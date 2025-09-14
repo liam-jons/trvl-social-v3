@@ -1,13 +1,13 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, Outlet } from 'react-router-dom';
 import { useUser, useRole } from '../../hooks/useAuth';
 import GlassCard from '../ui/GlassCard';
 
-const ProtectedRoute = ({ 
-  children, 
+const ProtectedRoute = ({
+  children,
   requireAuth = true,
   requiredRole = null,
   redirectTo = '/login',
-  fallback = null 
+  fallback = null
 }) => {
   const location = useLocation();
   const { user, loading } = useUser();
@@ -72,8 +72,8 @@ const ProtectedRoute = ({
     );
   }
 
-  // Render children if all checks pass
-  return children;
+  // Render outlet for nested routes or children if provided
+  return children || <Outlet />;
 };
 
 export default ProtectedRoute;
