@@ -24,6 +24,7 @@ const VendorsPage = lazy(() => import('./pages/vendors/VendorsPage'));
 const VendorDetailPage = lazy(() => import('./pages/vendors/VendorDetailPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const PersonalityQuizPage = lazy(() => import('./pages/quiz/PersonalityQuizPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 function App() {
@@ -51,6 +52,9 @@ function App() {
 
                   {/* Community Routes */}
                   <Route path="community" element={<CommunityPage />} />
+
+                  {/* Quiz Routes */}
+                  <Route path="quiz" element={<PersonalityQuizPage />} />
 
                   {/* Groups Routes */}
                   <Route path="groups">
