@@ -1,0 +1,10 @@
+{
+  "project": "TRVL Social v3",
+  "context": [
+    "Vision Document v3.0",
+    "Supabase schema",
+    "React + Vite + Tailwind stack"
+  ],
+  "ai_tools": ["lovable", "bolt", "cursor"],
+  "focus": "Community features first"
+}

@@ -1,0 +1,11 @@
+# Task ID: 2
+# Title: Configure Supabase Database Schema
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Set up complete database schema with all required tables, relationships, and Row Level Security policies
+# Details:
+Create migration files for all core tables: adventures, vendors, bookings, groups, reviews, user_roles, community_posts, community_connections, vendor_forums, personality_assessments, group_compatibility_scores, trip_requests, vendor_bids. Implement proper foreign key constraints and indexes for performance. Set up Row Level Security policies for each table based on user roles. Create database functions for complex queries like compatibility scoring. Implement triggers for updating engagement scores and connection strength. Set up real-time subscriptions for live updates.
+
+# Test Strategy:
+Unit tests for RLS policies using Supabase test helpers. Integration tests for database operations (CRUD). Performance testing for complex queries with sample data. Test real-time subscriptions for community posts and group updates. Verify cascade deletes and data integrity constraints.

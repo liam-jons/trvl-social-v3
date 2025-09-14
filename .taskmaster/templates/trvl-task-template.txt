@@ -1,0 +1,28 @@
+# Task: {{TASK_TITLE}}
+
+## Objective
+{{TASK_DESCRIPTION}}
+
+## Claude Code Implementation Instructions
+
+### Files to Create/Modify
+- [ ] `{{FILE_PATH_1}}`
+- [ ] `{{FILE_PATH_2}}`
+- [ ] Tests: `{{TEST_PATH}}`
+
+### Existing Code Context
+- Database: Review `src/lib/supabase.js`
+- Types: Check `src/types/index.ts`
+- Components: Reuse from `src/components/shared/`
+
+### Component Specification
+```jsx
+// Component: {{COMPONENT_NAME}}
+// Location: src/components/{{FEATURE}}/{{COMPONENT_NAME}}.jsx
+
+import React from 'react';
+import { GlassCard } from '../shared/GlassCard';
+
+export const {{COMPONENT_NAME}} = () => {
+  // Implementation here
+};

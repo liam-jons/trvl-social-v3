@@ -1,0 +1,138 @@
+import { Meta, ColorPalette, ColorItem, Typeset } from '@storybook/addon-docs';
+
+<Meta title="Design System/Overview" />
+
+# Glassmorphic Design System
+
+Welcome to the Glassmorphic Design System for TRVL Social v3. This design system provides a trust-centered, modern interface with glassmorphic effects.
+
+## Design Principles
+
+1. **Trust-Centered**: Every element is designed to build user confidence
+2. **Accessibility**: WCAG 2.1 compliant with proper color contrast
+3. **Responsive**: Mobile-first design with breakpoints at 320px, 768px, 1024px, and 1440px
+4. **Performance**: Optimized blur effects for smooth mobile performance
+5. **Consistency**: Unified design language across all components
+
+## Color Palette
+
+### Primary Colors
+<ColorPalette>
+  <ColorItem
+    title="Primary"
+    subtitle="Main brand color"
+    colors={{
+      50: '#f0f9ff',
+      100: '#e0f2fe',
+      200: '#bae6fd',
+      300: '#7dd3fc',
+      400: '#38bdf8',
+      500: '#0ea5e9',
+      600: '#0284c7',
+      700: '#0369a1',
+      800: '#075985',
+      900: '#0c4a6e',
+    }}
+  />
+</ColorPalette>
+
+### Secondary Colors
+<ColorPalette>
+  <ColorItem
+    title="Secondary"
+    subtitle="Supporting color"
+    colors={{
+      50: '#f8fafc',
+      100: '#f1f5f9',
+      200: '#e2e8f0',
+      300: '#cbd5e1',
+      400: '#94a3b8',
+      500: '#64748b',
+      600: '#475569',
+      700: '#334155',
+      800: '#1e293b',
+      900: '#0f172a',
+    }}
+  />
+</ColorPalette>
+
+### Accent Colors
+<ColorPalette>
+  <ColorItem
+    title="Accent"
+    subtitle="Highlight color"
+    colors={{
+      50: '#fef3c7',
+      100: '#fde68a',
+      200: '#fcd34d',
+      300: '#fbbf24',
+      400: '#f59e0b',
+      500: '#d97706',
+      600: '#b45309',
+      700: '#92400e',
+      800: '#78350f',
+      900: '#451a03',
+    }}
+  />
+</ColorPalette>
+
+## Glassmorphic Effects
+
+### Blur Levels
+- **xs**: 2px - Subtle glass effect
+- **sm**: 4px - Light glass effect
+- **md**: 12px - Standard glass effect (default)
+- **lg**: 20px - Strong glass effect
+- **xl**: 40px - Maximum glass effect
+
+### Glass Opacity
+- Light mode: `rgba(255, 255, 255, 0.1)`
+- Dark mode: `rgba(0, 0, 0, 0.1)`
+
+### Glass Borders
+- Light mode: `rgba(255, 255, 255, 0.2)`
+- Dark mode: `rgba(255, 255, 255, 0.1)`
+
+## Responsive Breakpoints
+
+| Breakpoint | Size | Usage |
+|------------|------|-------|
+| xs | 320px | Small mobile devices |
+| sm | 640px | Large mobile devices |
+| md | 768px | Tablets |
+| lg | 1024px | Desktop |
+| xl | 1280px | Large desktop |
+| 2xl | 1440px | Wide screens |
+
+## Dark Mode
+
+The design system includes full dark mode support with:
+- Automatic system preference detection
+- Manual theme toggle
+- Persistent theme selection
+- Smooth transitions between themes
+
+## Accessibility
+
+All components are designed with accessibility in mind:
+- Proper ARIA labels
+- Keyboard navigation support
+- Focus indicators
+- Color contrast ratios meeting WCAG 2.1 AA standards
+- Screen reader compatibility
+
+## Performance Considerations
+
+### Mobile Optimization
+- Backdrop filters are performance-optimized
+- Blur effects use GPU acceleration
+- Transitions are hardware-accelerated
+- Critical CSS is inlined for faster initial render
+
+### Browser Support
+- Chrome 76+
+- Firefox 103+
+- Safari 9+
+- Edge 79+
+
+Note: Older browsers will gracefully degrade to solid backgrounds without blur effects.

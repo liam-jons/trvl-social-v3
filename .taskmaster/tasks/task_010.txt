@@ -1,0 +1,11 @@
+# Task ID: 10
+# Title: Implement Payment Processing and Stripe Connect
+# Status: pending
+# Dependencies: 8
+# Priority: high
+# Description: Set up complete payment infrastructure with split payments and vendor payouts
+# Details:
+Integrate Stripe Connect for marketplace payments with vendor onboarding flow. Implement split payment functionality for group bookings with individual payment tracking. Create payment UI components with Stripe Elements for secure card input. Build refund and dispute management system. Implement automatic vendor payouts with configurable schedules. Create payment reconciliation dashboard. Set up webhook handlers for payment events. Implement multi-currency support for international transactions. Create invoice generation and receipt emails using SendGrid.
+
+# Test Strategy:
+Test payment flows in Stripe test mode. Verify split payment calculations and processing. Test webhook reliability and idempotency. Security testing for PCI compliance. Test refund and dispute workflows. Verify multi-currency conversions. Test email delivery and formatting.

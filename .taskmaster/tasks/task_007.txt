@@ -1,0 +1,11 @@
+# Task ID: 7
+# Title: Implement Group Matching and Compatibility Scoring
+# Status: pending
+# Dependencies: 5, 6
+# Priority: high
+# Description: Build AI-powered group matching system with compatibility calculations and recommendations
+# Details:
+Create compatibility scoring algorithm using personality traits, preferences, and past booking data. Implement machine learning model training pipeline using historical group success metrics. Build compatibility visualization components showing percentage scores and dimension breakdowns. Create 'Why We Match' explanation generator using AI to provide transparent reasoning. Implement group recommendation engine filtering adventures by 70%+ compatibility. Build group preview cards showing member personalities and dynamics. Create compatibility recalculation on group composition changes. Integrate real-time updates as new members join groups.
+
+# Test Strategy:
+Unit tests for scoring algorithm accuracy. Test ML model predictions against known successful groups. A/B testing for recommendation effectiveness. Test real-time updates with concurrent users. Verify explanations are accurate and helpful. Performance testing for complex calculations.

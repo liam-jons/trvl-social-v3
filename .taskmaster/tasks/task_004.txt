@@ -1,0 +1,11 @@
+# Task ID: 4
+# Title: Build Core UI Layout and Navigation
+# Status: pending
+# Dependencies: 1, 3
+# Priority: high
+# Description: Create the main application layout with responsive navigation and routing structure
+# Details:
+Implement main layout component with header, footer, and content area using glassmorphic design. Create responsive navigation menu with mobile hamburger menu. Set up React Router v6 with nested routes for all main sections. Build community navigation tabs (Local/Regional/Global) with active state management. Implement breadcrumb navigation for nested pages. Create loading states and error boundaries. Build notification system for user feedback. Implement progressive enhancement for JavaScript-disabled browsers.
+
+# Test Strategy:
+Component testing with React Testing Library. Test responsive navigation at different breakpoints. Verify routing works correctly with browser back/forward. Test error boundaries with simulated errors. Accessibility testing with screen readers. Performance testing for route transitions.

@@ -1,0 +1,1215 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Setup Tailwind CSS and Glassmorphic Design System",
+        "description": "Configure Tailwind CSS with custom glassmorphic components and establish the trust-centered design system foundation",
+        "details": "Install and configure Tailwind CSS with PostCSS. Create custom utility classes for glassmorphic effects using backdrop-filter, blur, and transparency. Set up CSS variables for theme colors, spacing, and typography. Implement base components: GlassCard, GlassButton, GlassModal with proper backdrop-blur-md, bg-white/10, border-white/20 styling. Configure responsive breakpoints for mobile-first design. Set up dark mode support with CSS custom properties.",
+        "testStrategy": "Visual regression testing using Storybook or similar tool. Verify glassmorphic effects render correctly across browsers. Test responsive breakpoints at 320px, 768px, 1024px, 1440px. Validate WCAG 2.1 color contrast ratios. Performance testing for blur effects on mobile devices.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Install and Configure Tailwind CSS with PostCSS",
+            "description": "Set up Tailwind CSS with PostCSS configuration and integrate with Vite build process",
+            "dependencies": [],
+            "details": "Install Tailwind CSS and its peer dependencies (postcss, autoprefixer). Create postcss.config.js with Tailwind and autoprefixer plugins. Initialize tailwind.config.js with content paths for React components. Add Tailwind directives (@tailwind base, components, utilities) to main CSS file. Configure Vite to process PostCSS. Set up purge/content configuration for production builds to minimize CSS bundle size.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Create Glassmorphic Utility Classes and CSS Variables",
+            "description": "Develop custom utility classes for glassmorphic effects and establish CSS variable system for theming",
+            "dependencies": [
+              "1.1"
+            ],
+            "details": "Create CSS custom properties for glass effects (--glass-blur, --glass-opacity, --glass-border). Define utility classes for backdrop-filter effects (.glass-blur-sm, .glass-blur-md, .glass-blur-lg). Set up transparency utilities for glass backgrounds (.bg-glass-light, .bg-glass-dark). Create border utilities for glass edges (.border-glass). Establish CSS variables for theme colors (primary, secondary, accent), spacing scale, and typography (font families, sizes, line heights). Configure color palette for trust-centered design.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Build Core Glassmorphic Components",
+            "description": "Implement GlassCard, GlassButton, and GlassModal base components with proper styling",
+            "dependencies": [
+              "1.2"
+            ],
+            "details": "Create GlassCard component with backdrop-blur-md, bg-white/10, border border-white/20, rounded corners, and shadow effects. Implement GlassButton with hover/active states, size variants (sm, md, lg), and color variants. Build GlassModal with overlay backdrop, glass panel, and proper z-index management. Add TypeScript interfaces for component props. Implement forwarding refs for all components. Create compound components pattern where applicable. Ensure all components support className prop for extension.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Configure Responsive Breakpoints and Dark Mode",
+            "description": "Set up mobile-first responsive design system and dark mode support with CSS custom properties",
+            "dependencies": [
+              "1.3"
+            ],
+            "details": "Configure Tailwind breakpoints for mobile-first design (xs: 320px, sm: 640px, md: 768px, lg: 1024px, xl: 1280px, 2xl: 1440px). Implement dark mode using Tailwind's dark variant and class strategy. Create CSS custom properties that switch based on dark mode preference. Update glassmorphic components to adapt blur and opacity values for dark mode. Set up useTheme hook for programmatic theme control. Configure system preference detection and localStorage persistence for theme preference.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Set Up Storybook for Component Visual Testing",
+            "description": "Install and configure Storybook for component documentation and visual regression testing",
+            "dependencies": [
+              "1.3",
+              "1.4"
+            ],
+            "details": "Install Storybook for React with Vite builder. Configure Storybook to load Tailwind CSS and custom styles. Create stories for all glassmorphic components showing different states and variants. Set up controls/args for interactive component testing. Configure viewport addon for responsive testing. Implement dark mode toggle in Storybook toolbar. Create MDX documentation pages for design system guidelines. Set up visual regression testing with Chromatic or Percy integration if needed.",
+            "status": "done",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Configure Supabase Database Schema",
+        "description": "Set up complete database schema with all required tables, relationships, and Row Level Security policies",
+        "details": "Create migration files for all core tables: adventures, vendors, bookings, groups, reviews, user_roles, community_posts, community_connections, vendor_forums, personality_assessments, group_compatibility_scores, trip_requests, vendor_bids. Implement proper foreign key constraints and indexes for performance. Set up Row Level Security policies for each table based on user roles. Create database functions for complex queries like compatibility scoring. Implement triggers for updating engagement scores and connection strength. Set up real-time subscriptions for live updates.",
+        "testStrategy": "Unit tests for RLS policies using Supabase test helpers. Integration tests for database operations (CRUD). Performance testing for complex queries with sample data. Test real-time subscriptions for community posts and group updates. Verify cascade deletes and data integrity constraints.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Core User and Authentication Tables",
+            "description": "Set up foundational user tables including profiles, authentication, and role management structures",
+            "dependencies": [],
+            "details": "Create users table extending Supabase auth.users with profile data (name, avatar, bio, location). Create user_roles table with enum types (traveler, vendor, admin). Set up user_preferences table for notification and privacy settings. Add proper indexes on email, username, and role lookups. Include created_at, updated_at timestamps with automatic triggers.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Build Vendor and Adventure Tables",
+            "description": "Implement vendor profiles and adventure listings with all required fields and relationships",
+            "dependencies": [
+              "2.1"
+            ],
+            "details": "Create vendors table with business details, verification status, payout information. Build adventures table with title, description, price, capacity, location, categories. Set up adventure_availability table for scheduling. Create adventure_media table for images/videos. Implement vendor_certifications and vendor_insurance tables. Add foreign key constraints to users table.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement Booking and Payment Tables",
+            "description": "Create booking system tables with payment tracking and group booking support",
+            "dependencies": [
+              "2.1",
+              "2.2"
+            ],
+            "details": "Build bookings table with status enum (pending, confirmed, cancelled, completed). Create booking_payments table for individual payment tracking in group bookings. Set up booking_participants table linking users to bookings. Implement payment_splits table for group payment management. Add booking_modifications table for change tracking. Include proper cascade deletes and status transition constraints.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Set Up Group and Compatibility Tables",
+            "description": "Create tables for group formation and compatibility scoring systems",
+            "dependencies": [
+              "2.1"
+            ],
+            "details": "Create groups table with name, description, privacy settings, member limits. Build group_members table with roles (owner, admin, member). Implement group_compatibility_scores table storing match percentages. Create personality_assessments table with trait dimensions. Set up assessment_responses table for user answers. Build compatibility_algorithms table for scoring logic configuration.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Build Community and Social Tables",
+            "description": "Implement community features including posts, connections, and forums",
+            "dependencies": [
+              "2.1",
+              "2.4"
+            ],
+            "details": "Create community_posts table with content, visibility scopes (local, regional, global). Build community_connections table for user relationships with connection strength metrics. Set up vendor_forums table for vendor-specific discussions. Implement post_reactions and post_comments tables. Create connection_requests table with status tracking. Add engagement_scores table for activity metrics.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Create Trip Request and Bidding Tables",
+            "description": "Set up marketplace tables for custom trip requests and vendor bidding",
+            "dependencies": [
+              "2.1",
+              "2.2"
+            ],
+            "details": "Build trip_requests table with destination, dates, budget, requirements. Create vendor_bids table with proposed itinerary, pricing, terms. Implement bid_messages table for negotiation. Set up bid_attachments table for proposals. Create request_invitations table for targeted vendor invites. Add bid ranking and scoring fields.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Configure Row Level Security Policies",
+            "description": "Implement comprehensive RLS policies for all tables based on user roles and relationships",
+            "dependencies": [
+              "2.1",
+              "2.2",
+              "2.3",
+              "2.4",
+              "2.5",
+              "2.6"
+            ],
+            "details": "Create RLS policies for user data (users can read/update own profiles). Set vendor-specific policies (vendors manage own adventures/bids). Implement group member policies (members access group data based on role). Configure booking policies (participants view bookings, vendors manage). Set up community policies with visibility scopes. Create admin override policies for moderation.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Develop Database Functions and Stored Procedures",
+            "description": "Create complex database functions for business logic and calculations",
+            "dependencies": [
+              "2.1",
+              "2.2",
+              "2.3",
+              "2.4",
+              "2.5",
+              "2.6"
+            ],
+            "details": "Build calculate_compatibility_score() function using personality assessments. Create get_adventure_availability() function with booking conflict checks. Implement update_engagement_scores() for community metrics. Build process_group_payment() for split payment calculations. Create search_adventures() with filtering and ranking. Develop get_vendor_analytics() for performance metrics.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Set Up Database Triggers and Automation",
+            "description": "Implement triggers for automated updates and data consistency",
+            "dependencies": [
+              "2.1",
+              "2.2",
+              "2.3",
+              "2.4",
+              "2.5",
+              "2.6",
+              "2.8"
+            ],
+            "details": "Create trigger for auto-updating updated_at timestamps. Build trigger to update engagement scores on user activity. Implement trigger for connection strength calculations. Set up trigger for group member count updates. Create trigger for vendor rating recalculation on new reviews. Build cascade update triggers for denormalized data.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 10,
+            "title": "Configure Real-time Subscriptions and Indexes",
+            "description": "Set up real-time features and optimize database performance",
+            "dependencies": [
+              "2.1",
+              "2.2",
+              "2.3",
+              "2.4",
+              "2.5",
+              "2.6",
+              "2.7",
+              "2.8",
+              "2.9"
+            ],
+            "details": "Configure real-time subscriptions for community posts and comments. Set up live updates for group chat and notifications. Implement real-time booking status changes. Create subscription filters based on user preferences. Add composite indexes for common query patterns. Optimize full-text search indexes for adventure discovery.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Implement Authentication and User Management",
+        "description": "Build complete authentication system with Supabase Auth including user registration, login, and role management",
+        "details": "Set up Supabase Auth with email/password authentication. Implement user registration flow with email verification. Create login/logout functionality with session management using Zustand. Build password reset flow with email tokens. Implement social login providers (Google, Facebook). Create user profile management with avatar upload to Supabase Storage. Set up role-based access control (user, vendor, admin). Implement protected routes using React Router. Create auth context and hooks for accessing user state throughout the app.",
+        "testStrategy": "End-to-end tests for registration and login flows. Test email verification and password reset workflows. Verify session persistence and refresh token handling. Test role-based route protection. Security testing for XSS and CSRF protection. Test social login integration in staging environment.",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Configure Supabase Auth with Email/Password Setup",
+            "description": "Set up Supabase authentication service with email/password provider configuration and database schema",
+            "dependencies": [],
+            "details": "Initialize Supabase auth configuration in the project. Set up email/password authentication provider in Supabase dashboard. Configure auth settings including password strength requirements, session duration, and JWT expiry. Create necessary database tables for user profiles and roles. Set up Row Level Security (RLS) policies for user data access. Configure email templates for verification and password reset. Test basic auth connection from the React app.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Build Registration Flow with Email Verification",
+            "description": "Implement complete user registration system with email verification and profile creation",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Create registration form component with validation for email, password, and user details. Implement Supabase signUp method integration with error handling. Build email verification flow with token handling and verification page. Create user profile initialization in database upon successful verification. Implement registration success/error UI feedback. Add loading states and form validation messages. Test registration flow end-to-end including email delivery.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement Login/Logout with Zustand Session Management",
+            "description": "Create login/logout functionality with persistent session management using Zustand store",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Build login form component with email/password fields and validation. Integrate Supabase signIn method with error handling for various scenarios. Create Zustand auth store for managing user session state globally. Implement automatic session refresh using Supabase auth listeners. Build logout functionality clearing both Supabase session and Zustand state. Add remember me functionality with persistent sessions. Create auth hooks (useAuth, useUser) for accessing auth state throughout the app.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Create Password Reset Functionality",
+            "description": "Build complete password reset flow with email-based token verification",
+            "dependencies": [
+              "3.1",
+              "3.2"
+            ],
+            "details": "Create forgot password form and request flow using Supabase resetPasswordForEmail. Build password reset landing page for handling email tokens. Implement new password form with confirmation and validation. Handle token expiration and invalid token scenarios. Create success/error messaging for reset process. Test email delivery and token validation. Implement rate limiting for password reset requests to prevent abuse.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Add Social Login Providers (Google, Facebook)",
+            "description": "Integrate OAuth-based social login options for streamlined authentication",
+            "dependencies": [
+              "3.1",
+              "3.3"
+            ],
+            "details": "Configure Google OAuth application and credentials in Google Console. Set up Facebook App and OAuth configuration in Facebook Developers. Integrate OAuth providers in Supabase Auth settings with proper redirect URLs. Create social login buttons and UI components with proper branding. Implement OAuth flow handling with error cases and user cancellation. Handle account linking for users with existing email/password accounts. Test OAuth flows in development and production environments.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Build User Profile Management with Avatar Uploads",
+            "description": "Create comprehensive user profile system with avatar storage in Supabase Storage",
+            "dependencies": [
+              "3.3"
+            ],
+            "details": "Create user profile page with editable fields (name, bio, preferences, etc.). Set up Supabase Storage bucket for avatar images with proper permissions. Implement avatar upload component with image preview and cropping. Build profile update functionality with optimistic UI updates. Create avatar URL generation with CDN integration for performance. Implement profile completion tracking and prompts. Add validation for file types, sizes, and image dimensions.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Implement Role-Based Route Protection with React Router",
+            "description": "Set up role-based access control system with protected routes for users, vendors, and admins",
+            "dependencies": [
+              "3.3",
+              "3.6"
+            ],
+            "details": "Define role hierarchy and permissions matrix (user, vendor, admin). Create ProtectedRoute component checking authentication and role authorization. Implement role checking utilities and hooks (useRole, hasPermission). Set up route configuration with role requirements for each page. Build unauthorized access handling with appropriate redirects. Create role-based UI component rendering (conditional features). Test role transitions and permission updates in real-time.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Build Core UI Layout and Navigation",
+        "description": "Create the main application layout with responsive navigation and routing structure",
+        "details": "Implement main layout component with header, footer, and content area using glassmorphic design. Create responsive navigation menu with mobile hamburger menu. Set up React Router v6 with nested routes for all main sections. Build community navigation tabs (Local/Regional/Global) with active state management. Implement breadcrumb navigation for nested pages. Create loading states and error boundaries. Build notification system for user feedback. Implement progressive enhancement for JavaScript-disabled browsers.",
+        "testStrategy": "Component testing with React Testing Library. Test responsive navigation at different breakpoints. Verify routing works correctly with browser back/forward. Test error boundaries with simulated errors. Accessibility testing with screen readers. Performance testing for route transitions.",
+        "priority": "high",
+        "dependencies": [
+          1,
+          3
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Main Layout Component with Glassmorphic Design",
+            "description": "Build the core layout component with header, footer, and content area using glassmorphic styling from the design system",
+            "dependencies": [],
+            "details": "Create MainLayout.jsx component that serves as the wrapper for all pages. Implement glassmorphic header with logo, main navigation menu items, and user profile area. Build footer with links to legal pages, social media, and contact information. Use the GlassCard components from the design system with backdrop-blur-md and bg-white/10 styling. Ensure proper z-index layering for the glassmorphic effects. Create a flexible content area that accommodates different page layouts. Add proper semantic HTML structure for accessibility.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Build Responsive Navigation Menu with Mobile Support",
+            "description": "Implement responsive navigation system with desktop menu bar and mobile hamburger menu with smooth transitions",
+            "dependencies": [
+              "4.1"
+            ],
+            "details": "Create Navigation.jsx component with desktop horizontal menu bar and mobile hamburger menu. Implement smooth slide-in drawer for mobile navigation using CSS transitions. Add active link highlighting based on current route. Include navigation items for Adventures, Community, Groups, and Vendor sections. Implement keyboard navigation support and proper ARIA labels. Add touch gestures for mobile menu (swipe to close). Store mobile menu state in context to persist across route changes. Test at breakpoints: 320px, 768px, 1024px, 1440px.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Configure React Router v6 with Nested Routes",
+            "description": "Set up complete routing structure with React Router v6 including nested routes for all application sections",
+            "dependencies": [
+              "4.1"
+            ],
+            "details": "Install and configure React Router v6 with BrowserRouter in main App.jsx. Create route configuration with nested routes for /adventures, /community, /groups, /vendors sections. Implement protected routes using Outlet components for authenticated areas. Set up route parameters for dynamic pages like /adventures/:id and /vendors/:vendorId. Configure lazy loading for route components using React.lazy() and Suspense. Add route-level error boundaries with ErrorBoundary components. Implement scroll restoration on route changes. Create NotFound component for 404 pages.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement Community Navigation Tabs with State Management",
+            "description": "Create tabbed navigation for Local/Regional/Global community views with active state management and smooth transitions",
+            "dependencies": [
+              "4.3"
+            ],
+            "details": "Build CommunityTabs.jsx component with Local (<50mi), Regional (<500mi), and Global tab options. Implement tab state management using React Context or URL parameters for deep linking. Add smooth transition animations between tab switches using CSS transforms. Create visual indicators for active tab with glassmorphic highlighting. Implement swipe gestures for mobile tab navigation. Add badge notifications for new content in each tab. Store user's last selected tab preference in localStorage. Ensure tabs are keyboard navigable with proper focus management.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Create Loading States and Error Boundaries",
+            "description": "Build comprehensive loading components and error boundary system for graceful error handling throughout the application",
+            "dependencies": [
+              "4.3"
+            ],
+            "details": "Create LoadingSpinner, LoadingSkeleton, and LoadingOverlay components with glassmorphic styling. Implement ErrorBoundary component that catches JavaScript errors and displays user-friendly messages. Build route-level error boundaries for section-specific error handling. Create fallback UI components for different error types (404, 500, network errors). Add retry mechanisms for failed data fetches. Implement progressive loading states for better perceived performance. Create suspense fallbacks for lazy-loaded routes. Add loading progress indicators for file uploads and long operations.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Build Notification System for User Feedback",
+            "description": "Implement toast notification system for displaying success messages, errors, and important updates to users",
+            "dependencies": [
+              "4.1"
+            ],
+            "details": "Create NotificationProvider context and useNotification hook for global notification management. Build Toast component with glassmorphic styling that supports success, error, warning, and info variants. Implement notification queue system with configurable display duration and max visible notifications. Add slide-in/slide-out animations for smooth appearance. Create notification persistence for important messages that shouldn't auto-dismiss. Implement click-to-dismiss and swipe-to-dismiss gestures. Add notification history panel for viewing past notifications. Ensure notifications are announced to screen readers using ARIA live regions.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Develop Personality Assessment System",
+        "description": "Create the 10-question visual personality quiz with AI-powered trait analysis and storage",
+        "details": "Build visual quiz interface with image-based questions using React Hook Form. Implement quiz logic with progress tracking and validation using Zod schemas. Create trait calculation algorithm mapping answers to personality dimensions (energy level, social preference, adventure style, risk tolerance). Integrate OpenAI/Anthropic API for natural language trait descriptions. Store assessment results in personality_assessments table. Build quiz results display with visual charts. Implement quiz retake functionality with history tracking. Create onboarding flow integration for new users.",
+        "testStrategy": "Unit tests for trait calculation algorithm. Integration tests for quiz flow completion. Test API integration with mock responses. Verify data persistence in database. A/B testing for question effectiveness. Usability testing with target demographic.",
+        "priority": "high",
+        "dependencies": [
+          3,
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Quiz Data Structure and Question Format",
+            "description": "Define the data structure for quiz questions, including image references, answer options, and trait mappings",
+            "dependencies": [],
+            "details": "Create TypeScript interfaces for quiz questions with properties for question text, image URLs, answer options, and trait dimension mappings. Design JSON schema for storing 10 questions with visual elements. Define personality dimensions (energy level, social preference, adventure style, risk tolerance) and their scoring ranges. Create mapping structure between answer choices and trait scores. Design question progression logic and branching if needed.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Build Visual Quiz UI with React Hook Form",
+            "description": "Implement the quiz interface with image-based questions, progress tracking, and smooth transitions",
+            "dependencies": [
+              "5.1"
+            ],
+            "details": "Create QuizContainer component using React Hook Form for state management. Build QuizQuestion component displaying images and answer options with glassmorphic styling. Implement progress bar showing quiz completion percentage. Add smooth transitions between questions using Framer Motion. Create responsive layout for mobile and desktop views. Implement navigation controls (next, previous, skip) with proper validation.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement Trait Calculation Algorithm",
+            "description": "Develop the algorithm to calculate personality dimensions from quiz answers",
+            "dependencies": [
+              "5.1"
+            ],
+            "details": "Create trait calculation engine that processes answer selections and maps them to personality scores. Implement weighted scoring system for each personality dimension. Build normalization functions to scale scores to percentages. Create personality profile generator combining individual trait scores. Implement edge case handling for incomplete or skipped questions. Add validation to ensure consistent and meaningful results.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Integrate AI API for Natural Language Descriptions",
+            "description": "Connect OpenAI/Anthropic API to generate personalized trait descriptions based on quiz results",
+            "dependencies": [
+              "5.3"
+            ],
+            "details": "Set up API client for OpenAI or Anthropic with proper authentication and error handling. Create prompt engineering templates for generating personality descriptions. Implement API call function with retry logic and timeout handling. Build response parser to extract and format AI-generated descriptions. Add caching mechanism to reduce API calls for similar profiles. Implement fallback descriptions for API failures.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Create Results Visualization with Charts",
+            "description": "Build visual representation of personality assessment results using charts and graphs",
+            "dependencies": [
+              "5.3",
+              "5.4"
+            ],
+            "details": "Implement radar chart for displaying personality dimensions using Recharts or similar library. Create personality type badge/card with visual indicators. Build comparison charts for showing trait distributions. Design shareable result cards with glassmorphic styling. Implement animated transitions for result reveal. Create mobile-optimized chart layouts with touch interactions.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Build Data Persistence to personality_assessments Table",
+            "description": "Implement database operations for storing and retrieving quiz results",
+            "dependencies": [
+              "5.3",
+              "5.4"
+            ],
+            "details": "Create Supabase client functions for inserting assessment results into personality_assessments table. Implement data validation using Zod schemas before database operations. Build retrieval functions for fetching user's assessment history. Create indexes for efficient querying by user_id and assessment_date. Implement error handling and transaction support for data consistency. Add real-time subscription for assessment updates.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Implement Quiz History and Retake Functionality",
+            "description": "Create features for viewing past assessments and retaking the quiz",
+            "dependencies": [
+              "5.6"
+            ],
+            "details": "Build assessment history view showing past quiz results with timestamps. Create comparison feature to track personality changes over time. Implement retake button with confirmation dialog. Design history timeline component with visual indicators. Add filtering and sorting options for assessment history. Create export functionality for downloading assessment results as PDF or image.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Create Onboarding Flow Integration",
+            "description": "Integrate the personality quiz into the new user onboarding process",
+            "dependencies": [
+              "5.2",
+              "5.5",
+              "5.6"
+            ],
+            "details": "Design onboarding flow that introduces the quiz to new users. Create skip option with ability to take quiz later. Implement progress saving for interrupted onboarding sessions. Build user profile enrichment using quiz results. Create personalized welcome screen based on personality type. Implement first-time user detection and quiz prompt. Add completion tracking for analytics and user engagement metrics.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Create Adventure Discovery and Listing Pages",
+        "description": "Build adventure browsing interface with filtering, search, and detailed adventure pages",
+        "details": "Create adventure card components displaying key information and imagery. Implement grid/list view toggle with user preference persistence. Build filtering system by location (Local <50mi, Regional <500mi, Global), date range, price, group size, and adventure type. Integrate Mapbox for location-based search and visualization. Create adventure detail pages with image galleries, descriptions, and vendor information. Implement search functionality with fuzzy matching. Build pagination and infinite scroll for large result sets. Add favorite/wishlist functionality for saving adventures.",
+        "testStrategy": "Test filtering logic with various combinations. Verify search returns relevant results. Test map integration and location accuracy. Performance testing with 1000+ adventures. Test image lazy loading and optimization. Verify responsive design on mobile devices.",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Build Adventure Card and Grid/List View Components",
+            "description": "Create reusable adventure card components with grid and list view toggle functionality",
+            "dependencies": [],
+            "details": "Design and implement AdventureCard component displaying title, price, location, rating, duration, group size, and hero image with lazy loading. Create AdventureGrid and AdventureList wrapper components with smooth transitions between views. Implement view toggle button with icon animations. Add user preference persistence using localStorage. Style cards with glassmorphic design matching the established design system. Ensure responsive behavior with proper breakpoints for mobile, tablet, and desktop views.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement Multi-Faceted Filtering System",
+            "description": "Build comprehensive filtering system for location, date, price, and adventure type",
+            "dependencies": [
+              "6.1"
+            ],
+            "details": "Create FilterPanel component with collapsible sections for each filter category. Implement location filter with Local (<50mi), Regional (<500mi), and Global options using geolocation API. Build date range picker with calendar interface for trip dates. Add price range slider with min/max inputs and currency formatting. Create adventure type checkboxes (hiking, water sports, cultural, extreme, etc.). Implement group size selector (solo, couple, small group, large group). Add filter state management with URL persistence for shareable filtered views. Create filter reset and active filter pills display.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Integrate Mapbox for Location Search and Visualization",
+            "description": "Set up Mapbox integration for map-based adventure discovery and location services",
+            "dependencies": [],
+            "details": "Install and configure Mapbox GL JS with React wrapper components. Create MapView component showing adventure locations as clustered markers. Implement location search autocomplete using Mapbox Geocoding API. Add map controls for zoom, pan, and current location. Create custom marker designs matching the glassmorphic theme. Implement marker clustering for performance with large datasets. Add popup cards showing adventure preview on marker click. Create boundary-based search (draw area on map). Integrate user's current location for distance calculations.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Create Detailed Adventure Pages with Galleries",
+            "description": "Build comprehensive adventure detail pages with image galleries and vendor information",
+            "dependencies": [
+              "6.1"
+            ],
+            "details": "Create AdventureDetailPage component with hero image section and breadcrumb navigation. Implement image gallery with lightbox functionality and touch/swipe support on mobile. Add comprehensive adventure information sections (description, itinerary, what's included, requirements). Build vendor profile card with ratings, verification badges, and contact options. Create pricing breakdown table with group discounts and seasonal variations. Add availability calendar showing bookable dates. Implement social proof section with reviews and ratings. Create similar adventures carousel for discovery.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Build Search with Fuzzy Matching",
+            "description": "Implement intelligent search functionality with fuzzy matching and autocomplete",
+            "dependencies": [
+              "6.1",
+              "6.2"
+            ],
+            "details": "Install and configure Fuse.js for client-side fuzzy search capabilities. Create SearchBar component with debounced input and loading states. Implement search across multiple fields (title, description, location, tags). Add search suggestions dropdown with categorized results (adventures, locations, activities). Create search results page with relevance scoring and highlighting of matched terms. Implement search history with recent searches stored locally. Add popular searches and trending adventures section. Create empty state with helpful suggestions when no results found.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement Pagination and Infinite Scroll",
+            "description": "Add pagination and infinite scroll functionality for large adventure result sets",
+            "dependencies": [
+              "6.1",
+              "6.2",
+              "6.5"
+            ],
+            "details": "Create usePagination hook for managing pagination state and logic. Implement traditional pagination controls with page numbers and prev/next buttons. Add infinite scroll using Intersection Observer API for seamless loading. Create loading skeletons for smooth content loading experience. Implement virtual scrolling for performance with very large lists. Add 'Load More' button as fallback for infinite scroll. Create results count and showing X of Y indicators. Implement scroll-to-top button for long lists. Add URL-based pagination for shareable paginated results.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Add Wishlist/Favorites Functionality",
+            "description": "Implement system for users to save and organize favorite adventures",
+            "dependencies": [
+              "6.1",
+              "6.4"
+            ],
+            "details": "Create favorite toggle button with animated heart icon on adventure cards and detail pages. Implement wishlist management with add/remove functionality using optimistic updates. Build WishlistPage component showing saved adventures with sorting options. Add wishlist collections/boards for organizing saved adventures by trip or theme. Create share wishlist functionality with public/private visibility settings. Implement wishlist notifications for price drops or availability changes. Add export wishlist feature (PDF, email). Create quick actions for moving adventures between collections. Sync wishlist across devices for logged-in users.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Implement Group Matching and Compatibility Scoring",
+        "description": "Build AI-powered group matching system with compatibility calculations and recommendations",
+        "details": "Create compatibility scoring algorithm using personality traits, preferences, and past booking data. Implement machine learning model training pipeline using historical group success metrics. Build compatibility visualization components showing percentage scores and dimension breakdowns. Create 'Why We Match' explanation generator using AI to provide transparent reasoning. Implement group recommendation engine filtering adventures by 70%+ compatibility. Build group preview cards showing member personalities and dynamics. Create compatibility recalculation on group composition changes. Integrate real-time updates as new members join groups.",
+        "testStrategy": "Unit tests for scoring algorithm accuracy. Test ML model predictions against known successful groups. A/B testing for recommendation effectiveness. Test real-time updates with concurrent users. Verify explanations are accurate and helpful. Performance testing for complex calculations.",
+        "priority": "high",
+        "dependencies": [
+          5,
+          6
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Compatibility Scoring Algorithm Architecture",
+            "description": "Create the overall architecture and data flow for the compatibility scoring system",
+            "dependencies": [],
+            "details": "Define scoring dimensions (personality traits, travel preferences, experience level, budget range, activity preferences). Design weighted scoring formula with configurable weights. Create data models for compatibility scores and scoring parameters. Design caching strategy for computed scores. Define API endpoints for scoring operations. Document algorithm decision tree and scoring thresholds.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Build Personality Trait Matching Logic",
+            "description": "Implement core matching logic based on personality assessments and user preferences",
+            "dependencies": [
+              "7.1"
+            ],
+            "details": "Create trait compatibility matrix for personality dimensions (introvert/extrovert, adventurous/cautious, planner/spontaneous). Implement preference matching for travel styles, accommodation types, and activity levels. Build conflict detection for incompatible traits. Create scoring functions for each dimension. Implement normalization logic for score ranges. Build trait weighting system based on adventure type.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement ML Model Training Pipeline",
+            "description": "Set up machine learning infrastructure for training compatibility prediction models",
+            "dependencies": [
+              "7.1"
+            ],
+            "details": "Set up TensorFlow.js or similar ML framework. Create data preprocessing pipeline for historical booking data. Build feature engineering for user attributes and group outcomes. Implement model training with cross-validation. Create model versioning and storage system in Supabase. Build automated retraining triggers based on new data volume. Implement model performance tracking and A/B testing framework.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Create Compatibility Visualization Components",
+            "description": "Build React components for displaying compatibility scores and breakdowns",
+            "dependencies": [
+              "7.2"
+            ],
+            "details": "Create circular progress component for overall compatibility percentage. Build radar chart for multi-dimensional compatibility visualization. Implement compatibility badge system (Excellent Match, Good Fit, etc.). Create animated score transitions for real-time updates. Build detailed breakdown modal showing individual dimensions. Implement color coding system for score ranges. Create responsive mobile-first designs.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Build AI-Powered Explanation Generator",
+            "description": "Implement natural language generation for compatibility explanations",
+            "dependencies": [
+              "7.2",
+              "7.3"
+            ],
+            "details": "Integrate OpenAI or similar API for explanation generation. Create prompt templates for different compatibility scenarios. Build context aggregation from scoring dimensions. Implement explanation caching to reduce API calls. Create fallback templates for API failures. Build multi-language support for explanations. Implement tone adjustment based on score levels (encouraging vs cautionary).",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Develop Group Recommendation Engine",
+            "description": "Create system for recommending compatible groups based on user profiles",
+            "dependencies": [
+              "7.3",
+              "7.2"
+            ],
+            "details": "Build recommendation query optimizer using compatibility scores. Implement filtering by minimum compatibility threshold (70%+). Create ranking algorithm combining compatibility, group size, and timing. Build collaborative filtering for similar user preferences. Implement diversity balancing in recommendations. Create recommendation explanation snippets. Build pagination and infinite scroll for results.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Create Group Preview Cards with Member Dynamics",
+            "description": "Build interactive components showing group composition and dynamics",
+            "dependencies": [
+              "7.4",
+              "7.5"
+            ],
+            "details": "Design group preview card layout with member avatars and key traits. Implement personality mix visualization (e.g., 3 adventurers, 2 planners). Create group dynamics summary using AI-generated insights. Build expandable member profiles with compatibility to viewer. Implement group chemistry indicators. Create booking confidence score display. Build interactive hover states showing pairwise compatibilities.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Implement Real-time Compatibility Updates",
+            "description": "Build system for live compatibility recalculation as groups change",
+            "dependencies": [
+              "7.2",
+              "7.6"
+            ],
+            "details": "Set up WebSocket connections for real-time group updates. Implement incremental score recalculation for member additions/removals. Create optimistic UI updates with rollback on errors. Build score animation system for smooth transitions. Implement debouncing for rapid group changes. Create notification system for significant compatibility changes. Build conflict resolution for concurrent updates.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Build Testing Framework for Algorithm Accuracy",
+            "description": "Create comprehensive testing suite for compatibility algorithm validation",
+            "dependencies": [
+              "7.2",
+              "7.3",
+              "7.6"
+            ],
+            "details": "Create unit tests for individual scoring functions. Build integration tests for end-to-end scoring pipeline. Implement regression tests using historical successful groups. Create performance benchmarks for score calculation times. Build A/B testing framework for algorithm variations. Create synthetic data generator for edge case testing. Implement monitoring dashboard for algorithm metrics.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 10,
+            "title": "Optimize Performance for Complex Calculations",
+            "description": "Implement performance optimizations for scalable compatibility scoring",
+            "dependencies": [
+              "7.8",
+              "7.9"
+            ],
+            "details": "Implement Redis caching for frequently accessed scores. Create database indexes for compatibility queries. Build batch processing for bulk score calculations. Implement lazy loading for detailed breakdowns. Create score approximation for initial display. Build background job queue for expensive recalculations. Implement CDN caching for static compatibility assets.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Build Dual Booking Models System",
+        "description": "Implement both Push (vendor offers) and Pull (user requests) booking models with natural language processing",
+        "details": "Create trip request interface where users describe dream adventures in natural language. Implement NLP parsing using OpenAI API to extract destination, dates, budget, preferences. Build vendor bid system allowing customized adventure proposals. Create push notification system for targeted vendor offers to matched users. Implement offer management dashboard for accepting/declining. Build natural language booking chat interface using AI agents. Create booking confirmation flow with payment splitting for groups. Implement booking modification and cancellation workflows.",
+        "testStrategy": "Test NLP parsing accuracy with diverse input formats. Test bidding system with multiple concurrent vendors. Verify notification delivery and user preferences. Test payment splitting calculations. End-to-end booking flow testing. Test edge cases like last-minute cancellations.",
+        "priority": "medium",
+        "dependencies": [
+          6,
+          7
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Trip Request UI with Natural Language Input",
+            "description": "Build the user interface for trip requests where users can describe their dream adventures in natural language",
+            "dependencies": [],
+            "details": "Design and implement a trip request form with a large text area for natural language input. Include helper prompts and examples to guide users (e.g., 'Describe your ideal adventure: dates, destination, activities, budget'). Add optional structured fields for basic info (date range picker, budget slider, group size). Implement character count and validation. Create mobile-responsive design with proper input handling. Add ability to save drafts and view previous requests. Include file upload for inspiration images.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement NLP Parsing with OpenAI API",
+            "description": "Set up OpenAI API integration to parse natural language trip requests and extract structured data",
+            "dependencies": [
+              "8.1"
+            ],
+            "details": "Configure OpenAI API client with proper authentication and rate limiting. Create prompt engineering system to extract: destination, dates, budget range, group size, activity preferences, accommodation type, and special requirements. Implement fallback parsing for ambiguous inputs. Build confidence scoring for extracted entities. Create data validation and normalization layer. Implement caching for similar requests. Set up error handling for API failures with graceful degradation.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Build Vendor Bid Submission System",
+            "description": "Create system for vendors to view trip requests and submit customized adventure proposals",
+            "dependencies": [
+              "8.2"
+            ],
+            "details": "Build vendor dashboard showing relevant trip requests based on their offerings and location. Create bid submission form with pricing breakdown, itinerary builder, and custom message field. Implement bid templates for common adventure types. Add ability to attach images and documents to proposals. Create bid expiration and withdrawal functionality. Implement vendor rating and review history display. Build notification system for new matching requests.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Create Push Notification Infrastructure",
+            "description": "Implement push notification system for targeted vendor offers to matched users",
+            "dependencies": [],
+            "details": "Set up Firebase Cloud Messaging or OneSignal for cross-platform notifications. Implement user preference management for notification types and frequency. Create matching algorithm to target users based on past bookings and searches. Build notification templates for different offer types. Implement in-app notification center with read/unread status. Create email fallback for users with notifications disabled. Set up analytics tracking for notification engagement.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Develop Offer Management Dashboard",
+            "description": "Build dashboard for users to view, compare, and manage vendor offers and bids",
+            "dependencies": [
+              "8.3",
+              "8.4"
+            ],
+            "details": "Create offer listing page with filtering and sorting capabilities (price, rating, response time). Build side-by-side comparison view for multiple offers. Implement offer acceptance/rejection workflow with confirmation dialogs. Create counteroffer functionality for price negotiation. Add saved offers section with expiration tracking. Implement offer sharing feature for group decision making. Build analytics to track offer conversion rates.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement Booking Chat Interface with AI",
+            "description": "Build natural language chat interface using AI agents for booking assistance and modifications",
+            "dependencies": [
+              "8.2",
+              "8.5"
+            ],
+            "details": "Create chat UI component with message history and typing indicators. Implement AI agent using OpenAI Assistant API or LangChain for context-aware responses. Build intent recognition for common booking actions (check availability, modify dates, add participants). Create seamless handoff to human support when needed. Implement chat persistence and session management. Add quick action buttons for common requests. Build multilingual support using translation APIs.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Build Payment Splitting for Group Bookings",
+            "description": "Implement payment splitting functionality allowing groups to divide costs",
+            "dependencies": [
+              "8.5"
+            ],
+            "details": "Create group booking interface with participant management (add/remove members). Implement split calculation options (equal split, custom amounts, percentage-based). Build payment link generation for non-registered users. Create payment tracking dashboard showing who has paid. Implement reminder notifications for pending payments. Add partial payment acceptance with deadline tracking. Build refund distribution logic for cancellations. Create payment reconciliation for completed group bookings.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Create Modification and Cancellation Workflows",
+            "description": "Implement comprehensive booking modification and cancellation system with policy enforcement",
+            "dependencies": [
+              "8.6",
+              "8.7"
+            ],
+            "details": "Build modification request interface for date changes, participant updates, and itinerary adjustments. Implement vendor approval workflow for modifications with automatic acceptance rules. Create cancellation policy engine with vendor-specific rules and deadlines. Build refund calculation based on cancellation timing and policy. Implement partial cancellation for group bookings. Create modification history tracking and audit log. Set up automated email notifications for all parties. Build dispute resolution workflow for contested cancellations.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Develop Vendor Management Suite",
+        "description": "Create comprehensive vendor tools including dashboard, group builder, and analytics",
+        "details": "Build vendor dashboard with real-time booking updates using Supabase Realtime. Create AI-powered Smart Group Builder with drag-and-drop interface for optimizing group dynamics. Implement WhatsApp Business API integration for one-click group creation. Build analytics dashboard using Recharts showing revenue, booking patterns, and customer insights. Create adventure management interface for creating/editing listings. Implement vendor forum system for knowledge sharing. Build performance metrics and rating management. Create bulk operation tools for managing multiple adventures.",
+        "testStrategy": "Test real-time updates with multiple concurrent bookings. Verify WhatsApp integration in production environment. Test group builder optimization algorithms. Performance testing for analytics with large datasets. Test vendor permissions and data isolation. Usability testing with actual vendors.",
+        "priority": "medium",
+        "dependencies": [
+          7,
+          8
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Build vendor dashboard with real-time updates",
+            "description": "Create the main vendor dashboard interface with real-time booking updates using Supabase Realtime subscriptions",
+            "dependencies": [],
+            "details": "Set up vendor dashboard layout with sidebar navigation and main content area. Implement Supabase Realtime subscriptions for booking updates, new customer inquiries, and payment notifications. Create dashboard widgets showing today's bookings, upcoming adventures, recent activities, and revenue overview. Build real-time notification system with toast messages for new bookings and updates. Implement dashboard state management using Zustand for caching real-time data. Create responsive design for mobile vendor access.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Create Smart Group Builder with drag-and-drop UI",
+            "description": "Develop the AI-powered group builder interface with drag-and-drop functionality for organizing adventure participants",
+            "dependencies": [],
+            "details": "Implement drag-and-drop interface using react-beautiful-dnd or dnd-kit library. Create participant cards showing personality traits, preferences, and compatibility scores. Build group containers with size limits and validation rules. Implement visual feedback for compatibility indicators using color coding. Create undo/redo functionality for group modifications. Build save and load group configurations feature. Implement responsive design for touch devices.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement group optimization algorithms",
+            "description": "Build the AI-powered algorithms for optimizing group dynamics based on personality assessments and preferences",
+            "dependencies": [
+              "9.2"
+            ],
+            "details": "Create compatibility scoring algorithm using personality assessment data from database. Implement machine learning model or rule-based system for group recommendations. Build optimization engine considering factors like energy levels, social preferences, experience levels, and age ranges. Create API endpoints for group suggestions and auto-grouping features. Implement conflict detection for incompatible participants. Build testing suite for algorithm accuracy and performance.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Integrate WhatsApp Business API",
+            "description": "Set up WhatsApp Business API integration for one-click group creation and communication",
+            "dependencies": [
+              "9.2",
+              "9.3"
+            ],
+            "details": "Configure WhatsApp Business API account and webhook endpoints. Implement authentication and message encryption for secure communication. Create one-click group creation feature that automatically adds participants to WhatsApp groups. Build message template system for booking confirmations, reminders, and updates. Implement two-way messaging for customer inquiries and responses. Create error handling and fallback mechanisms for API failures. Build compliance features for opt-in/opt-out management.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Build analytics dashboard with Recharts",
+            "description": "Create comprehensive analytics dashboard using Recharts library for data visualization",
+            "dependencies": [
+              "9.1"
+            ],
+            "details": "Install and configure Recharts library with TypeScript support. Create revenue analytics with line charts showing daily, weekly, and monthly trends. Build booking patterns visualization with heat maps and bar charts. Implement customer insights dashboard with demographic breakdowns and retention metrics. Create adventure performance metrics with popularity rankings and ratings. Build exportable reports in PDF and CSV formats. Implement date range selectors and filtering options for all charts.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Create adventure CRUD interface",
+            "description": "Build complete adventure management interface for creating, editing, and managing adventure listings",
+            "dependencies": [
+              "9.1"
+            ],
+            "details": "Create adventure creation form with multi-step wizard for details, pricing, and availability. Implement rich text editor for adventure descriptions using TipTap or Quill. Build image upload and gallery management with Supabase Storage. Create availability calendar with blackout dates and seasonal pricing. Implement adventure duplication and templating features. Build preview mode for seeing how adventures appear to customers. Create validation and auto-save functionality.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Implement vendor forum system",
+            "description": "Build knowledge-sharing forum system for vendors to exchange tips and best practices",
+            "dependencies": [
+              "9.1"
+            ],
+            "details": "Create forum categories for different topics like marketing, safety, and customer service. Implement thread creation with rich text formatting and image attachments. Build commenting and reply system with nested discussions. Create upvoting and reputation system for helpful contributions. Implement search functionality for finding relevant discussions. Build moderation tools for managing inappropriate content. Create notification system for thread updates and mentions.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Build performance metrics tracking",
+            "description": "Develop comprehensive performance tracking and rating management system for vendors",
+            "dependencies": [
+              "9.5"
+            ],
+            "details": "Create performance scorecard showing customer satisfaction, response time, and booking completion rates. Implement rating aggregation system pulling from customer reviews. Build trend analysis for identifying performance improvements or declines. Create benchmarking features comparing vendor metrics to platform averages. Implement automated alerts for performance thresholds. Build goal-setting and achievement tracking features. Create performance report generation for vendor meetings.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Develop bulk operations tools",
+            "description": "Create tools for managing multiple adventures and bookings simultaneously",
+            "dependencies": [
+              "9.6"
+            ],
+            "details": "Build bulk adventure editor for updating prices, availability, and details across multiple listings. Create batch booking management for handling group reservations and modifications. Implement bulk messaging system for notifying multiple customers simultaneously. Build CSV import/export functionality for adventure data and customer lists. Create bulk action history and undo capabilities. Implement queue system for processing large batch operations. Build progress indicators and error reporting for bulk operations.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Implement Payment Processing and Stripe Connect",
+        "description": "Set up complete payment infrastructure with split payments and vendor payouts",
+        "details": "Integrate Stripe Connect for marketplace payments with vendor onboarding flow. Implement split payment functionality for group bookings with individual payment tracking. Create payment UI components with Stripe Elements for secure card input. Build refund and dispute management system. Implement automatic vendor payouts with configurable schedules. Create payment reconciliation dashboard. Set up webhook handlers for payment events. Implement multi-currency support for international transactions. Create invoice generation and receipt emails using SendGrid.",
+        "testStrategy": "Test payment flows in Stripe test mode. Verify split payment calculations and processing. Test webhook reliability and idempotency. Security testing for PCI compliance. Test refund and dispute workflows. Verify multi-currency conversions. Test email delivery and formatting.",
+        "priority": "high",
+        "dependencies": [
+          8
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up Stripe Connect account and configuration",
+            "description": "Initialize Stripe Connect for marketplace payments with proper account structure",
+            "dependencies": [],
+            "details": "Create Stripe Connect account and configure marketplace settings. Set up connected account types (Express or Custom) for vendors. Configure platform fees and payment routing. Set up test and production API keys in environment variables. Create Stripe webhook endpoint configuration. Implement secure key storage using Supabase secrets. Configure payment method types and supported countries. Set up platform branding for Stripe onboarding.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Build vendor onboarding flow with Stripe Connect",
+            "description": "Create complete vendor registration and verification process through Stripe",
+            "dependencies": [
+              "10.1"
+            ],
+            "details": "Implement vendor registration API endpoint to create connected accounts. Build onboarding UI flow with account verification steps. Create dashboard for vendors to complete Stripe requirements. Implement document upload for KYC compliance. Set up bank account connection for payouts. Create vendor status tracking in database. Build notification system for onboarding updates. Implement fallback handling for failed verifications.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Create payment UI components with Stripe Elements",
+            "description": "Build secure payment form components using Stripe's PCI-compliant UI elements",
+            "dependencies": [
+              "10.1"
+            ],
+            "details": "Integrate Stripe Elements for card input with React components. Create reusable PaymentForm component with validation. Implement saved payment methods functionality. Build payment method selection UI (cards, wallets). Create loading states and error handling UI. Implement 3D Secure authentication flow. Add support for digital wallets (Apple Pay, Google Pay). Style components to match application design system.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement split payment logic for group bookings",
+            "description": "Build system to handle multiple payments for single bookings with tracking",
+            "dependencies": [
+              "10.3"
+            ],
+            "details": "Create payment splitting algorithm for group bookings. Build database schema for tracking individual payment statuses. Implement payment collection workflow with reminders. Create UI for group members to pay their share. Build payment tracking dashboard for group leaders. Implement partial payment handling and reconciliation. Create automatic refund logic for incomplete group payments. Set up payment deadline enforcement with cancellation logic.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Set up webhook handlers for Stripe events",
+            "description": "Create robust webhook processing system for payment event handling",
+            "dependencies": [
+              "10.1",
+              "10.4"
+            ],
+            "details": "Set up webhook endpoint with signature verification. Implement idempotent event processing to prevent duplicates. Create handlers for payment success, failure, and disputes. Build webhook event logging and monitoring system. Implement retry logic for failed webhook processing. Set up real-time notifications for payment events. Create webhook testing utilities for development. Implement database updates based on payment status changes.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Build refund and dispute management system",
+            "description": "Create comprehensive system for handling refunds and payment disputes",
+            "dependencies": [
+              "10.5"
+            ],
+            "details": "Implement refund API endpoints with validation rules. Create admin dashboard for refund approval workflow. Build dispute response system with evidence submission. Implement partial refund functionality for cancellations. Create refund policy engine based on booking status. Set up automated refund processing for eligible cases. Build notification system for refund status updates. Implement refund reporting and analytics tracking.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Implement automated vendor payout system",
+            "description": "Build scheduled payout functionality with configurable timing and rules",
+            "dependencies": [
+              "10.2",
+              "10.5"
+            ],
+            "details": "Create payout scheduling system with configurable frequencies. Implement payout calculation with platform fee deduction. Build payout queue processing with error handling. Create vendor payout dashboard with transaction history. Implement minimum payout thresholds and accumulation. Set up payout failure handling and retry logic. Build payout reconciliation and reporting tools. Create tax document generation for vendors (1099s).",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Create payment reconciliation dashboard",
+            "description": "Build comprehensive dashboard for tracking and reconciling all payment flows",
+            "dependencies": [
+              "10.6",
+              "10.7"
+            ],
+            "details": "Design payment analytics dashboard with key metrics. Implement transaction search and filtering capabilities. Create reconciliation tools for matching payments to bookings. Build revenue reporting with vendor breakdowns. Implement export functionality for accounting systems. Create dispute and refund tracking visualizations. Build real-time payment monitoring alerts. Implement audit trail for all payment modifications.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 9,
+            "title": "Add multi-currency support and invoice generation",
+            "description": "Implement international payment handling and automated invoice system",
+            "dependencies": [
+              "10.8"
+            ],
+            "details": "Implement currency conversion with real-time exchange rates. Create currency selection UI for international users. Build invoice generation system with PDF export. Integrate SendGrid for invoice and receipt email delivery. Create customizable invoice templates with branding. Implement VAT/tax calculation for different regions. Build receipt storage system in Supabase. Create automated invoice numbering and tracking system.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Build Community and Social Features",
+        "description": "Create community infrastructure with forums, connections, and live adventure feeds",
+        "details": "Implement community post creation with rich text editor and media uploads to Supabase Storage. Build three-tier community filtering (Local/Regional/Global) based on user location. Create live video feed integration using Agora/Daily.co for homepage. Implement connection system for maintaining relationships post-adventure. Build engagement scoring algorithm for content ranking. Create vendor forums with topic categorization and search. Implement notification system for community activity. Build moderation tools for content management. Create sharing functionality without social media mechanics.",
+        "testStrategy": "Test post creation with various media types. Verify location-based filtering accuracy. Test video streaming performance and quality. Test connection persistence and recommendations. Load testing for community features. Test moderation workflows and content filtering.",
+        "priority": "low",
+        "dependencies": [
+          4,
+          7
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Build Post Creation with Rich Text Editor",
+            "description": "Implement community post creation interface with a fully-featured rich text editor supporting text formatting, links, and embedded content",
+            "dependencies": [],
+            "details": "Integrate a rich text editor library (Tiptap or Quill) with support for bold, italic, lists, links, headings, and code blocks. Create post composition form with title, content, tags, and category selection. Implement draft saving with localStorage. Add character/word count limits. Build preview mode to show formatted output before posting. Create post validation with required fields and content sanitization.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement Media Upload to Supabase Storage",
+            "description": "Create media upload system for images and videos with Supabase Storage integration, including progress tracking and optimization",
+            "dependencies": [
+              "11.1"
+            ],
+            "details": "Set up Supabase Storage buckets for community media with proper RLS policies. Implement drag-and-drop file upload with progress indicators. Add image optimization and resizing before upload (max 2MB, multiple sizes). Support video uploads with size limits (max 100MB) and format validation. Create thumbnail generation for videos. Implement media gallery component for displaying uploaded files. Add ability to delete/reorder media attachments.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Create Location-Based Community Filtering",
+            "description": "Build three-tier community filtering system (Local/Regional/Global) based on user geolocation and preference settings",
+            "dependencies": [],
+            "details": "Implement geolocation detection using browser API with fallback to IP-based location. Create filter UI with tabs for Local (<50mi), Regional (<500mi), and Global views. Build location-based query logic using PostGIS functions in Supabase. Implement user location preferences with ability to change default location. Add location privacy settings for post visibility. Create location search with autocomplete using Mapbox Geocoding API.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Integrate Video Streaming (Agora/Daily.co)",
+            "description": "Implement live video feed integration for homepage using Agora or Daily.co SDK for real-time adventure streaming",
+            "dependencies": [],
+            "details": "Set up Agora/Daily.co account and configure API credentials. Integrate video SDK with React components for streaming. Create broadcaster interface for starting/stopping streams with camera/mic controls. Build viewer component with low-latency video playback. Implement stream scheduling and notifications. Add stream quality adaptive bitrate settings. Create stream metadata (title, description, viewer count). Build stream discovery feed for homepage.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Build Connection System and Recommendations",
+            "description": "Create connection management system for maintaining relationships post-adventure with smart recommendations",
+            "dependencies": [],
+            "details": "Design connections database schema with connection_requests and connections tables. Build connection request flow with accept/decline/block actions. Create connection recommendation algorithm based on shared adventures, interests, and location. Implement connection privacy settings (public/friends/private profiles). Build connections list with search and filter capabilities. Create mutual connections indicator. Add connection activity feed showing recent adventures and posts.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement Engagement Scoring and Content Ranking",
+            "description": "Develop engagement scoring algorithm for content ranking without traditional social media mechanics",
+            "dependencies": [
+              "11.1",
+              "11.2",
+              "11.5"
+            ],
+            "details": "Create engagement metrics tracking (views, time spent, saves, shares) without likes/reactions. Build scoring algorithm weighing recency, relevance, and quality factors. Implement content freshness decay over time. Create personalized feed ranking based on user interests and past engagement. Build trending content detection for popular posts. Implement content diversity to avoid echo chambers. Add quality signals like post completeness and media presence.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Create Moderation Tools and Content Management",
+            "description": "Build comprehensive moderation system with reporting, review queues, and automated content filtering",
+            "dependencies": [
+              "11.1",
+              "11.2"
+            ],
+            "details": "Implement content reporting system with categories (spam, inappropriate, misinformation). Create moderation dashboard with review queues and bulk actions. Build automated content filtering using profanity detection and spam patterns. Implement user reputation system affecting posting privileges. Create appeal process for moderated content. Build admin tools for user warnings, timeouts, and bans. Add content versioning for edit history. Implement NSFW content detection and filtering.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Implement Analytics and Monitoring",
+        "description": "Set up comprehensive analytics, error tracking, and performance monitoring",
+        "details": "Integrate Mixpanel for user behavior tracking and cohort analysis. Set up Sentry for error tracking and debugging in production. Implement Datadog for performance monitoring and alerting. Create custom analytics dashboard for business metrics. Set up conversion funnel tracking for booking flow. Implement A/B testing framework for feature experiments. Create user session recording for UX analysis. Set up automated reporting for key metrics. Implement GDPR-compliant data collection with user consent management.",
+        "testStrategy": "Verify event tracking accuracy in Mixpanel. Test error capture and alerting in Sentry. Load testing to verify monitoring under stress. Test A/B testing framework randomization. Verify GDPR compliance and data privacy. Test automated reporting accuracy and delivery.",
+        "priority": "low",
+        "dependencies": [
+          10,
+          11
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Integrate Mixpanel for User Behavior Tracking",
+            "description": "Set up Mixpanel SDK and implement comprehensive event tracking for user actions and journey analysis",
+            "dependencies": [],
+            "details": "Install Mixpanel React SDK and configure initialization with project token. Create event tracking service with standardized event naming conventions. Implement user identification and profile properties syncing with Supabase auth. Track key events: page views, adventure searches, booking funnel steps, group interactions, and vendor actions. Set up user properties for segmentation (user type, preferences, booking history). Create custom events for conversion tracking and cohort analysis. Implement offline event queuing for reliability. Configure data retention policies and sampling rates for cost optimization.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Set up Sentry for Error Monitoring",
+            "description": "Configure Sentry for comprehensive error tracking, debugging, and alerting in production environments",
+            "dependencies": [],
+            "details": "Install Sentry React SDK and configure with DSN and environment settings. Set up source map uploads for readable stack traces in production builds. Configure error boundaries to catch React component errors gracefully. Implement custom error context with user info, booking details, and session data. Set up performance monitoring for slow API calls and render issues. Create alert rules for critical errors and error rate spikes. Configure integrations with Slack/email for team notifications. Set up issue grouping rules and auto-assignment based on code ownership. Implement custom breadcrumbs for better error context.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Configure Datadog for Performance Monitoring",
+            "description": "Implement Datadog RUM and APM for comprehensive performance monitoring and infrastructure observability",
+            "dependencies": [],
+            "details": "Install Datadog RUM SDK for browser performance monitoring. Configure custom metrics for key business KPIs (booking conversion, search performance, group matching speed). Set up synthetic monitoring for critical user journeys. Implement custom dashboards for different stakeholder views (engineering, product, business). Configure alerting thresholds for performance degradation and anomalies. Set up log aggregation and correlation with metrics. Implement distributed tracing for API calls to Supabase and third-party services. Create SLO/SLI definitions and tracking. Configure cost optimization through intelligent sampling.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Build Custom Analytics Dashboard",
+            "description": "Create internal analytics dashboard for business metrics visualization and reporting",
+            "dependencies": [
+              "12.1",
+              "12.2",
+              "12.3"
+            ],
+            "details": "Design dashboard UI with key metric cards, charts, and data tables using Recharts or similar library. Create API endpoints to aggregate data from Mixpanel, Stripe, and Supabase. Implement real-time metrics updates using WebSockets or polling. Build metric visualizations: booking trends, revenue analytics, user growth, vendor performance, group success rates. Create filtering and date range selection for all metrics. Implement export functionality for reports (PDF, CSV). Add role-based access control for sensitive metrics. Create scheduled report generation with email delivery. Build metric comparison tools for period-over-period analysis.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement A/B Testing Framework",
+            "description": "Set up feature flagging and A/B testing infrastructure for controlled experiments and gradual rollouts",
+            "dependencies": [
+              "12.1"
+            ],
+            "details": "Integrate feature flag service (LaunchDarkly, Optimizely, or build custom with Supabase). Create React hooks and components for feature flag consumption. Implement experiment tracking integration with Mixpanel for result analysis. Build admin interface for creating and managing experiments. Set up statistical significance calculations and experiment monitoring. Create experiment documentation system with hypothesis and results tracking. Implement gradual rollout capabilities with user segmentation. Configure server-side rendering compatibility for flags. Build experiment isolation to prevent interaction effects. Create automated experiment conclusion and rollback mechanisms.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Set up GDPR-Compliant Data Collection",
+            "description": "Implement privacy-first data collection with user consent management and data governance",
+            "dependencies": [
+              "12.1",
+              "12.2",
+              "12.3"
+            ],
+            "details": "Build consent management UI with granular opt-in/opt-out controls for different data categories. Implement cookie consent banner with preferences center. Create data processing agreements documentation and privacy policy integration. Build user data export functionality for GDPR data portability requirements. Implement right-to-deletion with cascading removal across all analytics platforms. Set up anonymization for PII in analytics events. Configure geographic-based consent rules for different jurisdictions. Implement consent versioning and audit trail. Create automated data retention policies with scheduled deletions. Build compliance reporting dashboard for regulatory requirements.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-09-13T20:13:47.735Z",
+      "updated": "2025-09-14T08:07:45.938Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

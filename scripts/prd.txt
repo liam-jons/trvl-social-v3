@@ -1,0 +1,417 @@
+<context> # Overview
+TRVL Social is a community-driven adventure platform that eliminates loneliness through meaningful group experiences. Unlike traditional booking platforms that focus on transactions, TRVL Social engineers authentic human connections by matching solo travelers with personality-compatible adventure groups that evolve into lasting friendships beyond the trip itself.
+The platform solves the modern loneliness epidemic by transforming travel from isolated consumption into community formation. Targeting "Digital Detox Dana" - Instagram-fatigued 22-year-olds seeking real connections over social media moments - TRVL Social provides structured spontaneity with safety nets for first-time solo travelers.
+With 75% of the platform already built, including AI-powered group matching, vendor tools, and a trust-centered glassmorphic UI, TRVL Social is positioned to revolutionize how people connect through shared adventures.
+Core Features
+Community Infrastructure
+	•	Three-tier Community System: Local (<50mi), Regional (<500mi), and Global adventure communities that persist beyond individual trips
+	•	Vendor Forums: B2B knowledge sharing platform where vendors collaborate on operations, marketing, and safety best practices
+	•	Live Video Feed: Homepage featuring real-time adventures happening now to showcase community energy
+	•	Connection Persistence: Tools for groups to stay connected post-adventure through platform features
+Intelligent Matching System
+	•	Personality Assessment: 10-question visual quiz during onboarding that determines adventure style and group compatibility
+	•	Group Compatibility Scoring: AI-powered matching showing percentage compatibility with existing groups across dimensions like energy, interests, and communication style
+	•	Smart Group Builder: Revolutionary drag-and-drop tool for vendors to optimize group dynamics in real-time
+	•	"Why We Match" Explanations: Transparent reasoning for compatibility recommendations
+Dual Booking Models
+	•	Push Model: Vendors send targeted offers to matched users for last-minute spots
+	•	Pull Model: Users post dream trips and vendors bid with custom adventures
+	•	Natural Language Booking: AI-enabled conversational booking through chat interfaces
+	•	Group Coordination: Simplified multi-person bookings with individual payment splitting
+Vendor Empowerment Suite
+	•	Real-time Group Composition Dashboard: Live updates as bookings come in with personality mix visualization
+	•	WhatsApp Business Integration: One-click group creation for adventure coordination
+	•	Analytics Dashboard: Performance metrics, booking patterns, and revenue tracking
+	•	Payment Processing: Stripe Connect integration for seamless vendor payouts
+User Experience
+User Personas
+Primary: "Digital Detox Dana" (22, recent grad, $900/adventure budget)
+	•	Instagram-fatigued, seeking authentic experiences
+	•	First-time solo traveler with adventure anxiety
+	•	Values real friendships over follower counts
+	•	Wants structured spontaneity with safety nets
+Secondary: Adventure Vendors
+	•	Local experience providers needing digital presence
+	•	Struggles with group coordination and payment collection
+	•	Seeks consistent bookings and operational efficiency
+Tertiary: "The Tribe Leader"
+	•	Natural coordinators organizing group adventures
+	•	Needs bulk booking with individual payments
+	•	Manages 4-20 person groups regularly
+Key User Flows
+	1	Discovery → Assessment → Matching → Booking → Connection
+	◦	User discovers platform through organic search/referral
+	◦	Takes personality quiz determining adventure style
+	◦	Browses adventures filtered by 70%+ compatibility scores
+	◦	Joins matched group and connects via in-app chat
+	◦	Experiences adventure and maintains connections post-trip
+	2	Vendor Onboarding → Group Building → Management
+	◦	Vendor creates profile and lists adventures
+	◦	Uses AI group builder to optimize participant mix
+	◦	Manages bookings through real-time dashboard
+	◦	Creates WhatsApp groups for coordination
+UI/UX Considerations
+	•	Glassmorphic Design: Trust-centered, calm aesthetic reducing solo travel anxiety
+	•	Digital Detox Philosophy: Anti-social media design with no likes/comments/shares
+	•	Mobile-First: 70% of traffic expected from mobile devices
+	•	Accessibility: WCAG 2.1 compliance for inclusive adventure access
+	•	Progressive Enhancement: Static foundation → Interactive features → Social elements </context>
+<PRD> # Technical Architecture
+System Components
+Backend Infrastructure
+Existing Foundation:
+	•	Database: Supabase PostgreSQL with Row Level Security
+	•	Authentication: Supabase Auth (email/password + social login planned)
+	•	Payments: Stripe Connect for marketplace transactions
+	•	File Storage: Supabase Storage for media
+	•	Real-time: Supabase Realtime subscriptions for live updates
+New Enhancements Required:
+	•	AI Layer: OpenAI/Anthropic APIs for natural language processing
+	•	Messaging: WhatsApp Business API integration
+	•	Video Streaming: Agora/Daily.co for live adventure feeds
+	•	Analytics: Mixpanel/Amplitude for user behavior tracking
+	•	Email Service: SendGrid for transactional emails
+Frontend Architecture
+	•	Framework: React 18 with Vite for optimal performance
+	•	Styling: Tailwind CSS with custom glassmorphic components
+	•	State Management: Zustand for global state
+	•	Routing: React Router v6
+	•	Form Handling: React Hook Form + Zod validation
+Data Models
+Core Tables (Existing)
+	•	adventures: Adventure listings with vendor relationships
+	•	vendors: Vendor profiles and verification status
+	•	bookings: Transaction records with participant tracking
+	•	groups: Group compositions with compatibility scores
+	•	reviews: User feedback and ratings
+	•	user_roles: Permission management
+New Tables (Required)
+
+
+sql
+-- Community Features
+community_posts (
+  id, author_id, community_type, content, 
+  media_urls, created_at, engagement_score
+)
+
+community_connections (
+  user_a_id, user_b_id, adventure_id,
+  connection_strength, last_interaction
+)
+
+vendor_forums (
+  id, vendor_id, topic, content,
+  is_pinned, helpful_count
+)
+
+-- Matching System
+personality_assessments (
+  user_id, traits_json, assessment_date,
+  adventure_preferences, group_size_preference
+)
+
+group_compatibility_scores (
+  group_id, overall_score, dimension_scores_json,
+  predicted_cohesion
+)
+
+-- Booking Models
+trip_requests (
+  user_id, destination, dates, budget,
+  group_size, preferences, status
+)
+
+vendor_bids (
+  request_id, vendor_id, proposed_adventure,
+  price, special_offers
+)
+APIs and Integrations
+RESTful Endpoints
+
+
+javascript
+// Community APIs
+GET    /api/community/feeds/{type}
+POST   /api/community/posts
+GET    /api/community/connections/{userId}
+
+// Matching APIs  
+POST   /api/matching/assess-personality
+GET    /api/matching/compatible-groups
+GET    /api/matching/score/{groupId}
+
+// Booking APIs
+POST   /api/requests/create         // Pull model
+POST   /api/offers/send             // Push model
+GET    /api/offers/matched-users
+
+// AI Booking
+POST   /api/ai/book-adventure
+POST   /api/ai/find-matches
+Third-Party Integrations
+	•	Stripe Connect: Vendor payouts and split payments
+	•	WhatsApp Business API: Group communication
+	•	SendGrid: Email notifications
+	•	Mapbox: Adventure location visualization
+	•	Mixpanel: User analytics and cohort analysis
+Infrastructure Requirements
+	•	Hosting: Vercel/Netlify for frontend, Supabase cloud for backend
+	•	CDN: Cloudflare for static assets and global distribution
+	•	Monitoring: Sentry for error tracking, Datadog for performance
+	•	Backup: Automated daily database backups with 30-day retention
+	•	Security: SSL certificates, OWASP compliance, GDPR-ready
+Development Roadmap
+MVP Sprint (3 Weeks)
+Week 1: Foundation & Community Core
+Scope:
+	•	Environment setup and data migration from existing codebase
+	•	Community infrastructure implementation (forums, posts, connections)
+	•	Three-tier adventure filtering (Local/Regional/Global)
+	•	Live video feed integration for homepage
+	•	Mobile responsiveness and accessibility audit
+Deliverables:
+	•	Functioning community features with real-time updates
+	•	Vendor forum with discussion threads
+	•	Adventure discovery by community level
+	•	Homepage with live adventure feed
+Week 2: Intelligence Layer
+Scope:
+	•	Personality assessment quiz implementation
+	•	Compatibility scoring algorithm development
+	•	Group recommendation engine
+	•	Adventure portfolio pages for users
+	•	Privacy controls and sharing mechanisms
+Deliverables:
+	•	Complete onboarding flow with personality quiz
+	•	AI-powered matching system
+	•	User profiles with adventure history
+	•	Group compatibility visualizations
+Week 3: Vendor Tools & Booking Models
+Scope:
+	•	Real-time group composition dashboard
+	•	WhatsApp Business API integration
+	•	Push/Pull booking model implementation
+	•	Natural language booking API
+	•	Vendor analytics dashboard
+Deliverables:
+	•	Complete vendor management suite
+	•	Dual booking models functional
+	•	Group coordination tools
+	•	Payment processing setup
+Phase 2: Enhancement (Months 2-3)
+Scope:
+	•	Advanced AI matching algorithms
+	•	Mobile app development (React Native)
+	•	International market features (multi-currency, translations)
+	•	Advanced analytics and business intelligence
+	•	Vendor community marketplace
+Phase 3: Scale (Months 4-6)
+Scope:
+	•	AI agent integration for conversational booking
+	•	Tech-free retreat offerings
+	•	Corporate team-building vertical
+	•	API marketplace for third-party developers
+	•	Global expansion to 10 markets
+Logical Dependency Chain
+Foundation Layer (Must Build First)
+	1	Database Schema: Complete data model with relationships
+	2	Authentication System: User/vendor registration and login
+	3	Core UI Components: Reusable glassmorphic design system
+	4	API Structure: RESTful endpoints with proper authentication
+Feature Layer (Build on Foundation)
+	1	User Profiles: Basic profiles before personality assessment
+	2	Adventure Listings: Display before filtering/matching
+	3	Basic Booking: Simple bookings before group features
+	4	Reviews System: Feedback before compatibility scoring
+Intelligence Layer (Requires Features)
+	1	Personality Quiz: Needs user profiles to store results
+	2	Matching Algorithm: Requires adventure and user data
+	3	Group Builder: Needs bookings and personality data
+	4	Recommendations: Requires historical booking patterns
+Social Layer (Final Enhancement)
+	1	Community Forums: After user base established
+	2	Connection Features: After successful group adventures
+	3	Live Feeds: After content generation
+	4	Referral System: After proven user satisfaction
+Critical Path to Usable Product
+	1	User registration → 2. Browse adventures → 3. View details → 4. Simple booking → 5. Payment processing → 6. Booking confirmation → 7. Basic vendor dashboard → 8. Add personality quiz → 9. Show compatibility → 10. Enable group features
+Risks and Mitigations
+Technical Risks
+Supabase Scaling Limitations
+	•	Risk: Database performance issues at scale
+	•	Mitigation: Implement Redis caching layer, prepare PostgreSQL migration path, optimize queries with indexes
+WhatsApp API Complexity
+	•	Risk: Integration challenges and approval delays
+	•	Mitigation: Start with email/SMS fallback, build abstraction layer for messaging providers
+AI Matching Accuracy
+	•	Risk: Poor group compatibility predictions
+	•	Mitigation: Start with simple rule-based matching, collect data for ML training, allow manual overrides
+Market Risks
+Vendor Adoption Resistance
+	•	Risk: Vendors reluctant to adopt new platform
+	•	Mitigation: Legacy pricing (10% commission forever), white-glove onboarding, free trial period
+User Trust in Group Matching
+	•	Risk: Users skeptical of personality-based matching
+	•	Mitigation: Transparency in algorithms, money-back guarantee, testimonials from beta users
+Competition from Established Players
+	•	Risk: Viator/GetYourGuide adding social features
+	•	Mitigation: Patent provisional for group matching, move fast on community features, vendor lock-in through tools
+Operational Risks
+Group Dynamic Failures
+	•	Risk: Incompatible groups leading to bad experiences
+	•	Mitigation: Vendor training on conflict resolution, safety protocols, refund policies, post-adventure support
+Payment Processing Complexity
+	•	Risk: Split payments and international transactions
+	•	Mitigation: Phased rollout by region, manual backup processes, Stripe Connect expertise
+MVP Focus Risks
+Feature Creep
+	•	Risk: Trying to build everything in 3 weeks
+	•	Mitigation: Strict sprint planning, daily standups, feature flags for progressive rollout
+Quality vs Speed
+	•	Risk: Rushing leads to poor user experience
+	•	Mitigation: Automated testing, staging environment, beta user program before full launch
+Appendix
+Research Findings
+Market Validation
+	•	78% of users are female aged 18-25 (exact target demographic)
+	•	68% book second adventure (above 35% industry standard)
+	•	Average booking value: $120 per person
+	•	Group size average: 6 participants
+	•	Vendor NPS: 72 (excellent)
+Technical Performance Metrics
+	•	Page load speed: <2 seconds
+	•	Mobile responsive: 100% pages
+	•	Accessibility score: 87/100
+	•	SEO score: 92/100
+	•	Database query optimization: <100ms average
+Competitive Analysis
+	•	No direct competitors in personality-based group adventure booking
+	•	Viator/GetYourGuide focus on transactions, not community
+	•	Meetup lacks booking/payment infrastructure
+	•	Facebook Groups lacks vendor tools and trust layer
+Technical Specifications
+Component Library (Ready for AI Implementation)
+
+
+javascript
+// Glassmorphic Card Component
+const GlassCard = ({ children, className }) => (
+  <div className={`
+    backdrop-blur-md bg-white/10 
+    border border-white/20 rounded-2xl 
+    shadow-xl p-6 ${className}
+  `}>
+    {children}
+  </div>
+);
+
+// Community Navigation Component
+const CommunityNav = ({ activeTab, onTabChange }) => (
+  <nav className="flex gap-2 p-2 bg-white/5 rounded-full">
+    {['Local', 'Regional', 'Global'].map(tab => (
+      <button
+        key={tab}
+        onClick={() => onTabChange(tab)}
+        className={`
+          px-6 py-2 rounded-full transition-all
+          ${activeTab === tab 
+            ? 'bg-purple-500 text-white' 
+            : 'hover:bg-white/10'}
+        `}
+      >
+        {tab}
+      </button>
+    ))}
+  </nav>
+);
+
+// Compatibility Badge Component
+const CompatibilityBadge = ({ score }) => (
+  <div className="relative w-16 h-16">
+    <svg className="transform -rotate-90">
+      <circle
+        cx="32" cy="32" r="28"
+        stroke="rgba(255,255,255,0.2)"
+        strokeWidth="4"
+        fill="none"
+      />
+      <circle
+        cx="32" cy="32" r="28"
+        stroke="url(#gradient)"
+        strokeWidth="4"
+        fill="none"
+        strokeDasharray={`${score * 1.76} 176`}
+      />
+    </svg>
+    <span className="absolute inset-0 flex items-center justify-center text-white font-bold">
+      {score}%
+    </span>
+  </div>
+);
+Database Migration Scripts
+
+
+sql
+-- Run in sequence for Supabase migration
+
+-- 1. Community Infrastructure
+CREATE TABLE community_posts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  author_id UUID REFERENCES auth.users(id),
+  community_type VARCHAR(20) CHECK (community_type IN ('local', 'regional', 'global')),
+  content TEXT NOT NULL,
+  media_urls TEXT[],
+  created_at TIMESTAMP DEFAULT NOW(),
+  engagement_score INTEGER DEFAULT 0
+);
+
+-- 2. Personality Matching
+CREATE TABLE personality_assessments (
+  user_id UUID PRIMARY KEY REFERENCES auth.users(id),
+  traits_json JSONB NOT NULL,
+  assessment_date TIMESTAMP DEFAULT NOW(),
+  adventure_preferences JSONB,
+  group_size_preference INTEGER
+);
+
+-- 3. Dual Booking Models
+CREATE TABLE trip_requests (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id),
+  destination VARCHAR(255),
+  dates DATERANGE,
+  budget DECIMAL(10,2),
+  group_size INTEGER,
+  preferences JSONB,
+  status VARCHAR(20) DEFAULT 'active',
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Enable Row Level Security
+ALTER TABLE community_posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE personality_assessments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE trip_requests ENABLE ROW LEVEL SECURITY;
+Success Metrics Framework
+Metric
+Target (6 months)
+Measurement Method
+Loneliness Reduction Score
+40% improvement
+Pre/post trip surveys
+Group Cohesion Rate
+35% book together again
+Booking database analysis
+Vendor NPS
+70+
+Quarterly vendor surveys
+Active Communities
+50 location-based groups
+Platform analytics
+Total Bookings
+500 adventures
+Stripe dashboard
+User Retention
+60% monthly active
+Mixpanel cohorts
+</PRD>

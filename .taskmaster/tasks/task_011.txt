@@ -1,0 +1,11 @@
+# Task ID: 11
+# Title: Build Community and Social Features
+# Status: pending
+# Dependencies: 4, 7
+# Priority: low
+# Description: Create community infrastructure with forums, connections, and live adventure feeds
+# Details:
+Implement community post creation with rich text editor and media uploads to Supabase Storage. Build three-tier community filtering (Local/Regional/Global) based on user location. Create live video feed integration using Agora/Daily.co for homepage. Implement connection system for maintaining relationships post-adventure. Build engagement scoring algorithm for content ranking. Create vendor forums with topic categorization and search. Implement notification system for community activity. Build moderation tools for content management. Create sharing functionality without social media mechanics.
+
+# Test Strategy:
+Test post creation with various media types. Verify location-based filtering accuracy. Test video streaming performance and quality. Test connection persistence and recommendations. Load testing for community features. Test moderation workflows and content filtering.
