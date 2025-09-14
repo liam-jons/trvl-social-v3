@@ -1,11 +1,14 @@
 import { PERSONALITY_DIMENSIONS } from '../types/personality';
+import { generatePersonalityDescriptions } from '../services/ai-service.js';
 
 /**
  * Calculate personality profile from quiz answers
  * @param {Array} answers - Array of quiz answers with trait scores
+ * @param {Object} options - Options for profile calculation
+ * @param {boolean} options.useAI - Whether to use AI for description generation (default: true)
  * @returns {Object} Calculated personality profile
  */
-export function calculatePersonalityProfile(answers) {
+export async function calculatePersonalityProfile(answers, options = { useAI: true }) {
   if (!answers || answers.length === 0) {
     throw new Error('No answers provided for calculation');
   }
@@ -68,8 +71,25 @@ export function calculatePersonalityProfile(answers) {
   // Add personality type classification
   profile.personalityType = classifyPersonalityType(profile);
 
-  // Add trait descriptions
-  profile.traitDescriptions = generateTraitDescriptions(profile);
+  // Add trait descriptions using AI or fallback
+  try {
+    if (options.useAI) {
+      const aiResult = await generatePersonalityDescriptions(profile);
+      profile.traitDescriptions = aiResult.descriptions;
+      profile.descriptionSource = aiResult.source;
+      if (aiResult.error) {
+        profile.descriptionError = aiResult.error;
+      }
+    } else {
+      profile.traitDescriptions = generateTraitDescriptions(profile);
+      profile.descriptionSource = 'static';
+    }
+  } catch (error) {
+    console.warn('Failed to generate AI descriptions, using fallback:', error.message);
+    profile.traitDescriptions = generateTraitDescriptions(profile);
+    profile.descriptionSource = 'fallback';
+    profile.descriptionError = error.message;
+  }
 
   return profile;
 }

@@ -27,7 +27,9 @@ const Header = () => {
   }, [location]);
 
   const navItems = [
+    { path: '/search', label: 'Search', icon: '🔍' },
     { path: '/adventures', label: 'Adventures', icon: '🏔️' },
+    { path: '/wishlist', label: 'Wishlist', icon: '❤️', requiresAuth: true },
     { path: '/community', label: 'Community', icon: '👥' },
     { path: '/groups', label: 'Groups', icon: '🤝' },
     { path: '/vendors', label: 'Vendors', icon: '🏪' },
@@ -61,22 +63,27 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  `px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${
-                    isActive
-                      ? 'bg-glass-heavy text-blue-600 dark:text-blue-400'
-                      : 'hover:bg-glass-light'
-                  }`
-                }
-              >
-                <span>{item.icon}</span>
-                <span>{item.label}</span>
-              </NavLink>
-            ))}
+            {navItems.map((item) => {
+              // Skip auth-required items if user is not authenticated
+              if (item.requiresAuth && !isAuthenticated) return null;
+
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${
+                      isActive
+                        ? 'bg-glass-heavy text-blue-600 dark:text-blue-400'
+                        : 'hover:bg-glass-light'
+                    }`
+                  }
+                >
+                  <span>{item.icon}</span>
+                  <span>{item.label}</span>
+                </NavLink>
+              );
+            })}
           </nav>
 
           {/* Desktop Actions */}
@@ -179,22 +186,27 @@ const Header = () => {
           }`}
         >
           <nav className="space-y-2 pb-4">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  `block px-4 py-2 rounded-lg transition-all duration-200 ${
-                    isActive
-                      ? 'bg-glass-heavy text-blue-600 dark:text-blue-400'
-                      : 'hover:bg-glass-light'
-                  }`
-                }
-              >
-                <span className="mr-2">{item.icon}</span>
-                {item.label}
-              </NavLink>
-            ))}
+            {navItems.map((item) => {
+              // Skip auth-required items if user is not authenticated
+              if (item.requiresAuth && !isAuthenticated) return null;
+
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `block px-4 py-2 rounded-lg transition-all duration-200 ${
+                      isActive
+                        ? 'bg-glass-heavy text-blue-600 dark:text-blue-400'
+                        : 'hover:bg-glass-light'
+                    }`
+                  }
+                >
+                  <span className="mr-2">{item.icon}</span>
+                  {item.label}
+                </NavLink>
+              );
+            })}
             
             <hr className="my-2 border-glass" />
             

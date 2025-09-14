@@ -1,0 +1,96 @@
+/* Dual Range Slider Styles */
+.slider-thumb-min::-webkit-slider-thumb {
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #4f46e5;
+  border: 2px solid #ffffff;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+  position: relative;
+}
+
+.slider-thumb-max::-webkit-slider-thumb {
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #4f46e5;
+  border: 2px solid #ffffff;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  position: relative;
+}
+
+.slider-thumb-min::-moz-range-thumb {
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #4f46e5;
+  border: 2px solid #ffffff;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+  position: relative;
+}
+
+.slider-thumb-max::-moz-range-thumb {
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #4f46e5;
+  border: 2px solid #ffffff;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  position: relative;
+}
+
+/* Track styles */
+.slider-thumb-min::-webkit-slider-track {
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(
+    to right,
+    #e5e7eb 0%,
+    #e5e7eb var(--min-percent, 0%),
+    #4f46e5 var(--min-percent, 0%),
+    #4f46e5 var(--max-percent, 100%),
+    #e5e7eb var(--max-percent, 100%),
+    #e5e7eb 100%
+  );
+}
+
+.slider-thumb-max::-webkit-slider-track {
+  height: 8px;
+  border-radius: 4px;
+  background: transparent;
+}
+
+/* Dark mode styles */
+.dark .slider-thumb-min::-webkit-slider-track {
+  background: linear-gradient(
+    to right,
+    #374151 0%,
+    #374151 var(--min-percent, 0%),
+    #6366f1 var(--min-percent, 0%),
+    #6366f1 var(--max-percent, 100%),
+    #374151 var(--max-percent, 100%),
+    #374151 100%
+  );
+}
+
+.dark .slider-thumb-min::-webkit-slider-thumb {
+  background: #6366f1;
+  border: 2px solid #1f2937;
+}
+
+.dark .slider-thumb-max::-webkit-slider-thumb {
+  background: #6366f1;
+  border: 2px solid #1f2937;
+}

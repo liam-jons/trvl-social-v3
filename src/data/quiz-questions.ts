@@ -137,7 +137,7 @@ export const quizQuestions: QuizQuestion[] = [
     options: [
       {
         id: '5a',
-        text: 'They're the best stories! Bring it on!',
+        text: "They're the best stories! Bring it on!",
         imageUrl: 'https://images.unsplash.com/photo-1502791451862-7bd8c1df43a7?w=400&h=300&fit=crop',
         traitScores: { riskTolerance: 95, adventureStyle: 90, energyLevel: 80 }
       },

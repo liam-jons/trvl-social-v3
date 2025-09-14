@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
+import { useAuth } from '../../hooks/useAuth';
 import QuizProgress from './QuizProgress';
 import QuizQuestion from './QuizQuestion';
 import { quizQuestions } from '../../data/quiz-questions';
@@ -10,6 +11,7 @@ import GlassCard from '../ui/GlassCard';
 
 export default function QuizContainer({ onComplete }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isCalculating, setIsCalculating] = useState(false);
@@ -93,15 +95,28 @@ export default function QuizContainer({ onComplete }) {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Discover Your Travel Personality
           </h1>
-          {!isLastQuestion && (
-            <button
-              type="button"
-              onClick={handleSkip}
-              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
-            >
-              Skip Question →
-            </button>
-          )}
+          <div className="flex items-center gap-4">
+            {user && (
+              <Link
+                to="/quiz/history"
+                className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors flex items-center gap-1"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                View History
+              </Link>
+            )}
+            {!isLastQuestion && (
+              <button
+                type="button"
+                onClick={handleSkip}
+                className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+              >
+                Skip Question →
+              </button>
+            )}
+          </div>
         </div>
         <QuizProgress
           currentQuestion={currentQuestionIndex + 1}

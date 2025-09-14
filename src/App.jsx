@@ -25,6 +25,12 @@ const VendorDetailPage = lazy(() => import('./pages/vendors/VendorDetailPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const PersonalityQuizPage = lazy(() => import('./pages/quiz/PersonalityQuizPage'));
+const QuizResultsPage = lazy(() => import('./pages/quiz/QuizResultsPage'));
+const QuizHistoryPage = lazy(() => import('./pages/quiz/QuizHistoryPage'));
+const OnboardingPage = lazy(() => import('./pages/onboarding/OnboardingPage'));
+const SearchPage = lazy(() => import('./pages/SearchPage'));
+const WishlistPage = lazy(() => import('./pages/WishlistPage'));
+const SharedWishlistPage = lazy(() => import('./pages/SharedWishlistPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 function App() {
@@ -44,6 +50,18 @@ function App() {
                   <Route path="auth/forgot-password" element={<ForgotPasswordPage />} />
                   <Route path="auth/reset-password" element={<ResetPasswordPage />} />
 
+                  {/* Onboarding Route */}
+                  <Route path="onboarding" element={<OnboardingPage />} />
+
+                  {/* Search Route */}
+                  <Route path="search" element={<SearchPage />} />
+
+                  {/* Wishlist Routes */}
+                  <Route path="wishlist">
+                    <Route index element={<WishlistPage />} />
+                    <Route path="shared/:shareId" element={<SharedWishlistPage />} />
+                  </Route>
+
                   {/* Adventures Routes */}
                   <Route path="adventures">
                     <Route index element={<AdventuresPage />} />
@@ -54,7 +72,11 @@ function App() {
                   <Route path="community" element={<CommunityPage />} />
 
                   {/* Quiz Routes */}
-                  <Route path="quiz" element={<PersonalityQuizPage />} />
+                  <Route path="quiz">
+                    <Route index element={<PersonalityQuizPage />} />
+                    <Route path="results" element={<QuizResultsPage />} />
+                    <Route path="history" element={<QuizHistoryPage />} />
+                  </Route>
 
                   {/* Groups Routes */}
                   <Route path="groups">

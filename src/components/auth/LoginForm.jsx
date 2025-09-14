@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { onboardingService } from '../../services/onboarding-service';
 import GlassCard from '../ui/GlassCard';
 import GlassButton from '../ui/GlassButton';
 
@@ -62,20 +63,35 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     const result = await signIn({
       email: formData.email,
       password: formData.password,
     });
-    
-    if (result.success) {
-      const redirectTo = sessionStorage.getItem('redirectAfterLogin') || location.state?.from || '/dashboard';
-      sessionStorage.removeItem('redirectAfterLogin');
-      navigate(redirectTo);
+
+    if (result.success && result.data?.user) {
+      // Check if user needs onboarding
+      try {
+        const isFirstTime = await onboardingService.isFirstTimeUser(result.data.user);
+
+        if (isFirstTime) {
+          navigate('/onboarding');
+        } else {
+          const redirectTo = sessionStorage.getItem('redirectAfterLogin') || location.state?.from || '/dashboard';
+          sessionStorage.removeItem('redirectAfterLogin');
+          navigate(redirectTo);
+        }
+      } catch (error) {
+        console.error('Error checking onboarding status:', error);
+        // Fallback to default redirect
+        const redirectTo = sessionStorage.getItem('redirectAfterLogin') || location.state?.from || '/dashboard';
+        sessionStorage.removeItem('redirectAfterLogin');
+        navigate(redirectTo);
+      }
     }
   };
 
