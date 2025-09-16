@@ -1,6 +1,7 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 
 // https://vite.dev/config/
 import path from 'node:path';
@@ -10,7 +11,33 @@ const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(file
 
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    // Only upload source maps in production builds
+    process.env.NODE_ENV === 'production' && sentryVitePlugin({
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      release: {
+        name: process.env.npm_package_version || 'unknown',
+        uploadLegacySourcemaps: {
+          paths: ['./dist'],
+          ignore: ['node_modules']
+        }
+      },
+      sourcemaps: {
+        assets: './dist/**'
+      },
+      // Automatically create releases and deploy notifications
+      setCommits: {
+        auto: true
+      }
+    })
+  ].filter(Boolean),
+  build: {
+    // Generate source maps for Sentry
+    sourcemap: true
+  },
   test: {
     projects: [
       {

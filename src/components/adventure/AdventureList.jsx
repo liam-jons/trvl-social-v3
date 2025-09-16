@@ -1,9 +1,15 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import AdventureGrid from './AdventureGrid';
 import ViewToggle from './ViewToggle';
 import { useViewPreference } from '../../hooks/useViewPreference';
 import { useGeolocation } from '../../hooks/useGeolocation';
+import { usePagination } from '../../hooks/usePagination';
+import { useInfiniteScrollObserver } from '../../hooks/useInfiniteScroll';
+import PaginationControls from '../common/PaginationControls';
+import LoadMoreButton from '../common/LoadMoreButton';
+import ScrollToTop from '../common/ScrollToTop';
+import AdventureLoadingSkeleton from './AdventureLoadingSkeleton';
 import GlassCard from '../ui/GlassCard';
 
 const AdventureList = ({
@@ -13,10 +19,24 @@ const AdventureList = ({
   filters = {},
   searchQuery = '',
   sortBy = 'featured',
-  className = ''
+  className = '',
+  // Pagination options
+  paginationMode = 'infinite', // 'pagination', 'infinite', 'both'
+  pageSize = 12,
+  enableVirtualScroll = false,
+  onLoadMore,
+  hasMore = true,
+  totalCount,
+  // URL-based pagination
+  currentPage: urlPage,
+  onPageChange: urlPageChange
 }) => {
   const [viewMode, setViewMode] = useViewPreference('grid');
   const { location: userLocation, calculateDistance } = useGeolocation();
+
+  // Internal state for infinite scroll
+  const [displayedAdventures, setDisplayedAdventures] = useState([]);
+  const [infiniteLoading, setInfiniteLoading] = useState(false);
 
   // Filter and sort adventures
   const filteredAdventures = useMemo(() => {
@@ -174,6 +194,74 @@ const AdventureList = ({
     return filtered;
   }, [adventures, searchQuery, filters, sortBy, userLocation, calculateDistance]);
 
+  // Pagination hook (for traditional pagination)
+  const pagination = usePagination(filteredAdventures, {
+    initialPage: urlPage || 1,
+    pageSize,
+    enabled: paginationMode === 'pagination' || paginationMode === 'both'
+  });
+
+  // Infinite scroll implementation
+  const handleInfiniteLoadMore = useCallback(async ({ page }) => {
+    if (onLoadMore) {
+      setInfiniteLoading(true);
+      try {
+        const result = await onLoadMore({ page, pageSize });
+        return {
+          hasMore: result?.hasMore ?? hasMore,
+          nextPage: page,
+          error: result?.error
+        };
+      } catch (error) {
+        return {
+          hasMore: false,
+          error: error.message
+        };
+      } finally {
+        setInfiniteLoading(false);
+      }
+    } else {
+      // Client-side infinite scroll
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = page * pageSize;
+      const newItems = filteredAdventures.slice(startIndex, endIndex);
+
+      if (newItems.length > 0) {
+        setDisplayedAdventures(prev => [...prev, ...newItems]);
+      }
+
+      return {
+        hasMore: endIndex < filteredAdventures.length,
+        nextPage: page
+      };
+    }
+  }, [onLoadMore, pageSize, hasMore, filteredAdventures]);
+
+  // Infinite scroll hook
+  const infiniteScroll = useInfiniteScrollObserver(handleInfiniteLoadMore, {
+    enabled: paginationMode === 'infinite' || paginationMode === 'both',
+    pageSize,
+    threshold: 0.8
+  });
+
+  // Initialize displayed adventures for infinite scroll
+  useEffect(() => {
+    if (paginationMode === 'infinite' || paginationMode === 'both') {
+      if (!onLoadMore) {
+        // Client-side: show first page
+        setDisplayedAdventures(filteredAdventures.slice(0, pageSize));
+        infiniteScroll.reset();
+      }
+    }
+  }, [filteredAdventures, paginationMode, pageSize, onLoadMore]);
+
+  // Handle URL-based pagination changes
+  useEffect(() => {
+    if (urlPageChange && pagination.currentPage !== urlPage) {
+      pagination.goToPage(urlPage);
+    }
+  }, [urlPage, urlPageChange]);
+
   // Mock function to get coordinates for adventures (in real app, this would come from API)
   const getAdventureCoordinates = (location) => {
     const locationCoords = {
@@ -187,8 +275,23 @@ const AdventureList = ({
     return locationCoords[location];
   };
 
-  const resultsCount = filteredAdventures.length;
-  const totalCount = adventures.length;
+  // Determine which adventures to display based on pagination mode
+  const adventuresToDisplay = useMemo(() => {
+    switch (paginationMode) {
+      case 'pagination':
+        return pagination.currentItems;
+      case 'infinite':
+        return onLoadMore ? adventures : displayedAdventures;
+      case 'both':
+        return pagination.currentItems;
+      default:
+        return filteredAdventures;
+    }
+  }, [paginationMode, pagination.currentItems, adventures, displayedAdventures, filteredAdventures, onLoadMore]);
+
+  const resultsCount = adventuresToDisplay.length;
+  const totalFilteredCount = filteredAdventures.length;
+  const allAdventuresCount = totalCount || adventures.length;
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -203,7 +306,25 @@ const AdventureList = ({
               <span className="animate-pulse">Loading adventures...</span>
             ) : (
               <>
-                Showing {resultsCount} of {totalCount} adventure{totalCount !== 1 ? 's' : ''}
+                {paginationMode === 'infinite' && !onLoadMore ? (
+                  <>
+                    Showing {resultsCount} of {totalFilteredCount} adventure{totalFilteredCount !== 1 ? 's' : ''}
+                    {totalFilteredCount !== allAdventuresCount && (
+                      <span className="text-gray-500"> ({allAdventuresCount} total)</span>
+                    )}
+                  </>
+                ) : paginationMode === 'pagination' ? (
+                  <>
+                    Showing {pagination.startIndex}-{pagination.endIndex} of {totalFilteredCount} adventure{totalFilteredCount !== 1 ? 's' : ''}
+                    {totalFilteredCount !== allAdventuresCount && (
+                      <span className="text-gray-500"> ({allAdventuresCount} total)</span>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    Showing {resultsCount} of {allAdventuresCount} adventure{allAdventuresCount !== 1 ? 's' : ''}
+                  </>
+                )}
                 {searchQuery && (
                   <span className="ml-1">
                     for "<strong>{searchQuery}</strong>"
@@ -225,23 +346,113 @@ const AdventureList = ({
         layout
         transition={{ duration: 0.3 }}
       >
-        <AdventureGrid
-          adventures={filteredAdventures}
-          viewMode={viewMode}
-          onAdventureClick={onAdventureClick}
-          loading={loading}
-        />
+        {loading ? (
+          <AdventureLoadingSkeleton
+            count={pageSize}
+            viewMode={viewMode}
+          />
+        ) : (
+          <AdventureGrid
+            adventures={adventuresToDisplay}
+            viewMode={viewMode}
+            onAdventureClick={onAdventureClick}
+            loading={infiniteLoading}
+          />
+        )}
       </motion.div>
 
+      {/* Pagination Controls */}
+      {!loading && (paginationMode === 'pagination' || paginationMode === 'both') && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <PaginationControls
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            visiblePages={pagination.visiblePages}
+            onPageChange={urlPageChange || pagination.goToPage}
+            hasNextPage={pagination.hasNextPage}
+            hasPreviousPage={pagination.hasPreviousPage}
+            isFirstPage={pagination.isFirstPage}
+            isLastPage={pagination.isLastPage}
+            onFirst={pagination.goToFirst}
+            onLast={pagination.goToLast}
+            onNext={pagination.goToNext}
+            onPrevious={pagination.goToPrevious}
+            startIndex={pagination.startIndex}
+            endIndex={pagination.endIndex}
+            totalItems={pagination.totalItems}
+          />
+        </motion.div>
+      )}
+
+      {/* Infinite Scroll Controls */}
+      {!loading && (paginationMode === 'infinite' || paginationMode === 'both') && (
+        <>
+          {/* Infinite scroll sentinel */}
+          <div ref={infiniteScroll.sentinelRef} className="h-4" />
+
+          {/* Load More Button (fallback) */}
+          {infiniteScroll.canLoadMore && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <LoadMoreButton
+                onClick={infiniteScroll.loadMore}
+                loading={infiniteLoading || infiniteScroll.isLoading}
+                hasMore={infiniteScroll.hasNextPage}
+                className="mt-6"
+              >
+                Load More Adventures
+              </LoadMoreButton>
+            </motion.div>
+          )}
+
+          {/* Loading more indicator */}
+          {(infiniteLoading || infiniteScroll.isLoading) && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-6"
+            >
+              <AdventureLoadingSkeleton
+                count={3}
+                viewMode={viewMode}
+              />
+            </motion.div>
+          )}
+        </>
+      )}
+
+      {/* Scroll to Top Button */}
+      <ScrollToTop />
+
       {/* Results summary */}
-      {!loading && filteredAdventures.length > 0 && (
+      {!loading && adventuresToDisplay.length > 0 && paginationMode !== 'infinite' && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
           className="text-center text-sm text-gray-500 dark:text-gray-400"
         >
-          End of results
+          {paginationMode === 'pagination' && pagination.isLastPage ? 'End of results' : ''}
+        </motion.div>
+      )}
+
+      {/* No more results for infinite scroll */}
+      {!loading && (paginationMode === 'infinite' || paginationMode === 'both') &&
+       !infiniteScroll.hasNextPage && adventuresToDisplay.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="text-center text-sm text-gray-500 dark:text-gray-400 py-4"
+        >
+          No more adventures to load
         </motion.div>
       )}
     </div>

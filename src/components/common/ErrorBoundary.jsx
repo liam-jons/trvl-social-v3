@@ -1,15 +1,17 @@
-import { Component } from 'react';
+import React, { Component } from 'react';
 import GlassCard from '../ui/GlassCard';
 import GlassButton from '../ui/GlassButton';
+import sentryService from '../../services/sentry-service.js';
 
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { 
-      hasError: false, 
+    this.state = {
+      hasError: false,
       error: null,
       errorInfo: null,
-      errorCount: 0
+      errorCount: 0,
+      eventId: null
     };
   }
 
@@ -19,21 +21,34 @@ class ErrorBoundary extends Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+
+    // Capture error in Sentry with full context
+    const eventId = sentryService.captureException(error, {
+      tags: {
+        error_type: 'react_error_boundary',
+        component: this.props.name || 'ErrorBoundary',
+        fallback_level: this.props.level || 'page'
+      },
+      extra: {
+        errorInfo,
+        props: this.props,
+        component_stack: errorInfo.componentStack,
+        error_boundary_name: this.props.name || 'ErrorBoundary',
+        error_count: this.state.errorCount + 1
+      },
+      level: 'error'
+    });
+
     this.setState(prevState => ({
       error,
       errorInfo,
-      errorCount: prevState.errorCount + 1
+      errorCount: prevState.errorCount + 1,
+      eventId
     }));
 
-    // Log to error reporting service in production
-    if (process.env.NODE_ENV === 'production') {
-      // TODO: Send to error tracking service like Sentry
-      console.error('Production error:', {
-        error: error.toString(),
-        componentStack: errorInfo.componentStack,
-        timestamp: new Date().toISOString()
-      });
+    // Call onError callback if provided
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo);
     }
   }
 
@@ -41,8 +56,16 @@ class ErrorBoundary extends Component {
     this.setState({
       hasError: false,
       error: null,
-      errorInfo: null
+      errorInfo: null,
+      eventId: null
     });
+  };
+
+  handleReportFeedback = () => {
+    if (this.state.eventId) {
+      const feedbackUrl = `mailto:support@trvl-social.com?subject=Error Report&body=Error ID: ${this.state.eventId}%0A%0APlease describe what you were doing when this error occurred:`;
+      window.open(feedbackUrl, '_blank');
+    }
   };
 
   handleReload = () => {
@@ -88,7 +111,7 @@ class ErrorBoundary extends Component {
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-4 justify-center">
+              <div className="flex gap-4 justify-center flex-wrap">
                 <GlassButton
                   variant="ghost"
                   onClick={this.handleReset}
@@ -101,6 +124,15 @@ class ErrorBoundary extends Component {
                 >
                   Reload Page
                 </GlassButton>
+                {this.state.eventId && (
+                  <GlassButton
+                    variant="outline"
+                    onClick={this.handleReportFeedback}
+                    className="text-sm"
+                  >
+                    Report Issue
+                  </GlassButton>
+                )}
               </div>
 
               {/* Multiple Errors Warning */}
@@ -118,5 +150,33 @@ class ErrorBoundary extends Component {
     return this.props.children;
   }
 }
+
+// Higher-order component for easy wrapping
+export const withErrorBoundary = (Component, errorBoundaryProps = {}) => {
+  const WrappedComponent = (props) => (
+    <ErrorBoundary {...errorBoundaryProps}>
+      <Component {...props} />
+    </ErrorBoundary>
+  );
+
+  WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`;
+
+  return WrappedComponent;
+};
+
+// Hook for imperative error handling
+export const useErrorHandler = () => {
+  const handleError = React.useCallback((error, errorInfo = {}) => {
+    sentryService.captureException(error, {
+      tags: {
+        error_type: 'hook_error',
+        component: errorInfo.component || 'unknown'
+      },
+      extra: errorInfo
+    });
+  }, []);
+
+  return handleError;
+};
 
 export default ErrorBoundary;

@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { onboardingService } from '../../services/onboarding-service';
 import GlassCard from '../ui/GlassCard';
 import GlassButton from '../ui/GlassButton';
+import { logger } from '../../utils/logger.js';
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -86,7 +87,6 @@ const LoginForm = () => {
           navigate(redirectTo);
         }
       } catch (error) {
-        console.error('Error checking onboarding status:', error);
         // Fallback to default redirect
         const redirectTo = sessionStorage.getItem('redirectAfterLogin') || location.state?.from || '/dashboard';
         sessionStorage.removeItem('redirectAfterLogin');
@@ -100,7 +100,6 @@ const LoginForm = () => {
     
     if (result.success) {
       // OAuth redirects are handled by Supabase
-      console.log(`Redirecting to ${provider} login...`);
     }
   };
 

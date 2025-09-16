@@ -1,0 +1,31 @@
+{
+  "name": "trvl-social-api",
+  "version": "1.0.0",
+  "description": "Backend API functions for TRVL Social",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step required for serverless functions'",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "stripe": "^14.21.0",
+    "@supabase/supabase-js": "^2.57.4",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "stripe",
+    "payments",
+    "marketplace",
+    "serverless",
+    "api"
+  ],
+  "author": "TRVL Social",
+  "license": "MIT"
+}

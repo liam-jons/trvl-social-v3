@@ -1,0 +1,79 @@
+# Task ID: 13
+# Title: Fix Production Readiness Issues
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Address critical security, placeholder pages, and production console logs before deployment
+# Details:
+Based on comprehensive TODO/placeholder search, we need to address critical issues before production deployment. This includes removing exposed secrets, implementing placeholder pages, removing console.logs, and replacing mock data.
+
+# Test Strategy:
+Verify no exposed secrets in codebase, test all placeholder pages have functionality, ensure no console.logs in production build, validate real data replaces mocks
+
+# Subtasks:
+## 1. Remove exposed secrets and API keys [done]
+### Dependencies: None
+### Description: Audit codebase for exposed API keys and move to environment variables
+### Details:
+Already fixed .mcp.json Anthropic key. Check for other hardcoded secrets.
+
+## 2. Implement GroupsPage functionality [pending]
+### Dependencies: None
+### Description: Build out the groups listing page with search, filtering, and group cards
+### Details:
+Currently only has h1 title. Need group listing, search, filters, create group button.
+
+## 3. Implement GroupDetailPage functionality [pending]
+### Dependencies: None
+### Description: Build group details page with members, activities, and group management
+### Details:
+Currently only has h1 title. Need member list, group info, join/leave functionality.
+
+## 4. Implement SettingsPage functionality [pending]
+### Dependencies: None
+### Description: Build user settings page with profile, preferences, and privacy controls
+### Details:
+Currently only has h1 title. Need account settings, notification preferences, privacy settings.
+
+## 5. Remove all console.log statements from production [pending]
+### Dependencies: None
+### Description: Replace console.logs with proper logging service or remove entirely
+### Details:
+Found 100+ console.log/warn/error statements across services that need removal.
+
+## 6. Complete Stripe webhook notification integrations [pending]
+### Dependencies: None
+### Description: Integrate webhook handlers with notification and monitoring services
+### Details:
+TODOs in api/stripe/webhooks.js for DataDog/Sentry integration and notifications.
+
+## 7. Replace mock data with real API calls [pending]
+### Dependencies: None
+### Description: Replace all mock data in dashboards and analytics with real backend calls
+### Details:
+Dashboard metrics, vendor analytics, and admin panels using mock data.
+
+## 8. Add routing for existing unrouted pages [pending]
+### Dependencies: None
+### Description: Add routes for ConnectionsPage, OfferManagementPage, and other completed but unrouted pages
+### Details:
+5 completed pages exist but aren't accessible via routing: ConnectionsPage, OfferManagementPage, CompatibilityDemoPage, PayoutManagementPage, BidRequestsPage.
+
+## 9. Implement VendorsPage and VendorDetailPage [pending]
+### Dependencies: None
+### Description: Build vendor discovery pages with listing, search, and detail views
+### Details:
+Currently only h1 titles. Need vendor cards, search/filters, categories, vendor profiles with adventure listings, ratings, and booking capabilities.
+
+## 10. Create footer link pages [pending]
+### Dependencies: None
+### Description: Implement all missing footer link pages for legal, support, and company sections
+### Details:
+Need pages for: /about, /careers, /press, /blog, /help, /safety, /contact, /faq, /terms, /licenses, /guidelines, /vendor-resources, /api, /partners, /accessibility. Privacy and Cookie pages already exist.
+
+## 11. Create production deployment documentation [pending]
+### Dependencies: None
+### Description: Create comprehensive deployment guide with all configuration, setup, and dashboard requirements
+### Details:
+Document required: environment variables, API keys setup, Supabase configuration, Stripe Connect setup, domain/SSL config, monitoring dashboards (Sentry, Datadog, Mixpanel), backup procedures, and production checklist.
+

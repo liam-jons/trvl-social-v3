@@ -1,5 +1,8 @@
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect } from 'react';
 import AdventureCard from './AdventureCard';
+import { useAnalytics } from '../../contexts/AnalyticsContext';
+import { useExperimentWithTracking } from '../../hooks/useABTesting';
 
 const AdventureGrid = ({
   adventures = [],
@@ -8,15 +11,60 @@ const AdventureGrid = ({
   loading = false,
   className = ''
 }) => {
+  // A/B Testing: Adventure card layout experiment
+  const {
+    variant: cardLayoutVariant,
+    trackClick,
+    trackConversion
+  } = useExperimentWithTracking('adventure_card_layout');
+
+  const { trackEvent } = useAnalytics();
+
+  // Track grid view event
+  useEffect(() => {
+    if (adventures.length > 0) {
+      trackEvent('adventure_grid_viewed', {
+        view_mode: viewMode,
+        adventures_count: adventures.length,
+        experiment_variant: cardLayoutVariant
+      });
+    }
+  }, [adventures.length, viewMode, cardLayoutVariant, trackEvent]);
+
+  // Enhanced adventure click handler with A/B testing tracking
+  const handleAdventureClick = (adventure) => {
+    // Track A/B test click event
+    if (cardLayoutVariant) {
+      trackClick('adventure_card', {
+        adventure_id: adventure.id,
+        adventure_title: adventure.title,
+        card_layout: cardLayoutVariant,
+        view_mode: viewMode,
+        position: adventures.findIndex(a => a.id === adventure.id)
+      });
+    }
+
+    // Track regular analytics event
+    trackEvent('adventure_clicked', {
+      adventure_id: adventure.id,
+      adventure_title: adventure.title,
+      view_mode: viewMode,
+      source: 'adventure_grid'
+    });
+
+    // Call the original click handler
+    onAdventureClick?.(adventure);
+  };
+  // Container variants with A/B testing layout variations
   const containerVariants = {
     grid: {
       display: 'grid',
-      gap: '1.5rem'
+      gap: cardLayoutVariant === 'compact' ? '1rem' : '1.5rem'
     },
     list: {
       display: 'flex',
       flexDirection: 'column',
-      gap: '1rem'
+      gap: cardLayoutVariant === 'compact' ? '0.5rem' : '1rem'
     }
   };
 
@@ -102,10 +150,12 @@ const AdventureGrid = ({
             key={adventure.id}
             adventure={adventure}
             viewMode={viewMode}
-            onClick={() => onAdventureClick?.(adventure)}
+            onClick={() => handleAdventureClick(adventure)}
             className={`
               ${viewMode === 'list' ? 'w-full' : ''}
+              ${cardLayoutVariant === 'compact' ? 'adventure-card-compact' : ''}
             `}
+            layoutVariant={cardLayoutVariant}
           />
         ))}
       </AnimatePresence>

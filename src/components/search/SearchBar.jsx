@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { MagnifyingGlassIcon, XMarkIcon, ClockIcon, TrendingUpIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, XMarkIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { ArrowTrendingUpIcon } from '@heroicons/react/24/outline';
 import { useDebouncedSearch } from '../../hooks/useDebounce';
 import searchService from '../../services/searchService';
 
@@ -308,7 +309,7 @@ const SearchBar = ({
           {suggestions.popular.length > 0 && (
             <div className="p-2 border-t border-gray-100">
               <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-2 flex items-center">
-                <TrendingUpIcon className="w-3 h-3 mr-1" />
+                <ArrowTrendingUpIcon className="w-3 h-3 mr-1" />
                 {hasQuery ? 'Related Searches' : 'Popular Searches'}
               </h4>
               {suggestions.popular.map((search, index) => (
@@ -317,7 +318,7 @@ const SearchBar = ({
                   onClick={() => handleSuggestionSelect(search, 'popular')}
                   className="w-full flex items-center px-2 py-2 hover:bg-gray-50 rounded-md transition-colors text-left"
                 >
-                  <TrendingUpIcon className="w-4 h-4 text-gray-400 mr-3" />
+                  <ArrowTrendingUpIcon className="w-4 h-4 text-gray-400 mr-3" />
                   <span className="text-sm text-gray-700">{search}</span>
                 </button>
               ))}

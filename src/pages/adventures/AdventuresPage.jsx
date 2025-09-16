@@ -15,6 +15,8 @@ const AdventuresPage = () => {
   const [sortBy, setSortBy] = useState('featured');
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'map'
   const [showFilters, setShowFilters] = useState(true);
+  const [paginationMode, setPaginationMode] = useState('infinite'); // 'pagination', 'infinite', 'both'
+  const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState({
     category: 'all',
     location: 'all',
@@ -66,6 +68,24 @@ const AdventuresPage = () => {
 
   const toggleViewMode = () => {
     setViewMode(prev => prev === 'list' ? 'map' : 'list');
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    // Scroll to top when changing pages
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const togglePaginationMode = () => {
+    setPaginationMode(prev => {
+      switch (prev) {
+        case 'infinite': return 'pagination';
+        case 'pagination': return 'both';
+        case 'both': return 'infinite';
+        default: return 'infinite';
+      }
+    });
+    setCurrentPage(1); // Reset to first page when changing mode
   };
 
   return (
@@ -144,6 +164,19 @@ const AdventuresPage = () => {
                   <option value="duration">Duration</option>
                   <option value="alphabetical">A to Z</option>
                 </select>
+
+                {/* Pagination Mode Toggle */}
+                <button
+                  onClick={togglePaginationMode}
+                  className="px-4 py-3 bg-white/50 dark:bg-black/20 border border-white/20 dark:border-white/10 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/20 transition-all flex items-center gap-2 min-w-[120px]"
+                  title={`Current: ${paginationMode} - Click to change`}
+                >
+                  <span className="text-sm font-medium">
+                    {paginationMode === 'infinite' && '∞ Scroll'}
+                    {paginationMode === 'pagination' && '📄 Pages'}
+                    {paginationMode === 'both' && '∞📄 Both'}
+                  </span>
+                </button>
 
                 {/* View Toggle */}
                 <button
@@ -225,6 +258,11 @@ const AdventuresPage = () => {
                 filters={filters}
                 searchQuery={searchQuery}
                 sortBy={sortBy}
+                paginationMode={paginationMode}
+                pageSize={12}
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+                totalCount={adventures.length}
               />
             ) : (
               <GlassCard variant="light" className="p-0 overflow-hidden">

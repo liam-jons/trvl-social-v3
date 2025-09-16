@@ -5,6 +5,7 @@
 
 import { supabase } from '../lib/supabase.js';
 import { assessmentService } from './assessment-service.js';
+import sentryService from './sentry-service.js';
 
 // Onboarding steps
 export const ONBOARDING_STEPS = {
@@ -71,7 +72,9 @@ class OnboardingService {
         .single();
 
       if (error) {
-        console.warn('Error checking onboarding status:', error);
+        sentryService.captureException(error, {
+          tags: { service: 'onboarding', operation: 'checkOnboardingStatus' }
+        });
         return true; // Default to showing onboarding if we can't check
       }
 
@@ -85,7 +88,9 @@ class OnboardingService {
       return isFirstTime;
 
     } catch (error) {
-      console.error('Error checking first-time user status:', error);
+      sentryService.captureException(error, {
+        tags: { service: 'onboarding', operation: 'isFirstTimeUser' }
+      });
       return true; // Default to showing onboarding
     }
   }
@@ -313,7 +318,9 @@ class OnboardingService {
       return wasSkipped && !hasAssessment;
 
     } catch (error) {
-      console.error('Error checking quiz prompt status:', error);
+      sentryService.captureException(error, {
+        tags: { service: 'onboarding', operation: 'shouldPromptQuiz' }
+      });
       return false;
     }
   }
@@ -346,7 +353,9 @@ class OnboardingService {
         calculatorProfile: assessment.calculatorProfile
       } : null;
     } catch (error) {
-      console.error('Error getting personalized data:', error);
+      sentryService.captureException(error, {
+        tags: { service: 'onboarding', operation: 'getPersonalizedData' }
+      });
       return null;
     }
   }
@@ -389,7 +398,9 @@ class OnboardingService {
       const assessment = await assessmentService.getAssessmentByUserId(this.currentUser.id);
       return !!assessment;
     } catch (error) {
-      console.error('Error checking for existing assessment:', error);
+      sentryService.captureException(error, {
+        tags: { service: 'onboarding', operation: 'checkExistingAssessment' }
+      });
       return false;
     }
   }
@@ -406,7 +417,9 @@ class OnboardingService {
         JSON.stringify(this.onboardingProgress)
       );
     } catch (error) {
-      console.error('Error saving onboarding progress:', error);
+      sentryService.captureException(error, {
+        tags: { service: 'onboarding', operation: 'saveProgress' }
+      });
     }
   }
 
@@ -419,7 +432,9 @@ class OnboardingService {
       const saved = localStorage.getItem(STORAGE_KEYS.ONBOARDING_PROGRESS);
       return saved ? JSON.parse(saved) : null;
     } catch (error) {
-      console.error('Error loading onboarding progress:', error);
+      sentryService.captureException(error, {
+        tags: { service: 'onboarding', operation: 'loadProgress' }
+      });
       return null;
     }
   }
@@ -459,9 +474,11 @@ class OnboardingService {
       }
 
       // Could also integrate with other analytics services
-      console.log('Analytics event:', event, properties);
+      // Analytics event logged to analytics service
     } catch (error) {
-      console.error('Error tracking analytics event:', error);
+      sentryService.captureException(error, {
+        tags: { service: 'onboarding', operation: 'trackAnalyticsEvent' }
+      });
     }
   }
 }

@@ -3,6 +3,8 @@
  * Uses Anthropic Claude API with fallback to static descriptions
  */
 
+import { logger } from '../utils/logger.js';
+
 // Configuration
 const API_CONFIG = {
   anthropic: {
@@ -41,7 +43,6 @@ const cache = {
 
       return data;
     } catch (error) {
-      console.warn('Cache retrieval error:', error);
       return null;
     }
   },
@@ -54,7 +55,6 @@ const cache = {
       };
       localStorage.setItem(key, JSON.stringify(cacheEntry));
     } catch (error) {
-      console.warn('Cache storage error:', error);
     }
   },
 
@@ -67,7 +67,6 @@ const cache = {
         }
       });
     } catch (error) {
-      console.warn('Cache clearing error:', error);
     }
   }
 };
@@ -206,7 +205,6 @@ async function callAnthropicAPI(prompt, retryCount = 0) {
     // Retry logic with exponential backoff
     if (retryCount < API_CONFIG.maxRetries) {
       const delay = API_CONFIG.retryDelay * Math.pow(2, retryCount);
-      console.warn(`AI API call failed, retrying in ${delay}ms (attempt ${retryCount + 1}/${API_CONFIG.maxRetries}):`, error.message);
 
       await sleep(delay);
       return callAnthropicAPI(prompt, retryCount + 1);
@@ -272,7 +270,6 @@ export async function generatePersonalityDescriptions(profile) {
   const cachedResult = cache.get(cacheKey);
 
   if (cachedResult) {
-    console.log('Returning cached personality descriptions');
     return {
       descriptions: cachedResult,
       source: 'cache'
@@ -281,7 +278,6 @@ export async function generatePersonalityDescriptions(profile) {
 
   // Try AI generation
   try {
-    console.log('Generating AI-powered personality descriptions');
     const prompt = createPrompt(profile);
     const aiResponse = await callAnthropicAPI(prompt);
     const descriptions = parseAIResponse(aiResponse);
@@ -294,7 +290,6 @@ export async function generatePersonalityDescriptions(profile) {
       source: 'ai'
     };
   } catch (error) {
-    console.warn('AI description generation failed, using fallback:', error.message);
 
     // Return fallback descriptions
     const fallbackDescriptions = getFallbackDescriptions(profile);
@@ -310,7 +305,6 @@ export async function generatePersonalityDescriptions(profile) {
 // Utility function to clear AI description cache
 export function clearDescriptionCache() {
   cache.clear();
-  console.log('AI description cache cleared');
 }
 
 // Configuration getter for debugging

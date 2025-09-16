@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import GlassCard from '../components/ui/GlassCard';
 import GlassButton from '../components/ui/GlassButton';
+import LiveStreamFeed from '../components/video/LiveStreamFeed';
 
 const HomePage = () => {
   const { isAuthenticated } = useAuth();
@@ -47,6 +48,11 @@ const HomePage = () => {
             )}
           </div>
         </div>
+      </section>
+
+      {/* Live Streams Section */}
+      <section className="container mx-auto px-4">
+        <LiveStreamFeed maxStreams={4} />
       </section>
 
       {/* Features Grid */}
