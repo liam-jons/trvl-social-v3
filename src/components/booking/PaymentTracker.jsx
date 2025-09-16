@@ -2,7 +2,6 @@
  * PaymentTracker - Component for tracking individual payment status
  * Shows payment progress, handles payment processing, and displays real-time updates
  */
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
@@ -22,7 +21,6 @@ import {
   AlertTriangle,
   ExternalLink
 } from 'lucide-react';
-
 const PaymentTracker = ({
   splitPaymentId,
   splitPaymentDetails,
@@ -36,11 +34,9 @@ const PaymentTracker = ({
   const [refreshing, setRefreshing] = useState(false);
   const [processingPayment, setProcessingPayment] = useState(null);
   const [paymentUrl, setPaymentUrl] = useState(null);
-
   // Real-time updates subscription
   useEffect(() => {
     if (!splitPaymentId) return;
-
     const subscription = supabase
       .channel(`split_payment_${splitPaymentId}`)
       .on(
@@ -57,12 +53,10 @@ const PaymentTracker = ({
         }
       )
       .subscribe();
-
     return () => {
       subscription.unsubscribe();
     };
   }, [splitPaymentId, onPaymentUpdate]);
-
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
@@ -71,24 +65,19 @@ const PaymentTracker = ({
       setRefreshing(false);
     }
   };
-
   const handleProcessPayment = async (individualPaymentId) => {
     if (!user?.id) return;
-
     setProcessingPayment(individualPaymentId);
     try {
       const result = await groupPaymentManager.processIndividualPayment(
         individualPaymentId,
         user.id
       );
-
       // Create payment URL for Stripe Checkout or redirect
       const paymentUrl = `/payment?payment_intent=${result.paymentIntentId}&client_secret=${result.clientSecret}`;
       setPaymentUrl(paymentUrl);
-
       // Open payment in new tab/window
       window.open(paymentUrl, '_blank');
-
       onPaymentComplete?.(result);
     } catch (err) {
       console.error('Payment processing failed:', err);
@@ -96,7 +85,6 @@ const PaymentTracker = ({
       setProcessingPayment(null);
     }
   };
-
   const getStatusIcon = (status) => {
     switch (status) {
       case 'paid':
@@ -109,7 +97,6 @@ const PaymentTracker = ({
         return <Clock className="w-4 h-4 text-muted-foreground" />;
     }
   };
-
   const getStatusBadge = (status) => {
     const variants = {
       paid: 'default',
@@ -117,21 +104,18 @@ const PaymentTracker = ({
       failed: 'destructive',
       pending: 'outline',
     };
-
     return (
       <Badge variant={variants[status] || 'outline'}>
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </Badge>
     );
   };
-
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: splitPaymentDetails?.currency?.toUpperCase() || 'USD',
     }).format(amount / 100);
   };
-
   const formatDateTime = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleString('en-US', {
@@ -142,14 +126,11 @@ const PaymentTracker = ({
       minute: '2-digit',
     });
   };
-
   const getUserPayment = () => {
     return individualPayments.find(payment => payment.user_id === user?.id);
   };
-
   const userPayment = getUserPayment();
   const canPayOwn = userPayment && userPayment.status === 'pending' && !disabled;
-
   return (
     <div className="space-y-6">
       {/* Overall Progress */}
@@ -165,7 +146,6 @@ const PaymentTracker = ({
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
           </Button>
         </div>
-
         {paymentStats && (
           <div className="space-y-4">
             <div>
@@ -175,7 +155,6 @@ const PaymentTracker = ({
               </div>
               <Progress value={paymentStats.completionPercentage} className="h-2" />
             </div>
-
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
                 <p className="text-2xl font-bold text-green-600">{paymentStats.paidCount}</p>
@@ -198,7 +177,6 @@ const PaymentTracker = ({
                 <p className="text-xs text-muted-foreground">Remaining</p>
               </div>
             </div>
-
             {/* Payment Threshold Check */}
             {paymentStats.completionPercentage < 100 && (
               <div className={`p-3 rounded-lg ${
@@ -230,7 +208,6 @@ const PaymentTracker = ({
           </div>
         )}
       </Card>
-
       {/* User's Payment */}
       {userPayment && (
         <Card className="p-4 border-primary/50">
@@ -238,7 +215,6 @@ const PaymentTracker = ({
             <User className="w-4 h-4 mr-2" />
             Your Payment
           </h4>
-
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium">
@@ -270,11 +246,9 @@ const PaymentTracker = ({
           </div>
         </Card>
       )}
-
       {/* Individual Payments */}
       <Card className="p-4">
         <h4 className="text-md font-medium mb-4">Individual Payments</h4>
-
         <div className="space-y-3">
           {individualPayments.map((payment) => (
             <div
@@ -292,25 +266,21 @@ const PaymentTracker = ({
                   </p>
                 </div>
               </div>
-
               <div className="text-right">
                 <p className="text-sm font-semibold">
                   {formatCurrency(payment.amount_due)}
                 </p>
                 {getStatusBadge(payment.status)}
-
                 {payment.status === 'paid' && payment.paid_at && (
                   <p className="text-xs text-muted-foreground mt-1">
                     {formatDateTime(payment.paid_at)}
                   </p>
                 )}
-
                 {payment.reminder_count > 0 && (
                   <p className="text-xs text-amber-600 mt-1">
                     {payment.reminder_count} reminder(s) sent
                   </p>
                 )}
-
                 {payment.last_reminder_sent && (
                   <p className="text-xs text-muted-foreground">
                     Last reminder: {formatDateTime(payment.last_reminder_sent)}
@@ -321,7 +291,6 @@ const PaymentTracker = ({
           ))}
         </div>
       </Card>
-
       {/* Payment Summary */}
       <Card className="p-4 bg-muted/30">
         <h4 className="text-md font-medium mb-3">Summary</h4>
@@ -350,7 +319,6 @@ const PaymentTracker = ({
           </div>
         </div>
       </Card>
-
       {/* Payment URL Display */}
       {paymentUrl && (
         <Card className="p-4 border-blue-200 bg-blue-50">
@@ -373,5 +341,4 @@ const PaymentTracker = ({
     </div>
   );
 };
-
 export default PaymentTracker;

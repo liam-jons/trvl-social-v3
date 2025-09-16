@@ -2,7 +2,6 @@
  * ContentFilterManager Component
  * Manages automated content filtering rules and policies
  */
-
 import React, { useState, useEffect } from 'react';
 import {
   Shield,
@@ -22,7 +21,6 @@ import {
   Zap
 } from 'lucide-react';
 import ContentModerationService from '../../services/content-moderation-service';
-
 const ContentFilterManager = () => {
   const [activeTab, setActiveTab] = useState('rules');
   const [filterRules, setFilterRules] = useState([]);
@@ -40,7 +38,6 @@ const ContentFilterManager = () => {
     enableProfanityFilter: true,
     enableSpamDetection: true
   });
-
   const defaultRules = [
     {
       id: 1,
@@ -91,14 +88,11 @@ const ContentFilterManager = () => {
       accuracy: 98
     }
   ];
-
   useEffect(() => {
     setFilterRules(defaultRules);
   }, []);
-
   const handleTestContent = async () => {
     if (!testContent.trim()) return;
-
     try {
       const results = await ContentModerationService.analyzeContent(testContent);
       setTestResults(results);
@@ -107,7 +101,6 @@ const ContentFilterManager = () => {
       setTestResults({ error: 'Analysis failed' });
     }
   };
-
   const handleSaveRule = (ruleData) => {
     if (editingRule) {
       setFilterRules(prev => prev.map(rule =>
@@ -125,17 +118,14 @@ const ContentFilterManager = () => {
     }
     setShowAddRule(false);
   };
-
   const handleDeleteRule = (ruleId) => {
     setFilterRules(prev => prev.filter(rule => rule.id !== ruleId));
   };
-
   const handleToggleRule = (ruleId) => {
     setFilterRules(prev => prev.map(rule =>
       rule.id === ruleId ? { ...rule, enabled: !rule.enabled } : rule
     ));
   };
-
   const RuleForm = ({ rule, onSave, onCancel }) => {
     const [formData, setFormData] = useState({
       name: rule?.name || '',
@@ -146,7 +136,6 @@ const ContentFilterManager = () => {
       patterns: rule?.patterns?.join('\n') || '',
       enabled: rule?.enabled ?? true
     });
-
     const handleSubmit = (e) => {
       e.preventDefault();
       onSave({
@@ -154,7 +143,6 @@ const ContentFilterManager = () => {
         patterns: formData.patterns.split('\n').filter(p => p.trim())
       });
     };
-
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -169,7 +157,6 @@ const ContentFilterManager = () => {
               <X className="w-5 h-5 text-gray-500" />
             </button>
           </div>
-
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -185,7 +172,6 @@ const ContentFilterManager = () => {
                   required
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Rule Type
@@ -203,7 +189,6 @@ const ContentFilterManager = () => {
                 </select>
               </div>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -220,7 +205,6 @@ const ContentFilterManager = () => {
                   <option value="critical">Critical</option>
                 </select>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Action
@@ -237,7 +221,6 @@ const ContentFilterManager = () => {
                 </select>
               </div>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Description
@@ -250,7 +233,6 @@ const ContentFilterManager = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Filter Patterns (one per line)
@@ -263,7 +245,6 @@ const ContentFilterManager = () => {
                 required
               />
             </div>
-
             <div className="flex items-center">
               <input
                 type="checkbox"
@@ -276,7 +257,6 @@ const ContentFilterManager = () => {
                 Enable this rule
               </label>
             </div>
-
             <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
               <button
                 type="button"
@@ -298,7 +278,6 @@ const ContentFilterManager = () => {
       </div>
     );
   };
-
   const RuleCard = ({ rule }) => {
     const getSeverityColor = (severity) => {
       const colors = {
@@ -309,7 +288,6 @@ const ContentFilterManager = () => {
       };
       return colors[severity] || colors.medium;
     };
-
     const getActionColor = (action) => {
       const colors = {
         flag: 'bg-blue-100 text-blue-800',
@@ -319,7 +297,6 @@ const ContentFilterManager = () => {
       };
       return colors[action] || colors.flag;
     };
-
     return (
       <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-sm transition-shadow">
         <div className="flex items-start justify-between mb-4">
@@ -359,7 +336,6 @@ const ContentFilterManager = () => {
             </button>
           </div>
         </div>
-
         <div className="flex items-center space-x-4 mb-4">
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getSeverityColor(rule.severity)}`}>
             {rule.severity} severity
@@ -371,7 +347,6 @@ const ContentFilterManager = () => {
             {rule.type}
           </span>
         </div>
-
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-gray-600">Detections:</span>
@@ -382,7 +357,6 @@ const ContentFilterManager = () => {
             <span className="font-medium text-gray-900 ml-1">{rule.accuracy}%</span>
           </div>
         </div>
-
         <div className="mt-4 pt-4 border-t border-gray-100">
           <details className="text-sm">
             <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
@@ -400,7 +374,6 @@ const ContentFilterManager = () => {
       </div>
     );
   };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -417,7 +390,6 @@ const ContentFilterManager = () => {
           <span>Add Rule</span>
         </button>
       </div>
-
       {/* Tabs */}
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
@@ -441,7 +413,6 @@ const ContentFilterManager = () => {
           ))}
         </nav>
       </div>
-
       {/* Tab Content */}
       {activeTab === 'rules' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -450,11 +421,9 @@ const ContentFilterManager = () => {
           ))}
         </div>
       )}
-
       {activeTab === 'testing' && (
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Test Content Filtering</h3>
-
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -468,7 +437,6 @@ const ContentFilterManager = () => {
                 rows={6}
               />
             </div>
-
             <button
               onClick={handleTestContent}
               disabled={!testContent.trim()}
@@ -477,11 +445,9 @@ const ContentFilterManager = () => {
               <Zap className="w-4 h-4" />
               <span>Analyze Content</span>
             </button>
-
             {testResults && (
               <div className="mt-6 p-4 border border-gray-200 rounded-lg">
                 <h4 className="font-medium text-gray-900 mb-3">Analysis Results</h4>
-
                 {testResults.error ? (
                   <div className="text-red-600">Error: {testResults.error}</div>
                 ) : (
@@ -506,7 +472,6 @@ const ContentFilterManager = () => {
                         <div className="text-sm text-gray-600">Toxicity Score</div>
                       </div>
                     </div>
-
                     {testResults.violations.length > 0 && (
                       <div>
                         <h5 className="font-medium text-gray-900 mb-2">Violations Detected:</h5>
@@ -525,7 +490,6 @@ const ContentFilterManager = () => {
                         </div>
                       </div>
                     )}
-
                     <div>
                       <h5 className="font-medium text-gray-900 mb-2">Recommended Action:</h5>
                       <span className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -543,11 +507,9 @@ const ContentFilterManager = () => {
           </div>
         </div>
       )}
-
       {activeTab === 'settings' && (
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">System Settings</h3>
-
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
@@ -561,7 +523,6 @@ const ContentFilterManager = () => {
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -580,7 +541,6 @@ const ContentFilterManager = () => {
                   Current: {Math.round(systemSettings.toxicityThreshold * 100)}%
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Auto-Block Threshold
@@ -599,7 +559,6 @@ const ContentFilterManager = () => {
                 </div>
               </div>
             </div>
-
             <div className="space-y-4">
               {[
                 { key: 'enableMLDetection', label: 'ML-based Detection', desc: 'Use machine learning for content analysis' },
@@ -623,7 +582,6 @@ const ContentFilterManager = () => {
           </div>
         </div>
       )}
-
       {/* Rule Form Modal */}
       {(showAddRule || editingRule) && (
         <RuleForm
@@ -638,5 +596,4 @@ const ContentFilterManager = () => {
     </div>
   );
 };
-
 export default ContentFilterManager;

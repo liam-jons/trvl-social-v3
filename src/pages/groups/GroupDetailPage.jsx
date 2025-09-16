@@ -14,7 +14,6 @@ import {
   SparklesIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
-
 import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
 import MemberAvatarRow from '../../components/groups/MemberAvatarRow';
@@ -23,7 +22,6 @@ import PersonalityMixVisualization from '../../components/groups/PersonalityMixV
 import GroupDynamicsSummary from '../../components/groups/GroupDynamicsSummary';
 import GroupChemistryIndicators from '../../components/groups/GroupChemistryIndicators';
 import BookingConfidenceScore from '../../components/groups/BookingConfidenceScore';
-
 const GroupDetailPage = () => {
   const { groupId } = useParams();
   const navigate = useNavigate();
@@ -33,12 +31,10 @@ const GroupDetailPage = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [showExpandedMembers, setShowExpandedMembers] = useState(false);
   const [activeTab, setActiveTab] = useState('overview'); // overview, members, activities, chat
-
   // Mock data - replace with real API calls
   useEffect(() => {
     const fetchGroupDetails = async () => {
       setLoading(true);
-
       // Simulate API call
       setTimeout(() => {
         const mockGroup = {
@@ -144,23 +140,19 @@ const GroupDetailPage = () => {
           chat_message_count: 156,
           is_featured: true
         };
-
         setGroup(mockGroup);
         setCurrentUser({ id: 1, name: 'Current User', personality_profile: { primary_type: 'adventurer' } });
         setIsLiked(Math.random() > 0.5);
         setLoading(false);
       }, 1000);
     };
-
     if (groupId) {
       fetchGroupDetails();
     }
   }, [groupId]);
-
   // Calculate group metrics
   const groupMetrics = useMemo(() => {
     if (!group?.members) return null;
-
     const members = group.members;
     const personalityTypes = ['adventurer', 'planner', 'socializer', 'explorer', 'relaxer'];
     const personalityMix = personalityTypes.reduce((acc, type) => {
@@ -169,17 +161,14 @@ const GroupDetailPage = () => {
       ).length;
       return acc;
     }, {});
-
     // Calculate average compatibility
     const avgCompatibility = 78; // Mock value
     const confidenceScore = Math.min(100, avgCompatibility + (members.length >= 3 ? 20 : 0));
-
     const dynamicsInsights = [
       `${members.length} travelers with diverse personalities`,
       `Strong ${personalityMix.adventurer > personalityMix.planner ? 'adventure' : 'planning'} focus`,
       avgCompatibility > 80 ? 'Excellent group chemistry' : 'Good compatibility'
     ];
-
     return {
       personalityMix,
       totalMembers: members.length,
@@ -188,33 +177,26 @@ const GroupDetailPage = () => {
       dynamicsInsights
     };
   }, [group?.members]);
-
   const isUserInGroup = useMemo(() => {
     return currentUser && group?.members?.some(member => member.id === currentUser.id);
   }, [currentUser, group?.members]);
-
   const userRole = useMemo(() => {
     const member = group?.members?.find(member => member.id === currentUser?.id);
     return member?.role || null;
   }, [currentUser, group?.members]);
-
   const canManageGroup = userRole === 'creator' || userRole === 'admin';
-
   const handleJoinGroup = () => {
     console.log('Joining group:', group.id);
     // Implement join group logic
   };
-
   const handleLeaveGroup = () => {
     console.log('Leaving group:', group.id);
     // Implement leave group logic
   };
-
   const handleLikeGroup = () => {
     setIsLiked(!isLiked);
     // Implement like/unlike logic
   };
-
   const handleShareGroup = () => {
     // Implement share functionality
     navigator.share({
@@ -226,7 +208,6 @@ const GroupDetailPage = () => {
       navigator.clipboard.writeText(window.location.href);
     });
   };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
@@ -246,7 +227,6 @@ const GroupDetailPage = () => {
       </div>
     );
   }
-
   if (!group) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
@@ -272,7 +252,6 @@ const GroupDetailPage = () => {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
       <div className="container mx-auto px-4 py-8">
@@ -286,7 +265,6 @@ const GroupDetailPage = () => {
             <ArrowLeftIcon className="h-5 w-5" />
             <span>Back to Groups</span>
           </GlassButton>
-
           <div className="flex items-center space-x-3">
             <GlassButton
               variant="ghost"
@@ -300,7 +278,6 @@ const GroupDetailPage = () => {
               )}
               <span>{group.likes_count}</span>
             </GlassButton>
-
             <GlassButton
               variant="ghost"
               onClick={handleShareGroup}
@@ -309,7 +286,6 @@ const GroupDetailPage = () => {
               <ShareIcon className="h-5 w-5" />
               <span>Share</span>
             </GlassButton>
-
             {canManageGroup && (
               <GlassButton
                 variant="ghost"
@@ -321,7 +297,6 @@ const GroupDetailPage = () => {
             )}
           </div>
         </div>
-
         {/* Main Content */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Left Column - Main Info */}
@@ -343,7 +318,6 @@ const GroupDetailPage = () => {
                       </div>
                     )}
                   </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
                       <MapPinIcon className="h-5 w-5" />
@@ -358,19 +332,16 @@ const GroupDetailPage = () => {
                       <span>{group.current_members} / {group.max_members} members</span>
                     </div>
                   </div>
-
                   <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                     {group.description}
                   </p>
                 </div>
-
                 <BookingConfidenceScore
                   score={groupMetrics?.confidenceScore || 0}
                   size="lg"
                   animated={true}
                 />
               </div>
-
               {/* Tags */}
               <div className="flex flex-wrap gap-2 mb-6">
                 {group.tags.map((tag, index) => (
@@ -382,7 +353,6 @@ const GroupDetailPage = () => {
                   </span>
                 ))}
               </div>
-
               {/* Action Buttons */}
               <div className="flex items-center space-x-4">
                 {isUserInGroup ? (
@@ -419,7 +389,6 @@ const GroupDetailPage = () => {
                 )}
               </div>
             </GlassCard>
-
             {/* Navigation Tabs */}
             <GlassCard className="p-0">
               <div className="flex border-b border-gray-200 dark:border-gray-700">
@@ -442,7 +411,6 @@ const GroupDetailPage = () => {
                   </button>
                 ))}
               </div>
-
               <div className="p-6">
                 {/* Overview Tab */}
                 {activeTab === 'overview' && (
@@ -463,7 +431,6 @@ const GroupDetailPage = () => {
                     />
                   </div>
                 )}
-
                 {/* Members Tab */}
                 {activeTab === 'members' && (
                   <ExpandableMemberProfiles
@@ -474,7 +441,6 @@ const GroupDetailPage = () => {
                     maxVisible={10}
                   />
                 )}
-
                 {/* Itinerary Tab */}
                 {activeTab === 'itinerary' && (
                   <div className="space-y-4">
@@ -497,7 +463,6 @@ const GroupDetailPage = () => {
                     ))}
                   </div>
                 )}
-
                 {/* Requirements Tab */}
                 {activeTab === 'requirements' && (
                   <div className="space-y-4">
@@ -517,7 +482,6 @@ const GroupDetailPage = () => {
               </div>
             </GlassCard>
           </div>
-
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
             {/* Quick Info */}
@@ -550,7 +514,6 @@ const GroupDetailPage = () => {
                 </div>
               </div>
             </GlassCard>
-
             {/* Group Creator */}
             <GlassCard>
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
@@ -577,7 +540,6 @@ const GroupDetailPage = () => {
                 </div>
               </div>
             </GlassCard>
-
             {/* Budget Breakdown */}
             <GlassCard>
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
@@ -596,7 +558,6 @@ const GroupDetailPage = () => {
                 ))}
               </div>
             </GlassCard>
-
             {/* Members Preview */}
             <GlassCard>
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
@@ -624,5 +585,4 @@ const GroupDetailPage = () => {
     </div>
   );
 };
-
 export default GroupDetailPage;

@@ -1,5 +1,4 @@
 import Fuse from 'fuse.js';
-
 /**
  * Search service for fuzzy matching adventures across multiple fields
  */
@@ -22,7 +21,6 @@ class SearchService {
       'meditation'
     ];
   }
-
   /**
    * Initialize Fuse.js with adventure data
    * @param {Array} adventures - Array of adventure objects
@@ -63,10 +61,8 @@ class SearchService {
         }
       ]
     };
-
     this.fuse = new Fuse(adventures, options);
   }
-
   /**
    * Search adventures with fuzzy matching
    * @param {string} query - Search query
@@ -77,18 +73,14 @@ class SearchService {
     if (!this.fuse || !query.trim()) {
       return [];
     }
-
     const {
       limit = 20,
       includeAll = false
     } = options;
-
     // Save search to recent searches
     this.saveRecentSearch(query.trim());
-
     // Perform search
     const results = this.fuse.search(query, { limit: includeAll ? undefined : limit });
-
     // Process results to include highlighting and categorization
     return results.map(result => ({
       ...result.item,
@@ -98,7 +90,6 @@ class SearchService {
       category: this.categorizeResult(result.item)
     }));
   }
-
   /**
    * Get search suggestions based on input
    * @param {string} query - Partial query
@@ -114,16 +105,12 @@ class SearchService {
         popular: this.popularSearches.slice(0, 5)
       };
     }
-
     const searchResults = this.search(query, { limit: 10 });
-
     // Extract unique locations and activities from all adventures
     const allLocations = [...new Set(adventures.map(adv => adv.location))];
     const allActivities = [...new Set(adventures.flatMap(adv => adv.tags))];
-
     const locationMatches = this.fuzzyMatch(query, allLocations).slice(0, 5);
     const activityMatches = this.fuzzyMatch(query, allActivities).slice(0, 5);
-
     return {
       adventures: searchResults.slice(0, 5),
       locations: locationMatches,
@@ -131,7 +118,6 @@ class SearchService {
       popular: this.getFilteredPopularSearches(query)
     };
   }
-
   /**
    * Generate highlighted text for matches
    * @param {Array} matches - Fuse.js matches array
@@ -139,15 +125,11 @@ class SearchService {
    */
   generateHighlights(matches) {
     const highlights = {};
-
     matches.forEach(match => {
       const { key, value, indices } = match;
-
       if (!value || !indices.length) return;
-
       let highlightedText = '';
       let lastIndex = 0;
-
       indices.forEach(([start, end]) => {
         // Add text before match
         highlightedText += value.slice(lastIndex, start);
@@ -155,16 +137,12 @@ class SearchService {
         highlightedText += `<mark class="bg-yellow-200 text-yellow-900 px-1 rounded">${value.slice(start, end + 1)}</mark>`;
         lastIndex = end + 1;
       });
-
       // Add remaining text
       highlightedText += value.slice(lastIndex);
-
       highlights[key] = highlightedText;
     });
-
     return highlights;
   }
-
   /**
    * Categorize search result
    * @param {Object} adventure - Adventure object
@@ -180,7 +158,6 @@ class SearchService {
     if (adventure.tags.includes('meditation')) return 'Wellness';
     return 'Adventure';
   }
-
   /**
    * Simple fuzzy matching for suggestions
    * @param {string} query - Search query
@@ -193,7 +170,6 @@ class SearchService {
       .filter(item => item.toLowerCase().includes(lowerQuery))
       .sort((a, b) => a.length - b.length);
   }
-
   /**
    * Get filtered popular searches based on query
    * @param {string} query - Current query
@@ -205,7 +181,6 @@ class SearchService {
       .filter(search => search.includes(lowerQuery))
       .slice(0, 3);
   }
-
   /**
    * Save search to recent searches
    * @param {string} query - Search query
@@ -214,28 +189,23 @@ class SearchService {
     // Remove existing instance and increment count
     const existingSearch = this.recentSearches.find(search => search.query === query);
     this.recentSearches = this.recentSearches.filter(search => search.query !== query);
-
     // Add to beginning
     this.recentSearches.unshift({
       query,
       timestamp: new Date().toISOString(),
       count: existingSearch ? existingSearch.count + 1 : 1
     });
-
     // Keep only last 10 searches
     this.recentSearches = this.recentSearches.slice(0, 10);
-
     // Save to localStorage
     try {
       localStorage.setItem('travel_recent_searches', JSON.stringify(this.recentSearches));
-
       // Track search analytics (could be sent to analytics service)
       this.trackSearchAnalytics(query);
     } catch (e) {
       console.warn('Failed to save recent searches to localStorage:', e);
     }
   }
-
   /**
    * Track search analytics (placeholder for future analytics integration)
    * @param {string} query - Search query
@@ -250,11 +220,9 @@ class SearchService {
         event_label: 'Adventure Search'
       });
     }
-
     // Console log for development (remove in production)
     console.log(`Search Analytics: "${query}" at ${new Date().toISOString()}`);
   }
-
   /**
    * Load recent searches from localStorage
    * @returns {Array} Recent searches
@@ -268,7 +236,6 @@ class SearchService {
       return [];
     }
   }
-
   /**
    * Get recent searches
    * @returns {Array} Recent searches
@@ -276,7 +243,6 @@ class SearchService {
   getRecentSearches() {
     return this.recentSearches.slice(0, 5);
   }
-
   /**
    * Clear recent searches
    */
@@ -288,7 +254,6 @@ class SearchService {
       console.warn('Failed to clear recent searches from localStorage:', e);
     }
   }
-
   /**
    * Get trending searches (mock implementation)
    * @returns {Array} Trending searches
@@ -302,7 +267,6 @@ class SearchService {
       { query: 'wildlife safari', trend: '+9%' }
     ];
   }
-
   /**
    * Get search analytics (mock implementation)
    * @returns {Object} Search analytics data
@@ -316,8 +280,6 @@ class SearchService {
     };
   }
 }
-
 // Create singleton instance
 const searchService = new SearchService();
-
 export default searchService;

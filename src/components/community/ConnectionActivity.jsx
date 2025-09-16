@@ -2,7 +2,6 @@
  * Connection Activity Component
  * Display activity feed from user's connections
  */
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
@@ -19,32 +18,25 @@ import {
   RefreshCw,
   Eye
 } from 'lucide-react';
-
 const ConnectionActivity = () => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-
   useEffect(() => {
     loadActivity(true);
   }, []);
-
   const loadActivity = async (reset = false) => {
     try {
       setLoading(true);
-
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-
       const currentPage = reset ? 0 : page;
       const limit = 10;
-
       const result = await connectionService.getConnectionActivity(user.id, {
         limit,
         offset: currentPage * limit
       });
-
       if (result.success) {
         if (reset) {
           setActivities(result.data);
@@ -60,17 +52,14 @@ const ConnectionActivity = () => {
       setLoading(false);
     }
   };
-
   const handleLoadMore = () => {
     setPage(prev => prev + 1);
     loadActivity(false);
   };
-
   const handleLikePost = async (postId) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-
       // Toggle like
       const { data: existingReaction } = await supabase
         .from('post_reactions')
@@ -79,14 +68,12 @@ const ConnectionActivity = () => {
         .eq('user_id', user.id)
         .eq('reaction_type', 'like')
         .single();
-
       if (existingReaction) {
         // Remove like
         await supabase
           .from('post_reactions')
           .delete()
           .eq('id', existingReaction.id);
-
         // Update local state
         setActivities(prev => prev.map(activity => {
           if (activity.id === postId) {
@@ -107,7 +94,6 @@ const ConnectionActivity = () => {
             user_id: user.id,
             reaction_type: 'like'
           });
-
         // Update local state
         setActivities(prev => prev.map(activity => {
           if (activity.id === postId) {
@@ -124,7 +110,6 @@ const ConnectionActivity = () => {
       console.error('Error toggling like:', error);
     }
   };
-
   const formatTimeAgo = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -132,7 +117,6 @@ const ConnectionActivity = () => {
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
     if (diffMinutes < 60) {
       return `${diffMinutes}m`;
     } else if (diffHours < 24) {
@@ -143,10 +127,8 @@ const ConnectionActivity = () => {
       return date.toLocaleDateString();
     }
   };
-
   const ActivityPost = ({ activity }) => {
     const [currentUser, setCurrentUser] = useState(null);
-
     useEffect(() => {
       const getUser = async () => {
         const { data: { user } } = await supabase.auth.getUser();
@@ -154,9 +136,7 @@ const ConnectionActivity = () => {
       };
       getUser();
     }, []);
-
     const hasLiked = activity.reactions?.some(r => r.user_id === currentUser?.id && r.reaction_type === 'like');
-
     return (
       <Card className="p-4">
         <div className="space-y-4">
@@ -182,11 +162,9 @@ const ConnectionActivity = () => {
               )}
             </div>
           </div>
-
           {/* Content */}
           <div className="space-y-3">
             <p className="text-gray-800 leading-relaxed">{activity.content}</p>
-
             {/* Media */}
             {activity.media_urls && activity.media_urls.length > 0 && (
               <div className="grid grid-cols-2 gap-2">
@@ -208,7 +186,6 @@ const ConnectionActivity = () => {
                 ))}
               </div>
             )}
-
             {/* Tags */}
             {activity.tags && activity.tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
@@ -223,7 +200,6 @@ const ConnectionActivity = () => {
               </div>
             )}
           </div>
-
           {/* Actions */}
           <div className="flex items-center justify-between pt-3 border-t border-gray-100">
             <div className="flex items-center gap-4">
@@ -236,7 +212,6 @@ const ConnectionActivity = () => {
                 <Heart className={`h-4 w-4 ${hasLiked ? 'fill-current' : ''}`} />
                 <span>{activity.likes_count}</span>
               </Button>
-
               <Button
                 variant="ghost"
                 size="sm"
@@ -245,7 +220,6 @@ const ConnectionActivity = () => {
                 <MessageCircle className="h-4 w-4" />
                 <span>{activity.comments_count}</span>
               </Button>
-
               <Button
                 variant="ghost"
                 size="sm"
@@ -255,7 +229,6 @@ const ConnectionActivity = () => {
                 <span>{activity.shares_count}</span>
               </Button>
             </div>
-
             <Button
               variant="ghost"
               size="sm"
@@ -265,7 +238,6 @@ const ConnectionActivity = () => {
               View
             </Button>
           </div>
-
           {/* Recent Comments Preview */}
           {activity.comments_preview && activity.comments_preview.length > 0 && (
             <div className="space-y-2 pt-2">
@@ -284,7 +256,6 @@ const ConnectionActivity = () => {
                   </div>
                 </div>
               ))}
-
               {activity.comments_count > 2 && (
                 <Button
                   variant="ghost"
@@ -300,7 +271,6 @@ const ConnectionActivity = () => {
       </Card>
     );
   };
-
   if (loading && activities.length === 0) {
     return (
       <div className="space-y-4">
@@ -324,7 +294,6 @@ const ConnectionActivity = () => {
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -343,7 +312,6 @@ const ConnectionActivity = () => {
           Refresh
         </Button>
       </div>
-
       {/* Activity Feed */}
       {activities.length === 0 ? (
         <Card className="p-8 text-center">
@@ -364,7 +332,6 @@ const ConnectionActivity = () => {
           {activities.map((activity) => (
             <ActivityPost key={activity.id} activity={activity} />
           ))}
-
           {/* Load More Button */}
           {hasMore && (
             <div className="text-center pt-4">
@@ -383,5 +350,4 @@ const ConnectionActivity = () => {
     </div>
   );
 };
-
 export default ConnectionActivity;

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import useOfferManagementStore from '../../stores/offerManagementStore';
 import { formatCurrency, formatDate, formatDateTime } from '../../utils/formatters';
 import LoadingSpinner from '../common/LoadingSpinner';
-
 const OfferActionModal = ({ type, offer, onClose, userId }) => {
   const {
     acceptOffer,
@@ -12,7 +11,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
     shareOfferWithGroup,
     loading
   } = useOfferManagementStore();
-
   const [formData, setFormData] = useState({
     rejectionReason: '',
     counterOfferPrice: offer?.proposed_price || 0,
@@ -21,12 +19,10 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
     shareMessage: '',
     selectedGroupId: ''
   });
-
   const [step, setStep] = useState(1); // For multi-step processes
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [groups, setGroups] = useState([]); // For sharing functionality
-
   useEffect(() => {
     // Load user's groups for sharing functionality
     if (type === 'share') {
@@ -34,21 +30,17 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
       setGroups([]);
     }
   }, [type]);
-
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   };
-
   const handleAccept = async () => {
     try {
       setSubmitting(true);
       setError(null);
-
       const result = await acceptOffer(offer.id, userId);
-
       if (result.success) {
         onClose();
       } else {
@@ -61,14 +53,11 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
       setSubmitting(false);
     }
   };
-
   const handleReject = async () => {
     try {
       setSubmitting(true);
       setError(null);
-
       const result = await rejectOffer(offer.id, formData.rejectionReason);
-
       if (result.success) {
         onClose();
       } else {
@@ -81,25 +70,20 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
       setSubmitting(false);
     }
   };
-
   const handleCounteroffer = async () => {
     if (formData.counterOfferPrice <= 0) {
       setError('Please enter a valid counteroffer price');
       return;
     }
-
     try {
       setSubmitting(true);
       setError(null);
-
       const counterOfferData = {
         proposed_price: formData.counterOfferPrice,
         message: formData.counterOfferMessage,
         modifications: formData.counterOfferModifications
       };
-
       const result = await submitCounteroffer(offer.id, counterOfferData);
-
       if (result.success) {
         onClose();
       } else {
@@ -112,14 +96,11 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
       setSubmitting(false);
     }
   };
-
   const handleSave = async () => {
     try {
       setSubmitting(true);
       setError(null);
-
       const result = await saveOfferForLater(offer.id, userId);
-
       if (result.success) {
         onClose();
       } else {
@@ -132,19 +113,15 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
       setSubmitting(false);
     }
   };
-
   const handleShare = async () => {
     if (!formData.selectedGroupId) {
       setError('Please select a group to share with');
       return;
     }
-
     try {
       setSubmitting(true);
       setError(null);
-
       const result = await shareOfferWithGroup(offer.id, formData.selectedGroupId, formData.shareMessage);
-
       if (result.success) {
         onClose();
       } else {
@@ -157,7 +134,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
       setSubmitting(false);
     }
   };
-
   const getModalTitle = () => {
     switch (type) {
       case 'accept': return 'Accept Offer';
@@ -169,7 +145,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
       default: return 'Offer Action';
     }
   };
-
   const renderOfferSummary = () => (
     <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-6">
       <div className="flex items-center gap-3 mb-3">
@@ -195,7 +170,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
           </div>
         </div>
       </div>
-
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
           <span className="text-gray-600 dark:text-gray-400">Trip:</span>
@@ -230,7 +204,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
       </div>
     </div>
   );
-
   const renderAcceptModal = () => (
     <div>
       {renderOfferSummary()}
@@ -253,13 +226,11 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
           </div>
         </div>
       </div>
-
       {error && (
         <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-800 dark:text-red-300 text-sm">
           {error}
         </div>
       )}
-
       <div className="flex gap-3">
         <button
           onClick={onClose}
@@ -279,7 +250,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
       </div>
     </div>
   );
-
   const renderRejectModal = () => (
     <div>
       {renderOfferSummary()}
@@ -302,13 +272,11 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
           <option value="other">Other</option>
         </select>
       </div>
-
       {error && (
         <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-800 dark:text-red-300 text-sm">
           {error}
         </div>
       )}
-
       <div className="flex gap-3">
         <button
           onClick={onClose}
@@ -328,11 +296,9 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
       </div>
     </div>
   );
-
   const renderCounterofferModal = () => (
     <div>
       {renderOfferSummary()}
-
       <div className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -356,7 +322,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
             Original price: {formatCurrency(offer.proposed_price)}
           </div>
         </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Message to Vendor
@@ -369,7 +334,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
             placeholder="Explain your counteroffer or any modifications you'd like..."
           />
         </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Requested Modifications (optional)
@@ -383,13 +347,11 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
           />
         </div>
       </div>
-
       {error && (
         <div className="mt-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-800 dark:text-red-300 text-sm">
           {error}
         </div>
       )}
-
       <div className="flex gap-3 mt-6">
         <button
           onClick={onClose}
@@ -409,7 +371,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
       </div>
     </div>
   );
-
   const renderViewModal = () => (
     <div className="max-w-2xl">
       <div className="mb-6">
@@ -442,7 +403,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
             </div>
           </div>
         </div>
-
         <div className="grid grid-cols-2 gap-6 text-sm">
           <div>
             <span className="text-gray-600 dark:text-gray-400">Trip:</span>
@@ -488,7 +448,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
           </div>
         </div>
       </div>
-
       {/* Price Breakdown */}
       {offer.price_breakdown && (
         <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
@@ -507,7 +466,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
           </div>
         </div>
       )}
-
       {/* Vendor Message */}
       {offer.message && (
         <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -517,7 +475,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
           </p>
         </div>
       )}
-
       {/* Vendor Specialties */}
       {offer.vendor?.specialties && offer.vendor.specialties.length > 0 && (
         <div className="mb-6">
@@ -534,7 +491,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
           </div>
         </div>
       )}
-
       {/* Action Buttons */}
       <div className="flex gap-3">
         <button
@@ -570,7 +526,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
       </div>
     </div>
   );
-
   const renderSaveModal = () => (
     <div>
       {renderOfferSummary()}
@@ -579,13 +534,11 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
           Save this offer to review later? You can find all saved offers in the "Saved Offers" tab.
         </p>
       </div>
-
       {error && (
         <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-800 dark:text-red-300 text-sm">
           {error}
         </div>
       )}
-
       <div className="flex gap-3">
         <button
           onClick={onClose}
@@ -605,7 +558,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
       </div>
     </div>
   );
-
   const renderContent = () => {
     switch (type) {
       case 'accept': return renderAcceptModal();
@@ -616,7 +568,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
       default: return <div>Unknown action type</div>;
     }
   };
-
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -632,12 +583,10 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
               ×
             </button>
           </div>
-
           {renderContent()}
         </div>
       </div>
     </div>
   );
 };
-
 export default OfferActionModal;

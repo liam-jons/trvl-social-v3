@@ -3,7 +3,6 @@ import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import vendorPerformanceService from '../../services/vendor-performance-service';
-
 /**
  * Rating Management Component - Manage customer reviews and ratings
  */
@@ -20,29 +19,23 @@ const RatingManagement = ({ vendorId }) => {
   });
   const [responseTexts, setResponseTexts] = useState({});
   const [submittingResponse, setSubmittingResponse] = useState(null);
-
   useEffect(() => {
     loadReviewData();
   }, [vendorId, filters]);
-
   const loadReviewData = async () => {
     try {
       setLoading(true);
       setError(null);
-
       // Get rating metrics
       const performanceResult = await vendorPerformanceService.calculatePerformanceMetrics(vendorId, parseInt(filters.period));
       if (performanceResult.error) {
         throw new Error(performanceResult.error);
       }
-
       setRatingStats(performanceResult.data.metrics.reviews);
-
       // In a real implementation, this would fetch actual reviews from the database
       // For now, we'll simulate some review data
       const mockReviews = generateMockReviews(vendorId, filters);
       setReviews(mockReviews);
-
     } catch (err) {
       console.error('Load review data error:', err);
       setError(err.message);
@@ -50,7 +43,6 @@ const RatingManagement = ({ vendorId }) => {
       setLoading(false);
     }
   };
-
   const generateMockReviews = (vendorId, filters) => {
     // This would normally come from the database
     const mockData = [
@@ -110,7 +102,6 @@ const RatingManagement = ({ vendorId }) => {
         sentiment: 'neutral'
       }
     ];
-
     // Apply filters
     return mockData.filter(review => {
       if (filters.rating !== 'all' && review.rating !== parseInt(filters.rating)) return false;
@@ -121,19 +112,15 @@ const RatingManagement = ({ vendorId }) => {
       return true;
     });
   };
-
   const submitResponse = async (reviewId) => {
     try {
       setSubmittingResponse(reviewId);
       const responseText = responseTexts[reviewId];
-
       if (!responseText || responseText.trim().length === 0) {
         throw new Error('Response text is required');
       }
-
       // In a real implementation, this would submit to the database
       await new Promise(resolve => setTimeout(resolve, 1000));
-
       // Update local state
       setReviews(reviews.map(review =>
         review.id === reviewId
@@ -145,9 +132,7 @@ const RatingManagement = ({ vendorId }) => {
             }
           : review
       ));
-
       setResponseTexts({ ...responseTexts, [reviewId]: '' });
-
     } catch (err) {
       console.error('Submit response error:', err);
       setError(err.message);
@@ -155,27 +140,23 @@ const RatingManagement = ({ vendorId }) => {
       setSubmittingResponse(null);
     }
   };
-
   const getSentimentBadge = (sentiment) => {
     const variants = {
       positive: 'bg-green-100 text-green-800',
       neutral: 'bg-yellow-100 text-yellow-800',
       negative: 'bg-red-100 text-red-800'
     };
-
     const labels = {
       positive: 'Positive',
       neutral: 'Neutral',
       negative: 'Negative'
     };
-
     return (
       <Badge className={variants[sentiment]}>
         {labels[sentiment]}
       </Badge>
     );
   };
-
   const getRatingStars = (rating) => {
     return Array.from({ length: 5 }, (_, i) => (
       <svg
@@ -188,7 +169,6 @@ const RatingManagement = ({ vendorId }) => {
       </svg>
     ));
   };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -196,7 +176,6 @@ const RatingManagement = ({ vendorId }) => {
       day: 'numeric'
     });
   };
-
   if (loading) {
     return (
       <div className="space-y-6">
@@ -216,7 +195,6 @@ const RatingManagement = ({ vendorId }) => {
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -234,7 +212,6 @@ const RatingManagement = ({ vendorId }) => {
           Refresh
         </Button>
       </div>
-
       {/* Rating Statistics */}
       {ratingStats && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -252,7 +229,6 @@ const RatingManagement = ({ vendorId }) => {
               From {ratingStats.totalReviews} reviews
             </div>
           </Card>
-
           <Card className="p-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-medium text-gray-900">Satisfaction Rate</h3>
@@ -267,7 +243,6 @@ const RatingManagement = ({ vendorId }) => {
               Positive reviews
             </div>
           </Card>
-
           <Card className="p-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-medium text-gray-900">Review Velocity</h3>
@@ -284,7 +259,6 @@ const RatingManagement = ({ vendorId }) => {
           </Card>
         </div>
       )}
-
       {/* Filters */}
       <Card className="p-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -344,7 +318,6 @@ const RatingManagement = ({ vendorId }) => {
           </div>
         </div>
       </Card>
-
       {/* Reviews List */}
       <div className="space-y-4">
         {reviews.length === 0 ? (
@@ -394,11 +367,9 @@ const RatingManagement = ({ vendorId }) => {
                   )}
                 </div>
               </div>
-
               <div className="mb-4">
                 <p className="text-gray-700">{review.review}</p>
               </div>
-
               {/* Existing Response */}
               {review.hasResponse && (
                 <div className="bg-blue-50 border-l-4 border-blue-400 p-3 mb-4">
@@ -414,7 +385,6 @@ const RatingManagement = ({ vendorId }) => {
                   <p className="text-blue-700 text-sm">{review.response}</p>
                 </div>
               )}
-
               {/* Response Form */}
               {!review.hasResponse && (
                 <div className="border-t pt-4">
@@ -477,7 +447,6 @@ const RatingManagement = ({ vendorId }) => {
           ))
         )}
       </div>
-
       {/* Error Display */}
       {error && (
         <Card className="p-6 border-red-200 bg-red-50">
@@ -492,5 +461,4 @@ const RatingManagement = ({ vendorId }) => {
     </div>
   );
 };
-
 export default RatingManagement;

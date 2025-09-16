@@ -2,7 +2,6 @@
  * Payment Dashboard Component
  * Comprehensive dashboard for group payment organizers
  */
-
 import React, { useState, useEffect } from 'react';
 import { GlassCard } from '../ui/GlassCard.jsx';
 import { GlassButton } from '../ui/GlassButton.jsx';
@@ -25,7 +24,6 @@ import {
 import { supabase } from '../../lib/supabase.js';
 import { groupPaymentManager } from '../../services/split-payment-service.js';
 import { paymentCollectionWorkflow } from '../../services/payment-collection-service.js';
-
 const PaymentDashboard = ({ organizerId }) => {
   const [splitPayments, setSplitPayments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,16 +32,13 @@ const PaymentDashboard = ({ organizerId }) => {
   const [dashboardStats, setDashboardStats] = useState(null);
   const [filter, setFilter] = useState('all'); // 'all', 'active', 'completed', 'overdue'
   const [sortBy, setSortBy] = useState('created_at'); // 'created_at', 'deadline', 'amount', 'completion'
-
   useEffect(() => {
     fetchPaymentData();
   }, [organizerId]);
-
   const fetchPaymentData = async () => {
     try {
       setError(null);
       setLoading(true);
-
       // Fetch all split payments for this organizer
       const { data: payments, error: paymentsError } = await supabase
         .from('split_payments')
@@ -53,14 +48,11 @@ const PaymentDashboard = ({ organizerId }) => {
         `)
         .eq('organizer_id', organizerId)
         .order('created_at', { ascending: false });
-
       if (paymentsError) throw paymentsError;
-
       // Process payments with statistics
       const processedPayments = await Promise.all(
         payments.map(async (payment) => {
           const stats = groupPaymentManager.calculatePaymentStats(payment.individual_payments);
-
           // Get collection stats
           let collectionStats = null;
           try {
@@ -68,7 +60,6 @@ const PaymentDashboard = ({ organizerId }) => {
           } catch (err) {
             console.warn(`Failed to get collection stats for payment ${payment.id}:`, err);
           }
-
           return {
             ...payment,
             stats,
@@ -76,20 +67,16 @@ const PaymentDashboard = ({ organizerId }) => {
           };
         })
       );
-
       setSplitPayments(processedPayments);
-
       // Calculate overall dashboard statistics
       const overallStats = calculateDashboardStats(processedPayments);
       setDashboardStats(overallStats);
-
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
-
   const calculateDashboardStats = (payments) => {
     const stats = {
       totalPayments: payments.length,
@@ -102,23 +89,18 @@ const PaymentDashboard = ({ organizerId }) => {
       averageCompletionRate: 0,
       upcomingDeadlines: 0,
     };
-
     const now = new Date();
     let totalCompletionRate = 0;
-
     payments.forEach(payment => {
       stats.totalAmountManaged += payment.total_amount;
       stats.totalCollected += payment.stats.totalPaid;
       stats.totalParticipants += payment.stats.participantCount;
       totalCompletionRate += payment.stats.completionPercentage;
-
       const deadline = new Date(payment.payment_deadline);
-
       if (payment.status === 'completed') {
         stats.completedPayments++;
       } else if (payment.status === 'pending' || payment.status === 'partially_paid') {
         stats.activePayments++;
-
         if (deadline < now) {
           stats.overduePayments++;
         } else if (deadline.getTime() - now.getTime() < 48 * 60 * 60 * 1000) { // 48 hours
@@ -126,15 +108,11 @@ const PaymentDashboard = ({ organizerId }) => {
         }
       }
     });
-
     stats.averageCompletionRate = payments.length > 0 ? totalCompletionRate / payments.length : 0;
-
     return stats;
   };
-
   const getFilteredAndSortedPayments = () => {
     let filtered = [...splitPayments];
-
     // Apply filters
     switch (filter) {
       case 'active':
@@ -153,7 +131,6 @@ const PaymentDashboard = ({ organizerId }) => {
       default:
         break;
     }
-
     // Apply sorting
     filtered.sort((a, b) => {
       switch (sortBy) {
@@ -168,31 +145,24 @@ const PaymentDashboard = ({ organizerId }) => {
           return new Date(b.created_at) - new Date(a.created_at);
       }
     });
-
     return filtered;
   };
-
   const sendBulkReminders = async (paymentId) => {
     try {
       // Find pending payments
       const payment = splitPayments.find(p => p.id === paymentId);
       const pendingPayments = payment.individual_payments.filter(p => p.status === 'pending');
-
       // Send reminders to all pending participants
       const reminderPromises = pendingPayments.map(individualPayment =>
         paymentCollectionWorkflow.sendPaymentRequest(individualPayment, payment)
       );
-
       await Promise.all(reminderPromises);
-
       // Refresh data to show updated reminder counts
       await fetchPaymentData();
-
     } catch (error) {
       console.error('Failed to send bulk reminders:', error);
     }
   };
-
   const getStatusBadge = (status) => {
     const badges = {
       'pending': { color: 'bg-yellow-500/20 text-yellow-400', text: 'Pending' },
@@ -201,7 +171,6 @@ const PaymentDashboard = ({ organizerId }) => {
       'completed_partial': { color: 'bg-green-500/20 text-green-400', text: 'Complete*' },
       'cancelled_insufficient': { color: 'bg-red-500/20 text-red-400', text: 'Cancelled' },
     };
-
     const badge = badges[status] || badges['pending'];
     return (
       <span className={`px-2 py-1 rounded-full text-xs font-medium ${badge.color}`}>
@@ -209,26 +178,21 @@ const PaymentDashboard = ({ organizerId }) => {
       </span>
     );
   };
-
   const formatAmount = (amountInCents) => {
     return `$${(amountInCents / 100).toFixed(2)}`;
   };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString();
   };
-
   const isDeadlineUrgent = (deadline) => {
     const now = new Date();
     const deadlineDate = new Date(deadline);
     const timeDiff = deadlineDate.getTime() - now.getTime();
     return timeDiff > 0 && timeDiff < 48 * 60 * 60 * 1000; // Less than 48 hours
   };
-
   const isOverdue = (deadline) => {
     return new Date() > new Date(deadline);
   };
-
   if (loading) {
     return (
       <div className="space-y-6">
@@ -241,7 +205,6 @@ const PaymentDashboard = ({ organizerId }) => {
       </div>
     );
   }
-
   if (error) {
     return (
       <GlassCard className="p-6">
@@ -257,9 +220,7 @@ const PaymentDashboard = ({ organizerId }) => {
       </GlassCard>
     );
   }
-
   const filteredPayments = getFilteredAndSortedPayments();
-
   return (
     <div className="space-y-6">
       {/* Dashboard Header */}
@@ -273,7 +234,6 @@ const PaymentDashboard = ({ organizerId }) => {
           Refresh
         </GlassButton>
       </div>
-
       {/* Dashboard Statistics */}
       {dashboardStats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -291,7 +251,6 @@ const PaymentDashboard = ({ organizerId }) => {
               </div>
             </div>
           </GlassCard>
-
           <GlassCard className="p-4">
             <div className="flex items-center">
               <UserGroupIcon className="h-8 w-8 text-blue-500 mr-3" />
@@ -306,7 +265,6 @@ const PaymentDashboard = ({ organizerId }) => {
               </div>
             </div>
           </GlassCard>
-
           <GlassCard className="p-4">
             <div className="flex items-center">
               <ArrowTrendingUpIcon className="h-8 w-8 text-yellow-500 mr-3" />
@@ -321,7 +279,6 @@ const PaymentDashboard = ({ organizerId }) => {
               </div>
             </div>
           </GlassCard>
-
           <GlassCard className="p-4">
             <div className="flex items-center">
               <ClockIcon className="h-8 w-8 text-red-500 mr-3" />
@@ -338,7 +295,6 @@ const PaymentDashboard = ({ organizerId }) => {
           </GlassCard>
         </div>
       )}
-
       {/* Filters and Sorting */}
       <GlassCard className="p-4">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
@@ -358,7 +314,6 @@ const PaymentDashboard = ({ organizerId }) => {
               </button>
             ))}
           </div>
-
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-400 font-medium">Sort by:</span>
             <select
@@ -374,13 +329,11 @@ const PaymentDashboard = ({ organizerId }) => {
           </div>
         </div>
       </GlassCard>
-
       {/* Payment List */}
       <GlassCard className="p-6">
         <h2 className="text-xl font-semibold text-white mb-4">
           Payment Collections ({filteredPayments.length})
         </h2>
-
         {filteredPayments.length === 0 ? (
           <div className="text-center py-8 text-gray-400">
             <CurrencyDollarIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
@@ -391,7 +344,6 @@ const PaymentDashboard = ({ organizerId }) => {
             {filteredPayments.map(payment => {
               const deadlineUrgent = isDeadlineUrgent(payment.payment_deadline);
               const overdue = isOverdue(payment.payment_deadline);
-
               return (
                 <div
                   key={payment.id}
@@ -421,7 +373,6 @@ const PaymentDashboard = ({ organizerId }) => {
                           </span>
                         )}
                       </div>
-
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div>
                           <span className="text-gray-400">Amount:</span>
@@ -450,7 +401,6 @@ const PaymentDashboard = ({ organizerId }) => {
                           </div>
                         </div>
                       </div>
-
                       {/* Progress Bar */}
                       <div className="mt-3 bg-black/20 rounded-full h-2">
                         <div
@@ -465,7 +415,6 @@ const PaymentDashboard = ({ organizerId }) => {
                         />
                       </div>
                     </div>
-
                     <div className="flex flex-col gap-2 ml-4">
                       <GlassButton
                         onClick={() => setSelectedPayment(payment.id)}
@@ -474,7 +423,6 @@ const PaymentDashboard = ({ organizerId }) => {
                         <EyeIcon className="h-4 w-4 mr-1" />
                         View
                       </GlassButton>
-
                       {payment.stats.pendingCount > 0 && (
                         <GlassButton
                           onClick={() => sendBulkReminders(payment.id)}
@@ -493,7 +441,6 @@ const PaymentDashboard = ({ organizerId }) => {
           </div>
         )}
       </GlassCard>
-
       {/* Alert Cards */}
       {dashboardStats && (dashboardStats.overduePayments > 0 || dashboardStats.upcomingDeadlines > 0) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -512,7 +459,6 @@ const PaymentDashboard = ({ organizerId }) => {
               </div>
             </GlassCard>
           )}
-
           {dashboardStats.upcomingDeadlines > 0 && (
             <GlassCard className="p-4 border-yellow-500/30">
               <div className="flex items-center">
@@ -533,5 +479,4 @@ const PaymentDashboard = ({ organizerId }) => {
     </div>
   );
 };
-
 export default PaymentDashboard;

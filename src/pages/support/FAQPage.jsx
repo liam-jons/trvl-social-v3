@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Search, MessageCircle, ThumbsUp, ThumbsDown } from 'lucide-react';
 import StaticPageLayout from '../../components/layout/StaticPageLayout';
 import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
@@ -141,7 +142,7 @@ const FAQPage = () => {
                 className="w-full px-4 py-3 pl-12 rounded-lg bg-white/50 dark:bg-black/20 border border-white/20 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
-                🔍
+                <Search className="w-5 h-5" />
               </div>
             </div>
           </GlassCard>
@@ -201,7 +202,7 @@ const FAQPage = () => {
           <h2 className="text-2xl font-bold mb-6 text-center">Need More Help?</h2>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="text-center">
-              <div className="text-4xl mb-4">💬</div>
+              <MessageCircle className="w-12 h-12 mx-auto mb-4 text-blue-500" />
               <h3 className="text-lg font-semibold mb-2">Live Chat</h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
                 Get instant help from our support team
@@ -243,10 +244,16 @@ const FAQPage = () => {
           </p>
           <div className="flex justify-center space-x-4">
             <GlassButton variant="primary">
-              👍 Yes, helpful
+              <div className="flex items-center space-x-2">
+                <ThumbsUp className="w-4 h-4" />
+                <span>Yes, helpful</span>
+              </div>
             </GlassButton>
             <GlassButton variant="secondary">
-              👎 No, needs improvement
+              <div className="flex items-center space-x-2">
+                <ThumbsDown className="w-4 h-4" />
+                <span>No, needs improvement</span>
+              </div>
             </GlassButton>
           </div>
         </GlassCard>

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Globe, Handshake, Sparkles, Users } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import GlassCard from '../components/ui/GlassCard';
 import GlassButton from '../components/ui/GlassButton';
@@ -62,31 +63,31 @@ const HomePage = () => {
         </h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <GlassCard className="text-center p-6">
-            <div className="text-4xl mb-4">🌍</div>
+            <Globe className="w-12 h-12 mx-auto mb-4 text-blue-500" />
             <h3 className="text-xl font-semibold mb-2">Global Adventures</h3>
             <p className="text-gray-600 dark:text-gray-300">
               Explore experiences from local hidden gems to worldwide destinations
             </p>
           </GlassCard>
-          
+
           <GlassCard className="text-center p-6">
-            <div className="text-4xl mb-4">🤝</div>
+            <Handshake className="w-12 h-12 mx-auto mb-4 text-green-500" />
             <h3 className="text-xl font-semibold mb-2">Travel Groups</h3>
             <p className="text-gray-600 dark:text-gray-300">
               Find compatible travel companions based on personality and interests
             </p>
           </GlassCard>
-          
+
           <GlassCard className="text-center p-6">
-            <div className="text-4xl mb-4">✨</div>
+            <Sparkles className="w-12 h-12 mx-auto mb-4 text-purple-500" />
             <h3 className="text-xl font-semibold mb-2">Trusted Vendors</h3>
             <p className="text-gray-600 dark:text-gray-300">
               Book with verified adventure providers and local experts
             </p>
           </GlassCard>
-          
+
           <GlassCard className="text-center p-6">
-            <div className="text-4xl mb-4">👥</div>
+            <Users className="w-12 h-12 mx-auto mb-4 text-orange-500" />
             <h3 className="text-xl font-semibold mb-2">Vibrant Community</h3>
             <p className="text-gray-600 dark:text-gray-300">
               Share experiences, get tips, and connect with fellow adventurers

@@ -2,7 +2,6 @@
  * Payment Audit Trail Component
  * Displays comprehensive audit trail for payment modifications and reconciliation actions
  */
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -28,7 +27,6 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-
 const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
   const [auditEntries, setAuditEntries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,11 +37,9 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEntry, setSelectedEntry] = useState(null);
-
   useEffect(() => {
     loadAuditTrail();
   }, [paymentId, vendorStripeAccountId, filters]);
-
   const loadAuditTrail = async () => {
     setLoading(true);
     try {
@@ -60,7 +56,6 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
         `)
         .order('created_at', { ascending: false })
         .limit(100);
-
       // Filter by specific payment or all payments for vendor
       if (paymentId) {
         query = query.eq('payment_id', paymentId);
@@ -70,7 +65,6 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
           .from('booking_payments')
           .select('id')
           .eq('vendor_stripe_account_id', vendorStripeAccountId);
-
         if (vendorPayments && vendorPayments.length > 0) {
           const paymentIds = vendorPayments.map(p => p.id);
           query = query.in('payment_id', paymentIds);
@@ -80,28 +74,22 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
           return;
         }
       }
-
       // Apply date filter
       if (filters.dateRange !== 'all') {
         const startDate = new Date();
         startDate.setDate(startDate.getDate() - parseInt(filters.dateRange));
         query = query.gte('created_at', startDate.toISOString());
       }
-
       // Apply action filter
       if (filters.action !== 'all') {
         query = query.eq('action', filters.action);
       }
-
       // Apply performed_by filter
       if (filters.performedBy !== 'all') {
         query = query.eq('performed_by', filters.performedBy);
       }
-
       const { data, error } = await query;
-
       if (error) throw error;
-
       setAuditEntries(data || []);
     } catch (error) {
       console.error('Failed to load audit trail:', error);
@@ -109,11 +97,9 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
       setLoading(false);
     }
   };
-
   const exportAuditTrail = async (format = 'csv') => {
     try {
       const filteredEntries = filterAuditEntries(auditEntries);
-
       if (format === 'csv') {
         const headers = [
           'Timestamp',
@@ -125,7 +111,6 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
           'Previous Values',
           'New Values',
         ];
-
         const rows = filteredEntries.map(entry => [
           new Date(entry.created_at).toISOString(),
           entry.action,
@@ -136,12 +121,10 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
           JSON.stringify(entry.previous_values || {}),
           JSON.stringify(entry.new_values || {}),
         ]);
-
         const csv = [
           headers.join(','),
           ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
         ].join('\n');
-
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -155,18 +138,15 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
       alert('Failed to export audit trail. Please try again.');
     }
   };
-
   const filterAuditEntries = (entries) => {
     return entries.filter(entry => {
       const matchesSearch = !searchTerm ||
         entry.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
         entry.performed_by.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (entry.payment_id && entry.payment_id.toLowerCase().includes(searchTerm.toLowerCase()));
-
       return matchesSearch;
     });
   };
-
   const getActionIcon = (action) => {
     switch (action) {
       case 'payment_created':
@@ -189,7 +169,6 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
         return <Clock className="h-4 w-4 text-gray-500" />;
     }
   };
-
   const getActionBadge = (action) => {
     const variants = {
       payment_created: 'default',
@@ -203,17 +182,13 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
     };
     return variants[action] || 'outline';
   };
-
   const getUserAgentInfo = (userAgent) => {
     if (!userAgent) return { device: 'Unknown', browser: 'Unknown', icon: Globe };
-
     const isMobile = /Mobile|Android|iPhone|iPad/.test(userAgent);
     const isTablet = /iPad|Tablet/.test(userAgent);
     const isDesktop = !isMobile && !isTablet;
-
     let device = 'Unknown';
     let icon = Globe;
-
     if (isDesktop) {
       device = 'Desktop';
       icon = Monitor;
@@ -224,16 +199,13 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
       device = 'Mobile';
       icon = Smartphone;
     }
-
     let browser = 'Unknown';
     if (userAgent.includes('Chrome')) browser = 'Chrome';
     else if (userAgent.includes('Firefox')) browser = 'Firefox';
     else if (userAgent.includes('Safari')) browser = 'Safari';
     else if (userAgent.includes('Edge')) browser = 'Edge';
-
     return { device, browser, icon };
   };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString('en-US', {
       year: 'numeric',
@@ -244,20 +216,16 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
       second: '2-digit',
     });
   };
-
   const formatAmount = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
     }).format(amount / 100);
   };
-
   const renderValueChange = (previous, current, key) => {
     if (previous === current) return null;
-
     const isAmount = key.includes('amount') || key === 'amount';
     const formatValue = isAmount ? formatAmount : (val) => String(val);
-
     return (
       <div className="flex items-center space-x-2 text-sm">
         <span className="text-gray-500">{key}:</span>
@@ -275,9 +243,7 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
       </div>
     );
   };
-
   const filteredEntries = filterAuditEntries(auditEntries);
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -286,7 +252,6 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -317,7 +282,6 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
           </Button>
         </div>
       </div>
-
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
@@ -362,7 +326,6 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
           </div>
         </CardContent>
       </Card>
-
       {/* Audit Entries */}
       <Card>
         <CardHeader>
@@ -374,7 +337,6 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
               {filteredEntries.map((entry) => {
                 const userAgentInfo = getUserAgentInfo(entry.user_agent);
                 const UserAgentIcon = userAgentInfo.icon;
-
                 return (
                   <div
                     key={entry.id}
@@ -397,7 +359,6 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
                           <span>{userAgentInfo.device}</span>
                         </div>
                       </div>
-
                       <p className="text-sm text-gray-600 mb-2">
                         Payment ID: {entry.payment_id}
                         {entry.booking_payments && (
@@ -406,7 +367,6 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
                           </span>
                         )}
                       </p>
-
                       {/* Show key changes */}
                       {entry.previous_values && entry.new_values && (
                         <div className="space-y-1 mb-2">
@@ -419,7 +379,6 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
                           )}
                         </div>
                       )}
-
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <span>{formatDate(entry.created_at)}</span>
                         <div className="flex items-center space-x-2">
@@ -448,7 +407,6 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
           )}
         </CardContent>
       </Card>
-
       {/* Detail Modal */}
       {selectedEntry && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -489,7 +447,6 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
                   <p className="mt-1">{selectedEntry.payment_id}</p>
                 </div>
               </div>
-
               {/* Technical Details */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -503,7 +460,6 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
                   </p>
                 </div>
               </div>
-
               {/* Value Changes */}
               {selectedEntry.previous_values && selectedEntry.new_values && (
                 <div>
@@ -521,7 +477,6 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
                   </div>
                 </div>
               )}
-
               {/* Metadata */}
               {selectedEntry.metadata && Object.keys(selectedEntry.metadata).length > 0 && (
                 <div>
@@ -538,5 +493,4 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
     </div>
   );
 };
-
 export default PaymentAuditTrail;

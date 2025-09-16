@@ -2,7 +2,6 @@
  * Compatibility Service
  * High-level service for managing compatibility calculations and data persistence
  */
-
 import { supabase } from '../lib/supabase';
 import { CompatibilityScoringEngine } from './compatibility-scoring-engine';
 import {
@@ -22,16 +21,13 @@ import {
 } from '../types/compatibility';
 import { PersonalityProfile } from '../types/personality';
 import { generateCompatibilityExplanation } from './explanation-generator.js';
-
 export class CompatibilityService {
   private scoringEngine: CompatibilityScoringEngine;
   private currentAlgorithm: CompatibilityAlgorithm | null = null;
-
   constructor() {
     this.scoringEngine = new CompatibilityScoringEngine();
     this.initializeDefaultAlgorithm();
   }
-
   /**
    * Calculate compatibility between two users
    */
@@ -39,14 +35,12 @@ export class CompatibilityService {
     request: CalculateCompatibilityRequest
   ): Promise<CalculateCompatibilityResponse> {
     const startTime = Date.now();
-
     try {
       // Load user profiles
       const [user1Profile, user2Profile] = await Promise.all([
         this.loadUserProfile(request.user1Id),
         this.loadUserProfile(request.user2Id)
       ]);
-
       if (!user1Profile || !user2Profile) {
         return {
           success: false,
@@ -61,14 +55,11 @@ export class CompatibilityService {
           }
         };
       }
-
       // Get algorithm parameters
       const parameters = await this.getAlgorithmParameters(request.algorithmId);
-
       // Check cache first if not forcing recalculation
       const useCache = request.options?.cacheResult !== false && !request.options?.forceRecalculation;
       let cacheHit = false;
-
       if (useCache) {
         const cached = await this.getCachedScore(request.user1Id, request.user2Id, request.groupId);
         if (cached) {
@@ -86,7 +77,6 @@ export class CompatibilityService {
           };
         }
       }
-
       // Calculate compatibility
       const score = await this.scoringEngine.calculateCompatibility(
         user1Profile,
@@ -97,12 +87,10 @@ export class CompatibilityService {
           groupId: request.groupId
         }
       );
-
       // Persist to database if caching enabled
       if (request.options?.cacheResult !== false) {
         await this.persistScore(score);
       }
-
       return {
         success: true,
         data: score,
@@ -115,7 +103,6 @@ export class CompatibilityService {
           algorithmVersion: score.algorithmVersion
         }
       };
-
     } catch (error) {
       console.error('Compatibility calculation error:', error);
       return {
@@ -133,7 +120,6 @@ export class CompatibilityService {
       };
     }
   }
-
   /**
    * Calculate compatibility for multiple users (bulk operation)
    */
@@ -141,15 +127,12 @@ export class CompatibilityService {
     request: BulkCalculateRequest
   ): Promise<BulkCalculateResponse> {
     const startTime = Date.now();
-
     try {
       // Load all user profiles
       const userProfiles = await Promise.all(
         request.userIds.map(userId => this.loadUserProfile(userId))
       );
-
       const validProfiles = userProfiles.filter(profile => profile !== null) as UserCompatibilityProfile[];
-
       if (validProfiles.length < 2) {
         return {
           success: false,
@@ -165,10 +148,8 @@ export class CompatibilityService {
           }
         };
       }
-
       // Get algorithm parameters
       const parameters = await this.getAlgorithmParameters(request.algorithmId);
-
       // Calculate group compatibility if requested
       let analysis: GroupCompatibilityAnalysis | undefined;
       if (request.options?.includeAnalysis) {
@@ -178,29 +159,24 @@ export class CompatibilityService {
           request.groupId
         );
       }
-
       // Extract compatibility scores from analysis or calculate pairwise
       const scores: CompatibilityScore[] = [];
       const matrix: number[][] = [];
-
       if (analysis) {
         // Extract scores from group analysis
         for (let i = 0; i < analysis.compatibilityMatrix.length; i++) {
           if (request.options?.includeMatrix) {
             matrix[i] = [];
           }
-
           for (let j = i + 1; j < analysis.compatibilityMatrix[i].length; j++) {
             const score = analysis.compatibilityMatrix[i][j];
             scores.push(score);
-
             if (request.options?.includeMatrix) {
               matrix[i][j] = score.overallScore;
               if (!matrix[j]) matrix[j] = [];
               matrix[j][i] = score.overallScore;
             }
           }
-
           if (request.options?.includeMatrix && !matrix[i][i]) {
             matrix[i][i] = 100; // Self-compatibility
           }
@@ -216,7 +192,6 @@ export class CompatibilityService {
               { groupId: request.groupId }
             );
             scores.push(score);
-
             if (request.options?.includeMatrix) {
               if (!matrix[i]) matrix[i] = [];
               if (!matrix[j]) matrix[j] = [];
@@ -224,20 +199,16 @@ export class CompatibilityService {
               matrix[j][i] = score.overallScore;
             }
           }
-
           if (request.options?.includeMatrix && !matrix[i][i]) {
             matrix[i][i] = 100;
           }
         }
       }
-
       // Persist scores if caching enabled
       if (request.options?.cacheResults !== false) {
         await Promise.all(scores.map(score => this.persistScore(score)));
       }
-
       const totalPairs = (validProfiles.length * (validProfiles.length - 1)) / 2;
-
       return {
         success: true,
         data: {
@@ -252,7 +223,6 @@ export class CompatibilityService {
           algorithmVersion: this.currentAlgorithm?.name || 'unknown'
         }
       };
-
     } catch (error) {
       console.error('Bulk compatibility calculation error:', error);
       return {
@@ -271,7 +241,6 @@ export class CompatibilityService {
       };
     }
   }
-
   /**
    * Get cached compatibility score
    */
@@ -287,15 +256,12 @@ export class CompatibilityService {
         .or(`and(user_id.eq.${user1Id},group_id.eq.${groupId || 'null'}),and(user_id.eq.${user2Id},group_id.eq.${groupId || 'null'})`)
         .order('calculated_at', { ascending: false })
         .limit(1);
-
       if (error || !data || data.length === 0) {
         return null;
       }
-
       // Convert database record to CompatibilityScore format
       // This is a simplified conversion - in practice, you'd need to reconstruct the full score object
       const dbScore = data[0];
-
       return {
         user1Id,
         user2Id,
@@ -306,13 +272,11 @@ export class CompatibilityService {
         algorithmVersion: 'v1',
         calculatedAt: new Date(dbScore.calculated_at)
       };
-
     } catch (error) {
       console.error('Error retrieving cached score:', error);
       return null;
     }
   }
-
   /**
    * Get or create algorithm configuration
    */
@@ -320,28 +284,23 @@ export class CompatibilityService {
     if (!algorithmId) {
       return this.getDefaultParameters();
     }
-
     try {
       const { data, error } = await supabase
         .from('compatibility_algorithms')
         .select('*')
         .eq('id', algorithmId)
         .single();
-
       if (error || !data) {
         console.warn('Algorithm not found, using default parameters');
         return this.getDefaultParameters();
       }
-
       // Convert database record to ScoringParameters
       return this.convertDbAlgorithmToParameters(data);
-
     } catch (error) {
       console.error('Error loading algorithm parameters:', error);
       return this.getDefaultParameters();
     }
   }
-
   /**
    * Update algorithm configuration
    */
@@ -363,7 +322,6 @@ export class CompatibilityService {
         .eq('id', algorithmId)
         .select()
         .single();
-
       if (error || !data) {
         return {
           success: false,
@@ -373,19 +331,15 @@ export class CompatibilityService {
           }
         };
       }
-
       // Update scoring engine
       const newFormula = { ...DEFAULT_SCORING_FORMULA };
       this.scoringEngine.updateScoringFormula(newFormula);
-
       // Invalidate relevant caches
       this.scoringEngine.invalidateCache();
-
       return {
         success: true,
         data: this.convertDbAlgorithmToCompatibilityAlgorithm(data)
       };
-
     } catch (error) {
       console.error('Error updating algorithm config:', error);
       return {
@@ -397,7 +351,6 @@ export class CompatibilityService {
       };
     }
   }
-
   /**
    * Load user compatibility profile
    */
@@ -409,24 +362,20 @@ export class CompatibilityService {
         .select('*')
         .eq('user_id', userId)
         .single();
-
       if (personalityError || !personalityData) {
         console.warn(`No personality assessment found for user ${userId}`);
         return null;
       }
-
       // Load user profile for additional data
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
-
       if (profileError || !profileData) {
         console.warn(`No profile found for user ${userId}`);
         return null;
       }
-
       // Construct UserCompatibilityProfile
       const personalityProfile: PersonalityProfile = {
         energyLevel: this.convertBigFiveToTrait(personalityData, 'energy'),
@@ -435,7 +384,6 @@ export class CompatibilityService {
         riskTolerance: this.convertBigFiveToTrait(personalityData, 'risk'),
         calculatedAt: new Date(personalityData.completed_at)
       };
-
       const userProfile: UserCompatibilityProfile = {
         userId,
         personalityProfile,
@@ -463,15 +411,12 @@ export class CompatibilityService {
         },
         lastUpdated: new Date(personalityData.updated_at)
       };
-
       return userProfile;
-
     } catch (error) {
       console.error(`Error loading user profile for ${userId}:`, error);
       return null;
     }
   }
-
   /**
    * Convert Big Five traits to personality dimensions
    */
@@ -489,7 +434,6 @@ export class CompatibilityService {
         return 50; // Neutral default
     }
   }
-
   /**
    * Persist compatibility score to database
    */
@@ -508,7 +452,6 @@ export class CompatibilityService {
         }, {
           onConflict: 'group_id,user_id'
         });
-
       if (error) {
         console.error('Error persisting compatibility score:', error);
       }
@@ -516,7 +459,6 @@ export class CompatibilityService {
       console.error('Error persisting compatibility score:', error);
     }
   }
-
   /**
    * Generate natural language explanation of compatibility score using AI
    */
@@ -536,23 +478,19 @@ export class CompatibilityService {
         includeRecommendations: options?.includeRecommendations !== false,
         provider: options?.provider || 'auto'
       });
-
       return result.explanation;
     } catch (error) {
       console.error('AI explanation generation failed:', error);
-
       // Fallback to simple explanation
       return this.generateSimpleExplanation(score);
     }
   }
-
   /**
    * Generate simple fallback explanation
    */
   private generateSimpleExplanation(score: CompatibilityScore): string {
     const overall = score.overallScore;
     let explanation = '';
-
     if (overall >= 80) {
       explanation = 'Excellent compatibility! You share similar values and complementary traits that make for great travel companions.';
     } else if (overall >= 60) {
@@ -562,7 +500,6 @@ export class CompatibilityService {
     } else {
       explanation = 'Low compatibility. Significant differences in travel styles and preferences may lead to conflicts.';
     }
-
     // Add dimension-specific insights
     const dimensions = score.dimensions;
     if (dimensions?.personality_traits?.score > 70) {
@@ -571,10 +508,8 @@ export class CompatibilityService {
     if (dimensions?.travel_preferences?.score > 70) {
       explanation += ' You have very similar travel preferences and styles.';
     }
-
     return explanation;
   }
-
   /**
    * Initialize default algorithm configuration
    */
@@ -593,7 +528,6 @@ export class CompatibilityService {
       cacheStrategy: DEFAULT_CACHE_STRATEGY
     };
   }
-
   /**
    * Get default scoring parameters
    */
@@ -627,7 +561,6 @@ export class CompatibilityService {
       }
     };
   }
-
   /**
    * Convert database algorithm record to ScoringParameters
    */
@@ -638,7 +571,6 @@ export class CompatibilityService {
       algorithmId: dbRecord.id
     };
   }
-
   /**
    * Convert database record to CompatibilityAlgorithm
    */
@@ -657,21 +589,18 @@ export class CompatibilityService {
       cacheStrategy: DEFAULT_CACHE_STRATEGY
     };
   }
-
   /**
    * Get cache statistics
    */
   getCacheStats() {
     return this.scoringEngine.getCacheStats();
   }
-
   /**
    * Invalidate cache for specific user or group
    */
   invalidateCache(userId?: string, groupId?: string) {
     this.scoringEngine.invalidateCache(userId, groupId);
   }
-
   /**
    * Generate detailed explanation with custom options
    */
@@ -708,6 +637,5 @@ export class CompatibilityService {
     }
   }
 }
-
 // Export singleton instance
 export const compatibilityService = new CompatibilityService();

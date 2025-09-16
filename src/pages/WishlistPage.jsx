@@ -23,11 +23,9 @@ import {
   FolderIcon,
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
-
 const WishlistPage = () => {
   const { user, isAuthenticated } = useAuth();
   const { addNotification } = useNotification();
-
   const [wishlistItems, setWishlistItems] = useState([]);
   const [collections, setCollections] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,20 +37,16 @@ const WishlistPage = () => {
   const [showExportModal, setShowExportModal] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
-
   // Load wishlist data
   const loadWishlistData = useCallback(async () => {
     if (!user) return;
-
     try {
       setLoading(true);
-
       // Load wishlist items
       const collectionId = selectedCollection === 'all' ? null : selectedCollection;
       const { data: items, error: itemsError } = await WishlistService.getUserWishlist(user.id, {
         collectionId
       });
-
       if (itemsError) {
         console.error('Error loading wishlist:', itemsError);
         addNotification({
@@ -62,16 +56,13 @@ const WishlistPage = () => {
         });
         return;
       }
-
       // Load collections
       const { data: collectionData, error: collectionsError } = await WishlistService.getUserCollections(user.id);
-
       if (collectionsError) {
         console.error('Error loading collections:', collectionsError);
       } else {
         setCollections(collectionData || []);
       }
-
       setWishlistItems(items || []);
     } catch (error) {
       console.error('Error loading wishlist data:', error);
@@ -84,7 +75,6 @@ const WishlistPage = () => {
       setLoading(false);
     }
   }, [user, selectedCollection, addNotification]);
-
   useEffect(() => {
     if (isAuthenticated) {
       loadWishlistData();
@@ -92,7 +82,6 @@ const WishlistPage = () => {
       setLoading(false);
     }
   }, [isAuthenticated, loadWishlistData]);
-
   // Filter and sort wishlist items
   const filteredAndSortedItems = wishlistItems
     .filter(item => {
@@ -122,22 +111,18 @@ const WishlistPage = () => {
           return 0;
       }
     });
-
   const handleAdventureClick = (adventure) => {
     window.location.href = `/adventures/${adventure.id}`;
   };
-
   const handleFavoriteToggle = (adventureId, isFavorited) => {
     if (!isFavorited) {
       // Remove from local state
       setWishlistItems(prev => prev.filter(item => item.adventure_id !== adventureId));
     }
   };
-
   const handleCreateCollection = async (name, description, isPrivate) => {
     try {
       const { data, error } = await WishlistService.createCollection(user.id, name, description, isPrivate);
-
       if (error) {
         addNotification({
           type: 'error',
@@ -146,10 +131,8 @@ const WishlistPage = () => {
         });
         return;
       }
-
       setCollections(prev => [data, ...prev]);
       setShowCollectionModal(false);
-
       addNotification({
         type: 'success',
         title: 'Collection Created',
@@ -159,7 +142,6 @@ const WishlistPage = () => {
       console.error('Error creating collection:', error);
     }
   };
-
   const handleExport = async (format) => {
     try {
       const collectionId = selectedCollection === 'all' ? null : selectedCollection;
@@ -168,7 +150,6 @@ const WishlistPage = () => {
         format,
         collectionId
       );
-
       if (error) {
         addNotification({
           type: 'error',
@@ -177,7 +158,6 @@ const WishlistPage = () => {
         });
         return;
       }
-
       // Download file
       const blob = new Blob([data], { type: mimeType });
       const url = URL.createObjectURL(blob);
@@ -186,7 +166,6 @@ const WishlistPage = () => {
       a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
-
       setShowExportModal(false);
       addNotification({
         type: 'success',
@@ -197,7 +176,6 @@ const WishlistPage = () => {
       console.error('Error exporting wishlist:', error);
     }
   };
-
   const toggleSelection = (itemId) => {
     setSelectedItems(prev =>
       prev.includes(itemId)
@@ -205,20 +183,16 @@ const WishlistPage = () => {
         : [...prev, itemId]
     );
   };
-
   const selectAll = () => {
     setSelectedItems(filteredAndSortedItems.map(item => item.id));
   };
-
   const clearSelection = () => {
     setSelectedItems([]);
   };
-
   // Loading state
   if (loading) {
     return <LoadingSpinner fullScreen />;
   }
-
   // Unauthenticated state
   if (!isAuthenticated) {
     return (
@@ -247,7 +221,6 @@ const WishlistPage = () => {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900">
       <div className="container mx-auto px-4 py-8">
@@ -272,7 +245,6 @@ const WishlistPage = () => {
                 )}
               </p>
             </div>
-
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowExportModal(true)}
@@ -281,7 +253,6 @@ const WishlistPage = () => {
               >
                 <ArrowDownTrayIcon className="w-5 h-5" />
               </button>
-
               <button
                 onClick={() => setShowCollectionModal(true)}
                 className="p-2 text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
@@ -289,7 +260,6 @@ const WishlistPage = () => {
               >
                 <PlusIcon className="w-5 h-5" />
               </button>
-
               <button
                 onClick={() => setIsSelectionMode(!isSelectionMode)}
                 className={`p-2 transition-colors ${
@@ -304,10 +274,8 @@ const WishlistPage = () => {
             </div>
           </div>
         </motion.div>
-
         {/* Stats */}
         <WishlistStats userId={user?.id} className="mb-8" />
-
         {/* Filters and Controls */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -329,7 +297,6 @@ const WishlistPage = () => {
                   className="w-full pl-10 pr-4 py-3 bg-white/50 dark:bg-black/20 border border-white/20 dark:border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
-
               {/* View Toggle */}
               <div className="flex rounded-lg overflow-hidden border border-white/20 dark:border-white/10">
                 <button
@@ -353,7 +320,6 @@ const WishlistPage = () => {
                   <ListBulletIcon className="w-5 h-5" />
                 </button>
               </div>
-
               {/* Sort */}
               <select
                 value={sortBy}
@@ -368,7 +334,6 @@ const WishlistPage = () => {
                 <option value="alphabetical">A to Z</option>
               </select>
             </div>
-
             {/* Collection Filter */}
             <div className="flex flex-wrap gap-2">
               <button
@@ -381,7 +346,6 @@ const WishlistPage = () => {
               >
                 All Items ({wishlistItems.length})
               </button>
-
               {collections.map(collection => (
                 <button
                   key={collection.id}
@@ -400,7 +364,6 @@ const WishlistPage = () => {
                 </button>
               ))}
             </div>
-
             {/* Selection Actions */}
             {isSelectionMode && (
               <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -421,7 +384,6 @@ const WishlistPage = () => {
                     {selectedItems.length} selected
                   </span>
                 </div>
-
                 <div className="flex items-center gap-2">
                   <button className="px-4 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors">
                     Remove Selected
@@ -431,7 +393,6 @@ const WishlistPage = () => {
             )}
           </GlassCard>
         </motion.div>
-
         {/* Content */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -486,13 +447,11 @@ const WishlistPage = () => {
                         />
                       </div>
                     )}
-
                     <AdventureCard
                       adventure={item.adventure}
                       viewMode={viewMode}
                       onClick={() => handleAdventureClick(item.adventure)}
                     />
-
                     {/* Collection Badge */}
                     {item.collection && (
                       <div className="absolute top-2 right-2 px-2 py-1 bg-blue-500 text-white text-xs rounded-full">
@@ -506,14 +465,12 @@ const WishlistPage = () => {
           )}
         </motion.div>
       </div>
-
       {/* Modals */}
       <CollectionModal
         isOpen={showCollectionModal}
         onClose={() => setShowCollectionModal(false)}
         onCreate={handleCreateCollection}
       />
-
       <ExportModal
         isOpen={showExportModal}
         onClose={() => setShowExportModal(false)}
@@ -527,5 +484,4 @@ const WishlistPage = () => {
     </div>
   );
 };
-
 export default WishlistPage;

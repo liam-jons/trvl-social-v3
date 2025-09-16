@@ -2,11 +2,9 @@
  * DisputeResolutionInterface - Admin interface for handling payment disputes
  * Provides tools for managing Stripe disputes, chargebacks, and escalated refund issues
  */
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase.js';
 import { payments } from '../../services/stripe-service.js';
-
 const DisputeResolutionInterface = ({ adminId }) => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('active');
@@ -20,7 +18,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
     status: 'all',
     dateRange: '30d',
   });
-
   const disputeReasons = {
     duplicate: 'Duplicate Payment',
     fraudulent: 'Fraudulent Transaction',
@@ -36,7 +33,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
     debit_not_authorized: 'Debit Not Authorized',
     customer_initiated: 'Customer Initiated',
   };
-
   const disputeStatuses = {
     warning_needs_response: 'Needs Response',
     warning_under_review: 'Under Review',
@@ -47,15 +43,12 @@ const DisputeResolutionInterface = ({ adminId }) => {
     won: 'Won',
     lost: 'Lost',
   };
-
   useEffect(() => {
     loadDisputes();
   }, [activeTab, filter]);
-
   const loadDisputes = async () => {
     try {
       setLoading(true);
-
       // Get disputes from database (synchronized from Stripe webhooks)
       let query = supabase
         .from('payment_disputes')
@@ -68,7 +61,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
           users (id, email, full_name)
         `)
         .order('created_at', { ascending: false });
-
       // Apply status filter
       if (activeTab !== 'all') {
         if (activeTab === 'active') {
@@ -77,32 +69,25 @@ const DisputeResolutionInterface = ({ adminId }) => {
           query = query.eq('status', activeTab);
         }
       }
-
       // Apply additional filters
       if (filter.reason !== 'all') {
         query = query.eq('reason', filter.reason);
       }
-
       if (filter.status !== 'all') {
         query = query.eq('status', filter.status);
       }
-
       const { data, error } = await query;
-
       if (error) throw error;
       setDisputes(data || []);
-
     } catch (error) {
       console.error('Failed to load disputes:', error);
     } finally {
       setLoading(false);
     }
   };
-
   const submitDisputeResponse = async (disputeId) => {
     try {
       setSubmittingResponse(true);
-
       // Upload evidence files if any
       const evidenceUrls = [];
       for (const file of evidenceFiles) {
@@ -110,11 +95,9 @@ const DisputeResolutionInterface = ({ adminId }) => {
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('dispute-evidence')
           .upload(fileName, file);
-
         if (uploadError) throw uploadError;
         evidenceUrls.push(uploadData.path);
       }
-
       // Submit response via Stripe API
       const response = await fetch('/api/stripe/disputes/respond', {
         method: 'POST',
@@ -137,11 +120,9 @@ const DisputeResolutionInterface = ({ adminId }) => {
           },
         }),
       });
-
       if (!response.ok) {
         throw new Error('Failed to submit dispute response');
       }
-
       // Update dispute status in database
       await supabase
         .from('payment_disputes')
@@ -153,15 +134,12 @@ const DisputeResolutionInterface = ({ adminId }) => {
           updated_at: new Date().toISOString(),
         })
         .eq('id', disputeId);
-
       // Reset form
       setResponseText('');
       setEvidenceFiles([]);
       setSelectedDispute(null);
-
       // Reload disputes
       await loadDisputes();
-
     } catch (error) {
       console.error('Failed to submit dispute response:', error);
       alert(`Failed to submit response: ${error.message}`);
@@ -169,7 +147,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
       setSubmittingResponse(false);
     }
   };
-
   const acceptDispute = async (disputeId) => {
     try {
       const response = await fetch('/api/stripe/disputes/accept', {
@@ -185,11 +162,9 @@ const DisputeResolutionInterface = ({ adminId }) => {
           },
         }),
       });
-
       if (!response.ok) {
         throw new Error('Failed to accept dispute');
       }
-
       // Update in database
       await supabase
         .from('payment_disputes')
@@ -199,22 +174,18 @@ const DisputeResolutionInterface = ({ adminId }) => {
           updated_at: new Date().toISOString(),
         })
         .eq('id', disputeId);
-
       await loadDisputes();
-
     } catch (error) {
       console.error('Failed to accept dispute:', error);
       alert(`Failed to accept dispute: ${error.message}`);
     }
   };
-
   const formatAmount = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
     }).format(amount / 100);
   };
-
   const getStatusColor = (status) => {
     const colors = {
       warning_needs_response: 'bg-yellow-100 text-yellow-800',
@@ -228,12 +199,10 @@ const DisputeResolutionInterface = ({ adminId }) => {
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
-
   const getUrgencyColor = (status, createdAt) => {
     const now = new Date();
     const created = new Date(createdAt);
     const hoursSinceCreated = (now - created) / (1000 * 60 * 60);
-
     if (['warning_needs_response', 'needs_response'].includes(status)) {
       if (hoursSinceCreated > 168) return 'border-l-4 border-red-500'; // 7 days
       if (hoursSinceCreated > 120) return 'border-l-4 border-yellow-500'; // 5 days
@@ -241,7 +210,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
     }
     return '';
   };
-
   const renderDisputeDetail = (dispute) => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
@@ -260,7 +228,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
             </button>
           </div>
         </div>
-
         <div className="px-6 py-4 space-y-6">
           {/* Dispute Overview */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -301,7 +268,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
                 )}
               </div>
             </div>
-
             <div>
               <h4 className="text-sm font-medium text-gray-900 mb-3">Booking Information</h4>
               <div className="bg-gray-50 rounded-lg p-4 space-y-2">
@@ -332,7 +298,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
               </div>
             </div>
           </div>
-
           {/* Customer's Dispute Reason */}
           {dispute.customer_message && (
             <div>
@@ -342,7 +307,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
               </div>
             </div>
           )}
-
           {/* Previous Response */}
           {dispute.admin_response && (
             <div>
@@ -357,7 +321,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
               </div>
             </div>
           )}
-
           {/* Response Form - Only show if needs response */}
           {['warning_needs_response', 'needs_response'].includes(dispute.status) && (
             <div>
@@ -375,7 +338,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
                     placeholder="Explain why this charge is valid and provide any relevant details..."
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Evidence Files
@@ -391,7 +353,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
                     Upload receipts, communication logs, service documentation, etc.
                   </p>
                 </div>
-
                 {evidenceFiles.length > 0 && (
                   <div>
                     <h5 className="text-sm font-medium text-gray-700">Selected Files:</h5>
@@ -406,7 +367,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
             </div>
           )}
         </div>
-
         {/* Action Buttons */}
         <div className="px-6 py-4 border-t border-gray-200">
           <div className="flex justify-between">
@@ -442,7 +402,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
       </div>
     </div>
   );
-
   const renderDisputesList = () => (
     <div className="bg-white shadow overflow-hidden sm:rounded-md">
       <ul className="divide-y divide-gray-200">
@@ -521,7 +480,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
       )}
     </div>
   );
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="py-6">
@@ -532,7 +490,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
             </h2>
           </div>
         </div>
-
         {/* Summary Stats */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="bg-white overflow-hidden shadow rounded-lg">
@@ -558,7 +515,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
               </div>
             </div>
           </div>
-
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="p-5">
               <div className="flex items-center">
@@ -582,7 +538,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
               </div>
             </div>
           </div>
-
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="p-5">
               <div className="flex items-center">
@@ -606,7 +561,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
               </div>
             </div>
           </div>
-
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="p-5">
               <div className="flex items-center">
@@ -635,7 +589,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
             </div>
           </div>
         </div>
-
         {/* Tab Navigation */}
         <div className="mt-6 mb-6">
           <nav className="flex space-x-8" aria-label="Tabs">
@@ -659,7 +612,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
             ))}
           </nav>
         </div>
-
         {/* Disputes List */}
         {loading ? (
           <div className="text-center py-12">
@@ -669,12 +621,10 @@ const DisputeResolutionInterface = ({ adminId }) => {
         ) : (
           renderDisputesList()
         )}
-
         {/* Dispute Detail Modal */}
         {selectedDispute && renderDisputeDetail(selectedDispute)}
       </div>
     </div>
   );
 };
-
 export default DisputeResolutionInterface;

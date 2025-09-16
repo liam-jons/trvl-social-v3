@@ -2,14 +2,12 @@
  * ModificationRequestModal - Interface for submitting booking modification requests
  * Provides guided workflow for users to request booking modifications
  */
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase.js';
 import {
   bookingModificationManager,
   getModificationConfig
 } from '../../services/booking-modification-service.js';
-
 const ModificationRequestModal = ({
   isOpen,
   onClose,
@@ -28,7 +26,6 @@ const ModificationRequestModal = ({
   const [bookingDetails, setBookingDetails] = useState(null);
   const [estimatedFees, setEstimatedFees] = useState(null);
   const [error, setError] = useState('');
-
   const modificationTypes = [
     {
       id: 'date_change',
@@ -73,23 +70,19 @@ const ModificationRequestModal = ({
       fields: ['specialRequests'],
     },
   ];
-
   useEffect(() => {
     if (isOpen && bookingId) {
       loadBookingDetails();
     }
   }, [isOpen, bookingId]);
-
   useEffect(() => {
     if (modificationData.type && modificationData.changes) {
       calculateEstimatedFees();
     }
   }, [modificationData.type, modificationData.changes]);
-
   const loadBookingDetails = async () => {
     try {
       setLoading(true);
-
       const { data: booking, error } = await supabase
         .from('bookings')
         .select(`
@@ -110,33 +103,27 @@ const ModificationRequestModal = ({
         `)
         .eq('id', bookingId)
         .single();
-
       if (error) throw error;
       setBookingDetails(booking);
-
     } catch (error) {
       setError(`Failed to load booking details: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
-
   const calculateEstimatedFees = async () => {
     try {
       if (!bookingDetails || !modificationData.type) return;
-
       const fees = await bookingModificationManager.calculateModificationFees(
         bookingDetails,
         modificationData.type,
         modificationData.changes
       );
-
       setEstimatedFees(fees);
     } catch (error) {
       console.error('Failed to calculate fees:', error);
     }
   };
-
   const handleTypeSelection = (type) => {
     setModificationData(prev => ({
       ...prev,
@@ -145,7 +132,6 @@ const ModificationRequestModal = ({
     }));
     setStep(2);
   };
-
   const handleChangeUpdate = (field, value) => {
     setModificationData(prev => ({
       ...prev,
@@ -155,21 +141,17 @@ const ModificationRequestModal = ({
       },
     }));
   };
-
   const submitModificationRequest = async () => {
     try {
       setLoading(true);
       setError('');
-
       // Validate form
       if (!modificationData.type) {
         throw new Error('Please select a modification type');
       }
-
       if (!modificationData.reason) {
         throw new Error('Please provide a reason for the modification');
       }
-
       // Submit modification request
       const result = await bookingModificationManager.createModificationRequest({
         bookingId,
@@ -179,19 +161,16 @@ const ModificationRequestModal = ({
         reason: modificationData.reason,
         urgency: modificationData.urgency,
       });
-
       setStep(4);
       if (onModificationRequested) {
         onModificationRequested(result);
       }
-
     } catch (error) {
       setError(`Failed to submit modification request: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
-
   const renderStep1 = () => (
     <div className="space-y-6">
       <div>
@@ -222,7 +201,6 @@ const ModificationRequestModal = ({
           ))}
         </div>
       </div>
-
       {bookingDetails && (
         <div className="bg-gray-50 rounded-lg p-4">
           <h4 className="text-sm font-medium text-gray-900 mb-2">Current Booking</h4>
@@ -238,10 +216,8 @@ const ModificationRequestModal = ({
       )}
     </div>
   );
-
   const renderStep2 = () => {
     const selectedType = modificationTypes.find(t => t.id === modificationData.type);
-
     return (
       <div className="space-y-6">
         <div className="flex items-center space-x-3">
@@ -255,10 +231,8 @@ const ModificationRequestModal = ({
             </p>
           </div>
         </div>
-
         <div className="space-y-4">
           {renderModificationFields()}
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Reason for modification <span className="text-red-500">*</span>
@@ -272,7 +246,6 @@ const ModificationRequestModal = ({
               required
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Urgency
@@ -291,7 +264,6 @@ const ModificationRequestModal = ({
             </p>
           </div>
         </div>
-
         {estimatedFees && estimatedFees.total > 0 && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
             <div className="flex">
@@ -328,7 +300,6 @@ const ModificationRequestModal = ({
       </div>
     );
   };
-
   const renderModificationFields = () => {
     switch (modificationData.type) {
       case 'date_change':
@@ -358,7 +329,6 @@ const ModificationRequestModal = ({
             </div>
           </div>
         );
-
       case 'participant_update':
         return (
           <div className="space-y-4">
@@ -389,7 +359,6 @@ const ModificationRequestModal = ({
             </div>
           </div>
         );
-
       case 'itinerary_adjustment':
         return (
           <div>
@@ -405,7 +374,6 @@ const ModificationRequestModal = ({
             />
           </div>
         );
-
       case 'accommodation_change':
         return (
           <div>
@@ -421,7 +389,6 @@ const ModificationRequestModal = ({
             />
           </div>
         );
-
       case 'meal_preference':
         return (
           <div>
@@ -437,7 +404,6 @@ const ModificationRequestModal = ({
             />
           </div>
         );
-
       case 'special_requests':
         return (
           <div>
@@ -453,12 +419,10 @@ const ModificationRequestModal = ({
             />
           </div>
         );
-
       default:
         return null;
     }
   };
-
   const renderStep3 = () => (
     <div className="space-y-6">
       <div>
@@ -494,7 +458,6 @@ const ModificationRequestModal = ({
           )}
         </div>
       </div>
-
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <div className="flex">
           <div className="flex-shrink-0">
@@ -517,7 +480,6 @@ const ModificationRequestModal = ({
       </div>
     </div>
   );
-
   const renderStep4 = () => (
     <div className="text-center space-y-6">
       <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
@@ -546,9 +508,7 @@ const ModificationRequestModal = ({
       </div>
     </div>
   );
-
   if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
@@ -578,7 +538,6 @@ const ModificationRequestModal = ({
             </div>
           )}
         </div>
-
         <div className="px-6 py-4">
           {loading && (
             <div className="text-center py-4">
@@ -586,13 +545,11 @@ const ModificationRequestModal = ({
               <p className="mt-2 text-sm text-gray-500">Loading...</p>
             </div>
           )}
-
           {error && (
             <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-3">
               <div className="text-sm text-red-600">{error}</div>
             </div>
           )}
-
           {!loading && (
             <>
               {step === 1 && renderStep1()}
@@ -602,7 +559,6 @@ const ModificationRequestModal = ({
             </>
           )}
         </div>
-
         {!loading && step < 4 && (
           <div className="px-6 py-4 border-t border-gray-200">
             <div className="flex justify-between">
@@ -636,7 +592,6 @@ const ModificationRequestModal = ({
             </div>
           </div>
         )}
-
         {step === 4 && (
           <div className="px-6 py-4 border-t border-gray-200">
             <button
@@ -651,5 +606,4 @@ const ModificationRequestModal = ({
     </div>
   );
 };
-
 export default ModificationRequestModal;

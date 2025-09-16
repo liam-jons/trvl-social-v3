@@ -4,7 +4,6 @@ import GroupPreviewCard from '../../components/groups/GroupPreviewCard';
 import GlassButton from '../../components/ui/GlassButton';
 import GlassInput from '../../components/ui/GlassInput';
 import GlassCard from '../../components/ui/GlassCard';
-
 const GroupsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilters, setSelectedFilters] = useState({
@@ -17,7 +16,6 @@ const GroupsPage = () => {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
-
   // Mock data - replace with real API calls
   useEffect(() => {
     const fetchGroups = async () => {
@@ -96,10 +94,8 @@ const GroupsPage = () => {
         setLoading(false);
       }, 1000);
     };
-
     fetchGroups();
   }, []);
-
   // Filter and search groups
   const filteredGroups = useMemo(() => {
     return groups.filter(group => {
@@ -111,20 +107,16 @@ const GroupsPage = () => {
           group.destination.toLowerCase().includes(searchLower) ||
           group.description.toLowerCase().includes(searchLower) ||
           group.tags.some(tag => tag.toLowerCase().includes(searchLower));
-
         if (!matchesSearch) return false;
       }
-
       // Status filter
       if (selectedFilters.status !== 'all' && group.status !== selectedFilters.status) {
         return false;
       }
-
       // Destination filter
       if (selectedFilters.destination && !group.destination.toLowerCase().includes(selectedFilters.destination.toLowerCase())) {
         return false;
       }
-
       // Size filter
       if (selectedFilters.size !== 'all') {
         const memberCount = group.members.length;
@@ -132,36 +124,29 @@ const GroupsPage = () => {
         if (selectedFilters.size === 'medium' && (memberCount < 5 || memberCount > 8)) return false;
         if (selectedFilters.size === 'large' && memberCount < 9) return false;
       }
-
       // Type filter
       if (selectedFilters.type !== 'all' && group.type !== selectedFilters.type) {
         return false;
       }
-
       return true;
     });
   }, [groups, searchQuery, selectedFilters]);
-
   const handleJoinGroup = (groupId) => {
     // Implement join group logic
     console.log('Joining group:', groupId);
   };
-
   const handleLeaveGroup = (groupId) => {
     // Implement leave group logic
     console.log('Leaving group:', groupId);
   };
-
   const handleViewDetails = (groupId) => {
     // Navigate to group detail page
     console.log('Viewing group details:', groupId);
   };
-
   const handleCreateGroup = () => {
     // Navigate to create group page or open modal
     console.log('Creating new group');
   };
-
   const clearFilters = () => {
     setSelectedFilters({
       status: 'all',
@@ -171,7 +156,6 @@ const GroupsPage = () => {
     });
     setSearchQuery('');
   };
-
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (selectedFilters.status !== 'all') count++;
@@ -180,7 +164,6 @@ const GroupsPage = () => {
     if (selectedFilters.type !== 'all') count++;
     return count;
   }, [selectedFilters]);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
       <div className="container mx-auto px-4 py-8">
@@ -194,7 +177,6 @@ const GroupsPage = () => {
               Find your perfect travel companions and join amazing adventures
             </p>
           </div>
-
           <GlassButton
             variant="primary"
             size="lg"
@@ -205,7 +187,6 @@ const GroupsPage = () => {
             <span>Create Group</span>
           </GlassButton>
         </div>
-
         {/* Search and Filters */}
         <GlassCard className="mb-8">
           <div className="space-y-4">
@@ -220,7 +201,6 @@ const GroupsPage = () => {
                 className="pl-10"
               />
             </div>
-
             {/* Filter Toggle */}
             <div className="flex items-center justify-between">
               <GlassButton
@@ -236,7 +216,6 @@ const GroupsPage = () => {
                   </span>
                 )}
               </GlassButton>
-
               {(activeFilterCount > 0 || searchQuery) && (
                 <GlassButton
                   variant="ghost"
@@ -247,7 +226,6 @@ const GroupsPage = () => {
                 </GlassButton>
               )}
             </div>
-
             {/* Filter Options */}
             {showFilters && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-glass">
@@ -266,7 +244,6 @@ const GroupsPage = () => {
                     <option value="private">Private</option>
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Destination
@@ -278,7 +255,6 @@ const GroupsPage = () => {
                     onChange={(e) => setSelectedFilters(prev => ({ ...prev, destination: e.target.value }))}
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Group Size
@@ -294,7 +270,6 @@ const GroupsPage = () => {
                     <option value="large">Large (9+)</option>
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Type
@@ -314,14 +289,12 @@ const GroupsPage = () => {
             )}
           </div>
         </GlassCard>
-
         {/* Results Summary */}
         <div className="flex items-center justify-between mb-6">
           <p className="text-gray-600 dark:text-gray-300">
             {loading ? 'Loading...' : `${filteredGroups.length} group${filteredGroups.length !== 1 ? 's' : ''} found`}
           </p>
         </div>
-
         {/* Groups Grid */}
         {loading ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -378,5 +351,4 @@ const GroupsPage = () => {
     </div>
   );
 };
-
 export default GroupsPage;

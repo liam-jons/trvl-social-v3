@@ -4,15 +4,12 @@
  * This script verifies that all Supabase migrations have been applied correctly
  * and tests basic database functionality for the TRVL Social platform.
  */
-
 import { createClient } from '@supabase/supabase-js';
-
 // Critical tables that must exist for core functionality
 const CRITICAL_TABLES = [
   // Core user system
   'profiles',
   'user_preferences',
-
   // Vendor and adventure system
   'vendors',
   'adventures',
@@ -20,7 +17,6 @@ const CRITICAL_TABLES = [
   'adventure_media',
   'vendor_certifications',
   'vendor_insurance',
-
   // Booking and payment system
   'bookings',
   'booking_payments',
@@ -28,14 +24,12 @@ const CRITICAL_TABLES = [
   'payment_splits',
   'booking_modifications',
   'reviews',
-
   // Group and compatibility system
   'groups',
   'group_members',
   'personality_assessments',
   'compatibility_scores',
   'travel_preferences',
-
   // Social and community features
   'user_connections',
   'posts',
@@ -43,7 +37,6 @@ const CRITICAL_TABLES = [
   'comments',
   'comment_likes',
   'community_feed_items',
-
   // Notifications and messaging
   'notifications',
   'notification_settings',
@@ -51,7 +44,6 @@ const CRITICAL_TABLES = [
   'whatsapp_messages',
   'whatsapp_contacts',
   'whatsapp_webhooks',
-
   // Stripe Connect and payments
   'stripe_accounts',
   'stripe_account_onboarding',
@@ -66,40 +58,33 @@ const CRITICAL_TABLES = [
   'payout_transactions',
   'refund_requests',
   'dispute_cases',
-
   // Media and storage
   'media_files',
   'media_thumbnails',
   'media_metadata',
-
   // Engagement and analytics
   'engagement_metrics',
   'user_activity_logs',
   'content_views',
   'user_interactions',
-
   // Moderation system
   'content_reports',
   'moderation_actions',
   'automated_moderation_rules',
-
   // Vendor forum
   'forum_categories',
   'forum_topics',
   'forum_posts',
   'forum_post_votes',
-
   // ML and algorithm tables
   'model_training_data',
   'compatibility_model_versions',
   'user_behavior_data',
-
   // Webhook system
   'webhook_logs',
   'webhook_events',
   'webhook_failures'
 ];
-
 // Enums that should exist
 const EXPECTED_ENUMS = [
   'user_role',
@@ -112,7 +97,6 @@ const EXPECTED_ENUMS = [
   'group_privacy',
   'group_member_role'
 ];
-
 // Storage buckets that should exist
 const EXPECTED_STORAGE_BUCKETS = [
   'avatars',
@@ -121,7 +105,6 @@ const EXPECTED_STORAGE_BUCKETS = [
   'user-uploads',
   'system-media'
 ];
-
 class MigrationVerifier {
   constructor() {
     this.supabase = null;
@@ -140,7 +123,6 @@ class MigrationVerifier {
       summary: {}
     };
   }
-
   /**
    * Initialize Supabase client and test connection
    */
@@ -148,20 +130,15 @@ class MigrationVerifier {
     try {
       const supabaseUrl = process.env.VITE_SUPABASE_URL;
       const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
       if (!supabaseUrl || !supabaseKey) {
         throw new Error('Missing Supabase configuration. Check VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in .env');
       }
-
       this.supabase = createClient(supabaseUrl, supabaseKey);
-
       // Test connection with a simple query
       const { data, error } = await this.supabase.from('profiles').select('count').limit(1);
-
       if (error && error.code !== 'PGRST116') { // PGRST116 = table doesn't exist, which is still a connection
         throw error;
       }
-
       this.results.connection = true;
       console.log('✅ Database connection successful');
       return true;
@@ -172,20 +149,17 @@ class MigrationVerifier {
       return false;
     }
   }
-
   /**
    * Check if critical tables exist
    */
   async verifyTables() {
     console.log('\n🔍 Verifying table existence...');
-
     for (const tableName of CRITICAL_TABLES) {
       try {
         const { data, error } = await this.supabase
           .from(tableName)
           .select('*')
           .limit(1);
-
         if (error) {
           if (error.code === 'PGRST116') {
             this.results.tables[tableName] = false;
@@ -207,13 +181,11 @@ class MigrationVerifier {
       }
     }
   }
-
   /**
    * Test basic CRUD operations on key tables
    */
   async testCrudOperations() {
     console.log('\n🔧 Testing basic CRUD operations...');
-
     const testOperations = [
       {
         table: 'profiles',
@@ -231,14 +203,12 @@ class MigrationVerifier {
         description: 'Read bookings'
       }
     ];
-
     for (const test of testOperations) {
       try {
         const { data, error } = await this.supabase
           .from(test.table)
           .select('*')
           .limit(5);
-
         if (error) {
           this.results.errors.push(`CRUD test failed for ${test.table}: ${error.message}`);
           console.log(`❌ ${test.description} failed: ${error.message}`);
@@ -251,16 +221,13 @@ class MigrationVerifier {
       }
     }
   }
-
   /**
    * Check RLS policies are enabled
    */
   async verifyRlsPolicies() {
     console.log('\n🔒 Checking Row Level Security policies...');
-
     // This is a simplified check - in a real implementation you'd query pg_policies
     const rlsTables = ['profiles', 'adventures', 'bookings', 'vendors'];
-
     for (const table of rlsTables) {
       try {
         // Try to access table without authentication - should be restricted
@@ -268,7 +235,6 @@ class MigrationVerifier {
           .from(table)
           .select('id')
           .limit(1);
-
         // If we get data without auth, RLS might not be properly configured
         if (data && data.length > 0) {
           this.results.warnings.push(`Table '${table}' may have overly permissive RLS policies`);
@@ -281,24 +247,19 @@ class MigrationVerifier {
       }
     }
   }
-
   /**
    * Verify storage buckets exist
    */
   async verifyStorageBuckets() {
     console.log('\n📁 Checking storage buckets...');
-
     try {
       const { data: buckets, error } = await this.supabase.storage.listBuckets();
-
       if (error) {
         this.results.errors.push(`Failed to list storage buckets: ${error.message}`);
         console.log(`❌ Storage bucket check failed: ${error.message}`);
         return;
       }
-
       const existingBuckets = buckets.map(bucket => bucket.name);
-
       for (const bucketName of EXPECTED_STORAGE_BUCKETS) {
         if (existingBuckets.includes(bucketName)) {
           this.results.storageBuckets[bucketName] = true;
@@ -314,7 +275,6 @@ class MigrationVerifier {
       console.log(`❌ Storage verification error: ${error.message}`);
     }
   }
-
   /**
    * Generate verification summary
    */
@@ -323,7 +283,6 @@ class MigrationVerifier {
     const existingTables = Object.values(this.results.tables).filter(exists => exists === true).length;
     const missingTables = Object.values(this.results.tables).filter(exists => exists === false).length;
     const errorTables = Object.values(this.results.tables).filter(exists => exists === 'error').length;
-
     this.results.summary = {
       connection: this.results.connection,
       tablesTotal: totalTables,
@@ -336,7 +295,6 @@ class MigrationVerifier {
       overallStatus: this.getOverallStatus()
     };
   }
-
   /**
    * Determine overall migration status
    */
@@ -344,9 +302,7 @@ class MigrationVerifier {
     if (!this.results.connection) {
       return 'FAILED - No database connection';
     }
-
     const { tablesExisting, tablesTotal, totalErrors } = this.results.summary;
-
     if (tablesExisting === tablesTotal && totalErrors === 0) {
       return 'EXCELLENT - All migrations applied successfully';
     } else if (tablesExisting >= tablesTotal * 0.9) {
@@ -357,25 +313,20 @@ class MigrationVerifier {
       return 'POOR - Many migrations missing or failed';
     }
   }
-
   /**
    * Run complete verification process
    */
   async runVerification() {
     console.log('🚀 Starting database migration verification...\n');
-
     const connected = await this.initializeClient();
     if (!connected) {
       return this.results;
     }
-
     await this.verifyTables();
     await this.testCrudOperations();
     await this.verifyRlsPolicies();
     await this.verifyStorageBuckets();
-
     this.generateSummary();
-
     console.log('\n📊 VERIFICATION SUMMARY');
     console.log('========================');
     console.log(`Overall Status: ${this.results.summary.overallStatus}`);
@@ -383,24 +334,19 @@ class MigrationVerifier {
     console.log(`Tables: ${this.results.summary.tablesExisting}/${this.results.summary.tablesTotal} (${this.results.summary.tableCompletion}%)`);
     console.log(`Errors: ${this.results.summary.totalErrors}`);
     console.log(`Warnings: ${this.results.summary.totalWarnings}`);
-
     if (this.results.errors.length > 0) {
       console.log('\n❌ ERRORS:');
       this.results.errors.forEach(error => console.log(`  • ${error}`));
     }
-
     if (this.results.warnings.length > 0) {
       console.log('\n⚠️ WARNINGS:');
       this.results.warnings.forEach(warning => console.log(`  • ${warning}`));
     }
-
     return this.results;
   }
 }
-
 // Export for use in other modules
 export { MigrationVerifier };
-
 // CLI execution
 if (import.meta.url === `file://${process.argv[1]}`) {
   const verifier = new MigrationVerifier();

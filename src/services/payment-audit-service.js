@@ -2,9 +2,7 @@
  * Payment Audit Service
  * Handles creation and management of payment audit trail entries
  */
-
 import { supabase } from '../lib/supabase.js';
-
 class PaymentAuditService {
   constructor() {
     this.pendingEntries = new Map();
@@ -12,7 +10,6 @@ class PaymentAuditService {
     this.maxBatchSize = 50;
     this.setupBatchProcessing();
   }
-
   /**
    * Setup batch processing for audit entries
    */
@@ -21,7 +18,6 @@ class PaymentAuditService {
       this.processPendingEntries();
     }, this.batchInterval);
   }
-
   /**
    * Log payment action to audit trail
    */
@@ -36,11 +32,9 @@ class PaymentAuditService {
       ipAddress = null,
       userAgent = null,
     } = actionData;
-
     if (!paymentId || !action || !performedBy) {
       throw new Error('Payment ID, action, and performedBy are required for audit logging');
     }
-
     const auditEntry = {
       payment_id: paymentId,
       action,
@@ -56,30 +50,24 @@ class PaymentAuditService {
       },
       created_at: new Date().toISOString(),
     };
-
     try {
       // For critical actions, log immediately
       if (this.isCriticalAction(action)) {
         return await this.insertAuditEntry(auditEntry);
       }
-
       // For non-critical actions, batch for performance
       const entryId = `${paymentId}_${Date.now()}`;
       this.pendingEntries.set(entryId, auditEntry);
-
       // If batch is full, process immediately
       if (this.pendingEntries.size >= this.maxBatchSize) {
         await this.processPendingEntries();
       }
-
       return { success: true, entryId };
-
     } catch (error) {
       console.error('Failed to log payment action:', error);
       throw error;
     }
   }
-
   /**
    * Check if action is critical and should be logged immediately
    */
@@ -93,10 +81,8 @@ class PaymentAuditService {
       'payout_processed',
       'account_suspended',
     ];
-
     return criticalActions.includes(action);
   }
-
   /**
    * Insert single audit entry
    */
@@ -104,29 +90,23 @@ class PaymentAuditService {
     const { error } = await supabase
       .from('payment_audit_trail')
       .insert(entry);
-
     if (error) {
       console.error('Failed to insert audit entry:', error);
       throw error;
     }
-
     return { success: true };
   }
-
   /**
    * Process pending audit entries in batch
    */
   async processPendingEntries() {
     if (this.pendingEntries.size === 0) return;
-
     const entries = Array.from(this.pendingEntries.values());
     this.pendingEntries.clear();
-
     try {
       const { error } = await supabase
         .from('payment_audit_trail')
         .insert(entries);
-
       if (error) {
         console.error('Failed to batch insert audit entries:', error);
         // Re-queue entries for retry
@@ -136,7 +116,6 @@ class PaymentAuditService {
       } else {
         console.log(`Successfully logged ${entries.length} audit entries`);
       }
-
     } catch (error) {
       console.error('Batch audit logging failed:', error);
       // Re-queue entries for retry
@@ -145,7 +124,6 @@ class PaymentAuditService {
       });
     }
   }
-
   /**
    * Log payment creation
    */
@@ -168,7 +146,6 @@ class PaymentAuditService {
       userAgent: request.userAgent,
     });
   }
-
   /**
    * Log payment status change
    */
@@ -186,7 +163,6 @@ class PaymentAuditService {
       userAgent: request.userAgent,
     });
   }
-
   /**
    * Log payment refund
    */
@@ -208,7 +184,6 @@ class PaymentAuditService {
       userAgent: request.userAgent,
     });
   }
-
   /**
    * Log reconciliation match
    */
@@ -228,7 +203,6 @@ class PaymentAuditService {
       },
     });
   }
-
   /**
    * Log discrepancy detection
    */
@@ -248,7 +222,6 @@ class PaymentAuditService {
       },
     });
   }
-
   /**
    * Log discrepancy resolution
    */
@@ -272,7 +245,6 @@ class PaymentAuditService {
       userAgent: request.userAgent,
     });
   }
-
   /**
    * Log payout processing
    */
@@ -294,10 +266,8 @@ class PaymentAuditService {
         },
       })
     );
-
     return Promise.all(promises);
   }
-
   /**
    * Log payment amount change
    */
@@ -316,7 +286,6 @@ class PaymentAuditService {
       userAgent: request.userAgent,
     });
   }
-
   /**
    * Log security violation
    */
@@ -334,7 +303,6 @@ class PaymentAuditService {
       userAgent: request.userAgent,
     });
   }
-
   /**
    * Get audit trail for payment
    */
@@ -346,35 +314,27 @@ class PaymentAuditService {
       startDate = null,
       endDate = null,
     } = options;
-
     let query = supabase
       .from('payment_audit_trail')
       .select('*')
       .eq('payment_id', paymentId)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
-
     if (action) {
       query = query.eq('action', action);
     }
-
     if (startDate) {
       query = query.gte('created_at', startDate);
     }
-
     if (endDate) {
       query = query.lte('created_at', endDate);
     }
-
     const { data, error } = await query;
-
     if (error) {
       throw new Error(`Failed to get payment audit trail: ${error.message}`);
     }
-
     return data || [];
   }
-
   /**
    * Get audit summary for payment
    */
@@ -385,18 +345,14 @@ class PaymentAuditService {
         .select('action, performed_by, created_at')
         .eq('payment_id', paymentId)
         .order('created_at', { ascending: false });
-
       if (error) throw error;
-
       const actions = data || [];
       const actionCounts = actions.reduce((acc, entry) => {
         acc[entry.action] = (acc[entry.action] || 0) + 1;
         return acc;
       }, {});
-
       const performers = [...new Set(actions.map(entry => entry.performed_by))];
       const lastActivity = actions.length > 0 ? actions[0].created_at : null;
-
       return {
         totalEntries: actions.length,
         actionCounts,
@@ -404,13 +360,11 @@ class PaymentAuditService {
         lastActivity,
         recentActions: actions.slice(0, 5),
       };
-
     } catch (error) {
       console.error('Failed to get payment audit summary:', error);
       throw error;
     }
   }
-
   /**
    * Get audit trail for multiple payments
    */
@@ -421,35 +375,27 @@ class PaymentAuditService {
       startDate = null,
       endDate = null,
     } = options;
-
     let query = supabase
       .from('payment_audit_trail')
       .select('*')
       .in('payment_id', paymentIds)
       .order('created_at', { ascending: false })
       .limit(limit);
-
     if (action) {
       query = query.eq('action', action);
     }
-
     if (startDate) {
       query = query.gte('created_at', startDate);
     }
-
     if (endDate) {
       query = query.lte('created_at', endDate);
     }
-
     const { data, error } = await query;
-
     if (error) {
       throw new Error(`Failed to get bulk audit trail: ${error.message}`);
     }
-
     return data || [];
   }
-
   /**
    * Search audit trail
    */
@@ -463,46 +409,35 @@ class PaymentAuditService {
       paymentIds = [],
       limit = 100,
     } = searchParams;
-
     let query = supabase
       .from('payment_audit_trail')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(limit);
-
     if (paymentIds.length > 0) {
       query = query.in('payment_id', paymentIds);
     }
-
     if (action) {
       query = query.eq('action', action);
     }
-
     if (performedBy) {
       query = query.eq('performed_by', performedBy);
     }
-
     if (startDate) {
       query = query.gte('created_at', startDate);
     }
-
     if (endDate) {
       query = query.lte('created_at', endDate);
     }
-
     if (searchQuery) {
       // This would require full-text search setup in Supabase
       // For now, filter on client side
     }
-
     const { data, error } = await query;
-
     if (error) {
       throw new Error(`Failed to search audit trail: ${error.message}`);
     }
-
     let results = data || [];
-
     // Client-side search filtering if query provided
     if (searchQuery) {
       const lowerQuery = searchQuery.toLowerCase();
@@ -512,37 +447,29 @@ class PaymentAuditService {
         JSON.stringify(entry.metadata).toLowerCase().includes(lowerQuery)
       );
     }
-
     return results;
   }
-
   /**
    * Cleanup old audit entries (for maintenance)
    */
   async cleanupOldEntries(retentionDays = 365) {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
-
     try {
       const { error } = await supabase
         .from('payment_audit_trail')
         .delete()
         .lt('created_at', cutoffDate.toISOString());
-
       if (error) throw error;
-
       console.log(`Cleaned up audit entries older than ${retentionDays} days`);
       return { success: true };
-
     } catch (error) {
       console.error('Failed to cleanup old audit entries:', error);
       throw error;
     }
   }
 }
-
 // Create and export singleton instance
 const paymentAuditService = new PaymentAuditService();
-
 export { paymentAuditService };
 export default paymentAuditService;

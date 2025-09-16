@@ -9,9 +9,7 @@ import InvoiceService from '../../services/invoice-service';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { CreditCard, Receipt, FileText, Globe, Shield, Info } from 'lucide-react';
-
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-
 const MultiCurrencyPayment = ({
   bookingId,
   vendorId,
@@ -35,7 +33,6 @@ const MultiCurrencyPayment = ({
   const [autoInvoice, setAutoInvoice] = useState(true);
   const [invoiceTemplate, setInvoiceTemplate] = useState('standard');
   const [taxDetails, setTaxDetails] = useState(null);
-
   useEffect(() => {
     // Convert amount when currency changes
     if (selectedCurrency !== baseCurrency) {
@@ -43,11 +40,9 @@ const MultiCurrencyPayment = ({
     } else {
       setConvertedAmount(baseAmount);
     }
-
     // Calculate tax details
     calculateTaxDetails();
   }, [selectedCurrency, baseAmount, baseCurrency]);
-
   const convertCurrency = async () => {
     try {
       setLoading(true);
@@ -57,7 +52,6 @@ const MultiCurrencyPayment = ({
         selectedCurrency
       );
       setConvertedAmount(converted);
-
       // Generate preview for other currencies
       const preview = await stripeService.payments.getPaymentCurrencyPreview(
         converted,
@@ -72,12 +66,10 @@ const MultiCurrencyPayment = ({
       setLoading(false);
     }
   };
-
   const calculateTaxDetails = () => {
     const taxRate = CurrencyService.getTaxRate(selectedCurrency);
     const taxAmount = CurrencyService.calculateTax(convertedAmount, selectedCurrency);
     const totalWithTax = convertedAmount + taxAmount;
-
     setTaxDetails({
       rate: taxRate,
       amount: taxAmount,
@@ -86,11 +78,9 @@ const MultiCurrencyPayment = ({
         .find(c => c.code === selectedCurrency)?.region || 'Unknown',
     });
   };
-
   const createPaymentIntent = async () => {
     try {
       setLoading(true);
-
       const paymentData = {
         amount: convertedAmount,
         currency: selectedCurrency,
@@ -104,10 +94,8 @@ const MultiCurrencyPayment = ({
         autoInvoice,
         invoiceTemplate,
       };
-
       const result = await stripeService.payments.createMultiCurrencyPayment(paymentData);
       setPaymentIntent(result);
-
       return result;
     } catch (error) {
       console.error('Failed to create payment intent:', error);
@@ -117,7 +105,6 @@ const MultiCurrencyPayment = ({
       setLoading(false);
     }
   };
-
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Currency Selection */}
@@ -127,7 +114,6 @@ const MultiCurrencyPayment = ({
             <Globe className="w-5 h-5 text-blue-600" />
             <h3 className="text-lg font-semibold">Payment Currency</h3>
           </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
               <CurrencySelector
@@ -138,7 +124,6 @@ const MultiCurrencyPayment = ({
                 showConversion={true}
               />
             </div>
-
             {/* Payment Summary */}
             <div className="space-y-4">
               <div className="bg-gray-50 rounded-lg p-4">
@@ -179,7 +164,6 @@ const MultiCurrencyPayment = ({
                   </div>
                 </div>
               </div>
-
               {/* Currency Preview */}
               {Object.keys(currencyPreview).length > 0 && (
                 <div className="bg-blue-50 rounded-lg p-4">
@@ -200,7 +184,6 @@ const MultiCurrencyPayment = ({
           </div>
         </CardContent>
       </Card>
-
       {/* Invoice Options */}
       <Card>
         <CardContent className="p-6">
@@ -208,7 +191,6 @@ const MultiCurrencyPayment = ({
             <Receipt className="w-5 h-5 text-green-600" />
             <h3 className="text-lg font-semibold">Invoice Options</h3>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-3">
               <label className="flex items-center space-x-2">
@@ -220,7 +202,6 @@ const MultiCurrencyPayment = ({
                 />
                 <span className="text-sm">Auto-generate invoice</span>
               </label>
-
               {autoInvoice && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -238,7 +219,6 @@ const MultiCurrencyPayment = ({
                 </div>
               )}
             </div>
-
             <div className="flex items-center space-x-2">
               <Button
                 variant="outline"
@@ -252,7 +232,6 @@ const MultiCurrencyPayment = ({
           </div>
         </CardContent>
       </Card>
-
       {/* Payment Form */}
       <Elements stripe={stripePromise}>
         <PaymentForm
@@ -265,7 +244,6 @@ const MultiCurrencyPayment = ({
           loading={loading}
         />
       </Elements>
-
       {/* Security Notice */}
       <Card className="border-green-200 bg-green-50">
         <CardContent className="p-4">
@@ -281,7 +259,6 @@ const MultiCurrencyPayment = ({
           </div>
         </CardContent>
       </Card>
-
       {/* Invoice Management */}
       {showInvoices && (
         <InvoiceManagement
@@ -293,7 +270,6 @@ const MultiCurrencyPayment = ({
     </div>
   );
 };
-
 // Payment Form Component
 const PaymentForm = ({
   amount,
@@ -308,27 +284,21 @@ const PaymentForm = ({
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     if (!stripe || !elements) {
       return;
     }
-
     setProcessing(true);
     setErrorMessage('');
-
     try {
       let clientSecret;
-
       if (paymentIntent) {
         clientSecret = paymentIntent.clientSecret;
       } else {
         const newPaymentIntent = await onCreatePaymentIntent();
         clientSecret = newPaymentIntent.clientSecret;
       }
-
       const { error, paymentIntent: confirmedPayment } = await stripe.confirmCardPayment(
         clientSecret,
         {
@@ -337,7 +307,6 @@ const PaymentForm = ({
           },
         }
       );
-
       if (error) {
         setErrorMessage(error.message);
         onPaymentError?.(error);
@@ -351,7 +320,6 @@ const PaymentForm = ({
       setProcessing(false);
     }
   };
-
   const cardElementOptions = {
     style: {
       base: {
@@ -363,7 +331,6 @@ const PaymentForm = ({
       },
     },
   };
-
   return (
     <Card>
       <CardContent className="p-6">
@@ -371,7 +338,6 @@ const PaymentForm = ({
           <CreditCard className="w-5 h-5 text-blue-600" />
           <h3 className="text-lg font-semibold">Payment Details</h3>
         </div>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -381,7 +347,6 @@ const PaymentForm = ({
               <CardElement options={cardElementOptions} />
             </div>
           </div>
-
           {errorMessage && (
             <div className="bg-red-50 border border-red-200 rounded-md p-3">
               <div className="flex items-center space-x-2">
@@ -390,7 +355,6 @@ const PaymentForm = ({
               </div>
             </div>
           )}
-
           <div className="flex items-center justify-between pt-4 border-t">
             <div>
               <p className="text-lg font-semibold">
@@ -400,7 +364,6 @@ const PaymentForm = ({
                 Processed securely by Stripe
               </p>
             </div>
-
             <Button
               type="submit"
               disabled={!stripe || processing || loading}
@@ -421,5 +384,4 @@ const PaymentForm = ({
     </Card>
   );
 };
-
 export default MultiCurrencyPayment;

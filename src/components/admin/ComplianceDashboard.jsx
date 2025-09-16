@@ -5,38 +5,30 @@ import { Badge } from '../ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import gdprConsentService from '../../services/gdpr-consent-service';
 import gdprAnalyticsService from '../../services/gdpr-analytics-service';
-
 const ComplianceDashboard = () => {
   const [complianceReport, setComplianceReport] = useState(null);
   const [auditTrail, setAuditTrail] = useState([]);
   const [privacyMetrics, setPrivacyMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-
   useEffect(() => {
     loadComplianceData();
-
     // Refresh data every 5 minutes
     const interval = setInterval(loadComplianceData, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
-
   const loadComplianceData = async () => {
     try {
       setRefreshing(true);
-
       // Load compliance report
       const report = gdprConsentService.generateComplianceReport();
       setComplianceReport(report);
-
       // Load audit trail
       const audit = gdprConsentService.getAuditTrail(200);
       setAuditTrail(audit);
-
       // Load privacy metrics
       const metrics = gdprAnalyticsService.generatePrivacyReport();
       setPrivacyMetrics(metrics);
-
     } catch (error) {
       console.error('Failed to load compliance data:', error);
     } finally {
@@ -44,17 +36,14 @@ const ComplianceDashboard = () => {
       setRefreshing(false);
     }
   };
-
   const exportComplianceReport = () => {
     if (!complianceReport) return;
-
     const reportData = {
       ...complianceReport,
       auditTrail,
       privacyMetrics,
       exportedAt: new Date().toISOString()
     };
-
     const blob = new Blob([JSON.stringify(reportData, null, 2)], {
       type: 'application/json'
     });
@@ -67,21 +56,16 @@ const ComplianceDashboard = () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString();
   };
-
   const getComplianceScore = () => {
     if (!privacyMetrics) return 0;
-
     const checks = privacyMetrics.compliance_checks;
     const total = Object.keys(checks).length;
     const passed = Object.values(checks).filter(Boolean).length;
-
     return Math.round((passed / total) * 100);
   };
-
   const getEventTypeStats = () => {
     const stats = {};
     auditTrail.forEach(event => {
@@ -89,7 +73,6 @@ const ComplianceDashboard = () => {
     });
     return stats;
   };
-
   const getRegionStats = () => {
     const regions = {};
     // This would typically come from backend analytics
@@ -102,7 +85,6 @@ const ComplianceDashboard = () => {
       Other: 2
     };
   };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -110,11 +92,9 @@ const ComplianceDashboard = () => {
       </div>
     );
   }
-
   const complianceScore = getComplianceScore();
   const eventStats = getEventTypeStats();
   const regionStats = getRegionStats();
-
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -137,7 +117,6 @@ const ComplianceDashboard = () => {
           </Button>
         </div>
       </div>
-
       {/* Compliance Score Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="p-6">
@@ -151,13 +130,11 @@ const ComplianceDashboard = () => {
             </Badge>
           </div>
         </Card>
-
         <Card className="p-6">
           <h3 className="text-sm font-medium text-gray-500">Total Consent Events</h3>
           <div className="text-2xl font-bold text-gray-900">{auditTrail.length}</div>
           <p className="text-xs text-gray-500">Last 30 days</p>
         </Card>
-
         <Card className="p-6">
           <h3 className="text-sm font-medium text-gray-500">Data Exports</h3>
           <div className="text-2xl font-bold text-gray-900">
@@ -165,7 +142,6 @@ const ComplianceDashboard = () => {
           </div>
           <p className="text-xs text-gray-500">User requests</p>
         </Card>
-
         <Card className="p-6">
           <h3 className="text-sm font-medium text-gray-500">Data Deletions</h3>
           <div className="text-2xl font-bold text-gray-900">
@@ -174,7 +150,6 @@ const ComplianceDashboard = () => {
           <p className="text-xs text-gray-500">Pending/completed</p>
         </Card>
       </div>
-
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -183,7 +158,6 @@ const ComplianceDashboard = () => {
           <TabsTrigger value="retention">Data Retention</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
-
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="p-6">
@@ -203,7 +177,6 @@ const ComplianceDashboard = () => {
                 </div>
               )}
             </Card>
-
             <Card className="p-6">
               <h3 className="text-lg font-semibold mb-4">Regional Distribution</h3>
               <div className="space-y-3">
@@ -224,7 +197,6 @@ const ComplianceDashboard = () => {
               </div>
             </Card>
           </div>
-
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
             <div className="space-y-3">
@@ -246,7 +218,6 @@ const ComplianceDashboard = () => {
             </div>
           </Card>
         </TabsContent>
-
         <TabsContent value="consent" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="p-6">
@@ -268,7 +239,6 @@ const ComplianceDashboard = () => {
                 ))}
               </div>
             </Card>
-
             <Card className="p-6">
               <h3 className="text-lg font-semibold mb-4">Event Types</h3>
               <div className="space-y-3">
@@ -284,7 +254,6 @@ const ComplianceDashboard = () => {
             </Card>
           </div>
         </TabsContent>
-
         <TabsContent value="audit" className="space-y-6">
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Audit Trail</h3>
@@ -301,7 +270,6 @@ const ComplianceDashboard = () => {
                           {formatDate(event.timestamp)}
                         </span>
                       </div>
-
                       {event.data && Object.keys(event.data).length > 0 && (
                         <details className="mt-2">
                           <summary className="text-xs text-gray-600 cursor-pointer">
@@ -313,7 +281,6 @@ const ComplianceDashboard = () => {
                         </details>
                       )}
                     </div>
-
                     <div className="text-xs text-gray-400">
                       {event.id.slice(0, 8)}...
                     </div>
@@ -323,7 +290,6 @@ const ComplianceDashboard = () => {
             </div>
           </Card>
         </TabsContent>
-
         <TabsContent value="retention" className="space-y-6">
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Data Retention Policies</h3>
@@ -351,13 +317,11 @@ const ComplianceDashboard = () => {
               </div>
             )}
           </Card>
-
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Upcoming Deletions</h3>
             <p className="text-gray-500">No data scheduled for deletion in the next 30 days.</p>
           </Card>
         </TabsContent>
-
         <TabsContent value="reports" className="space-y-6">
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Generate Reports</h3>
@@ -371,7 +335,6 @@ const ComplianceDashboard = () => {
                   Download Report
                 </Button>
               </div>
-
               <div className="border-t pt-4">
                 <h4 className="font-medium mb-2">Data Processing Activities</h4>
                 <p className="text-sm text-gray-600 mb-3">
@@ -381,7 +344,6 @@ const ComplianceDashboard = () => {
                   Generate ROPA
                 </Button>
               </div>
-
               <div className="border-t pt-4">
                 <h4 className="font-medium mb-2">Data Subject Requests</h4>
                 <p className="text-sm text-gray-600 mb-3">
@@ -393,7 +355,6 @@ const ComplianceDashboard = () => {
               </div>
             </div>
           </Card>
-
           {complianceReport && (
             <Card className="p-6">
               <h3 className="text-lg font-semibold mb-4">Current Report Summary</h3>
@@ -418,5 +379,4 @@ const ComplianceDashboard = () => {
     </div>
   );
 };
-
 export default ComplianceDashboard;

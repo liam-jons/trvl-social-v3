@@ -13,15 +13,12 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import useVideoStreamStore from '../../stores/videoStreamStore';
 import { analyticsService } from '../../services/analytics-service';
 import GlassCard from '../ui/GlassCard';
-
 const StreamMetrics = ({ streamId, vendorId, className = "" }) => {
   const [realTimeData, setRealTimeData] = useState([]);
   const [historicalData, setHistoricalData] = useState([]);
   const [timeRange, setTimeRange] = useState('24h'); // 24h, 7d, 30d
   const [isLoading, setIsLoading] = useState(false);
-
   const { streamMetrics } = useVideoStreamStore();
-
   // Simulate real-time data updates
   useEffect(() => {
     const interval = setInterval(() => {
@@ -33,16 +30,13 @@ const StreamMetrics = ({ streamId, vendorId, className = "" }) => {
         chatMessages: Math.floor(Math.random() * 5),
         likes: Math.floor(Math.random() * 3)
       };
-
       setRealTimeData(prev => {
         const updated = [...prev, dataPoint];
         return updated.slice(-30); // Keep last 30 data points
       });
     }, 10000); // Update every 10 seconds
-
     return () => clearInterval(interval);
   }, [streamMetrics]);
-
   // Fetch historical data
   useEffect(() => {
     const fetchHistoricalData = async () => {
@@ -57,16 +51,13 @@ const StreamMetrics = ({ streamId, vendorId, className = "" }) => {
         setIsLoading(false);
       }
     };
-
     fetchHistoricalData();
   }, [timeRange, streamId]);
-
   // Generate mock historical data
   const generateMockHistoricalData = (range) => {
     const data = [];
     const points = range === '24h' ? 24 : range === '7d' ? 7 : 30;
     const baseViewers = 50;
-
     for (let i = 0; i < points; i++) {
       data.push({
         time: range === '24h' ? `${i}:00` : `Day ${i + 1}`,
@@ -77,20 +68,15 @@ const StreamMetrics = ({ streamId, vendorId, className = "" }) => {
         watchTime: 15 + Math.floor(Math.random() * 45) // minutes
       });
     }
-
     return data;
   };
-
   // Calculate trends
   const calculateTrend = (data, metric) => {
     if (data.length < 2) return 0;
-
     const recent = data.slice(-5).reduce((sum, item) => sum + item[metric], 0) / 5;
     const previous = data.slice(-10, -5).reduce((sum, item) => sum + item[metric], 0) / 5;
-
     return ((recent - previous) / previous) * 100;
   };
-
   // Metric card component
   const MetricCard = ({ title, value, icon: Icon, trend, color = 'blue' }) => {
     const trendUp = trend > 0;
@@ -100,7 +86,6 @@ const StreamMetrics = ({ streamId, vendorId, className = "" }) => {
       purple: 'text-purple-500',
       orange: 'text-orange-500'
     };
-
     return (
       <GlassCard className="p-6">
         <div className="flex items-start justify-between">
@@ -129,7 +114,6 @@ const StreamMetrics = ({ streamId, vendorId, className = "" }) => {
       </GlassCard>
     );
   };
-
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
@@ -138,7 +122,6 @@ const StreamMetrics = ({ streamId, vendorId, className = "" }) => {
           <ChartBarIcon className="h-8 w-8" />
           <span>Stream Analytics</span>
         </h2>
-
         <div className="flex items-center space-x-2">
           {['24h', '7d', '30d'].map((range) => (
             <button
@@ -155,7 +138,6 @@ const StreamMetrics = ({ streamId, vendorId, className = "" }) => {
           ))}
         </div>
       </div>
-
       {/* Real-time Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
@@ -165,7 +147,6 @@ const StreamMetrics = ({ streamId, vendorId, className = "" }) => {
           trend={calculateTrend(realTimeData, 'viewers')}
           color="blue"
         />
-
         <MetricCard
           title="Total Views"
           value={streamMetrics.totalViews}
@@ -173,7 +154,6 @@ const StreamMetrics = ({ streamId, vendorId, className = "" }) => {
           trend={15.3}
           color="green"
         />
-
         <MetricCard
           title="Avg. Watch Time"
           value={`${Math.round(streamMetrics.averageWatchTime)}m`}
@@ -181,7 +161,6 @@ const StreamMetrics = ({ streamId, vendorId, className = "" }) => {
           trend={8.7}
           color="purple"
         />
-
         <MetricCard
           title="Engagement Rate"
           value={`${Math.round(streamMetrics.engagement)}%`}
@@ -190,7 +169,6 @@ const StreamMetrics = ({ streamId, vendorId, className = "" }) => {
           color="orange"
         />
       </div>
-
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Viewer Trend Chart */}
@@ -227,7 +205,6 @@ const StreamMetrics = ({ streamId, vendorId, className = "" }) => {
             </LineChart>
           </ResponsiveContainer>
         </GlassCard>
-
         {/* Engagement Chart */}
         <GlassCard className="p-6">
           <h3 className="text-lg font-semibold mb-4">Engagement Metrics</h3>
@@ -257,7 +234,6 @@ const StreamMetrics = ({ streamId, vendorId, className = "" }) => {
           </ResponsiveContainer>
         </GlassCard>
       </div>
-
       {/* Detailed Statistics */}
       <GlassCard className="p-6">
         <h3 className="text-lg font-semibold mb-4">Detailed Statistics</h3>
@@ -279,7 +255,6 @@ const StreamMetrics = ({ streamId, vendorId, className = "" }) => {
               </div>
             </div>
           </div>
-
           <div className="space-y-4">
             <h4 className="font-medium text-gray-600 dark:text-gray-300">Engagement</h4>
             <div className="space-y-3">
@@ -297,7 +272,6 @@ const StreamMetrics = ({ streamId, vendorId, className = "" }) => {
               </div>
             </div>
           </div>
-
           <div className="space-y-4">
             <h4 className="font-medium text-gray-600 dark:text-gray-300">Performance</h4>
             <div className="space-y-3">
@@ -317,7 +291,6 @@ const StreamMetrics = ({ streamId, vendorId, className = "" }) => {
           </div>
         </div>
       </GlassCard>
-
       {/* Top Moments */}
       <GlassCard className="p-6">
         <h3 className="text-lg font-semibold mb-4">Top Moments</h3>
@@ -350,5 +323,4 @@ const StreamMetrics = ({ streamId, vendorId, className = "" }) => {
     </div>
   );
 };
-
 export default StreamMetrics;

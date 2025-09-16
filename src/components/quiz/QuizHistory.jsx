@@ -6,7 +6,6 @@ import GlassCard from '../ui/GlassCard';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { assessmentService } from '../../services/assessment-service';
 import { useAuth } from '../../hooks/useAuth';
-
 const PERSONALITY_TYPE_COLORS = {
   'The Thrill Seeker': { primary: '#ef4444', secondary: '#dc2626', gradient: 'from-red-500 to-orange-500' },
   'The Comfort Traveler': { primary: '#10b981', secondary: '#059669', gradient: 'from-emerald-500 to-green-500' },
@@ -19,14 +18,12 @@ const PERSONALITY_TYPE_COLORS = {
   'The Leisure Socializer': { primary: '#3b82f6', secondary: '#2563eb', gradient: 'from-blue-500 to-indigo-500' },
   'The Curious Traveler': { primary: '#6b7280', secondary: '#4b5563', gradient: 'from-gray-500 to-slate-500' },
 };
-
 const TRAIT_LABELS = {
   energyLevel: 'Energy Level',
   socialPreference: 'Social Preference',
   adventureStyle: 'Adventure Style',
   riskTolerance: 'Risk Tolerance'
 };
-
 export default function QuizHistory({ onRetakeQuiz, onViewResult, className = '' }) {
   const [assessments, setAssessments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,40 +34,33 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
   const [showComparison, setShowComparison] = useState(false);
   const { user } = useAuth();
   const exportRef = useRef(null);
-
   useEffect(() => {
     if (user?.id) {
       loadAssessmentHistory();
     }
   }, [user?.id, sortBy]);
-
   const loadAssessmentHistory = async () => {
     try {
       setLoading(true);
       setError(null);
-
       const result = await assessmentService.queryAssessments({
         userId: user.id,
         limit: 50,
         offset: 0
       });
-
       let sortedAssessments = result.data || [];
-
       // Apply sorting
       if (sortBy === 'newest') {
         sortedAssessments.sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at));
       } else if (sortBy === 'oldest') {
         sortedAssessments.sort((a, b) => new Date(a.completed_at) - new Date(b.completed_at));
       }
-
       // Apply filtering
       if (filterBy !== 'all') {
         sortedAssessments = sortedAssessments.filter(assessment =>
           assessment.calculatorProfile?.personalityType === filterBy
         );
       }
-
       setAssessments(sortedAssessments);
     } catch (err) {
       console.error('Error loading assessment history:', err);
@@ -79,13 +69,11 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
       setLoading(false);
     }
   };
-
   const handleRetakeWithConfirmation = () => {
     if (window.confirm('Taking a new quiz will create a new assessment result. Your previous results will remain in your history. Continue?')) {
       onRetakeQuiz?.();
     }
   };
-
   const handleSelectAssessment = (assessmentId) => {
     setSelectedAssessments(prev => {
       if (prev.includes(assessmentId)) {
@@ -96,18 +84,14 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
       return prev;
     });
   };
-
   const getPersonalityTypes = () => {
     const types = ['all', ...new Set(assessments.map(a => a.calculatorProfile?.personalityType).filter(Boolean))];
     return types;
   };
-
   const prepareComparisonData = () => {
     if (selectedAssessments.length < 2) return [];
-
     const selectedData = assessments.filter(a => selectedAssessments.includes(a.id));
     const traits = ['energyLevel', 'socialPreference', 'adventureStyle', 'riskTolerance'];
-
     return traits.map(trait => ({
       trait: TRAIT_LABELS[trait],
       ...selectedData.reduce((acc, assessment, index) => {
@@ -118,10 +102,8 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
       }, {})
     }));
   };
-
   const prepareTimelineData = () => {
     if (assessments.length < 2) return [];
-
     return assessments
       .slice(0, 10) // Last 10 assessments
       .reverse()
@@ -133,10 +115,8 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
         riskTolerance: assessment.calculatorProfile?.riskTolerance || 0,
       }));
   };
-
   const downloadHistory = async () => {
     if (!exportRef.current) return;
-
     try {
       const html2canvas = await import('html2canvas');
       const canvas = await html2canvas.default(exportRef.current, {
@@ -145,7 +125,6 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
         useCORS: true,
         allowTaint: true
       });
-
       const link = document.createElement('a');
       link.download = `personality-assessment-history-${format(new Date(), 'yyyy-MM-dd')}.png`;
       link.href = canvas.toDataURL();
@@ -154,7 +133,6 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
       console.error('Failed to download history:', err);
     }
   };
-
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -162,7 +140,6 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
       transition: { staggerChildren: 0.1 }
     }
   };
-
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
@@ -171,7 +148,6 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
       transition: { duration: 0.6, ease: 'easeOut' }
     }
   };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -179,7 +155,6 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
@@ -205,7 +180,6 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
       </div>
     );
   }
-
   if (assessments.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
@@ -231,7 +205,6 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
       </div>
     );
   }
-
   return (
     <motion.div
       variants={containerVariants}
@@ -252,7 +225,6 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
             Track your personality journey over time
           </p>
         </motion.div>
-
         {/* Controls */}
         <motion.div variants={itemVariants}>
           <GlassCard className="p-6">
@@ -288,7 +260,6 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
                   </select>
                 </div>
               </div>
-
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={() => setShowComparison(!showComparison)}
@@ -317,7 +288,6 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
             </div>
           </GlassCard>
         </motion.div>
-
         {/* Timeline Evolution Chart */}
         {assessments.length > 1 && (
           <motion.div variants={itemVariants}>
@@ -359,7 +329,6 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
             </GlassCard>
           </motion.div>
         )}
-
         {/* Comparison View */}
         <AnimatePresence>
           {showComparison && selectedAssessments.length >= 2 && (
@@ -377,7 +346,6 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
             </motion.div>
           )}
         </AnimatePresence>
-
         {/* Assessment Grid */}
         <motion.div variants={itemVariants}>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -394,7 +362,6 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
             ))}
           </div>
         </motion.div>
-
         {/* Selection Info */}
         {showComparison && (
           <motion.div variants={itemVariants}>
@@ -412,13 +379,11 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
     </motion.div>
   );
 }
-
 // Assessment Card Component
 function AssessmentCard({ assessment, index, isSelected, onSelect, onView, showComparisonMode }) {
   const profile = assessment.calculatorProfile;
   const typeColors = PERSONALITY_TYPE_COLORS[profile?.personalityType] || PERSONALITY_TYPE_COLORS['The Curious Traveler'];
   const completedAt = new Date(assessment.completed_at);
-
   const cardVariants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
@@ -427,7 +392,6 @@ function AssessmentCard({ assessment, index, isSelected, onSelect, onView, showC
       transition: { duration: 0.6, delay: index * 0.1, ease: 'easeOut' }
     }
   };
-
   return (
     <motion.div variants={cardVariants}>
       <GlassCard
@@ -446,23 +410,19 @@ function AssessmentCard({ assessment, index, isSelected, onSelect, onView, showC
             />
           </div>
         )}
-
         <div className="text-center">
           <div
             className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r ${typeColors.gradient} flex items-center justify-center shadow-lg`}
           >
             <span className="text-2xl">🌍</span>
           </div>
-
           <h3 className={`text-lg font-semibold mb-2 bg-gradient-to-r ${typeColors.gradient} bg-clip-text text-transparent`}>
             {profile?.personalityType || 'Unknown Type'}
           </h3>
-
           <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
             <p>{format(completedAt, 'MMM dd, yyyy')}</p>
             <p>{formatDistanceToNow(completedAt, { addSuffix: true })}</p>
           </div>
-
           <div className="grid grid-cols-2 gap-2 text-xs">
             {Object.entries(TRAIT_LABELS).map(([key, label]) => (
               <div key={key} className="text-center">
@@ -475,7 +435,6 @@ function AssessmentCard({ assessment, index, isSelected, onSelect, onView, showC
               </div>
             ))}
           </div>
-
           {!showComparisonMode && (
             <button
               onClick={(e) => {
@@ -492,7 +451,6 @@ function AssessmentCard({ assessment, index, isSelected, onSelect, onView, showC
     </motion.div>
   );
 }
-
 // Comparison View Component
 function ComparisonView({ data, assessments, onClearSelection }) {
   return (
@@ -508,7 +466,6 @@ function ComparisonView({ data, assessments, onClearSelection }) {
           Clear Selection
         </button>
       </div>
-
       <div className="grid lg:grid-cols-2 gap-8">
         {/* Radar Chart */}
         <div>
@@ -549,7 +506,6 @@ function ComparisonView({ data, assessments, onClearSelection }) {
             </ResponsiveContainer>
           </div>
         </div>
-
         {/* Assessment Details */}
         <div>
           <h4 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-4">

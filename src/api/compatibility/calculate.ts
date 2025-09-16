@@ -2,13 +2,11 @@
  * API endpoint for calculating compatibility between users
  * POST /api/compatibility/calculate
  */
-
 import { compatibilityService } from '../../services/compatibility-service';
 import {
   CalculateCompatibilityRequest,
   CalculateCompatibilityResponse
 } from '../../types/compatibility';
-
 export async function calculateCompatibility(
   request: CalculateCompatibilityRequest
 ): Promise<CalculateCompatibilityResponse> {
@@ -27,7 +25,6 @@ export async function calculateCompatibility(
       }
     };
   }
-
   if (request.user1Id === request.user2Id) {
     return {
       success: false,
@@ -42,7 +39,6 @@ export async function calculateCompatibility(
       }
     };
   }
-
   try {
     const response = await compatibilityService.calculateCompatibility(request);
     return response;
@@ -62,7 +58,6 @@ export async function calculateCompatibility(
     };
   }
 }
-
 // Express.js handler example (if using Express)
 export const calculateCompatibilityHandler = async (req: any, res: any) => {
   try {
@@ -77,9 +72,7 @@ export const calculateCompatibilityHandler = async (req: any, res: any) => {
         forceRecalculation: req.body.forceRecalculation ?? false
       }
     };
-
     const response = await calculateCompatibility(request);
-
     res.status(response.success ? 200 : 400).json(response);
   } catch (error) {
     console.error('Express handler error:', error);
@@ -97,12 +90,10 @@ export const calculateCompatibilityHandler = async (req: any, res: any) => {
     });
   }
 };
-
 // Supabase Edge Function handler example
 export const supabaseEdgeFunctionHandler = async (req: Request): Promise<Response> => {
   try {
     const body = await req.json();
-
     const request: CalculateCompatibilityRequest = {
       user1Id: body.user1Id,
       user2Id: body.user2Id,
@@ -114,9 +105,7 @@ export const supabaseEdgeFunctionHandler = async (req: Request): Promise<Respons
         forceRecalculation: body.forceRecalculation ?? false
       }
     };
-
     const response = await calculateCompatibility(request);
-
     return new Response(JSON.stringify(response), {
       status: response.success ? 200 : 400,
       headers: {

@@ -2,11 +2,9 @@
  * RefundTrackingTable - Comprehensive refund tracking and reporting component
  * Provides detailed views for tracking all refunds across the platform
  */
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase.js';
 import { refundMonitoring } from '../../services/payment-refund-service.js';
-
 const RefundTrackingTable = ({
   userId = null,
   vendorId = null,
@@ -30,7 +28,6 @@ const RefundTrackingTable = ({
     total: 0,
   });
   const [exportLoading, setExportLoading] = useState(false);
-
   const refundStatuses = {
     succeeded: 'Succeeded',
     pending: 'Pending',
@@ -38,7 +35,6 @@ const RefundTrackingTable = ({
     processing: 'Processing',
     cancelled: 'Cancelled',
   };
-
   const refundReasons = {
     insufficient_group_payments: 'Insufficient Group Payments',
     booking_cancelled: 'Booking Cancelled',
@@ -51,15 +47,12 @@ const RefundTrackingTable = ({
     weather: 'Weather/External Factors',
     other: 'Other',
   };
-
   useEffect(() => {
     loadRefunds();
   }, [filter, sortBy, sortOrder, pagination.page, userId, vendorId]);
-
   const loadRefunds = async () => {
     try {
       setLoading(true);
-
       // Build query based on user type
       let query = supabase
         .from('payment_refunds')
@@ -81,28 +74,23 @@ const RefundTrackingTable = ({
             )
           )
         `, { count: 'exact' });
-
       // Apply user/vendor filtering
       if (userId && !adminView) {
         query = query.eq('individual_payments.user_id', userId);
       } else if (vendorId) {
         query = query.eq('split_payments.bookings.adventures.vendor_id', vendorId);
       }
-
       // Apply filters
       if (filter.status !== 'all') {
         query = query.eq('status', filter.status);
       }
-
       if (filter.reason !== 'all') {
         query = query.eq('refund_reason', filter.reason);
       }
-
       // Apply date range
       if (filter.dateRange !== 'all') {
         const endDate = new Date();
         const startDate = new Date();
-
         switch (filter.dateRange) {
           case '7d':
             startDate.setDate(endDate.getDate() - 7);
@@ -117,10 +105,8 @@ const RefundTrackingTable = ({
             startDate.setFullYear(endDate.getFullYear() - 1);
             break;
         }
-
         query = query.gte('created_at', startDate.toISOString());
       }
-
       // Apply search
       if (filter.searchTerm) {
         query = query.or(`
@@ -129,28 +115,21 @@ const RefundTrackingTable = ({
           individual_payments.users.email.ilike.%${filter.searchTerm}%
         `);
       }
-
       // Apply sorting
       query = query.order(sortBy, { ascending: sortOrder === 'asc' });
-
       // Apply pagination
       const from = (pagination.page - 1) * pagination.limit;
       const to = from + pagination.limit - 1;
       query = query.range(from, to);
-
       const { data: refundsData, error: refundsError, count } = await query;
-
       if (refundsError) throw refundsError;
-
       setRefunds(refundsData || []);
       setPagination(prev => ({ ...prev, total: count || 0 }));
-
       // Load summary statistics
       if (adminView) {
         const endDate = new Date();
         const startDate = new Date();
         startDate.setDate(endDate.getDate() - 30);
-
         const statsData = await refundMonitoring.getRefundStats(
           vendorId,
           startDate.toISOString(),
@@ -158,14 +137,12 @@ const RefundTrackingTable = ({
         );
         setStats(statsData);
       }
-
     } catch (error) {
       console.error('Failed to load refunds:', error);
     } finally {
       setLoading(false);
     }
   };
-
   const handleSort = (column) => {
     if (sortBy === column) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -174,15 +151,12 @@ const RefundTrackingTable = ({
       setSortOrder('desc');
     }
   };
-
   const handlePageChange = (newPage) => {
     setPagination(prev => ({ ...prev, page: newPage }));
   };
-
   const exportRefunds = async (format = 'csv') => {
     try {
       setExportLoading(true);
-
       // Get all refunds (remove pagination for export)
       let exportQuery = supabase
         .from('payment_refunds')
@@ -204,32 +178,25 @@ const RefundTrackingTable = ({
             )
           )
         `);
-
       // Apply same filters as current view
       if (userId && !adminView) {
         exportQuery = exportQuery.eq('individual_payments.user_id', userId);
       } else if (vendorId) {
         exportQuery = exportQuery.eq('split_payments.bookings.adventures.vendor_id', vendorId);
       }
-
       if (filter.status !== 'all') {
         exportQuery = exportQuery.eq('status', filter.status);
       }
-
       if (filter.reason !== 'all') {
         exportQuery = exportQuery.eq('refund_reason', filter.reason);
       }
-
       const { data: exportData, error } = await exportQuery.order('created_at', { ascending: false });
-
       if (error) throw error;
-
       if (format === 'csv') {
         downloadCSV(exportData);
       } else {
         downloadJSON(exportData);
       }
-
     } catch (error) {
       console.error('Failed to export refunds:', error);
       alert('Failed to export refunds. Please try again.');
@@ -237,7 +204,6 @@ const RefundTrackingTable = ({
       setExportLoading(false);
     }
   };
-
   const downloadCSV = (data) => {
     const headers = [
       'Refund ID',
@@ -252,7 +218,6 @@ const RefundTrackingTable = ({
       'Processed Date',
       'Created Date',
     ];
-
     const csvContent = [
       headers.join(','),
       ...data.map(refund => [
@@ -269,14 +234,12 @@ const RefundTrackingTable = ({
         new Date(refund.created_at).toISOString(),
       ].map(field => `"${field}"`).join(','))
     ].join('\n');
-
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `refunds-export-${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
   };
-
   const downloadJSON = (data) => {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const link = document.createElement('a');
@@ -284,14 +247,12 @@ const RefundTrackingTable = ({
     link.download = `refunds-export-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
   };
-
   const formatAmount = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
     }).format(amount / 100);
   };
-
   const getStatusColor = (status) => {
     const colors = {
       succeeded: 'bg-green-100 text-green-800',
@@ -302,7 +263,6 @@ const RefundTrackingTable = ({
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
-
   const getSortIcon = (column) => {
     if (sortBy !== column) {
       return (
@@ -311,7 +271,6 @@ const RefundTrackingTable = ({
         </svg>
       );
     }
-
     if (sortOrder === 'asc') {
       return (
         <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -326,9 +285,7 @@ const RefundTrackingTable = ({
       );
     }
   };
-
   const totalPages = Math.ceil(pagination.total / pagination.limit);
-
   return (
     <div className="space-y-6">
       {/* Summary Statistics */}
@@ -351,7 +308,6 @@ const RefundTrackingTable = ({
               </div>
             </div>
           </div>
-
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -369,7 +325,6 @@ const RefundTrackingTable = ({
               </div>
             </div>
           </div>
-
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -387,7 +342,6 @@ const RefundTrackingTable = ({
               </div>
             </div>
           </div>
-
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -409,7 +363,6 @@ const RefundTrackingTable = ({
           </div>
         </div>
       )}
-
       {/* Filters and Search */}
       <div className="bg-white rounded-lg shadow p-6">
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
@@ -426,7 +379,6 @@ const RefundTrackingTable = ({
               ))}
             </select>
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Reason</label>
             <select
@@ -440,7 +392,6 @@ const RefundTrackingTable = ({
               ))}
             </select>
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
             <select
@@ -455,7 +406,6 @@ const RefundTrackingTable = ({
               <option value="all">All time</option>
             </select>
           </div>
-
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
             <input
@@ -466,7 +416,6 @@ const RefundTrackingTable = ({
               className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
             />
           </div>
-
           <div className="flex items-end">
             <button
               onClick={() => exportRefunds('csv')}
@@ -478,7 +427,6 @@ const RefundTrackingTable = ({
           </div>
         </div>
       </div>
-
       {/* Refunds Table */}
       <div className="bg-white shadow overflow-hidden sm:rounded-lg">
         <div className="overflow-x-auto">
@@ -605,7 +553,6 @@ const RefundTrackingTable = ({
             </tbody>
           </table>
         </div>
-
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
@@ -652,7 +599,6 @@ const RefundTrackingTable = ({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
                     </svg>
                   </button>
-
                   {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
                     let pageNum;
                     if (totalPages <= 5) {
@@ -664,7 +610,6 @@ const RefundTrackingTable = ({
                     } else {
                       pageNum = pagination.page - 2 + i;
                     }
-
                     return (
                       <button
                         key={pageNum}
@@ -679,7 +624,6 @@ const RefundTrackingTable = ({
                       </button>
                     );
                   })}
-
                   <button
                     onClick={() => handlePageChange(pagination.page + 1)}
                     disabled={pagination.page === totalPages}
@@ -698,5 +642,4 @@ const RefundTrackingTable = ({
     </div>
   );
 };
-
 export default RefundTrackingTable;

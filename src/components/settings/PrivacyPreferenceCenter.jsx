@@ -4,7 +4,6 @@ import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import gdprConsentService from '../../services/gdpr-consent-service';
-
 const PrivacyPreferenceCenter = () => {
   const [consentStatus, setConsentStatus] = useState(null);
   const [auditTrail, setAuditTrail] = useState([]);
@@ -12,27 +11,22 @@ const PrivacyPreferenceCenter = () => {
   const [saving, setSaving] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-
   useEffect(() => {
     loadPrivacyData();
-
     // Listen for consent changes
     const removeListener = gdprConsentService.addEventListener((eventType) => {
       if (eventType === 'consentChanged' || eventType === 'multipleConsentChanged') {
         loadPrivacyData();
       }
     });
-
     return removeListener;
   }, []);
-
   const loadPrivacyData = async () => {
     try {
       setLoading(true);
       await gdprConsentService.init();
       const status = gdprConsentService.getConsentStatus();
       const audit = gdprConsentService.getAuditTrail(50);
-
       setConsentStatus(status);
       setAuditTrail(audit);
     } catch (error) {
@@ -41,7 +35,6 @@ const PrivacyPreferenceCenter = () => {
       setLoading(false);
     }
   };
-
   const handleConsentToggle = async (category, enabled) => {
     setSaving(true);
     try {
@@ -53,14 +46,12 @@ const PrivacyPreferenceCenter = () => {
       setSaving(false);
     }
   };
-
   const handleExportData = async () => {
     setExportLoading(true);
     try {
       // This would normally require user authentication
       const userId = 'current-user-id'; // Replace with actual user ID
       const exportData = await gdprConsentService.exportUserData(userId);
-
       // Create and download JSON file
       const blob = new Blob([JSON.stringify(exportData, null, 2)], {
         type: 'application/json'
@@ -73,7 +64,6 @@ const PrivacyPreferenceCenter = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-
       alert('Your data has been exported and downloaded successfully.');
     } catch (error) {
       console.error('Failed to export data:', error);
@@ -82,21 +72,16 @@ const PrivacyPreferenceCenter = () => {
       setExportLoading(false);
     }
   };
-
   const handleDeleteData = async () => {
     const confirmed = window.confirm(
       'Are you sure you want to delete all your data? This action cannot be undone and you will be logged out.'
     );
-
     if (!confirmed) return;
-
     setDeleteLoading(true);
     try {
       const userId = 'current-user-id'; // Replace with actual user ID
       const result = await gdprConsentService.deleteUserData(userId);
-
       alert(`Data deletion initiated. Reference ID: ${result.deletionId}. You will receive confirmation within 30 days.`);
-
       // Redirect to logout or home page
       window.location.href = '/';
     } catch (error) {
@@ -106,11 +91,9 @@ const PrivacyPreferenceCenter = () => {
       setDeleteLoading(false);
     }
   };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString();
   };
-
   const getEventTypeColor = (eventType) => {
     if (eventType.includes('accept') || eventType.includes('consent_category_changed')) {
       return 'bg-green-100 text-green-800';
@@ -123,7 +106,6 @@ const PrivacyPreferenceCenter = () => {
     }
     return 'bg-gray-100 text-gray-800';
   };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -131,7 +113,6 @@ const PrivacyPreferenceCenter = () => {
       </div>
     );
   }
-
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <div>
@@ -140,7 +121,6 @@ const PrivacyPreferenceCenter = () => {
           Manage your privacy settings and data preferences. Changes take effect immediately.
         </p>
       </div>
-
       <Tabs defaultValue="preferences" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="preferences">Cookie Preferences</TabsTrigger>
@@ -148,11 +128,9 @@ const PrivacyPreferenceCenter = () => {
           <TabsTrigger value="audit">Activity Log</TabsTrigger>
           <TabsTrigger value="compliance">Compliance Info</TabsTrigger>
         </TabsList>
-
         <TabsContent value="preferences" className="space-y-6">
           <Card className="p-6">
             <h2 className="text-lg font-semibold mb-4">Cookie & Data Collection Preferences</h2>
-
             <div className="space-y-4">
               {consentStatus && Object.entries(consentStatus.categories).map(([category, info]) => (
                 <div key={category} className="border border-gray-200 rounded-lg p-4">
@@ -168,7 +146,6 @@ const PrivacyPreferenceCenter = () => {
                         )}
                       </div>
                       <p className="mt-1 text-sm text-gray-600">{info.description}</p>
-
                       {info.purposes && (
                         <div className="mt-2">
                           <p className="text-xs font-medium text-gray-700">Used for:</p>
@@ -179,7 +156,6 @@ const PrivacyPreferenceCenter = () => {
                           </ul>
                         </div>
                       )}
-
                       {info.timestamp && (
                         <p className="mt-2 text-xs text-gray-500">
                           Last updated: {formatDate(info.timestamp)}
@@ -187,7 +163,6 @@ const PrivacyPreferenceCenter = () => {
                         </p>
                       )}
                     </div>
-
                     <div className="ml-4">
                       <label className="flex items-center">
                         <input
@@ -207,7 +182,6 @@ const PrivacyPreferenceCenter = () => {
               ))}
             </div>
           </Card>
-
           {consentStatus && (
             <Card className="p-6">
               <h3 className="text-lg font-semibold mb-4">Current Status</h3>
@@ -240,14 +214,12 @@ const PrivacyPreferenceCenter = () => {
             </Card>
           )}
         </TabsContent>
-
         <TabsContent value="rights" className="space-y-6">
           <Card className="p-6">
             <h2 className="text-lg font-semibold mb-4">Your Data Rights</h2>
             <p className="text-gray-600 mb-6">
               Under privacy regulations, you have several rights regarding your personal data.
             </p>
-
             <div className="space-y-6">
               <div>
                 <h3 className="font-medium text-gray-900 mb-2">Export Your Data</h3>
@@ -263,7 +235,6 @@ const PrivacyPreferenceCenter = () => {
                   {exportLoading ? 'Exporting...' : 'Export My Data'}
                 </Button>
               </div>
-
               <div className="border-t pt-6">
                 <h3 className="font-medium text-gray-900 mb-2">Delete Your Data</h3>
                 <p className="text-sm text-gray-600 mb-4">
@@ -279,7 +250,6 @@ const PrivacyPreferenceCenter = () => {
                   {deleteLoading ? 'Processing...' : 'Delete All My Data'}
                 </Button>
               </div>
-
               <div className="border-t pt-6">
                 <h3 className="font-medium text-gray-900 mb-2">Other Rights</h3>
                 <ul className="text-sm text-gray-600 space-y-2">
@@ -299,14 +269,12 @@ const PrivacyPreferenceCenter = () => {
             </div>
           </Card>
         </TabsContent>
-
         <TabsContent value="audit" className="space-y-6">
           <Card className="p-6">
             <h2 className="text-lg font-semibold mb-4">Privacy Activity Log</h2>
             <p className="text-gray-600 mb-6">
               A record of all privacy-related actions and consent changes for your account.
             </p>
-
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {auditTrail.length > 0 ? (
                 auditTrail.map((event, index) => (
@@ -321,7 +289,6 @@ const PrivacyPreferenceCenter = () => {
                             {formatDate(event.timestamp)}
                           </span>
                         </div>
-
                         {event.data && Object.keys(event.data).length > 0 && (
                           <div className="mt-2">
                             <details className="text-xs text-gray-600">
@@ -344,11 +311,9 @@ const PrivacyPreferenceCenter = () => {
             </div>
           </Card>
         </TabsContent>
-
         <TabsContent value="compliance" className="space-y-6">
           <Card className="p-6">
             <h2 className="text-lg font-semibold mb-4">Compliance Information</h2>
-
             <div className="space-y-6">
               <div>
                 <h3 className="font-medium text-gray-900 mb-2">Data Retention Policies</h3>
@@ -371,7 +336,6 @@ const PrivacyPreferenceCenter = () => {
                   </div>
                 </div>
               </div>
-
               <div className="border-t pt-6">
                 <h3 className="font-medium text-gray-900 mb-2">Legal Basis for Processing</h3>
                 <div className="space-y-2 text-sm">
@@ -381,7 +345,6 @@ const PrivacyPreferenceCenter = () => {
                   <div><strong>Functional:</strong> Consent</div>
                 </div>
               </div>
-
               <div className="border-t pt-6">
                 <h3 className="font-medium text-gray-900 mb-2">Data Processors</h3>
                 <div className="space-y-2 text-sm text-gray-600">
@@ -391,7 +354,6 @@ const PrivacyPreferenceCenter = () => {
                   <div>• Supabase (Database) - GDPR compliant</div>
                 </div>
               </div>
-
               <div className="border-t pt-6">
                 <h3 className="font-medium text-gray-900 mb-2">Contact Information</h3>
                 <div className="text-sm text-gray-600">
@@ -407,5 +369,4 @@ const PrivacyPreferenceCenter = () => {
     </div>
   );
 };
-
 export default PrivacyPreferenceCenter;

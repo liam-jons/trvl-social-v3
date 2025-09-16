@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Star,
+  CheckCircle,
+  Zap,
+  Target,
+  Award,
+  Lightbulb,
+  Medal
+} from 'lucide-react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import vendorPerformanceService from '../../services/vendor-performance-service';
-
 /**
  * Performance Badges Component - Award and display performance-based badges
  */
@@ -13,33 +21,26 @@ const PerformanceBadges = ({ vendorId }) => {
   const [performanceData, setPerformanceData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   useEffect(() => {
     loadBadgeData();
   }, [vendorId]);
-
   const loadBadgeData = async () => {
     try {
       setLoading(true);
       setError(null);
-
       // Get current performance data
       const performanceResult = await vendorPerformanceService.calculatePerformanceMetrics(vendorId, 30);
       if (performanceResult.error) {
         throw new Error(performanceResult.error);
       }
-
       setPerformanceData(performanceResult.data);
-
       // Load earned badges (from localStorage for demo)
       const savedBadges = localStorage.getItem(`vendor-badges-${vendorId}`);
       const earnedBadges = savedBadges ? JSON.parse(savedBadges) : [];
       setBadges(earnedBadges);
-
       // Calculate available badges based on performance
       const available = calculateAvailableBadges(performanceResult.data, earnedBadges);
       setAvailableBadges(available);
-
     } catch (err) {
       console.error('Load badge data error:', err);
       setError(err.message);
@@ -47,11 +48,9 @@ const PerformanceBadges = ({ vendorId }) => {
       setLoading(false);
     }
   };
-
   const calculateAvailableBadges = (performance, earnedBadges) => {
     const metrics = performance.metrics;
     const earnedBadgeTypes = earnedBadges.map(b => b.type);
-
     const allBadges = [
       {
         type: 'excellence_award',
@@ -68,7 +67,7 @@ const PerformanceBadges = ({ vendorId }) => {
         type: 'customer_favorite',
         name: 'Customer Favorite',
         description: 'Achieve 4.8+ average rating with 50+ reviews',
-        icon: '⭐',
+        icon: Star,
         tier: 'gold',
         criteria: metrics.reviews.averageRating >= 4.8 && metrics.reviews.totalReviews >= 50,
         requirement: '4.8+ rating, 50+ reviews',
@@ -79,7 +78,7 @@ const PerformanceBadges = ({ vendorId }) => {
         type: 'reliability_expert',
         name: 'Reliability Expert',
         description: 'Maintain 95+ completion rate with zero vendor cancellations',
-        icon: '✅',
+        icon: CheckCircle,
         tier: 'silver',
         criteria: metrics.bookings.completionRate >= 95 && metrics.cancellations.vendorCancellationRate === 0,
         requirement: '95%+ completion, 0% vendor cancellations',
@@ -90,7 +89,7 @@ const PerformanceBadges = ({ vendorId }) => {
         type: 'quick_responder',
         name: 'Quick Responder',
         description: 'Maintain average response time under 2 hours',
-        icon: '⚡',
+        icon: Zap,
         tier: 'bronze',
         criteria: metrics.responseTime.averageResponseTime <= 2,
         requirement: 'Response time: <2 hours',
@@ -123,7 +122,7 @@ const PerformanceBadges = ({ vendorId }) => {
         type: 'volume_master',
         name: 'Volume Master',
         description: 'Complete 100+ bookings in 30 days',
-        icon: '🎯',
+        icon: Target,
         tier: 'bronze',
         criteria: metrics.bookings.completedBookings >= 100,
         requirement: 'Completed bookings: 100+',
@@ -134,7 +133,7 @@ const PerformanceBadges = ({ vendorId }) => {
         type: 'newcomer_success',
         name: 'Newcomer Success',
         description: 'Achieve first 10 completed bookings with 4.0+ rating',
-        icon: '🌟',
+        icon: Award,
         tier: 'bronze',
         criteria: metrics.bookings.completedBookings >= 10 && metrics.reviews.averageRating >= 4.0,
         requirement: '10+ bookings, 4.0+ rating',
@@ -156,7 +155,7 @@ const PerformanceBadges = ({ vendorId }) => {
         type: 'innovation_leader',
         name: 'Innovation Leader',
         description: 'First to implement new platform features',
-        icon: '💡',
+        icon: Lightbulb,
         tier: 'special',
         criteria: false, // This would be manually awarded
         requirement: 'Early feature adoption',
@@ -164,27 +163,21 @@ const PerformanceBadges = ({ vendorId }) => {
         points: 120
       }
     ];
-
     return allBadges.filter(badge => !earnedBadgeTypes.includes(badge.type));
   };
-
   const claimBadge = (badge) => {
     if (!badge.criteria) return;
-
     const newBadge = {
       ...badge,
       earnedAt: new Date().toISOString(),
       id: Date.now().toString()
     };
-
     const updatedBadges = [...badges, newBadge];
     setBadges(updatedBadges);
     localStorage.setItem(`vendor-badges-${vendorId}`, JSON.stringify(updatedBadges));
-
     // Remove from available badges
     setAvailableBadges(availableBadges.filter(b => b.type !== badge.type));
   };
-
   const getTierColor = (tier) => {
     const colors = {
       bronze: 'bg-orange-100 text-orange-800 border-orange-200',
@@ -195,20 +188,17 @@ const PerformanceBadges = ({ vendorId }) => {
     };
     return colors[tier] || colors.bronze;
   };
-
   const getTierIcon = (tier) => {
     const icons = {
-      bronze: '🥉',
-      silver: '🥈',
-      gold: '🥇',
-      platinum: '💎',
-      special: '🎖️'
+      bronze: Medal,
+      silver: Medal,
+      gold: Award,
+      platinum: Star,
+      special: Medal
     };
-    return icons[tier] || icons.bronze;
+    return icons[tier] || Medal;
   };
-
   const totalPoints = badges.reduce((sum, badge) => sum + (badge.points || 0), 0);
-
   if (loading) {
     return (
       <div className="space-y-6">
@@ -223,7 +213,6 @@ const PerformanceBadges = ({ vendorId }) => {
       </div>
     );
   }
-
   if (error) {
     return (
       <Card className="p-6">
@@ -242,7 +231,6 @@ const PerformanceBadges = ({ vendorId }) => {
       </Card>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -258,7 +246,6 @@ const PerformanceBadges = ({ vendorId }) => {
           <div className="text-sm text-gray-500">Total Points</div>
         </div>
       </div>
-
       {/* Earned Badges */}
       {badges.length > 0 && (
         <Card className="p-6">
@@ -268,8 +255,11 @@ const PerformanceBadges = ({ vendorId }) => {
               <div key={badge.id} className={`p-4 rounded-lg border-2 ${getTierColor(badge.tier)}`}>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center space-x-2">
-                    <span className="text-2xl">{badge.icon}</span>
-                    <span className="text-lg">{getTierIcon(badge.tier)}</span>
+                    <badge.icon className="w-6 h-6 text-yellow-500" />
+                    {(() => {
+                      const TierIcon = getTierIcon(badge.tier);
+                      return <TierIcon className="w-5 h-5 text-gray-500" />;
+                    })()}
                   </div>
                   <Badge className="bg-green-100 text-green-800">
                     +{badge.points} pts
@@ -285,7 +275,6 @@ const PerformanceBadges = ({ vendorId }) => {
           </div>
         </Card>
       )}
-
       {/* Available Badges */}
       <Card className="p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Available Badges</h3>
@@ -305,18 +294,19 @@ const PerformanceBadges = ({ vendorId }) => {
               <div key={badge.type} className={`p-4 rounded-lg border-2 ${badge.criteria ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-gray-50'}`}>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-2">
-                    <span className="text-2xl">{badge.icon}</span>
-                    <span className="text-lg">{getTierIcon(badge.tier)}</span>
+                    <badge.icon className="w-6 h-6 text-yellow-500" />
+                    {(() => {
+                      const TierIcon = getTierIcon(badge.tier);
+                      return <TierIcon className="w-5 h-5 text-gray-500" />;
+                    })()}
                     <span className="text-sm font-medium text-gray-600 capitalize">{badge.tier}</span>
                   </div>
                   <Badge className={badge.criteria ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
                     {badge.points} pts
                   </Badge>
                 </div>
-
                 <h4 className="font-medium text-gray-900 mb-2">{badge.name}</h4>
                 <p className="text-sm text-gray-600 mb-3">{badge.description}</p>
-
                 <div className="space-y-2">
                   <div className="text-xs text-gray-500">
                     <div className="font-medium">Requirement:</div>
@@ -327,7 +317,6 @@ const PerformanceBadges = ({ vendorId }) => {
                     <div>{badge.current}</div>
                   </div>
                 </div>
-
                 {badge.criteria && (
                   <div className="mt-4">
                     <Button
@@ -347,7 +336,6 @@ const PerformanceBadges = ({ vendorId }) => {
           </div>
         )}
       </Card>
-
       {/* Badge Tiers Info */}
       <Card className="p-6 bg-blue-50 border-blue-200">
         <h3 className="text-lg font-medium text-blue-900 mb-4">Badge Tiers</h3>
@@ -357,7 +345,7 @@ const PerformanceBadges = ({ vendorId }) => {
             { tier: 'silver', name: 'Silver', icon: '🥈', points: '70-80 pts' },
             { tier: 'gold', name: 'Gold', icon: '🥇', points: '100-150 pts' },
             { tier: 'platinum', name: 'Platinum', icon: '💎', points: '200+ pts' },
-            { tier: 'special', name: 'Special', icon: '🎖️', points: 'Variable' }
+            { tier: 'special', name: 'Special', icon: Medal, points: 'Variable' }
           ].map((tier) => (
             <div key={tier.tier} className="text-center">
               <div className="text-2xl mb-1">{tier.icon}</div>
@@ -367,7 +355,10 @@ const PerformanceBadges = ({ vendorId }) => {
           ))}
         </div>
         <div className="mt-4 text-sm text-blue-800">
-          <div className="font-medium mb-1">💡 Badge Benefits:</div>
+          <div className="flex items-center space-x-2 font-medium mb-1">
+            <Lightbulb className="w-4 h-4" />
+            <span>Badge Benefits:</span>
+          </div>
           <ul className="text-blue-700 space-y-1">
             <li>• Display badges on your profile to build customer trust</li>
             <li>• Higher search ranking for badged vendors</li>
@@ -379,5 +370,4 @@ const PerformanceBadges = ({ vendorId }) => {
     </div>
   );
 };
-
 export default PerformanceBadges;

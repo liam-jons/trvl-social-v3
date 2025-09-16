@@ -2,11 +2,9 @@
  * RefundManagementDashboard - Vendor interface for managing refund requests
  * Provides comprehensive tools for reviewing, approving, and processing refunds
  */
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase.js';
 import { manualRefundManager, refundMonitoring } from '../../services/payment-refund-service.js';
-
 const RefundManagementDashboard = ({ vendorId }) => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
@@ -19,21 +17,17 @@ const RefundManagementDashboard = ({ vendorId }) => {
     status: 'all',
     reason: 'all',
   });
-
   useEffect(() => {
     if (vendorId) {
       loadRefundData();
     }
   }, [vendorId, activeTab, filter]);
-
   const loadRefundData = async () => {
     try {
       setLoading(true);
-
       const endDate = new Date();
       const startDate = new Date();
       startDate.setDate(endDate.getDate() - 30);
-
       // Load refund statistics
       const stats = await refundMonitoring.getRefundStats(
         vendorId,
@@ -41,7 +35,6 @@ const RefundManagementDashboard = ({ vendorId }) => {
         endDate.toISOString()
       );
       setRefundStats(stats);
-
       // Load refund requests
       let query = supabase
         .from('refund_requests')
@@ -65,7 +58,6 @@ const RefundManagementDashboard = ({ vendorId }) => {
         `)
         .eq('bookings.adventures.vendor_id', vendorId)
         .order('created_at', { ascending: false });
-
       // Apply status filter
       if (activeTab !== 'all') {
         if (activeTab === 'pending') {
@@ -74,28 +66,22 @@ const RefundManagementDashboard = ({ vendorId }) => {
           query = query.eq('status', activeTab);
         }
       }
-
       // Apply additional filters
       if (filter.reason !== 'all') {
         query = query.eq('reason_category', filter.reason);
       }
-
       const { data: requests, error } = await query;
-
       if (error) throw error;
       setRefundRequests(requests || []);
-
     } catch (error) {
       console.error('Failed to load refund data:', error);
     } finally {
       setLoading(false);
     }
   };
-
   const updateRequestStatus = async (requestId, status, notes = '') => {
     try {
       setProcessingRefund(requestId);
-
       const { error } = await supabase
         .from('refund_requests')
         .update({
@@ -105,24 +91,19 @@ const RefundManagementDashboard = ({ vendorId }) => {
           updated_at: new Date().toISOString(),
         })
         .eq('id', requestId);
-
       if (error) throw error;
-
       // Reload data
       await loadRefundData();
       setSelectedRequest(null);
-
     } catch (error) {
       console.error('Failed to update request status:', error);
     } finally {
       setProcessingRefund(null);
     }
   };
-
   const processRefund = async (request, refundType = 'full') => {
     try {
       setProcessingRefund(request.id);
-
       // Process actual refund through service
       const refundResult = await manualRefundManager.processManualRefund({
         splitPaymentId: request.split_payment_id,
@@ -130,11 +111,9 @@ const RefundManagementDashboard = ({ vendorId }) => {
         reason: request.reason_category,
         refundType,
       });
-
       if (refundResult.success) {
         // Update request status to processed
         await updateRequestStatus(request.id, 'approved_processed', 'Refund processed successfully');
-
         // Send notification to customer
         await supabase
           .from('notifications')
@@ -152,7 +131,6 @@ const RefundManagementDashboard = ({ vendorId }) => {
       } else {
         throw new Error('Refund processing failed');
       }
-
     } catch (error) {
       console.error('Failed to process refund:', error);
       await updateRequestStatus(request.id, 'processing_failed', `Failed to process refund: ${error.message}`);
@@ -160,14 +138,12 @@ const RefundManagementDashboard = ({ vendorId }) => {
       setProcessingRefund(null);
     }
   };
-
   const formatAmount = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
     }).format(amount / 100);
   };
-
   const getStatusColor = (status) => {
     const colors = {
       pending_review: 'bg-yellow-100 text-yellow-800',
@@ -178,7 +154,6 @@ const RefundManagementDashboard = ({ vendorId }) => {
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
-
   const renderStats = () => (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
       <div className="bg-white rounded-lg shadow p-6">
@@ -202,7 +177,6 @@ const RefundManagementDashboard = ({ vendorId }) => {
           </div>
         </div>
       </div>
-
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center">
           <div className="flex-shrink-0">
@@ -224,7 +198,6 @@ const RefundManagementDashboard = ({ vendorId }) => {
           </div>
         </div>
       </div>
-
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center">
           <div className="flex-shrink-0">
@@ -246,7 +219,6 @@ const RefundManagementDashboard = ({ vendorId }) => {
           </div>
         </div>
       </div>
-
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center">
           <div className="flex-shrink-0">
@@ -270,7 +242,6 @@ const RefundManagementDashboard = ({ vendorId }) => {
       </div>
     </div>
   );
-
   const renderRequestDetail = (request) => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
@@ -289,7 +260,6 @@ const RefundManagementDashboard = ({ vendorId }) => {
             </button>
           </div>
         </div>
-
         <div className="px-6 py-4 space-y-6">
           {/* Customer Information */}
           <div>
@@ -305,7 +275,6 @@ const RefundManagementDashboard = ({ vendorId }) => {
               </div>
             </div>
           </div>
-
           {/* Booking Information */}
           <div>
             <h4 className="text-sm font-medium text-gray-900 mb-3">Booking Information</h4>
@@ -328,7 +297,6 @@ const RefundManagementDashboard = ({ vendorId }) => {
               )}
             </div>
           </div>
-
           {/* Refund Request Details */}
           <div>
             <h4 className="text-sm font-medium text-gray-900 mb-3">Refund Request</h4>
@@ -360,7 +328,6 @@ const RefundManagementDashboard = ({ vendorId }) => {
               </div>
             </div>
           </div>
-
           {request.additional_details && (
             <div>
               <h4 className="text-sm font-medium text-gray-900 mb-3">Additional Details</h4>
@@ -369,7 +336,6 @@ const RefundManagementDashboard = ({ vendorId }) => {
               </div>
             </div>
           )}
-
           {request.vendor_notes && (
             <div>
               <h4 className="text-sm font-medium text-gray-900 mb-3">Vendor Notes</h4>
@@ -379,7 +345,6 @@ const RefundManagementDashboard = ({ vendorId }) => {
             </div>
           )}
         </div>
-
         {/* Action Buttons */}
         {['pending_review', 'under_review'].includes(request.status) && (
           <div className="px-6 py-4 border-t border-gray-200">
@@ -411,7 +376,6 @@ const RefundManagementDashboard = ({ vendorId }) => {
       </div>
     </div>
   );
-
   const renderRequestsList = () => (
     <div className="bg-white shadow overflow-hidden sm:rounded-md">
       <ul className="divide-y divide-gray-200">
@@ -484,7 +448,6 @@ const RefundManagementDashboard = ({ vendorId }) => {
       )}
     </div>
   );
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="py-6">
@@ -495,10 +458,8 @@ const RefundManagementDashboard = ({ vendorId }) => {
             </h2>
           </div>
         </div>
-
         {/* Statistics */}
         {refundStats && renderStats()}
-
         {/* Tab Navigation */}
         <div className="mb-6">
           <nav className="flex space-x-8" aria-label="Tabs">
@@ -522,7 +483,6 @@ const RefundManagementDashboard = ({ vendorId }) => {
             ))}
           </nav>
         </div>
-
         {/* Refund Requests List */}
         {loading ? (
           <div className="text-center py-12">
@@ -532,12 +492,10 @@ const RefundManagementDashboard = ({ vendorId }) => {
         ) : (
           renderRequestsList()
         )}
-
         {/* Request Detail Modal */}
         {selectedRequest && renderRequestDetail(selectedRequest)}
       </div>
     </div>
   );
 };
-
 export default RefundManagementDashboard;

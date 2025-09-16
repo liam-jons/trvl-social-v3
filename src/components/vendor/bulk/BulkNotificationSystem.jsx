@@ -12,7 +12,6 @@ import {
 import GlassCard from '../../ui/GlassCard';
 import { bulkOperationsService } from '../../../services/bulk-operations-service';
 import { vendorService } from '../../../services/vendor-service';
-
 const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
   const [recipientType, setRecipientType] = useState('booking_participants');
   const [targetBookings, setTargetBookings] = useState([]);
@@ -30,15 +29,12 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
   const [results, setResults] = useState(null);
   const [showResults, setShowResults] = useState(false);
   const [recipientCount, setRecipientCount] = useState(0);
-
   useEffect(() => {
     loadData();
   }, [vendorId]);
-
   useEffect(() => {
     calculateRecipientCount();
   }, [recipientType, targetBookings, targetAdventures, allBookings, allAdventures]);
-
   const loadData = async () => {
     setIsLoading(true);
     try {
@@ -46,11 +42,9 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
         bulkOperationsService.getBulkBookingsData(vendorId, { limit: 500 }),
         vendorService.getVendorAdventures(vendorId, { limit: 1000 })
       ]);
-
       if (bookingsResult.data) {
         setAllBookings(bookingsResult.data);
       }
-
       if (adventuresResult.data) {
         setAllAdventures(adventuresResult.data);
       }
@@ -60,17 +54,14 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
       setIsLoading(false);
     }
   };
-
   const calculateRecipientCount = () => {
     let count = 0;
     const uniqueUsers = new Set();
-
     switch (recipientType) {
       case 'booking_participants':
         const selectedBookings = allBookings.filter(booking =>
           targetBookings.length === 0 || targetBookings.includes(booking.id)
         );
-
         selectedBookings.forEach(booking => {
           booking.booking_participants?.forEach(participant => {
             uniqueUsers.add(participant.user_id);
@@ -78,12 +69,10 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
         });
         count = uniqueUsers.size;
         break;
-
       case 'adventure_followers':
         const selectedAdventures = allAdventures.filter(adventure =>
           targetAdventures.length === 0 || targetAdventures.includes(adventure.id)
         );
-
         // Get unique users from bookings for these adventures
         allBookings
           .filter(booking => selectedAdventures.some(adv => adv.id === booking.adventure_id))
@@ -94,14 +83,11 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
           });
         count = uniqueUsers.size;
         break;
-
       default:
         count = 0;
     }
-
     setRecipientCount(count);
   };
-
   const recipientTypes = [
     {
       id: 'booking_participants',
@@ -116,7 +102,6 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
       description: 'Send to customers who have booked specific adventures'
     }
   ];
-
   const notificationTypes = [
     { value: 'vendor_update', label: 'General Update' },
     { value: 'booking_reminder', label: 'Booking Reminder' },
@@ -126,18 +111,15 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
     { value: 'special_offer', label: 'Special Offer' },
     { value: 'safety_information', label: 'Safety Information' }
   ];
-
   const handleSendNotifications = async () => {
     if (!notification.message.trim()) {
       alert('Please enter a message');
       return;
     }
-
     if (recipientCount === 0) {
       alert('No recipients selected');
       return;
     }
-
     setIsLoading(true);
     try {
       const notificationData = {
@@ -147,19 +129,15 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
         includeEmail: notification.includeEmail,
         includeWhatsApp: notification.includeWhatsApp
       };
-
       // Add specific targets based on recipient type
       if (recipientType === 'booking_participants') {
         notificationData.bookingIds = targetBookings.length > 0 ? targetBookings : allBookings.map(b => b.id);
       } else if (recipientType === 'adventure_followers') {
         notificationData.adventureIds = targetAdventures.length > 0 ? targetAdventures : allAdventures.map(a => a.id);
       }
-
       const result = await bulkOperationsService.sendBulkNotifications(vendorId, notificationData);
-
       setResults(result.data);
       setShowResults(true);
-
       // Log the action
       await bulkOperationsService.logBulkAction(vendorId, {
         type: 'bulk_notification',
@@ -168,9 +146,7 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
         details: notificationData,
         results: result.data
       });
-
       onActionComplete?.();
-
     } catch (error) {
       console.error('Send notifications failed:', error);
       setResults({
@@ -183,10 +159,8 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
       setIsLoading(false);
     }
   };
-
   const renderResults = () => {
     if (!results) return null;
-
     return (
       <GlassCard variant="light" padding="md" className="mt-6">
         <div className="flex items-center justify-between mb-4">
@@ -200,7 +174,6 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">
@@ -221,7 +194,6 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
             <div className="text-sm text-gray-600 dark:text-gray-400">Total Recipients</div>
           </div>
         </div>
-
         {results.failed && results.failed.length > 0 && (
           <div className="mt-4">
             <h4 className="font-medium text-red-600 dark:text-red-400 mb-2">
@@ -239,7 +211,6 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
       </GlassCard>
     );
   };
-
   return (
     <div className="space-y-6">
       {/* Recipient Type Selection */}
@@ -251,7 +222,6 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
           {recipientTypes.map((type) => {
             const Icon = type.icon;
             const isSelected = recipientType === type.id;
-
             return (
               <button
                 key={type.id}
@@ -276,7 +246,6 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
           })}
         </div>
       </GlassCard>
-
       {/* Target Selection */}
       {recipientType === 'booking_participants' && (
         <GlassCard variant="light" padding="md">
@@ -312,7 +281,6 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
           </div>
         </GlassCard>
       )}
-
       {recipientType === 'adventure_followers' && (
         <GlassCard variant="light" padding="md">
           <h3 className="font-medium text-gray-900 dark:text-white mb-4">
@@ -346,13 +314,11 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
           </div>
         </GlassCard>
       )}
-
       {/* Notification Configuration */}
       <GlassCard variant="light" padding="md">
         <h3 className="font-medium text-gray-900 dark:text-white mb-4">
           Notification Settings
         </h3>
-
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -373,7 +339,6 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
               ))}
             </select>
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Message
@@ -392,7 +357,6 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
               {notification.message.length}/500 characters
             </div>
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
               Delivery Methods
@@ -410,7 +374,6 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
                   In-App Notification (Always included)
                 </span>
               </label>
-
               <label className="flex items-center gap-3">
                 <input
                   type="checkbox"
@@ -426,7 +389,6 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
                   Email Notification
                 </span>
               </label>
-
               <label className="flex items-center gap-3">
                 <input
                   type="checkbox"
@@ -446,7 +408,6 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
           </div>
         </div>
       </GlassCard>
-
       {/* Recipient Summary */}
       <GlassCard variant="info" padding="md">
         <div className="flex items-center gap-3">
@@ -464,7 +425,6 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
           </div>
         </div>
       </GlassCard>
-
       {/* Send Button */}
       <div className="flex justify-end">
         <button
@@ -485,11 +445,9 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
           )}
         </button>
       </div>
-
       {/* Results */}
       {showResults && renderResults()}
     </div>
   );
 };
-
 export default BulkNotificationSystem;

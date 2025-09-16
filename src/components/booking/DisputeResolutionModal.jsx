@@ -2,11 +2,9 @@
  * DisputeResolutionModal - Interface for handling booking modification and cancellation disputes
  * Provides structured workflow for dispute submission and resolution
  */
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase.js';
 import { notificationService } from '../../services/notification-service.js';
-
 const DisputeResolutionModal = ({
   isOpen,
   onClose,
@@ -31,7 +29,6 @@ const DisputeResolutionModal = ({
   const [bookingDetails, setBookingDetails] = useState(null);
   const [evidenceFiles, setEvidenceFiles] = useState([]);
   const [error, setError] = useState('');
-
   const disputeCategories = {
     modification: [
       { id: 'vendor_unresponsive', label: 'Vendor Not Responding', description: 'Vendor has not responded within the required timeframe' },
@@ -54,7 +51,6 @@ const DisputeResolutionModal = ({
       { id: 'refund_failed', label: 'Refund Failed', description: 'Refund attempt failed or was reversed' },
     ]
   };
-
   const evidenceTypes = [
     { id: 'screenshots', label: 'Screenshots', description: 'Screenshots of communications or policies', accept: 'image/*' },
     { id: 'emails', label: 'Email Communications', description: 'Email threads with vendor or platform', accept: '.eml,.msg,.pdf' },
@@ -63,17 +59,14 @@ const DisputeResolutionModal = ({
     { id: 'legal', label: 'Legal Documents', description: 'Legal notices or official documents', accept: '.pdf' },
     { id: 'other', label: 'Other Evidence', description: 'Any other supporting documentation', accept: '*' },
   ];
-
   useEffect(() => {
     if (isOpen && bookingId) {
       loadBookingDetails();
     }
   }, [isOpen, bookingId]);
-
   const loadBookingDetails = async () => {
     try {
       setLoading(true);
-
       const { data: booking, error } = await supabase
         .from('bookings')
         .select(`
@@ -102,32 +95,25 @@ const DisputeResolutionModal = ({
         `)
         .eq('id', bookingId)
         .single();
-
       if (error) throw error;
       setBookingDetails(booking);
-
     } catch (error) {
       setError(`Failed to load booking details: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
-
   const handleFileUpload = async (files, evidenceType) => {
     try {
       const uploadedFiles = [];
-
       for (const file of files) {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
         const filePath = `dispute-evidence/${bookingId}/${fileName}`;
-
         const { data, error } = await supabase.storage
           .from('dispute-documents')
           .upload(filePath, file);
-
         if (error) throw error;
-
         uploadedFiles.push({
           id: Math.random().toString(36).substring(7),
           type: evidenceType,
@@ -137,18 +123,15 @@ const DisputeResolutionModal = ({
           uploadedAt: new Date().toISOString(),
         });
       }
-
       setEvidenceFiles(prev => [...prev, ...uploadedFiles]);
       setDisputeData(prev => ({
         ...prev,
         evidence: [...prev.evidence, ...uploadedFiles]
       }));
-
     } catch (error) {
       setError(`Failed to upload files: ${error.message}`);
     }
   };
-
   const removeEvidence = (evidenceId) => {
     setEvidenceFiles(prev => prev.filter(file => file.id !== evidenceId));
     setDisputeData(prev => ({
@@ -156,12 +139,10 @@ const DisputeResolutionModal = ({
       evidence: prev.evidence.filter(e => e.id !== evidenceId)
     }));
   };
-
   const submitDispute = async () => {
     try {
       setLoading(true);
       setError('');
-
       // Validate form
       if (!disputeData.category) {
         throw new Error('Please select a dispute category');
@@ -172,7 +153,6 @@ const DisputeResolutionModal = ({
       if (!disputeData.requestedResolution) {
         throw new Error('Please specify your requested resolution');
       }
-
       // Create dispute record
       const { data: dispute, error: disputeError } = await supabase
         .from('booking_disputes')
@@ -198,9 +178,7 @@ const DisputeResolutionModal = ({
         })
         .select()
         .single();
-
       if (disputeError) throw disputeError;
-
       // Create dispute thread
       await supabase
         .from('dispute_threads')
@@ -212,25 +190,20 @@ const DisputeResolutionModal = ({
           attachments: disputeData.evidence,
           created_at: new Date().toISOString(),
         });
-
       // Notify admin team
       await notifyAdminTeam(dispute);
-
       // Notify vendor
       await notifyVendor(dispute);
-
       setStep(5);
       if (onDisputeSubmitted) {
         onDisputeSubmitted(dispute);
       }
-
     } catch (error) {
       setError(`Failed to submit dispute: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
-
   const notifyAdminTeam = async (dispute) => {
     try {
       // Get admin users
@@ -238,9 +211,7 @@ const DisputeResolutionModal = ({
         .from('users')
         .select('id')
         .eq('role', 'admin');
-
       if (!admins?.length) return;
-
       // Create notifications for admin team
       const notifications = admins.map(admin => ({
         user_id: admin.id,
@@ -258,18 +229,15 @@ const DisputeResolutionModal = ({
         priority: disputeData.urgency === 'urgent' ? 'high' : 'normal',
         created_at: new Date().toISOString(),
       }));
-
       await supabase.from('notifications').insert(notifications);
     } catch (error) {
       console.error('Failed to notify admin team:', error);
     }
   };
-
   const notifyVendor = async (dispute) => {
     try {
       const vendorId = bookingDetails?.adventures?.vendor_id;
       if (!vendorId) return;
-
       const notification = {
         user_id: vendorId,
         type: 'dispute_notification',
@@ -285,13 +253,11 @@ const DisputeResolutionModal = ({
         priority: 'high',
         created_at: new Date().toISOString(),
       };
-
       await supabase.from('notifications').insert(notification);
     } catch (error) {
       console.error('Failed to notify vendor:', error);
     }
   };
-
   const renderStep1 = () => (
     <div className="space-y-6">
       <div>
@@ -321,7 +287,6 @@ const DisputeResolutionModal = ({
           ))}
         </div>
       </div>
-
       {bookingDetails && (
         <div className="bg-gray-50 rounded-lg p-4">
           <h4 className="text-sm font-medium text-gray-900 mb-2">Booking Information</h4>
@@ -335,14 +300,12 @@ const DisputeResolutionModal = ({
       )}
     </div>
   );
-
   const renderStep2 = () => (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium text-gray-900 mb-4">
           Dispute Details
         </h3>
-
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -356,7 +319,6 @@ const DisputeResolutionModal = ({
               placeholder="Brief summary of your dispute..."
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Detailed Description <span className="text-red-500">*</span>
@@ -369,7 +331,6 @@ const DisputeResolutionModal = ({
               placeholder="Provide a detailed explanation of the issue, including timeline of events, communications with vendor, and any relevant details..."
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Requested Resolution <span className="text-red-500">*</span>
@@ -382,7 +343,6 @@ const DisputeResolutionModal = ({
               placeholder="What specific resolution are you seeking? (e.g., full refund, modification approval, compensation, etc.)"
             />
           </div>
-
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -398,7 +358,6 @@ const DisputeResolutionModal = ({
                 <option value="emergency">Emergency</option>
               </select>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Preferred Contact Method
@@ -418,7 +377,6 @@ const DisputeResolutionModal = ({
       </div>
     </div>
   );
-
   const renderStep3 = () => (
     <div className="space-y-6">
       <div>
@@ -429,7 +387,6 @@ const DisputeResolutionModal = ({
           Upload any supporting documents, screenshots, or communications that support your dispute.
           This evidence will help us resolve your case more effectively.
         </p>
-
         <div className="space-y-4">
           {evidenceTypes.map((type) => (
             <div key={type.id} className="border border-gray-200 rounded-lg p-4">
@@ -451,7 +408,6 @@ const DisputeResolutionModal = ({
                   </span>
                 </label>
               </div>
-
               {/* Show uploaded files for this type */}
               {evidenceFiles.filter(file => file.type === type.id).map((file) => (
                 <div key={file.id} className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded mt-2">
@@ -475,7 +431,6 @@ const DisputeResolutionModal = ({
             </div>
           ))}
         </div>
-
         {evidenceFiles.length === 0 && (
           <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
             <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
@@ -488,7 +443,6 @@ const DisputeResolutionModal = ({
       </div>
     </div>
   );
-
   const renderStep4 = () => (
     <div className="space-y-6">
       <div>
@@ -520,7 +474,6 @@ const DisputeResolutionModal = ({
           </div>
         </div>
       </div>
-
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <div className="flex">
           <div className="flex-shrink-0">
@@ -546,7 +499,6 @@ const DisputeResolutionModal = ({
       </div>
     </div>
   );
-
   const renderStep5 = () => (
     <div className="text-center space-y-6">
       <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
@@ -575,9 +527,7 @@ const DisputeResolutionModal = ({
       </div>
     </div>
   );
-
   if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
@@ -608,7 +558,6 @@ const DisputeResolutionModal = ({
             </div>
           )}
         </div>
-
         <div className="px-6 py-4">
           {loading && (
             <div className="text-center py-4">
@@ -616,13 +565,11 @@ const DisputeResolutionModal = ({
               <p className="mt-2 text-sm text-gray-500">Loading...</p>
             </div>
           )}
-
           {error && (
             <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-3">
               <div className="text-sm text-red-600">{error}</div>
             </div>
           )}
-
           {!loading && (
             <>
               {step === 1 && renderStep1()}
@@ -633,7 +580,6 @@ const DisputeResolutionModal = ({
             </>
           )}
         </div>
-
         {!loading && step < 5 && (
           <div className="px-6 py-4 border-t border-gray-200">
             <div className="flex justify-between">
@@ -670,7 +616,6 @@ const DisputeResolutionModal = ({
             </div>
           </div>
         )}
-
         {step === 5 && (
           <div className="px-6 py-4 border-t border-gray-200">
             <button
@@ -685,5 +630,4 @@ const DisputeResolutionModal = ({
     </div>
   );
 };
-
 export default DisputeResolutionModal;

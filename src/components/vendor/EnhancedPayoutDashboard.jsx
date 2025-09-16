@@ -2,7 +2,6 @@
  * Enhanced Vendor Payout Dashboard Component
  * Comprehensive payout reporting with reconciliation and audit trail integration
  */
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -29,7 +28,6 @@ import { supabase } from '../../lib/supabase';
 import { payoutProcessingService } from '../../services/payout-processing-service';
 import PaymentReconciliationDashboard from './PaymentReconciliationDashboard';
 import PaymentAuditTrail from './PaymentAuditTrail';
-
 const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
   const [statistics, setStatistics] = useState(null);
   const [payoutHistory, setPayoutHistory] = useState([]);
@@ -43,11 +41,9 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
     period: '30',
     status: 'all',
   });
-
   useEffect(() => {
     loadDashboardData();
   }, [vendorStripeAccountId, filters]);
-
   const loadDashboardData = async () => {
     setLoading(true);
     try {
@@ -63,7 +59,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
       setLoading(false);
     }
   };
-
   const loadStatistics = async () => {
     try {
       const stats = await payoutProcessingService.getPayoutStatistics(vendorStripeAccountId);
@@ -72,25 +67,21 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
       console.error('Failed to load statistics:', error);
     }
   };
-
   const loadPayoutHistory = async () => {
     try {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - parseInt(filters.period));
-
       const options = {
         limit: 100,
         startDate: startDate.toISOString(),
         status: filters.status === 'all' ? null : filters.status,
       };
-
       const history = await payoutProcessingService.getPayoutHistory(vendorStripeAccountId, options);
       setPayoutHistory(history);
     } catch (error) {
       console.error('Failed to load payout history:', error);
     }
   };
-
   const loadPendingPayments = async () => {
     try {
       const { data, error } = await supabase
@@ -113,14 +104,12 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
         .in('payout_status', ['pending', 'eligible'])
         .order('created_at', { ascending: false })
         .limit(50);
-
       if (error) throw error;
       setPendingPayments(data || []);
     } catch (error) {
       console.error('Failed to load pending payments:', error);
     }
   };
-
   const loadReconciliationSummary = async () => {
     try {
       // Get latest reconciliation data
@@ -139,21 +128,17 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
-
       if (error && error.code !== 'PGRST116') throw error; // Ignore "no rows returned"
-
       setReconciliationSummary(data);
     } catch (error) {
       console.error('Failed to load reconciliation summary:', error);
     }
   };
-
   const refreshData = async () => {
     setRefreshing(true);
     await loadDashboardData();
     setRefreshing(false);
   };
-
   const requestManualPayout = async () => {
     try {
       const result = await payoutProcessingService.processVendorPayout({
@@ -162,7 +147,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
         currency: 'usd',
         description: 'Manual payout request',
       });
-
       if (result.success) {
         alert('Payout request submitted successfully!');
         await refreshData();
@@ -174,7 +158,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
       alert('Failed to request payout. Please try again.');
     }
   };
-
   const exportPayoutData = async (format = 'csv') => {
     try {
       const data = payoutHistory.map(payout => ({
@@ -186,13 +169,11 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
         arrival_date: payout.arrival_date || 'N/A',
         booking_count: payout.booking_count || 0,
       }));
-
       if (format === 'csv') {
         const csv = [
           Object.keys(data[0]).join(','),
           ...data.map(row => Object.values(row).join(','))
         ].join('\n');
-
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -206,14 +187,12 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
       alert('Failed to export data. Please try again.');
     }
   };
-
   const formatAmount = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
     }).format(amount / 100);
   };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -223,7 +202,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
       minute: '2-digit',
     });
   };
-
   const getStatusIcon = (status) => {
     switch (status) {
       case 'paid':
@@ -236,7 +214,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
         return <Clock className="h-4 w-4 text-gray-500" />;
     }
   };
-
   const getStatusBadge = (status) => {
     const variants = {
       paid: 'default',
@@ -246,13 +223,11 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
     };
     return <Badge variant={variants[status] || 'secondary'}>{status}</Badge>;
   };
-
   const getHealthScoreColor = (score) => {
     if (score >= 95) return 'text-green-600';
     if (score >= 85) return 'text-yellow-600';
     return 'text-red-600';
   };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -261,7 +236,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Header with actions */}
@@ -290,7 +264,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
           </Button>
         </div>
       </div>
-
       {/* Enhanced Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         <Card>
@@ -306,7 +279,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -320,7 +292,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -334,7 +305,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -348,7 +318,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -363,7 +332,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
           </CardContent>
         </Card>
       </div>
-
       {/* Reconciliation Status Alert */}
       {reconciliationSummary && reconciliationSummary.discrepancy_count > 0 && (
         <Card className="border-yellow-200 bg-yellow-50">
@@ -390,7 +358,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
           </CardContent>
         </Card>
       )}
-
       {/* Quick Actions */}
       {statistics?.pendingAmount > 0 && (
         <Card>
@@ -413,7 +380,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
           </CardContent>
         </Card>
       )}
-
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <div className="flex justify-between items-center">
@@ -432,7 +398,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
             <TabsTrigger value="audit">Audit Trail</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
-
           {/* Filters */}
           {(activeTab === 'history' || activeTab === 'pending' || activeTab === 'overview') && (
             <div className="flex space-x-2">
@@ -459,7 +424,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
             </div>
           )}
         </div>
-
         <TabsContent value="overview" className="space-y-6">
           {/* Quick Overview */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -484,7 +448,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
                 </div>
               </CardContent>
             </Card>
-
             <Card>
               <CardHeader>
                 <CardTitle>System Health</CardTitle>
@@ -517,7 +480,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
             </Card>
           </div>
         </TabsContent>
-
         <TabsContent value="history" className="space-y-4">
           <Card>
             <CardHeader>
@@ -565,7 +527,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="pending" className="space-y-4">
           <Card>
             <CardHeader>
@@ -614,15 +575,12 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="reconciliation" className="space-y-4">
           <PaymentReconciliationDashboard vendorStripeAccountId={vendorStripeAccountId} />
         </TabsContent>
-
         <TabsContent value="audit" className="space-y-4">
           <PaymentAuditTrail vendorStripeAccountId={vendorStripeAccountId} />
         </TabsContent>
-
         <TabsContent value="analytics" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
@@ -647,7 +605,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
                 )}
               </CardContent>
             </Card>
-
             <Card>
               <CardHeader>
                 <CardTitle>Key Metrics</CardTitle>
@@ -684,7 +641,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
           </div>
         </TabsContent>
       </Tabs>
-
       {/* Payout Detail Modal */}
       {selectedPayout && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -722,7 +678,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
                   <p>{selectedPayout.arrival_date || 'N/A'}</p>
                 </div>
               </div>
-
               {selectedPayout.payout_line_items && (
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">
@@ -745,5 +700,4 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
     </div>
   );
 };
-
 export default EnhancedPayoutDashboard;

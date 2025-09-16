@@ -18,12 +18,10 @@ import analyticsService from '../../services/analytics-service';
 import dashboardMetricsService from '../../services/dashboard-metrics-service';
 import { useAuth } from '../../hooks/useAuth';
 import RealTimeMetrics from './RealTimeMetrics';
-
 /**
  * Custom Analytics Dashboard
  * Internal analytics dashboard for business metrics visualization and reporting
  */
-
 const AnalyticsDashboard = ({ className = "" }) => {
   const { user } = useAuth();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -33,11 +31,9 @@ const AnalyticsDashboard = ({ className = "" }) => {
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(new Date());
-
   // Role-based access control
   const isAdmin = user?.role === 'admin';
   const isVendor = user?.role === 'vendor';
-
   if (!isAdmin && !isVendor) {
     return (
       <div className="p-6 text-center">
@@ -49,20 +45,16 @@ const AnalyticsDashboard = ({ className = "" }) => {
       </div>
     );
   }
-
   // Fetch metrics data
   useEffect(() => {
     fetchMetrics();
-
     // Set up auto-refresh every 30 seconds
     const interval = setInterval(fetchMetrics, 30000);
     return () => clearInterval(interval);
   }, [dateRange, comparisonMode]);
-
   const fetchMetrics = async () => {
     try {
       setLoading(true);
-
       // Fetch data from multiple services in parallel
       const [overviewData, revenueData, userData, adventureData, groupData] = await Promise.all([
         dashboardMetricsService.getOverviewMetrics(dateRange),
@@ -71,7 +63,6 @@ const AnalyticsDashboard = ({ className = "" }) => {
         dashboardMetricsService.getAdventureMetrics(dateRange),
         dashboardMetricsService.getGroupMetrics(dateRange)
       ]);
-
       // Combine all data sources
       const combinedData = {
         ...overviewData,
@@ -88,17 +79,14 @@ const AnalyticsDashboard = ({ className = "" }) => {
           conversionGrowth: ((overviewData.kpis.conversionRate - overviewData.kpis.previousConversionRate) / overviewData.kpis.previousConversionRate) * 100
         }
       };
-
       setMetrics(combinedData);
       setLastUpdated(new Date());
-
       // Track successful metrics fetch
       analyticsService.trackEvent('admin_dashboard_loaded', {
         date_range: dateRange,
         comparison_mode: comparisonMode,
         metrics_count: Object.keys(combinedData).length
       });
-
     } catch (error) {
       console.error('Failed to fetch metrics:', error);
       analyticsService.trackError(error, { context: 'analytics_dashboard_fetch' });
@@ -106,13 +94,11 @@ const AnalyticsDashboard = ({ className = "" }) => {
       setLoading(false);
     }
   };
-
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await fetchMetrics();
     setTimeout(() => setIsRefreshing(false), 1000);
   };
-
   // Export functionality
   const exportToPDF = () => {
     const doc = new jsPDF();
@@ -121,7 +107,6 @@ const AnalyticsDashboard = ({ className = "" }) => {
     doc.setFontSize(12);
     doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 35);
     doc.text(`Date Range: ${dateRange}`, 20, 45);
-
     if (metrics) {
       const kpiData = [
         ['Metric', 'Current', 'Previous', 'Change'],
@@ -138,26 +123,21 @@ const AnalyticsDashboard = ({ className = "" }) => {
          `${metrics.kpis.previousConversionRate.toFixed(1)}%`,
          `${metrics.kpis.conversionGrowth > 0 ? '+' : ''}${metrics.kpis.conversionGrowth.toFixed(1)}%`]
       ];
-
       doc.autoTable({
         head: [kpiData[0]],
         body: kpiData.slice(1),
         startY: 60,
       });
     }
-
     doc.save(`analytics-dashboard-${dateRange}-${Date.now()}.pdf`);
-
     analyticsService.trackEvent('analytics_export', {
       export_type: 'pdf',
       date_range: dateRange,
       user_role: user?.role
     });
   };
-
   const csvData = useMemo(() => {
     if (!metrics) return [];
-
     return [
       {
         metric: 'Total Revenue',
@@ -185,7 +165,6 @@ const AnalyticsDashboard = ({ className = "" }) => {
       }
     ];
   }, [metrics]);
-
   if (loading && !metrics) {
     return (
       <div className="p-6 flex items-center justify-center min-h-screen">
@@ -196,7 +175,6 @@ const AnalyticsDashboard = ({ className = "" }) => {
       </div>
     );
   }
-
   return (
     <div className={`analytics-dashboard p-6 bg-gray-50 min-h-screen ${className}`}>
       {/* Header */}
@@ -211,7 +189,6 @@ const AnalyticsDashboard = ({ className = "" }) => {
             <span>Last updated: {lastUpdated.toLocaleTimeString()}</span>
           </div>
         </div>
-
         {/* Controls */}
         <div className="flex gap-3">
           {/* Date Range Selector */}
@@ -225,7 +202,6 @@ const AnalyticsDashboard = ({ className = "" }) => {
             <option value="90d">Last 90 Days</option>
             <option value="1y">Last Year</option>
           </select>
-
           {/* Comparison Toggle */}
           <Button
             variant={comparisonMode ? "default" : "outline"}
@@ -235,7 +211,6 @@ const AnalyticsDashboard = ({ className = "" }) => {
             <Filter className="w-4 h-4" />
             Compare
           </Button>
-
           {/* Export Buttons */}
           <div className="flex gap-1">
             <CSVLink
@@ -251,12 +226,10 @@ const AnalyticsDashboard = ({ className = "" }) => {
                 <Download className="w-4 h-4" />
               </Button>
             </CSVLink>
-
             <Button variant="outline" size="sm" onClick={exportToPDF}>
               <Download className="w-4 h-4" />
             </Button>
           </div>
-
           {/* Refresh Button */}
           <Button
             onClick={handleRefresh}
@@ -268,7 +241,6 @@ const AnalyticsDashboard = ({ className = "" }) => {
           </Button>
         </div>
       </div>
-
       {/* KPI Cards */}
       {metrics && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -302,7 +274,6 @@ const AnalyticsDashboard = ({ className = "" }) => {
           />
         </div>
       )}
-
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-5">
@@ -312,27 +283,22 @@ const AnalyticsDashboard = ({ className = "" }) => {
           <TabsTrigger value="adventures">Adventures</TabsTrigger>
           <TabsTrigger value="groups">Groups</TabsTrigger>
         </TabsList>
-
         {/* Overview Tab */}
         <TabsContent value="overview" className="mt-6">
           {metrics && <OverviewTab metrics={metrics} comparisonMode={comparisonMode} />}
         </TabsContent>
-
         {/* Revenue Tab */}
         <TabsContent value="revenue" className="mt-6">
           {metrics && <RevenueTab metrics={metrics} comparisonMode={comparisonMode} />}
         </TabsContent>
-
         {/* Users Tab */}
         <TabsContent value="users" className="mt-6">
           {metrics && <UsersTab metrics={metrics} comparisonMode={comparisonMode} />}
         </TabsContent>
-
         {/* Adventures Tab */}
         <TabsContent value="adventures" className="mt-6">
           {metrics && <AdventuresTab metrics={metrics} comparisonMode={comparisonMode} />}
         </TabsContent>
-
         {/* Groups Tab */}
         <TabsContent value="groups" className="mt-6">
           {metrics && <GroupsTab metrics={metrics} comparisonMode={comparisonMode} />}
@@ -341,7 +307,6 @@ const AnalyticsDashboard = ({ className = "" }) => {
     </div>
   );
 };
-
 // KPI Card Component
 const KPICard = ({ title, value, change, icon, color = "blue" }) => {
   const colorClasses = {
@@ -350,9 +315,7 @@ const KPICard = ({ title, value, change, icon, color = "blue" }) => {
     purple: 'bg-purple-50 border-purple-200 text-purple-700',
     indigo: 'bg-indigo-50 border-indigo-200 text-indigo-700'
   };
-
   const isPositive = change > 0;
-
   return (
     <Card className="hover:shadow-lg transition-shadow duration-200">
       <CardContent className="p-6">
@@ -360,7 +323,6 @@ const KPICard = ({ title, value, change, icon, color = "blue" }) => {
           <div>
             <p className="text-sm font-medium text-gray-600">{title}</p>
             <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
-
             {change !== undefined && (
               <div className="flex items-center mt-2">
                 {isPositive ? (
@@ -382,13 +344,11 @@ const KPICard = ({ title, value, change, icon, color = "blue" }) => {
     </Card>
   );
 };
-
 // Tab Components
 const OverviewTab = ({ metrics, comparisonMode }) => (
   <div className="space-y-6">
     {/* Real-Time Metrics */}
     <RealTimeMetrics />
-
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
     {/* Revenue Trend */}
     <Card>
@@ -410,7 +370,6 @@ const OverviewTab = ({ metrics, comparisonMode }) => (
         </ResponsiveContainer>
       </CardContent>
     </Card>
-
     {/* User Growth */}
     <Card>
       <CardHeader>
@@ -430,7 +389,6 @@ const OverviewTab = ({ metrics, comparisonMode }) => (
         </ResponsiveContainer>
       </CardContent>
     </Card>
-
     {/* Booking Sources */}
     <Card>
       <CardHeader>
@@ -458,7 +416,6 @@ const OverviewTab = ({ metrics, comparisonMode }) => (
         </ResponsiveContainer>
       </CardContent>
     </Card>
-
     {/* Top Performing Adventures */}
     <Card>
       <CardHeader>
@@ -489,7 +446,6 @@ const OverviewTab = ({ metrics, comparisonMode }) => (
     </div>
   </div>
 );
-
 const RevenueTab = ({ metrics, comparisonMode }) => (
   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
     {/* Monthly Revenue */}
@@ -509,7 +465,6 @@ const RevenueTab = ({ metrics, comparisonMode }) => (
         </ResponsiveContainer>
       </CardContent>
     </Card>
-
     {/* Revenue by Category */}
     <Card>
       <CardHeader>
@@ -529,7 +484,6 @@ const RevenueTab = ({ metrics, comparisonMode }) => (
     </Card>
   </div>
 );
-
 const UsersTab = ({ metrics, comparisonMode }) => (
   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
     {/* User Registration Trend */}
@@ -549,7 +503,6 @@ const UsersTab = ({ metrics, comparisonMode }) => (
         </ResponsiveContainer>
       </CardContent>
     </Card>
-
     {/* User Demographics */}
     <Card>
       <CardHeader>
@@ -579,7 +532,6 @@ const UsersTab = ({ metrics, comparisonMode }) => (
     </Card>
   </div>
 );
-
 const AdventuresTab = ({ metrics, comparisonMode }) => (
   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
     {/* Adventure Performance */}
@@ -601,7 +553,6 @@ const AdventuresTab = ({ metrics, comparisonMode }) => (
         </ResponsiveContainer>
       </CardContent>
     </Card>
-
     {/* Adventure Ratings */}
     <Card>
       <CardHeader>
@@ -621,7 +572,6 @@ const AdventuresTab = ({ metrics, comparisonMode }) => (
     </Card>
   </div>
 );
-
 const GroupsTab = ({ metrics, comparisonMode }) => (
   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
     {/* Group Formation Trends */}
@@ -643,7 +593,6 @@ const GroupsTab = ({ metrics, comparisonMode }) => (
         </ResponsiveContainer>
       </CardContent>
     </Card>
-
     {/* Group Success Rate */}
     <Card>
       <CardHeader>
@@ -665,7 +614,6 @@ const GroupsTab = ({ metrics, comparisonMode }) => (
               <div className="text-sm text-blue-600">Avg Compatibility</div>
             </div>
           </div>
-
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={metrics.groupMetrics.groupSizeDistribution}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -680,8 +628,5 @@ const GroupsTab = ({ metrics, comparisonMode }) => (
     </Card>
   </div>
 );
-
-
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#8dd1e1', '#ff8c94'];
-
 export default AnalyticsDashboard;

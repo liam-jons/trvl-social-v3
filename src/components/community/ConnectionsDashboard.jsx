@@ -2,7 +2,6 @@
  * Connections Dashboard Component
  * Main hub for managing connections, requests, and recommendations
  */
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -14,7 +13,6 @@ import ConnectionRequests from './ConnectionRequests';
 import ConnectionRecommendations from './ConnectionRecommendations';
 import ConnectionActivity from './ConnectionActivity';
 import { Users, UserPlus, Heart, Activity } from 'lucide-react';
-
 const ConnectionsDashboard = () => {
   const [activeTab, setActiveTab] = useState('connections');
   const [stats, setStats] = useState({
@@ -23,32 +21,25 @@ const ConnectionsDashboard = () => {
     recommendations: 0
   });
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     loadDashboardStats();
   }, []);
-
   const loadDashboardStats = async () => {
     try {
       setLoading(true);
-
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-
       // Load connections count
       const connectionsResult = await connectionService.getUserConnections(user.id, {
         limit: 1,
         includeProfile: false
       });
-
       // Load pending requests count
       const requestsResult = await connectionService.getPendingRequests(user.id, 'received');
-
       // Load recommendations count
       const recommendationsResult = await connectionService.getConnectionRecommendations(user.id, {
         limit: 1
       });
-
       setStats({
         totalConnections: connectionsResult.success ? connectionsResult.data.length : 0,
         pendingRequests: requestsResult.success ? requestsResult.data.length : 0,
@@ -60,15 +51,12 @@ const ConnectionsDashboard = () => {
       setLoading(false);
     }
   };
-
   const handleTabChange = (value) => {
     setActiveTab(value);
   };
-
   const handleRequestUpdate = () => {
     loadDashboardStats();
   };
-
   if (loading) {
     return (
       <div className="animate-pulse space-y-4">
@@ -82,7 +70,6 @@ const ConnectionsDashboard = () => {
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -96,7 +83,6 @@ const ConnectionsDashboard = () => {
           Find Connections
         </Button>
       </div>
-
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-4">
@@ -110,7 +96,6 @@ const ConnectionsDashboard = () => {
             </div>
           </div>
         </Card>
-
         <Card className="p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-green-100 rounded-lg">
@@ -122,7 +107,6 @@ const ConnectionsDashboard = () => {
             </div>
           </div>
         </Card>
-
         <Card className="p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-purple-100 rounded-lg">
@@ -135,7 +119,6 @@ const ConnectionsDashboard = () => {
           </div>
         </Card>
       </div>
-
       {/* Main Content */}
       <Card className="p-6">
         <Tabs value={activeTab} onValueChange={handleTabChange}>
@@ -162,20 +145,16 @@ const ConnectionsDashboard = () => {
               Activity
             </TabsTrigger>
           </TabsList>
-
           <div className="mt-6">
             <TabsContent value="connections">
               <ConnectionsList onUpdate={handleRequestUpdate} />
             </TabsContent>
-
             <TabsContent value="requests">
               <ConnectionRequests onUpdate={handleRequestUpdate} />
             </TabsContent>
-
             <TabsContent value="recommendations">
               <ConnectionRecommendations onUpdate={handleRequestUpdate} />
             </TabsContent>
-
             <TabsContent value="activity">
               <ConnectionActivity />
             </TabsContent>
@@ -185,5 +164,4 @@ const ConnectionsDashboard = () => {
     </div>
   );
 };
-
 export default ConnectionsDashboard;

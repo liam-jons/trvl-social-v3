@@ -1,6 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
+import {
+  Target,
+  CheckCircle,
+  Clock,
+  Users,
+  CreditCard,
+  Bell,
+  Megaphone
+} from 'lucide-react';
 import GlassCard from '../ui/GlassCard';
 import GlassButton from '../ui/GlassButton';
 import useNotificationStore from '../../stores/notificationStore';
@@ -52,18 +61,18 @@ const NotificationDropdown = ({ isOpen, onToggle, onClose }) => {
 
   const getNotificationIcon = (type) => {
     const icons = {
-      vendor_offer: '🎯',
-      booking_confirmed: '✅',
-      booking_reminder: '⏰',
-      group_invitation: '👥',
-      group_update: '👥',
-      trip_request_match: '🎯',
-      payment_reminder: '💳',
-      system_update: '🔔',
-      marketing: '📢',
-      general: '🔔'
+      vendor_offer: Target,
+      booking_confirmed: CheckCircle,
+      booking_reminder: Clock,
+      group_invitation: Users,
+      group_update: Users,
+      trip_request_match: Target,
+      payment_reminder: CreditCard,
+      system_update: Bell,
+      marketing: Megaphone,
+      general: Bell
     };
-    return icons[type] || '🔔';
+    return icons[type] || Bell;
   };
 
   const formatNotificationTime = (timestamp) => {
@@ -113,7 +122,7 @@ const NotificationDropdown = ({ isOpen, onToggle, onClose }) => {
             </div>
           ) : notifications.length === 0 ? (
             <div className="p-6 text-center">
-              <div className="text-4xl mb-2">🔔</div>
+              <Bell className="w-12 h-12 mx-auto mb-2 text-gray-400" />
               <h4 className="font-medium mb-1">No notifications yet</h4>
               <p className="text-sm text-gray-500">
                 We'll notify you when there's something new
@@ -131,8 +140,11 @@ const NotificationDropdown = ({ isOpen, onToggle, onClose }) => {
                 >
                   <div className="flex items-start space-x-3">
                     {/* Icon */}
-                    <div className="flex-shrink-0 text-lg">
-                      {getNotificationIcon(notification.type)}
+                    <div className="flex-shrink-0">
+                      {(() => {
+                        const IconComponent = getNotificationIcon(notification.type);
+                        return <IconComponent className="w-5 h-5 text-blue-500" />;
+                      })()}
                     </div>
 
                     {/* Content */}

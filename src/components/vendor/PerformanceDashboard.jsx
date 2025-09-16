@@ -3,7 +3,6 @@ import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import vendorPerformanceService from '../../services/vendor-performance-service';
-
 /**
  * Comprehensive performance dashboard for vendors
  * Shows KPIs, benchmarks, trends, and improvement recommendations
@@ -16,32 +15,25 @@ const PerformanceDashboard = ({ vendorId }) => {
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState(30);
   const [error, setError] = useState(null);
-
   useEffect(() => {
     loadPerformanceData();
   }, [vendorId, timeRange]);
-
   const loadPerformanceData = async () => {
     try {
       setLoading(true);
       setError(null);
-
       const [performanceResult, benchmarkResult] = await Promise.all([
         vendorPerformanceService.calculatePerformanceMetrics(vendorId, timeRange),
         vendorPerformanceService.getBenchmarkComparison(vendorId, timeRange)
       ]);
-
       if (performanceResult.error) {
         throw new Error(performanceResult.error);
       }
-
       if (benchmarkResult.error) {
         throw new Error(benchmarkResult.error);
       }
-
       setPerformanceData(performanceResult.data);
       setBenchmarkData(benchmarkResult.data);
-
       // Generate alerts and recommendations
       const alertsData = await vendorPerformanceService.checkPerformanceAlerts(vendorId, performanceResult.data);
       const recommendationsData = await vendorPerformanceService.generateImprovementRecommendations(
@@ -49,10 +41,8 @@ const PerformanceDashboard = ({ vendorId }) => {
         performanceResult.data,
         benchmarkResult.data
       );
-
       setAlerts(alertsData);
       setRecommendations(recommendationsData);
-
     } catch (err) {
       console.error('Load performance data error:', err);
       setError(err.message);
@@ -60,13 +50,11 @@ const PerformanceDashboard = ({ vendorId }) => {
       setLoading(false);
     }
   };
-
   const getScoreColor = (score) => {
     if (score >= 85) return 'text-green-600 bg-green-50';
     if (score >= 70) return 'text-yellow-600 bg-yellow-50';
     return 'text-red-600 bg-red-50';
   };
-
   const getStatusBadge = (status) => {
     const variants = {
       excellent: 'bg-green-100 text-green-800',
@@ -74,21 +62,18 @@ const PerformanceDashboard = ({ vendorId }) => {
       average: 'bg-yellow-100 text-yellow-800',
       below: 'bg-red-100 text-red-800'
     };
-
     const labels = {
       excellent: 'Excellent',
       above: 'Above Average',
       average: 'Average',
       below: 'Below Average'
     };
-
     return (
       <Badge className={variants[status] || variants.average}>
         {labels[status] || 'Average'}
       </Badge>
     );
   };
-
   const formatMetric = (value, type) => {
     switch (type) {
       case 'percentage':
@@ -103,7 +88,6 @@ const PerformanceDashboard = ({ vendorId }) => {
         return value.toFixed(1);
     }
   };
-
   if (loading) {
     return (
       <div className="space-y-6">
@@ -119,7 +103,6 @@ const PerformanceDashboard = ({ vendorId }) => {
       </div>
     );
   }
-
   if (error) {
     return (
       <Card className="p-6">
@@ -138,7 +121,6 @@ const PerformanceDashboard = ({ vendorId }) => {
       </Card>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -171,7 +153,6 @@ const PerformanceDashboard = ({ vendorId }) => {
           </Button>
         </div>
       </div>
-
       {/* Alerts */}
       {alerts.length > 0 && (
         <Card className="p-4 border-red-200 bg-red-50">
@@ -191,7 +172,6 @@ const PerformanceDashboard = ({ vendorId }) => {
           </div>
         </Card>
       )}
-
       {/* Overall Performance Score */}
       <Card className="p-6">
         <div className="text-center">
@@ -204,7 +184,6 @@ const PerformanceDashboard = ({ vendorId }) => {
           </p>
         </div>
       </Card>
-
       {/* Key Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Customer Satisfaction */}
@@ -223,7 +202,6 @@ const PerformanceDashboard = ({ vendorId }) => {
             <span>Benchmark: {formatMetric(benchmarkData?.comparisons.averageRating.benchmark, 'rating')}</span>
           </div>
         </Card>
-
         {/* Booking Completion */}
         <Card className="p-4">
           <div className="flex items-center justify-between mb-2">
@@ -240,7 +218,6 @@ const PerformanceDashboard = ({ vendorId }) => {
             <span>Benchmark: {formatMetric(benchmarkData?.comparisons.completionRate.benchmark, 'percentage')}</span>
           </div>
         </Card>
-
         {/* Response Time */}
         <Card className="p-4">
           <div className="flex items-center justify-between mb-2">
@@ -257,7 +234,6 @@ const PerformanceDashboard = ({ vendorId }) => {
             <span>Benchmark: {formatMetric(benchmarkData?.comparisons.responseTime.benchmark, 'hours')}</span>
           </div>
         </Card>
-
         {/* Revenue Growth */}
         <Card className="p-4">
           <div className="flex items-center justify-between mb-2">
@@ -277,7 +253,6 @@ const PerformanceDashboard = ({ vendorId }) => {
           </div>
         </Card>
       </div>
-
       {/* Detailed Metrics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Booking Performance */}
@@ -306,7 +281,6 @@ const PerformanceDashboard = ({ vendorId }) => {
             </div>
           </div>
         </Card>
-
         {/* Customer Feedback */}
         <Card className="p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Customer Feedback</h3>
@@ -332,7 +306,6 @@ const PerformanceDashboard = ({ vendorId }) => {
           </div>
         </Card>
       </div>
-
       {/* Improvement Recommendations */}
       {recommendations.length > 0 && (
         <Card className="p-6">
@@ -368,5 +341,4 @@ const PerformanceDashboard = ({ vendorId }) => {
     </div>
   );
 };
-
 export default PerformanceDashboard;

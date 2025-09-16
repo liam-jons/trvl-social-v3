@@ -11,13 +11,11 @@ import {
   DevicePhoneMobileIcon,
   ArrowRightIcon
 } from '@heroicons/react/24/outline';
-
 import GlassCard from '../components/ui/GlassCard';
 import GlassButton from '../components/ui/GlassButton';
 import GlassInput from '../components/ui/GlassInput';
 import NotificationPreferences from '../components/settings/NotificationPreferences';
 import PrivacyPreferenceCenter from '../components/settings/PrivacyPreferenceCenter';
-
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState('account'); // account, notifications, privacy, preferences
   const [userProfile, setUserProfile] = useState({
@@ -51,12 +49,10 @@ const SettingsPage = () => {
   });
   const [hasChanges, setHasChanges] = useState(false);
   const [saving, setSaving] = useState(false);
-
   const handleProfileChange = (field, value) => {
     setUserProfile(prev => ({ ...prev, [field]: value }));
     setHasChanges(true);
   };
-
   const handleTravelPreferenceChange = (field, value) => {
     setUserProfile(prev => ({
       ...prev,
@@ -64,17 +60,14 @@ const SettingsPage = () => {
     }));
     setHasChanges(true);
   };
-
   const handleGeneralSettingChange = (field, value) => {
     setGeneralSettings(prev => ({ ...prev, [field]: value }));
     setHasChanges(true);
   };
-
   const handlePrivacySettingChange = (field, value) => {
     setPrivacySettings(prev => ({ ...prev, [field]: value }));
     setHasChanges(true);
   };
-
   const handleSaveChanges = async () => {
     setSaving(true);
     try {
@@ -88,19 +81,16 @@ const SettingsPage = () => {
       setSaving(false);
     }
   };
-
   const handleResetChanges = () => {
     // Reset to original values (would fetch from API in real app)
     setHasChanges(false);
   };
-
   const tabs = [
     { id: 'account', label: 'Account', icon: UserCircleIcon },
     { id: 'notifications', label: 'Notifications', icon: BellIcon },
     { id: 'privacy', label: 'Privacy', icon: ShieldCheckIcon },
     { id: 'preferences', label: 'Preferences', icon: CogIcon }
   ];
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
       <div className="container mx-auto px-4 py-8">
@@ -113,7 +103,6 @@ const SettingsPage = () => {
             Manage your account, preferences, and privacy settings
           </p>
         </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Navigation Sidebar */}
           <div className="lg:col-span-1">
@@ -140,7 +129,6 @@ const SettingsPage = () => {
               </nav>
             </GlassCard>
           </div>
-
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-6">
             {/* Account Tab */}
@@ -151,7 +139,6 @@ const SettingsPage = () => {
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
                     Profile Information
                   </h3>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <GlassInput
                       label="Full Name"
@@ -159,7 +146,6 @@ const SettingsPage = () => {
                       onChange={(e) => handleProfileChange('name', e.target.value)}
                       required
                     />
-
                     <GlassInput
                       label="Email"
                       type="email"
@@ -167,21 +153,18 @@ const SettingsPage = () => {
                       onChange={(e) => handleProfileChange('email', e.target.value)}
                       required
                     />
-
                     <GlassInput
                       label="Phone Number"
                       type="tel"
                       value={userProfile.phone}
                       onChange={(e) => handleProfileChange('phone', e.target.value)}
                     />
-
                     <GlassInput
                       label="Location"
                       value={userProfile.location}
                       onChange={(e) => handleProfileChange('location', e.target.value)}
                     />
                   </div>
-
                   <div className="mt-6">
                     <GlassInput
                       label="Bio"
@@ -192,13 +175,11 @@ const SettingsPage = () => {
                     />
                   </div>
                 </GlassCard>
-
                 {/* Travel Preferences */}
                 <GlassCard>
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
                     Travel Preferences
                   </h3>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -214,7 +195,6 @@ const SettingsPage = () => {
                         <option value="luxury">Luxury ($200+/day)</option>
                       </select>
                     </div>
-
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Accommodation Type
@@ -230,7 +210,6 @@ const SettingsPage = () => {
                         <option value="resort">Resort</option>
                       </select>
                     </div>
-
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Group Size Preference
@@ -246,7 +225,6 @@ const SettingsPage = () => {
                         <option value="large">Large (9+ people)</option>
                       </select>
                     </div>
-
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Adventure Level
@@ -264,13 +242,11 @@ const SettingsPage = () => {
                     </div>
                   </div>
                 </GlassCard>
-
                 {/* Account Security */}
                 <GlassCard>
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
                     Account Security
                   </h3>
-
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                       <div>
@@ -283,7 +259,6 @@ const SettingsPage = () => {
                         Change Password
                       </GlassButton>
                     </div>
-
                     <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                       <div>
                         <h4 className="font-medium text-gray-900 dark:text-white">Two-Factor Authentication</h4>
@@ -295,7 +270,6 @@ const SettingsPage = () => {
                         Enable 2FA
                       </GlassButton>
                     </div>
-
                     <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                       <div>
                         <h4 className="font-medium text-gray-900 dark:text-white">Login Sessions</h4>
@@ -311,10 +285,8 @@ const SettingsPage = () => {
                 </GlassCard>
               </div>
             )}
-
             {/* Notifications Tab */}
             {activeTab === 'notifications' && <NotificationPreferences />}
-
             {/* Privacy Tab */}
             {activeTab === 'privacy' && (
               <div className="space-y-6">
@@ -323,7 +295,6 @@ const SettingsPage = () => {
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
                     Privacy Settings
                   </h3>
-
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
                       <div>
@@ -342,7 +313,6 @@ const SettingsPage = () => {
                         <option value="private">Private</option>
                       </select>
                     </div>
-
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-medium text-gray-900 dark:text-white">Show Email Address</h4>
@@ -360,7 +330,6 @@ const SettingsPage = () => {
                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                       </label>
                     </div>
-
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-medium text-gray-900 dark:text-white">Show Phone Number</h4>
@@ -378,7 +347,6 @@ const SettingsPage = () => {
                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                       </label>
                     </div>
-
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-medium text-gray-900 dark:text-white">Show Location</h4>
@@ -396,7 +364,6 @@ const SettingsPage = () => {
                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                       </label>
                     </div>
-
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-medium text-gray-900 dark:text-white">Allow Messages From</h4>
@@ -416,19 +383,16 @@ const SettingsPage = () => {
                     </div>
                   </div>
                 </GlassCard>
-
                 {/* GDPR Privacy Center */}
                 <PrivacyPreferenceCenter />
               </div>
             )}
-
             {/* Preferences Tab */}
             {activeTab === 'preferences' && (
               <GlassCard>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
                   General Preferences
                 </h3>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -446,7 +410,6 @@ const SettingsPage = () => {
                       <option value="AUD">AUD - Australian Dollar</option>
                     </select>
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Language
@@ -463,7 +426,6 @@ const SettingsPage = () => {
                       <option value="it">Italian</option>
                     </select>
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Timezone
@@ -480,7 +442,6 @@ const SettingsPage = () => {
                       <option value="Europe/London">GMT</option>
                     </select>
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Measurement Unit
@@ -497,7 +458,6 @@ const SettingsPage = () => {
                 </div>
               </GlassCard>
             )}
-
             {/* Save Changes Button */}
             {hasChanges && ['account', 'privacy', 'preferences'].includes(activeTab) && (
               <div className="flex items-center space-x-4 pt-6 border-t border-white/20">
@@ -524,5 +484,4 @@ const SettingsPage = () => {
     </div>
   );
 };
-
 export default SettingsPage;

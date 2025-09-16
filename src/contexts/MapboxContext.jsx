@@ -1,7 +1,5 @@
 import { createContext, useContext, useMemo } from 'react';
-
 const MapboxContext = createContext();
-
 export const useMapbox = () => {
   const context = useContext(MapboxContext);
   if (!context) {
@@ -9,10 +7,8 @@ export const useMapbox = () => {
   }
   return context;
 };
-
 export const MapboxProvider = ({ children }) => {
   const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
-
   const config = useMemo(() => ({
     accessToken,
     defaultStyle: 'mapbox://styles/mapbox/light-v11',
@@ -29,16 +25,13 @@ export const MapboxProvider = ({ children }) => {
     // Distance calculation settings
     distanceUnit: 'miles', // or 'kilometers'
   }), [accessToken]);
-
   if (!accessToken) {
     console.warn('Mapbox access token not found. Please add VITE_MAPBOX_ACCESS_TOKEN to your environment variables.');
   }
-
   const value = {
     ...config,
     isConfigured: Boolean(accessToken),
   };
-
   return (
     <MapboxContext.Provider value={value}>
       {children}

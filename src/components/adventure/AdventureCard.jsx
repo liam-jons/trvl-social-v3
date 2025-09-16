@@ -2,7 +2,6 @@ import { useState, memo } from 'react';
 import { motion } from 'framer-motion';
 import GlassCard from '../ui/GlassCard';
 import FavoriteButton from '../wishlist/FavoriteButton';
-
 const AdventureCard = memo(({
   adventure,
   viewMode = 'grid',
@@ -11,20 +10,15 @@ const AdventureCard = memo(({
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
-
   const handleImageLoad = () => {
     setImageLoaded(true);
   };
-
   const handleImageError = () => {
     setImageError(true);
     setImageLoaded(true);
   };
-
   const isListView = viewMode === 'list';
-
   // Removed unused cardVariants
-
   const imageVariants = {
     grid: {
       width: '100%',
@@ -37,7 +31,6 @@ const AdventureCard = memo(({
       borderRadius: '0.75rem 0 0 0.75rem'
     }
   };
-
   const contentVariants = {
     grid: {
       padding: '1.5rem',
@@ -51,7 +44,6 @@ const AdventureCard = memo(({
       justifyContent: 'space-between'
     }
   };
-
   return (
     <motion.div
       layout
@@ -82,7 +74,6 @@ const AdventureCard = memo(({
           {!imageLoaded && !imageError && (
             <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 animate-pulse" />
           )}
-
           {!imageError ? (
             <img
               src={adventure.image}
@@ -99,7 +90,6 @@ const AdventureCard = memo(({
               </svg>
             </div>
           )}
-
           {/* Badge Overlay */}
           <div className="absolute top-3 left-3 flex gap-2">
             {adventure.featured && (
@@ -113,7 +103,6 @@ const AdventureCard = memo(({
               </span>
             )}
           </div>
-
           {/* Rating Badge */}
           <div className="absolute top-3 right-3 bg-black/50 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
             <svg className="w-3 h-3 fill-yellow-400" viewBox="0 0 20 20">
@@ -121,7 +110,6 @@ const AdventureCard = memo(({
             </svg>
             {adventure.rating}
           </div>
-
           {/* Favorite Button */}
           <div className="absolute bottom-3 right-3">
             <FavoriteButton
@@ -135,7 +123,6 @@ const AdventureCard = memo(({
             />
           </div>
         </motion.div>
-
         {/* Content */}
         <motion.div
           layout
@@ -157,7 +144,6 @@ const AdventureCard = memo(({
                 {adventure.location}
               </p>
             </div>
-
             {/* Details Grid */}
             <div className={`space-y-2 mb-4 ${isListView ? 'flex-1' : ''}`}>
               <div className="flex items-center justify-between text-sm">
@@ -169,7 +155,6 @@ const AdventureCard = memo(({
                 </span>
                 <span className="font-medium text-gray-900 dark:text-white">{adventure.duration}</span>
               </div>
-
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-600 dark:text-gray-300 flex items-center gap-1">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,7 +165,6 @@ const AdventureCard = memo(({
                 <span className="font-medium text-gray-900 dark:text-white">{adventure.groupSize}</span>
               </div>
             </div>
-
             {/* Price and Reviews */}
             <div className="flex items-center justify-between">
               <div>
@@ -189,7 +173,6 @@ const AdventureCard = memo(({
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">per person</div>
               </div>
-
               <div className="text-right">
                 <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300">
                   <svg className="w-4 h-4 fill-yellow-400" viewBox="0 0 20 20">
@@ -208,7 +191,5 @@ const AdventureCard = memo(({
     </motion.div>
   );
 });
-
 AdventureCard.displayName = 'AdventureCard';
-
 export default AdventureCard;

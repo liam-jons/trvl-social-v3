@@ -10,7 +10,6 @@ class WhatsAppService {
     this.phoneNumberId = import.meta.env.VITE_WHATSAPP_PHONE_NUMBER_ID;
     this.verifyToken = import.meta.env.VITE_WHATSAPP_VERIFY_TOKEN;
   }
-
   /**
    * Initialize WhatsApp service and validate configuration
    */
@@ -20,14 +19,12 @@ class WhatsAppService {
         logger.warn('WhatsApp Business API credentials not configured');
         return false;
       }
-
       // Verify the phone number is available
       const isValid = await this.validatePhoneNumber();
       if (!isValid) {
         logger.error('WhatsApp phone number validation failed');
         return false;
       }
-
       // console.log('WhatsApp Business API service initialized successfully');
       return true;
     } catch (error) {
@@ -35,7 +32,6 @@ class WhatsAppService {
       return false;
     }
   }
-
   /**
    * Validate WhatsApp Business phone number
    */
@@ -50,19 +46,16 @@ class WhatsAppService {
           }
         }
       );
-
       if (response.ok) {
         const data = await response.json();
         return data.display_phone_number ? true : false;
       }
-
       return false;
     } catch (error) {
       logger.error('Error validating phone number:', error);
       return false;
     }
   }
-
   /**
    * Send a text message to a WhatsApp number
    */
@@ -78,13 +71,11 @@ class WhatsAppService {
           body: message
         }
       };
-
       const response = await this.makeRequest(
         `/${this.phoneNumberId}/messages`,
         'POST',
         payload
       );
-
       return {
         success: true,
         messageId: response.messages?.[0]?.id,
@@ -98,7 +89,6 @@ class WhatsAppService {
       };
     }
   }
-
   /**
    * Send a template message
    */
@@ -125,13 +115,11 @@ class WhatsAppService {
           ] : []
         }
       };
-
       const response = await this.makeRequest(
         `/${this.phoneNumberId}/messages`,
         'POST',
         payload
       );
-
       return {
         success: true,
         messageId: response.messages?.[0]?.id,
@@ -145,7 +133,6 @@ class WhatsAppService {
       };
     }
   }
-
   /**
    * Create a WhatsApp group (Note: Direct group creation via API is limited)
    * This method prepares group invitation links and manages member lists
@@ -153,11 +140,9 @@ class WhatsAppService {
   async createGroup(groupData) {
     try {
       const { name, description, members, adminPhoneNumber } = groupData;
-
       // For now, we'll create a structured group invitation flow
       // Since WhatsApp API doesn't directly support group creation,
       // we'll use invitation templates and manage member lists
-
       const groupInfo = {
         id: `group_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         name,
@@ -168,7 +153,6 @@ class WhatsAppService {
         invitation_link: null, // Will be set when group is manually created
         status: 'pending_creation'
       };
-
       // Send group creation notification to admin
       if (adminPhoneNumber) {
         const message = `🎯 Travel Group Setup\n\n` +
@@ -176,10 +160,8 @@ class WhatsAppService {
           `Description: ${description}\n` +
           `Members to invite: ${members.length}\n\n` +
           `Please create the WhatsApp group and share the invitation link through the app.`;
-
         await this.sendTextMessage(adminPhoneNumber, message);
       }
-
       return {
         success: true,
         groupInfo,
@@ -193,14 +175,12 @@ class WhatsAppService {
       };
     }
   }
-
   /**
    * Send group invitation messages to members
    */
   async inviteToGroup(groupInfo, members) {
     try {
       const invitationResults = [];
-
       for (const member of members) {
         const message = `🎉 You're invited to join: ${groupInfo.name}\n\n` +
           `${groupInfo.description}\n\n` +
@@ -208,7 +188,6 @@ class WhatsAppService {
             `Join here: ${groupInfo.invitation_link}` :
             'The group admin will send you the invitation link soon.'
           }`;
-
         const result = await this.sendTextMessage(member.phone, message);
         invitationResults.push({
           phone: member.phone,
@@ -217,11 +196,9 @@ class WhatsAppService {
           messageId: result.messageId,
           error: result.error
         });
-
         // Add delay between messages to avoid rate limiting
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
-
       return {
         success: true,
         invitationResults,
@@ -236,7 +213,6 @@ class WhatsAppService {
       };
     }
   }
-
   /**
    * Send booking confirmation message
    */
@@ -248,10 +224,8 @@ class WhatsAppService {
       `Group Size: ${bookingData.groupSize}\n\n` +
       `Booking ID: ${bookingData.bookingId}\n\n` +
       `We'll keep you updated on your WhatsApp! 🎯`;
-
     return this.sendTextMessage(to, message);
   }
-
   /**
    * Send trip reminder message
    */
@@ -262,10 +236,8 @@ class WhatsAppService {
       `🕐 Time: ${tripData.time}\n\n` +
       `Don't forget: ${tripData.reminders.join(', ')}\n\n` +
       `Have an amazing adventure! 🌟`;
-
     return this.sendTextMessage(to, message);
   }
-
   /**
    * Send vendor offer notification
    */
@@ -276,31 +248,24 @@ class WhatsAppService {
       `💰 Price: ${offerData.price}\n` +
       `📅 Available: ${offerData.availability}\n\n` +
       `View details in the TRVL app to book now! 🚀`;
-
     return this.sendTextMessage(to, message);
   }
-
   /**
    * Handle incoming webhook messages
    */
   async processWebhookMessage(webhookData) {
     try {
       const { entry } = webhookData;
-
       if (!entry || !Array.isArray(entry)) {
         return { success: false, error: 'Invalid webhook data' };
       }
-
       const processedMessages = [];
-
       for (const entryItem of entry) {
         const changes = entryItem.changes || [];
-
         for (const change of changes) {
           if (change.field === 'messages') {
             const messages = change.value?.messages || [];
             const contacts = change.value?.contacts || [];
-
             for (const message of messages) {
               const processedMessage = await this.processIncomingMessage(
                 message,
@@ -311,7 +276,6 @@ class WhatsAppService {
           }
         }
       }
-
       return {
         success: true,
         processedMessages,
@@ -325,7 +289,6 @@ class WhatsAppService {
       };
     }
   }
-
   /**
    * Process individual incoming message
    */
@@ -341,7 +304,6 @@ class WhatsAppService {
           wa_id: contact.wa_id
         } : null
       };
-
       // Extract message content based on type
       switch (message.type) {
         case 'text':
@@ -365,13 +327,11 @@ class WhatsAppService {
         default:
           messageData.unsupported = true;
       }
-
       // Here you would typically:
       // 1. Store the message in your database
       // 2. Trigger any automated responses
       // 3. Forward to customer service if needed
       // 4. Send to real-time notification system
-
       return {
         success: true,
         messageData,
@@ -385,16 +345,13 @@ class WhatsAppService {
       };
     }
   }
-
   /**
    * Determine actions to take based on incoming message
    */
   async determineMessageActions(messageData) {
     const actions = [];
-
     if (messageData.type === 'text' && messageData.text) {
       const text = messageData.text.toLowerCase();
-
       // Auto-responses for common queries
       if (text.includes('booking') || text.includes('reservation')) {
         actions.push({
@@ -425,16 +382,13 @@ class WhatsAppService {
         priority: 'normal'
       });
     }
-
     return actions;
   }
-
   /**
    * Execute determined actions for incoming messages
    */
   async executeMessageActions(messageData, actions) {
     const results = [];
-
     for (const action of actions) {
       switch (action.type) {
         case 'auto_response':
@@ -445,7 +399,6 @@ class WhatsAppService {
             messageId: response.messageId
           });
           break;
-
         case 'forward_to_support':
           // This would integrate with your customer service system
           results.push({
@@ -456,10 +409,8 @@ class WhatsAppService {
           break;
       }
     }
-
     return results;
   }
-
   /**
    * Mark message as read
    */
@@ -470,20 +421,17 @@ class WhatsAppService {
         status: "read",
         message_id: messageId
       };
-
       const response = await this.makeRequest(
         `/${this.phoneNumberId}/messages`,
         'POST',
         payload
       );
-
       return { success: true, response };
     } catch (error) {
       console.error('Error marking message as read:', error);
       return { success: false, error: error.message };
     }
   }
-
   /**
    * Get media file from WhatsApp
    */
@@ -504,13 +452,11 @@ class WhatsAppService {
       };
     }
   }
-
   /**
    * Make authenticated request to WhatsApp API
    */
   async makeRequest(endpoint, method = 'GET', body = null) {
     const url = `${this.baseUrl}${endpoint}`;
-
     const options = {
       method,
       headers: {
@@ -518,13 +464,10 @@ class WhatsAppService {
         'Content-Type': 'application/json'
       }
     };
-
     if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
       options.body = JSON.stringify(body);
     }
-
     const response = await fetch(url, options);
-
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(
@@ -533,10 +476,8 @@ class WhatsAppService {
         }`
       );
     }
-
     return response.json();
   }
-
   /**
    * Verify webhook signature (for security)
    */
@@ -546,10 +487,8 @@ class WhatsAppService {
       .createHmac('sha256', secret)
       .update(payload)
       .digest('hex');
-
     return signature === `sha256=${expectedSignature}`;
   }
-
   /**
    * Get webhook verification token
    */
@@ -557,8 +496,6 @@ class WhatsAppService {
     return this.verifyToken;
   }
 }
-
 // Create singleton instance
 const whatsAppService = new WhatsAppService();
-
 export default whatsAppService;

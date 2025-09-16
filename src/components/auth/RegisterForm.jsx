@@ -3,11 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import GlassCard from '../ui/GlassCard';
 import GlassButton from '../ui/GlassButton';
-
 const RegisterForm = () => {
   const navigate = useNavigate();
   const { signUp, loading, error } = useAuth();
-  
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -16,14 +14,11 @@ const RegisterForm = () => {
     role: 'traveler',
     agreeToTerms: false,
   });
-  
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
-
   const validateForm = () => {
     const newErrors = {};
-    
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email) {
@@ -31,7 +26,6 @@ const RegisterForm = () => {
     } else if (!emailRegex.test(formData.email)) {
       newErrors.email = 'Please enter a valid email';
     }
-    
     // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
@@ -40,60 +34,49 @@ const RegisterForm = () => {
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
       newErrors.password = 'Password must contain uppercase, lowercase, and numbers';
     }
-    
     // Confirm password
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-    
     // Full name validation
     if (!formData.fullName.trim()) {
       newErrors.fullName = 'Full name is required';
     } else if (formData.fullName.trim().length < 2) {
       newErrors.fullName = 'Please enter your full name';
     }
-    
     // Terms agreement
     if (!formData.agreeToTerms) {
       newErrors.agreeToTerms = 'You must agree to the terms and conditions';
     }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
-    
     // Clear error for this field
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!validateForm()) {
       return;
     }
-    
     const result = await signUp({
       email: formData.email,
       password: formData.password,
       fullName: formData.fullName,
       role: formData.role,
     });
-    
     if (result.success) {
       setRegistrationSuccess(true);
     }
   };
-
   if (registrationSuccess) {
     return (
       <GlassCard className="max-w-md mx-auto mt-20 p-8 text-center">
@@ -108,7 +91,6 @@ const RegisterForm = () => {
             We've sent a verification email to <strong>{formData.email}</strong>
           </p>
         </div>
-        
         <div className="space-y-4 text-left bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
           <p className="text-sm text-gray-700 dark:text-gray-300">
             Please check your email and click the verification link to activate your account.
@@ -117,7 +99,6 @@ const RegisterForm = () => {
             The email may take a few minutes to arrive. Don't forget to check your spam folder.
           </p>
         </div>
-        
         <div className="mt-6">
           <Link to="/login">
             <GlassButton variant="secondary" className="w-full">
@@ -128,7 +109,6 @@ const RegisterForm = () => {
       </GlassCard>
     );
   }
-
   return (
     <GlassCard className="max-w-md mx-auto mt-10 p-8">
       <div className="mb-6">
@@ -137,7 +117,6 @@ const RegisterForm = () => {
           Join TRVL Social and start your adventure
         </p>
       </div>
-
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Full Name */}
         <div>
@@ -157,7 +136,6 @@ const RegisterForm = () => {
             <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>
           )}
         </div>
-
         {/* Email */}
         <div>
           <label htmlFor="email" className="block text-sm font-medium mb-1">
@@ -176,7 +154,6 @@ const RegisterForm = () => {
             <p className="text-red-500 text-xs mt-1">{errors.email}</p>
           )}
         </div>
-
         {/* Password */}
         <div>
           <label htmlFor="password" className="block text-sm font-medium mb-1">
@@ -216,7 +193,6 @@ const RegisterForm = () => {
             Must be at least 8 characters with uppercase, lowercase, and numbers
           </p>
         </div>
-
         {/* Confirm Password */}
         <div>
           <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1">
@@ -235,7 +211,6 @@ const RegisterForm = () => {
             <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
           )}
         </div>
-
         {/* Role Selection */}
         <div>
           <label className="block text-sm font-medium mb-2">
@@ -266,7 +241,6 @@ const RegisterForm = () => {
             </label>
           </div>
         </div>
-
         {/* Terms and Conditions */}
         <div>
           <label className="flex items-start">
@@ -292,14 +266,12 @@ const RegisterForm = () => {
             <p className="text-red-500 text-xs mt-1">{errors.agreeToTerms}</p>
           )}
         </div>
-
         {/* Error Message */}
         {error && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
             {error}
           </div>
         )}
-
         {/* Submit Button */}
         <GlassButton
           type="submit"
@@ -309,7 +281,6 @@ const RegisterForm = () => {
         >
           {loading ? 'Creating Account...' : 'Create Account'}
         </GlassButton>
-
         {/* Divider */}
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
@@ -319,7 +290,6 @@ const RegisterForm = () => {
             <span className="px-2 bg-white dark:bg-gray-900 text-gray-500">Or continue with</span>
           </div>
         </div>
-
         {/* Social Login */}
         <div className="grid grid-cols-2 gap-3">
           <GlassButton
@@ -336,7 +306,6 @@ const RegisterForm = () => {
             </svg>
             Google
           </GlassButton>
-          
           <GlassButton
             type="button"
             variant="secondary"
@@ -349,7 +318,6 @@ const RegisterForm = () => {
             Facebook
           </GlassButton>
         </div>
-
         {/* Login Link */}
         <p className="text-center text-sm text-gray-600 dark:text-gray-300 mt-6">
           Already have an account?{' '}
@@ -361,5 +329,4 @@ const RegisterForm = () => {
     </GlassCard>
   );
 };
-
 export default RegisterForm;

@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import analyticsService from '../services/analytics-service';
-
 /**
  * Custom hook for real-time analytics metrics
  * Provides live metric updates using WebSocket or polling
@@ -13,7 +12,6 @@ export const useRealTimeMetrics = (initialData = null, updateInterval = 30000) =
   const retryTimeoutRef = useRef(null);
   const retryCount = useRef(0);
   const maxRetries = 5;
-
   // Generate mock real-time metrics data
   const generateRealTimeMetrics = async () => {
     try {
@@ -45,24 +43,20 @@ export const useRealTimeMetrics = (initialData = null, updateInterval = 30000) =
         alerts: generateMockAlerts(),
         timestamp: new Date().toISOString()
       };
-
       // Track the metrics fetch event
       analyticsService.trackEvent('real_time_metrics_fetched', {
         timestamp: mockMetrics.timestamp,
         active_users: mockMetrics.realTime.activeUsersNow,
         revenue_today: mockMetrics.revenueToday
       });
-
       return mockMetrics;
     } catch (error) {
       analyticsService.trackError(error, { context: 'real_time_metrics_fetch' });
       throw error;
     }
   };
-
   const generateMockAlerts = () => {
     const alerts = [];
-
     // Random chance of having alerts
     if (Math.random() < 0.3) {
       alerts.push({
@@ -74,7 +68,6 @@ export const useRealTimeMetrics = (initialData = null, updateInterval = 30000) =
         severity: 'medium'
       });
     }
-
     if (Math.random() < 0.1) {
       alerts.push({
         id: `alert-${Date.now()}-2`,
@@ -85,20 +78,16 @@ export const useRealTimeMetrics = (initialData = null, updateInterval = 30000) =
         severity: 'high'
       });
     }
-
     return alerts;
   };
-
   // Initialize WebSocket connection (mock implementation)
   const initializeWebSocket = () => {
     try {
       // In a real implementation, you'd connect to your WebSocket server
       // const ws = new WebSocket(process.env.VITE_WEBSOCKET_URL);
-
       // Mock WebSocket behavior with polling for now
       setIsConnected(true);
       retryCount.current = 0;
-
       // Start polling for updates
       intervalRef.current = setInterval(async () => {
         try {
@@ -110,20 +99,16 @@ export const useRealTimeMetrics = (initialData = null, updateInterval = 30000) =
           handleConnectionError();
         }
       }, updateInterval);
-
     } catch (error) {
       console.error('Failed to initialize WebSocket connection:', error);
       handleConnectionError();
     }
   };
-
   const handleConnectionError = () => {
     setIsConnected(false);
-
     if (retryCount.current < maxRetries) {
       retryCount.current += 1;
       const delay = Math.min(1000 * Math.pow(2, retryCount.current), 30000);
-
       retryTimeoutRef.current = setTimeout(() => {
         console.log(`Retrying connection... Attempt ${retryCount.current}/${maxRetries}`);
         initializeWebSocket();
@@ -136,7 +121,6 @@ export const useRealTimeMetrics = (initialData = null, updateInterval = 30000) =
       });
     }
   };
-
   // Manual refresh function
   const refreshMetrics = async () => {
     try {
@@ -150,7 +134,6 @@ export const useRealTimeMetrics = (initialData = null, updateInterval = 30000) =
       throw error;
     }
   };
-
   // Cleanup function
   const cleanup = () => {
     if (intervalRef.current) {
@@ -163,11 +146,9 @@ export const useRealTimeMetrics = (initialData = null, updateInterval = 30000) =
     }
     setIsConnected(false);
   };
-
   // Initialize connection on mount
   useEffect(() => {
     initializeWebSocket();
-
     // Initial data fetch
     generateRealTimeMetrics().then(initialMetrics => {
       setMetrics(initialMetrics);
@@ -175,10 +156,8 @@ export const useRealTimeMetrics = (initialData = null, updateInterval = 30000) =
     }).catch(error => {
       console.error('Failed to fetch initial metrics:', error);
     });
-
     return cleanup;
   }, [updateInterval]);
-
   // Handle visibility change to pause/resume updates
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -188,11 +167,9 @@ export const useRealTimeMetrics = (initialData = null, updateInterval = 30000) =
         initializeWebSocket();
       }
     };
-
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
-
   return {
     metrics,
     isConnected,

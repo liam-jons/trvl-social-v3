@@ -2,12 +2,10 @@
  * Booking Modification Service - Comprehensive booking modification and cancellation system
  * Handles modification requests, vendor approval workflows, and policy enforcement
  */
-
 import { supabase } from '../lib/supabase.js';
 import { notificationService } from './notification-service.js';
 import { refundPolicyEngine, manualRefundManager } from './payment-refund-service.js';
 import { groupPaymentManager } from './split-payment-service.js';
-
 // Modification configuration
 const MODIFICATION_CONFIG = {
   types: {
@@ -38,7 +36,6 @@ const MODIFICATION_CONFIG = {
     lastMinuteFeeMultiplier: 2, // Double fees for last-minute changes
   },
 };
-
 /**
  * Booking modification manager
  */
@@ -56,23 +53,18 @@ export const bookingModificationManager = {
       urgency = 'normal',
       metadata = {},
     } = requestData;
-
     try {
       // Validate booking exists and user has permission
       const booking = await this.validateModificationPermission(bookingId, userId);
-
       // Check modification restrictions
       const restrictions = await this.checkModificationRestrictions(booking, modificationType);
       if (!restrictions.allowed) {
         throw new Error(restrictions.reason);
       }
-
       // Calculate modification fees
       const fees = await this.calculateModificationFees(booking, modificationType, requestedChanges);
-
       // Determine if auto-approval applies
       const autoApproval = this.evaluateAutoApproval(modificationType, requestedChanges, booking);
-
       // Create modification request record
       const { data: modificationRequest, error } = await supabase
         .from('booking_modifications')
@@ -101,9 +93,7 @@ export const bookingModificationManager = {
         })
         .select()
         .single();
-
       if (error) throw error;
-
       // Process auto-approval if eligible
       if (autoApproval.eligible) {
         await this.processAutoApproval(modificationRequest);
@@ -111,7 +101,6 @@ export const bookingModificationManager = {
         // Send notification to vendor for manual review
         await this.notifyVendorOfModificationRequest(modificationRequest, booking);
       }
-
       // Create audit log entry
       await this.createAuditLogEntry({
         booking_id: bookingId,
@@ -125,19 +114,16 @@ export const bookingModificationManager = {
           fees: fees,
         },
       });
-
       return {
         success: true,
         modificationRequest,
         autoApproved: autoApproval.eligible,
         estimatedFees: fees,
       };
-
     } catch (error) {
       throw new Error(`Failed to create modification request: ${error.message}`);
     }
   },
-
   /**
    * Validate user permission to modify booking
    */
@@ -163,25 +149,19 @@ export const bookingModificationManager = {
       `)
       .eq('id', bookingId)
       .single();
-
     if (error) throw new Error('Booking not found');
-
     // Check if user is the booking owner or organizer
     const isOwner = booking.user_id === userId;
     const isOrganizer = booking.split_payments?.some(sp => sp.organizer_id === userId);
-
     if (!isOwner && !isOrganizer) {
       throw new Error('You do not have permission to modify this booking');
     }
-
     // Check booking status
     if (!['confirmed', 'paid', 'partially_paid'].includes(booking.status)) {
       throw new Error('Booking cannot be modified in its current status');
     }
-
     return booking;
   },
-
   /**
    * Check modification restrictions
    */
@@ -190,7 +170,6 @@ export const bookingModificationManager = {
     const now = new Date();
     const tripStart = new Date(booking.adventures.start_date);
     const hoursUntilTrip = (tripStart - now) / (1000 * 60 * 60);
-
     // Check minimum advance time
     if (hoursUntilTrip < config.minAdvanceHours) {
       return {
@@ -198,7 +177,6 @@ export const bookingModificationManager = {
         reason: `Modifications must be requested at least ${config.minAdvanceHours} hours before the trip`,
       };
     }
-
     // Check for blackout days
     if (config.blackoutDays.some(blackout => {
       const blackoutDate = new Date(blackout);
@@ -209,7 +187,6 @@ export const bookingModificationManager = {
         reason: 'Modifications are not allowed on this date',
       };
     }
-
     // Check maximum date changes for date modifications
     if (modificationType === MODIFICATION_CONFIG.types.DATE_CHANGE) {
       const { data: previousChanges } = await supabase
@@ -218,7 +195,6 @@ export const bookingModificationManager = {
         .eq('booking_id', booking.id)
         .eq('modification_type', MODIFICATION_CONFIG.types.DATE_CHANGE)
         .in('status', ['approved', 'auto_approved']);
-
       if (previousChanges && previousChanges.length >= config.maxDateChanges) {
         return {
           allowed: false,
@@ -226,7 +202,6 @@ export const bookingModificationManager = {
         };
       }
     }
-
     // Check vendor-specific restrictions
     const vendorSettings = booking.adventures.vendors?.modification_settings || {};
     if (vendorSettings.blacklistTypes?.includes(modificationType)) {
@@ -235,10 +210,8 @@ export const bookingModificationManager = {
         reason: 'This type of modification is not allowed by the vendor',
       };
     }
-
     return { allowed: true };
   },
-
   /**
    * Calculate modification fees
    */
@@ -248,18 +221,15 @@ export const bookingModificationManager = {
     const tripStart = new Date(booking.adventures.start_date);
     const hoursUntilTrip = (tripStart - now) / (1000 * 60 * 60);
     const isLastMinute = hoursUntilTrip < 48;
-
     let baseFee = 0;
     let additionalFees = 0;
     const breakdown = [];
-
     // Calculate base fee by modification type
     switch (modificationType) {
       case MODIFICATION_CONFIG.types.DATE_CHANGE:
         baseFee = config.dateChangeFee;
         breakdown.push({ type: 'Date Change Fee', amount: baseFee });
         break;
-
       case MODIFICATION_CONFIG.types.PARTICIPANT_UPDATE:
         const participantChange = requestedChanges.participantCount || 0;
         if (participantChange > 0) {
@@ -267,12 +237,10 @@ export const bookingModificationManager = {
           breakdown.push({ type: 'Participant Addition Fee', amount: additionalFees });
         }
         break;
-
       case MODIFICATION_CONFIG.types.ITINERARY_ADJUSTMENT:
         baseFee = config.itineraryChangeFee;
         breakdown.push({ type: 'Itinerary Change Fee', amount: baseFee });
         break;
-
       default:
         // Minor modifications may have no fee
         if (!MODIFICATION_CONFIG.autoApprovalRules.minorAdjustmentTypes.includes(modificationType)) {
@@ -280,14 +248,12 @@ export const bookingModificationManager = {
           breakdown.push({ type: 'Modification Fee', amount: baseFee });
         }
     }
-
     // Apply last-minute multiplier
     if (isLastMinute && (baseFee > 0 || additionalFees > 0)) {
       const lastMinuteFee = (baseFee + additionalFees) * (config.lastMinuteFeeMultiplier - 1);
       additionalFees += lastMinuteFee;
       breakdown.push({ type: 'Last-Minute Change Surcharge', amount: lastMinuteFee });
     }
-
     // Check vendor-specific fees
     const vendorSettings = booking.adventures.vendors?.modification_settings || {};
     if (vendorSettings.customFees?.[modificationType]) {
@@ -295,9 +261,7 @@ export const bookingModificationManager = {
       additionalFees += vendorFee;
       breakdown.push({ type: 'Vendor-Specific Fee', amount: vendorFee });
     }
-
     const total = baseFee + additionalFees;
-
     return {
       total,
       baseFee,
@@ -306,7 +270,6 @@ export const bookingModificationManager = {
       isLastMinute,
     };
   },
-
   /**
    * Evaluate if modification qualifies for auto-approval
    */
@@ -315,7 +278,6 @@ export const bookingModificationManager = {
     const now = new Date();
     const tripStart = new Date(booking.adventures.start_date);
     const hoursUntilTrip = (tripStart - now) / (1000 * 60 * 60);
-
     // Check if modification type is auto-approvable
     if (config.minorAdjustmentTypes.includes(modificationType)) {
       return {
@@ -323,7 +285,6 @@ export const bookingModificationManager = {
         reason: 'Minor adjustment type - auto-approved',
       };
     }
-
     // Auto-approve date changes with sufficient advance notice
     if (modificationType === MODIFICATION_CONFIG.types.DATE_CHANGE &&
         hoursUntilTrip >= config.dateChangeHours) {
@@ -332,7 +293,6 @@ export const bookingModificationManager = {
         reason: `Date change requested ${Math.floor(hoursUntilTrip)} hours in advance`,
       };
     }
-
     // Auto-approve small participant increases
     if (modificationType === MODIFICATION_CONFIG.types.PARTICIPANT_UPDATE) {
       const increase = requestedChanges.participantCount || 0;
@@ -343,7 +303,6 @@ export const bookingModificationManager = {
         };
       }
     }
-
     // Check vendor auto-approval settings
     const vendorSettings = booking.adventures.vendors?.modification_settings || {};
     if (vendorSettings.autoApproveTypes?.includes(modificationType)) {
@@ -352,13 +311,11 @@ export const bookingModificationManager = {
         reason: 'Vendor allows auto-approval for this modification type',
       };
     }
-
     return {
       eligible: false,
       reason: 'Requires vendor review',
     };
   },
-
   /**
    * Process auto-approved modification
    */
@@ -375,13 +332,10 @@ export const bookingModificationManager = {
           updated_at: new Date().toISOString(),
         })
         .eq('id', modificationRequest.id);
-
       // Apply the modification to the booking
       await this.applyModificationToBooking(modificationRequest);
-
       // Send confirmation notifications
       await this.sendModificationConfirmation(modificationRequest, true);
-
       // Create audit log
       await this.createAuditLogEntry({
         booking_id: modificationRequest.booking_id,
@@ -393,23 +347,19 @@ export const bookingModificationManager = {
           reason: modificationRequest.auto_approval_reason,
         },
       });
-
     } catch (error) {
       throw new Error(`Failed to process auto-approval: ${error.message}`);
     }
   },
-
   /**
    * Apply approved modification to booking
    */
   async applyModificationToBooking(modificationRequest) {
     const { booking_id, modification_type, requested_changes } = modificationRequest;
-
     try {
       let updateData = {
         updated_at: new Date().toISOString(),
       };
-
       // Apply changes based on modification type
       switch (modification_type) {
         case MODIFICATION_CONFIG.types.DATE_CHANGE:
@@ -420,7 +370,6 @@ export const bookingModificationManager = {
             updateData.end_date = requested_changes.newEndDate;
           }
           break;
-
         case MODIFICATION_CONFIG.types.PARTICIPANT_UPDATE:
           if (requested_changes.participantCount !== undefined) {
             updateData.participant_count = requested_changes.participantCount;
@@ -429,65 +378,54 @@ export const bookingModificationManager = {
             updateData.participant_details = requested_changes.participantDetails;
           }
           break;
-
         case MODIFICATION_CONFIG.types.ITINERARY_ADJUSTMENT:
           if (requested_changes.itinerary) {
             updateData.custom_itinerary = requested_changes.itinerary;
           }
           break;
-
         case MODIFICATION_CONFIG.types.ACCOMMODATION_CHANGE:
           if (requested_changes.accommodation) {
             updateData.accommodation_preferences = requested_changes.accommodation;
           }
           break;
-
         case MODIFICATION_CONFIG.types.MEAL_PREFERENCE:
           if (requested_changes.meals) {
             updateData.meal_preferences = requested_changes.meals;
           }
           break;
-
         case MODIFICATION_CONFIG.types.SPECIAL_REQUESTS:
           if (requested_changes.specialRequests) {
             updateData.special_requests = requested_changes.specialRequests;
           }
           break;
       }
-
       // Update booking record
       await supabase
         .from('bookings')
         .update(updateData)
         .eq('id', booking_id);
-
       // Update related records if needed (e.g., split payments for participant changes)
       if (modification_type === MODIFICATION_CONFIG.types.PARTICIPANT_UPDATE) {
         await this.updateRelatedPaymentRecords(booking_id, requested_changes);
       }
-
     } catch (error) {
       throw new Error(`Failed to apply modification to booking: ${error.message}`);
     }
   },
-
   /**
    * Update payment records for participant changes
    */
   async updateRelatedPaymentRecords(bookingId, changes) {
     if (!changes.participantCount) return;
-
     try {
       // Get existing split payments
       const { data: splitPayments } = await supabase
         .from('split_payments')
         .select('*')
         .eq('booking_id', bookingId);
-
       for (const splitPayment of splitPayments || []) {
         // Recalculate payment amounts based on new participant count
         const newAmountPerPerson = Math.round(splitPayment.total_amount / changes.participantCount);
-
         await supabase
           .from('split_payments')
           .update({
@@ -501,7 +439,6 @@ export const bookingModificationManager = {
       console.error('Failed to update payment records:', error);
     }
   },
-
   /**
    * Send modification confirmation notifications
    */
@@ -516,7 +453,6 @@ export const bookingModificationManager = {
         `)
         .eq('id', modificationRequest.booking_id)
         .single();
-
       // Notify user
       const userNotification = {
         userId: modificationRequest.user_id,
@@ -531,9 +467,7 @@ export const bookingModificationManager = {
         channels: ['push', 'email'],
         priority: 'normal',
       };
-
       await notificationService.sendNotification(userNotification);
-
       // Notify vendor if not auto-approved
       if (!autoApproved) {
         const vendorNotification = {
@@ -549,15 +483,12 @@ export const bookingModificationManager = {
           channels: ['push', 'email'],
           priority: 'normal',
         };
-
         await notificationService.sendNotification(vendorNotification);
       }
-
     } catch (error) {
       console.error('Failed to send modification confirmation:', error);
     }
   },
-
   /**
    * Notify vendor of modification request
    */
@@ -577,13 +508,11 @@ export const bookingModificationManager = {
         channels: ['push', 'email'],
         priority: 'high',
       };
-
       await notificationService.sendNotification(notification);
     } catch (error) {
       console.error('Failed to notify vendor:', error);
     }
   },
-
   /**
    * Get modification history for a booking
    */
@@ -591,7 +520,6 @@ export const bookingModificationManager = {
     try {
       // Verify access
       await this.validateModificationPermission(bookingId, userId);
-
       const { data: modifications, error } = await supabase
         .from('booking_modifications')
         .select(`
@@ -601,15 +529,12 @@ export const bookingModificationManager = {
         `)
         .eq('booking_id', bookingId)
         .order('created_at', { ascending: false });
-
       if (error) throw error;
-
       return modifications;
     } catch (error) {
       throw new Error(`Failed to get modification history: ${error.message}`);
     }
   },
-
   /**
    * Create audit log entry
    */
@@ -626,7 +551,6 @@ export const bookingModificationManager = {
     }
   },
 };
-
 /**
  * Vendor modification approval manager
  */
@@ -653,21 +577,17 @@ export const vendorModificationManager = {
         .eq('bookings.adventures.vendor_id', vendorId)
         .eq('status', 'pending_vendor_review')
         .order('created_at', { ascending: true });
-
       if (error) throw error;
-
       return modifications;
     } catch (error) {
       throw new Error(`Failed to get pending modifications: ${error.message}`);
     }
   },
-
   /**
    * Approve or reject modification request
    */
   async processModificationRequest(modificationId, vendorId, decision, notes = '') {
     const { approved, rejectionReason } = decision;
-
     try {
       // Verify vendor permission
       const { data: modification, error: modError } = await supabase
@@ -680,17 +600,13 @@ export const vendorModificationManager = {
         `)
         .eq('id', modificationId)
         .single();
-
       if (modError) throw new Error('Modification request not found');
-
       if (modification.bookings.adventures.vendor_id !== vendorId) {
         throw new Error('You do not have permission to process this modification');
       }
-
       if (modification.status !== 'pending_vendor_review') {
         throw new Error('This modification has already been processed');
       }
-
       // Update modification status
       const updateData = {
         status: approved ? 'approved' : 'rejected',
@@ -700,26 +616,21 @@ export const vendorModificationManager = {
         processed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
-
       if (approved) {
         updateData.approved_at = new Date().toISOString();
       } else {
         updateData.rejected_at = new Date().toISOString();
       }
-
       await supabase
         .from('booking_modifications')
         .update(updateData)
         .eq('id', modificationId);
-
       // Apply modification if approved
       if (approved) {
         await bookingModificationManager.applyModificationToBooking(modification);
       }
-
       // Send notifications
       await this.sendDecisionNotification(modification, approved, notes, rejectionReason);
-
       // Create audit log
       await bookingModificationManager.createAuditLogEntry({
         booking_id: modification.booking_id,
@@ -732,18 +643,15 @@ export const vendorModificationManager = {
           rejectionReason,
         },
       });
-
       return {
         success: true,
         approved,
         modificationId,
       };
-
     } catch (error) {
       throw new Error(`Failed to process modification request: ${error.message}`);
     }
   },
-
   /**
    * Send decision notification to user
    */
@@ -757,7 +665,6 @@ export const vendorModificationManager = {
         `)
         .eq('id', modification.booking_id)
         .single();
-
       const notification = {
         userId: modification.user_id,
         type: approved ? 'modification_approved' : 'modification_rejected',
@@ -775,13 +682,11 @@ export const vendorModificationManager = {
         channels: ['push', 'email'],
         priority: approved ? 'normal' : 'high',
       };
-
       await notificationService.sendNotification(notification);
     } catch (error) {
       console.error('Failed to send decision notification:', error);
     }
   },
-
   /**
    * Set vendor auto-approval rules
    */
@@ -799,14 +704,12 @@ export const vendorModificationManager = {
           updated_at: new Date().toISOString(),
         })
         .eq('id', vendorId);
-
       return { success: true };
     } catch (error) {
       throw new Error(`Failed to set auto-approval rules: ${error.message}`);
     }
   },
 };
-
 /**
  * Cancellation policy engine
  */
@@ -843,9 +746,7 @@ export const cancellationPolicyEngine = {
         `)
         .eq('id', bookingId)
         .single();
-
       if (error) throw error;
-
       // Use vendor policy if available, otherwise adventure policy, otherwise default
       const vendorPolicy = booking.adventures.vendors?.cancellation_policy || {};
       const adventurePolicy = booking.adventures.cancellation_policy || {};
@@ -861,21 +762,16 @@ export const cancellationPolicyEngine = {
         cancellationFeePercent: 0,
         processingFeeWaived: false,
       };
-
       const policy = { ...defaultPolicy, ...adventurePolicy, ...vendorPolicy };
-
       // Calculate time until trip starts
       const tripStart = new Date(booking.adventures.start_date);
       const hoursUntilStart = (tripStart - requestedAt) / (1000 * 60 * 60);
-
       // Calculate refund eligibility
       const eligibility = await refundPolicyEngine.evaluateRefundEligibility(bookingId, requestedAt);
-
       // Calculate fees and refund amounts
       const paymentStats = booking.split_payments?.length > 0
         ? groupPaymentManager.calculatePaymentStats(booking.split_payments[0].individual_payments)
         : { totalPaid: booking.total_amount || 0 };
-
       const refundCalculation = refundPolicyEngine.calculateRefundAmount(
         paymentStats.totalPaid,
         eligibility,
@@ -884,7 +780,6 @@ export const cancellationPolicyEngine = {
           processingFee: policy.processingFeeWaived ? 0 : Math.round(paymentStats.totalPaid * 0.029),
         }
       );
-
       return {
         policy,
         eligibility,
@@ -899,12 +794,10 @@ export const cancellationPolicyEngine = {
           status: booking.status,
         },
       };
-
     } catch (error) {
       throw new Error(`Failed to evaluate cancellation policy: ${error.message}`);
     }
   },
-
   /**
    * Process booking cancellation
    */
@@ -917,11 +810,9 @@ export const cancellationPolicyEngine = {
       specialCircumstances,
       evidence = {},
     } = cancellationRequest;
-
     try {
       // Evaluate cancellation policy
       const policyEvaluation = await this.evaluateCancellationPolicy(bookingId, cancellationType);
-
       // Check special circumstances
       let finalEligibility = policyEvaluation.eligibility;
       if (specialCircumstances) {
@@ -936,7 +827,6 @@ export const cancellationPolicyEngine = {
           };
         }
       }
-
       // Create cancellation record
       const { data: cancellation, error: cancelError } = await supabase
         .from('booking_cancellations')
@@ -960,9 +850,7 @@ export const cancellationPolicyEngine = {
         })
         .select()
         .single();
-
       if (cancelError) throw cancelError;
-
       // Update booking status
       await supabase
         .from('bookings')
@@ -973,15 +861,12 @@ export const cancellationPolicyEngine = {
           updated_at: new Date().toISOString(),
         })
         .eq('id', bookingId);
-
       // Process refund if eligible and approved
       if (finalEligibility.eligible && cancellation.status === 'approved') {
         await this.processRefund(cancellation, policyEvaluation);
       }
-
       // Send notifications
       await this.sendCancellationNotifications(cancellation, policyEvaluation);
-
       // Create audit log
       await bookingModificationManager.createAuditLogEntry({
         booking_id: bookingId,
@@ -995,7 +880,6 @@ export const cancellationPolicyEngine = {
           refund_amount: policyEvaluation.refundCalculation.netRefund,
         },
       });
-
       return {
         success: true,
         cancellation,
@@ -1003,12 +887,10 @@ export const cancellationPolicyEngine = {
         refundAmount: policyEvaluation.refundCalculation.netRefund,
         requiresEvidence: finalEligibility.requiresEvidence,
       };
-
     } catch (error) {
       throw new Error(`Failed to process cancellation: ${error.message}`);
     }
   },
-
   /**
    * Process partial cancellation for group bookings
    */
@@ -1019,7 +901,6 @@ export const cancellationPolicyEngine = {
       participantsToCancel,
       reason,
     } = partialCancellationRequest;
-
     try {
       // Get booking and validate group booking
       const { data: booking, error } = await supabase
@@ -1033,29 +914,22 @@ export const cancellationPolicyEngine = {
         `)
         .eq('id', bookingId)
         .single();
-
       if (error) throw error;
-
       if (!booking.split_payments?.length) {
         throw new Error('Partial cancellation is only available for group bookings');
       }
-
       const splitPayment = booking.split_payments[0];
-
       // Validate participants to cancel
       const participantIds = participantsToCancel.map(p => p.userId);
       const validParticipants = splitPayment.individual_payments.filter(ip =>
         participantIds.includes(ip.user_id)
       );
-
       if (validParticipants.length !== participantsToCancel.length) {
         throw new Error('Some participants not found in this booking');
       }
-
       // Calculate refund for cancelled participants
       let totalRefundAmount = 0;
       const refundDetails = [];
-
       for (const participant of validParticipants) {
         if (participant.status === 'paid') {
           const paidAmount = participant.amount_paid || participant.amount_due;
@@ -1067,7 +941,6 @@ export const cancellationPolicyEngine = {
           });
         }
       }
-
       // Create partial cancellation record
       const { data: cancellation, error: cancelError } = await supabase
         .from('booking_cancellations')
@@ -1088,9 +961,7 @@ export const cancellationPolicyEngine = {
         })
         .select()
         .single();
-
       if (cancelError) throw cancelError;
-
       // Process individual refunds
       for (const participant of validParticipants) {
         if (participant.status === 'paid') {
@@ -1105,7 +976,6 @@ export const cancellationPolicyEngine = {
             splitPayment.id
           );
         }
-
         // Update individual payment status
         await supabase
           .from('individual_payments')
@@ -1116,7 +986,6 @@ export const cancellationPolicyEngine = {
           })
           .eq('id', participant.id);
       }
-
       // Update split payment participant count
       const newParticipantCount = splitPayment.participant_count - participantsToCancel.length;
       await supabase
@@ -1126,22 +995,18 @@ export const cancellationPolicyEngine = {
           updated_at: new Date().toISOString(),
         })
         .eq('id', splitPayment.id);
-
       // Send notifications
       await this.sendPartialCancellationNotifications(cancellation, booking, refundDetails);
-
       return {
         success: true,
         cancellation,
         refundAmount: totalRefundAmount,
         remainingParticipants: newParticipantCount,
       };
-
     } catch (error) {
       throw new Error(`Failed to process partial cancellation: ${error.message}`);
     }
   },
-
   /**
    * Process refund for approved cancellation
    */
@@ -1152,7 +1017,6 @@ export const cancellationPolicyEngine = {
         .from('split_payments')
         .select('*, individual_payments (*)')
         .eq('booking_id', cancellation.booking_id);
-
       if (splitPayments?.length > 0) {
         // Process group payment refund
         await manualRefundManager.processManualRefund({
@@ -1170,7 +1034,6 @@ export const cancellationPolicyEngine = {
       console.error('Failed to process cancellation refund:', error);
     }
   },
-
   /**
    * Send cancellation notifications
    */
@@ -1185,7 +1048,6 @@ export const cancellationPolicyEngine = {
         `)
         .eq('id', cancellation.booking_id)
         .single();
-
       // Notify user
       const userNotification = {
         userId: cancellation.user_id,
@@ -1201,9 +1063,7 @@ export const cancellationPolicyEngine = {
         channels: ['push', 'email'],
         priority: 'normal',
       };
-
       await notificationService.sendNotification(userNotification);
-
       // Notify vendor
       const vendorNotification = {
         userId: booking.adventures.vendor_id,
@@ -1218,14 +1078,11 @@ export const cancellationPolicyEngine = {
         channels: ['push', 'email'],
         priority: 'normal',
       };
-
       await notificationService.sendNotification(vendorNotification);
-
     } catch (error) {
       console.error('Failed to send cancellation notifications:', error);
     }
   },
-
   /**
    * Send partial cancellation notifications
    */
@@ -1246,7 +1103,6 @@ export const cancellationPolicyEngine = {
           channels: ['push', 'email'],
           priority: 'normal',
         };
-
         await notificationService.sendNotification(notification);
       }
     } catch (error) {
@@ -1254,10 +1110,8 @@ export const cancellationPolicyEngine = {
     }
   },
 };
-
 // Export configuration
 export const getModificationConfig = () => MODIFICATION_CONFIG;
-
 // Main export
 export default {
   bookingModificationManager,

@@ -2,14 +2,12 @@
  * CDN Cache Manager for Static Algorithm Data
  * Manages caching of static compatibility algorithm assets and configurations
  */
-
 class CDNCacheManager {
   constructor() {
     this.cdnEndpoint = process.env.CDN_ENDPOINT || 'https://cdn.trvl-social.com';
     this.staticAssets = new Map();
     this.cacheManifest = new Map();
     this.maxCacheAge = 86400; // 24 hours default
-
     // Cache headers configuration
     this.cacheHeaders = {
       'static-data': {
@@ -33,10 +31,8 @@ class CDNCacheManager {
         'Expires': true
       }
     };
-
     this.initializeStaticAssets();
   }
-
   /**
    * Initialize static algorithm assets that can be cached
    */
@@ -124,7 +120,6 @@ class CDNCacheManager {
       version: 'v1.2',
       lastModified: new Date('2025-01-15').toISOString()
     });
-
     // Scoring algorithm weights and formulas
     this.staticAssets.set('scoring-algorithms', {
       data: {
@@ -203,7 +198,6 @@ class CDNCacheManager {
       version: 'v2.1',
       lastModified: new Date('2025-01-10').toISOString()
     });
-
     // Travel preference compatibility matrices
     this.staticAssets.set('travel-preferences', {
       data: {
@@ -272,7 +266,6 @@ class CDNCacheManager {
       version: 'v1.0',
       lastModified: new Date('2025-01-05').toISOString()
     });
-
     // Age compatibility curves and demographic factors
     this.staticAssets.set('demographic-compatibility', {
       data: {
@@ -304,7 +297,6 @@ class CDNCacheManager {
       version: 'v1.1',
       lastModified: new Date('2025-01-08').toISOString()
     });
-
     // ML model parameters and weights
     this.staticAssets.set('ml-model-weights', {
       data: {
@@ -336,7 +328,6 @@ class CDNCacheManager {
       lastModified: new Date('2025-01-01').toISOString()
     });
   }
-
   /**
    * Get static asset with CDN caching support
    */
@@ -346,9 +337,7 @@ class CDNCacheManager {
       if (!asset) {
         throw new Error(`Static asset '${assetKey}' not found`);
       }
-
       const cacheKey = `${assetKey}_${asset.version}`;
-
       // Check if we should use CDN or local cache
       if (options.preferCDN && this.cdnEndpoint) {
         try {
@@ -366,7 +355,6 @@ class CDNCacheManager {
           console.warn(`CDN fetch failed for ${assetKey}, falling back to local:`, cdnError.message);
         }
       }
-
       // Return local asset with appropriate cache headers
       return {
         data: asset.data,
@@ -376,7 +364,6 @@ class CDNCacheManager {
         cacheHeaders: this.generateCacheHeaders(asset.cacheType),
         etag: this.generateETag(asset.data, asset.version)
       };
-
     } catch (error) {
       console.error(`Failed to get static asset ${assetKey}:`, error);
       return {
@@ -386,13 +373,11 @@ class CDNCacheManager {
       };
     }
   }
-
   /**
    * Fetch asset from CDN
    */
   async fetchFromCDN(assetKey, version) {
     const url = `${this.cdnEndpoint}/compatibility/${assetKey}/${version}.json`;
-
     const response = await fetch(url, {
       headers: {
         'Accept': 'application/json',
@@ -400,33 +385,26 @@ class CDNCacheManager {
       },
       timeout: 5000
     });
-
     if (!response.ok) {
       throw new Error(`CDN response ${response.status}: ${response.statusText}`);
     }
-
     return await response.json();
   }
-
   /**
    * Generate appropriate cache headers for asset type
    */
   generateCacheHeaders(cacheType) {
     const config = this.cacheHeaders[cacheType] || this.cacheHeaders['static-data'];
     const headers = {};
-
     if (config['Cache-Control']) {
       headers['Cache-Control'] = config['Cache-Control'];
     }
-
     if (config.Expires) {
       const expireDate = new Date(Date.now() + this.maxCacheAge * 1000);
       headers['Expires'] = expireDate.toUTCString();
     }
-
     return headers;
   }
-
   /**
    * Generate ETag for asset versioning
    */
@@ -435,7 +413,6 @@ class CDNCacheManager {
     const hash = this.simpleHash(content + version);
     return `"${hash}"`;
   }
-
   /**
    * Simple hash function for ETag generation
    */
@@ -448,7 +425,6 @@ class CDNCacheManager {
     }
     return Math.abs(hash).toString(16);
   }
-
   /**
    * Update static asset and invalidate cache
    */
@@ -457,22 +433,17 @@ class CDNCacheManager {
     if (!existingAsset) {
       throw new Error(`Cannot update non-existent asset: ${assetKey}`);
     }
-
     const updatedAsset = {
       ...existingAsset,
       data: newData,
       version: version || this.incrementVersion(existingAsset.version),
       lastModified: new Date().toISOString()
     };
-
     this.staticAssets.set(assetKey, updatedAsset);
-
     // Invalidate CDN cache if available
     this.invalidateCDNCache(assetKey, updatedAsset.version);
-
     return updatedAsset;
   }
-
   /**
    * Increment version string
    */
@@ -482,32 +453,26 @@ class CDNCacheManager {
     parts[parts.length - 1] = patch.toString();
     return 'v' + parts.join('.');
   }
-
   /**
    * Invalidate CDN cache for asset
    */
   async invalidateCDNCache(assetKey, version) {
     if (!this.cdnEndpoint) return;
-
     try {
       // This would typically use your CDN's API to invalidate cache
       // Example for CloudFlare, AWS CloudFront, etc.
       console.log(`Invalidating CDN cache for ${assetKey}/${version}`);
-
       // Placeholder for actual CDN invalidation
       // await this.cdnProvider.invalidate([`/compatibility/${assetKey}/*`]);
-
     } catch (error) {
       console.error(`CDN cache invalidation failed for ${assetKey}:`, error);
     }
   }
-
   /**
    * Batch load multiple static assets
    */
   async batchLoadAssets(assetKeys, options = {}) {
     const results = new Map();
-
     const loadPromises = assetKeys.map(async (key) => {
       try {
         const asset = await this.getStaticAsset(key, options);
@@ -518,9 +483,7 @@ class CDNCacheManager {
         return { key, success: false, error: error.message };
       }
     });
-
     const loadResults = await Promise.all(loadPromises);
-
     return {
       assets: Object.fromEntries(results),
       summary: {
@@ -530,7 +493,6 @@ class CDNCacheManager {
       }
     };
   }
-
   /**
    * Generate manifest for all static assets
    */
@@ -540,7 +502,6 @@ class CDNCacheManager {
       assets: {},
       totalAssets: this.staticAssets.size
     };
-
     for (const [key, asset] of this.staticAssets.entries()) {
       manifest.assets[key] = {
         version: asset.version,
@@ -551,10 +512,8 @@ class CDNCacheManager {
         cdnUrl: `${this.cdnEndpoint}/compatibility/${key}/${asset.version}.json`
       };
     }
-
     return manifest;
   }
-
   /**
    * Preload critical assets for performance
    */
@@ -564,16 +523,11 @@ class CDNCacheManager {
       'scoring-algorithms',
       'demographic-compatibility'
     ];
-
     console.log('Preloading critical compatibility assets...');
-
     const results = await this.batchLoadAssets(criticalAssets, { preferCDN: true });
-
     console.log(`Preloaded ${results.summary.successful}/${results.summary.total} critical assets`);
-
     return results;
   }
-
   /**
    * Create Express.js middleware for serving cached assets
    */
@@ -581,33 +535,27 @@ class CDNCacheManager {
     return (req, res, next) => {
       // Extract asset key from URL
       const assetKey = req.params.assetKey || req.query.asset;
-
       if (!assetKey) {
         return next();
       }
-
       // Serve asset with appropriate cache headers
       this.getStaticAsset(assetKey, { preferCDN: false })
         .then(asset => {
           if (asset.error) {
             return res.status(404).json({ error: 'Asset not found' });
           }
-
           // Set cache headers
           Object.entries(asset.cacheHeaders).forEach(([header, value]) => {
             res.set(header, value);
           });
-
           // Set ETag
           if (asset.etag) {
             res.set('ETag', asset.etag);
           }
-
           // Check if client has cached version
           if (req.headers['if-none-match'] === asset.etag) {
             return res.status(304).end();
           }
-
           res.json({
             data: asset.data,
             version: asset.version,
@@ -620,13 +568,11 @@ class CDNCacheManager {
         });
     };
   }
-
   /**
    * Get cache statistics
    */
   getCacheStats() {
     const assets = Array.from(this.staticAssets.values());
-
     return {
       totalAssets: assets.length,
       totalSize: assets.reduce((sum, asset) => {
@@ -647,7 +593,6 @@ class CDNCacheManager {
       cdnEnabled: !!this.cdnEndpoint
     };
   }
-
   /**
    * Export configuration for Vercel or other deployment platforms
    */
@@ -673,7 +618,6 @@ class CDNCacheManager {
     };
   }
 }
-
 // Export singleton instance
 export const cdnCacheManager = new CDNCacheManager();
 export default CDNCacheManager;

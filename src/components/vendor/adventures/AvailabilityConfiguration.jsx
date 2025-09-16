@@ -9,13 +9,11 @@ import {
 } from '@heroicons/react/24/outline';
 import GlassCard from '../../ui/GlassCard';
 import AvailabilityCalendar from '../../adventure/AvailabilityCalendar';
-
 const AVAILABILITY_TYPES = [
   { value: 'open', label: 'Open Booking', description: 'Available on most dates with advance notice' },
   { value: 'scheduled', label: 'Scheduled Dates', description: 'Specific predetermined dates only' },
   { value: 'on-demand', label: 'On Demand', description: 'Available upon request with flexible scheduling' }
 ];
-
 const WEEKDAYS = [
   { value: 0, label: 'Sunday', short: 'Sun' },
   { value: 1, label: 'Monday', short: 'Mon' },
@@ -25,11 +23,9 @@ const WEEKDAYS = [
   { value: 5, label: 'Friday', short: 'Fri' },
   { value: 6, label: 'Saturday', short: 'Sat' }
 ];
-
 const AvailabilityConfiguration = ({ data, onChange }) => {
   const [showScheduleForm, setShowScheduleForm] = useState(false);
   const [showBlackoutForm, setShowBlackoutForm] = useState(false);
-
   const availability = data.availability || {
     type: 'open',
     blackoutDates: [],
@@ -39,7 +35,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
     minGroupSize: 2,
     maxBookingsPerDay: 1
   };
-
   const updateAvailability = (updates) => {
     onChange({
       availability: {
@@ -48,7 +43,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
       }
     });
   };
-
   const addScheduledDate = (scheduleData) => {
     const newSchedule = {
       id: Date.now(),
@@ -59,19 +53,16 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
       price: scheduleData.price || data.basePrice,
       notes: scheduleData.notes || ''
     };
-
     updateAvailability({
       schedules: [...(availability.schedules || []), newSchedule]
     });
     setShowScheduleForm(false);
   };
-
   const removeScheduledDate = (scheduleId) => {
     updateAvailability({
       schedules: (availability.schedules || []).filter(s => s.id !== scheduleId)
     });
   };
-
   const addBlackoutDate = (blackoutData) => {
     const newBlackout = {
       id: Date.now(),
@@ -79,19 +70,16 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
       endDate: blackoutData.endDate || blackoutData.startDate,
       reason: blackoutData.reason || ''
     };
-
     updateAvailability({
       blackoutDates: [...(availability.blackoutDates || []), newBlackout]
     });
     setShowBlackoutForm(false);
   };
-
   const removeBlackoutDate = (blackoutId) => {
     updateAvailability({
       blackoutDates: (availability.blackoutDates || []).filter(b => b.id !== blackoutId)
     });
   };
-
   const updateWeeklySchedule = (dayOfWeek, isAvailable) => {
     updateAvailability({
       weeklySchedule: {
@@ -100,7 +88,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
       }
     });
   };
-
   const ScheduleForm = ({ onSave, onCancel }) => {
     const [formData, setFormData] = useState({
       date: '',
@@ -110,7 +97,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
       price: data.basePrice || '',
       notes: ''
     });
-
     return (
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -121,7 +107,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
           <h5 className="font-medium text-gray-900 dark:text-white">
             Add Scheduled Date
           </h5>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -136,7 +121,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
                 required
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Start Time
@@ -148,7 +132,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/50 dark:bg-gray-800/50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 End Time
@@ -160,7 +143,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/50 dark:bg-gray-800/50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Max Participants
@@ -173,7 +155,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/50 dark:bg-gray-800/50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Price (optional)
@@ -186,7 +167,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/50 dark:bg-gray-800/50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
             </div>
-
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Notes (optional)
@@ -200,7 +180,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
               />
             </div>
           </div>
-
           <div className="flex justify-end gap-2 pt-4">
             <button
               onClick={onCancel}
@@ -220,14 +199,12 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
       </motion.div>
     );
   };
-
   const BlackoutForm = ({ onSave, onCancel }) => {
     const [formData, setFormData] = useState({
       startDate: '',
       endDate: '',
       reason: ''
     });
-
     return (
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -239,7 +216,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
             <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
             Add Blackout Period
           </h5>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -253,7 +229,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
                 required
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 End Date
@@ -269,7 +244,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
                 Leave empty for single day
               </p>
             </div>
-
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Reason (optional)
@@ -283,7 +257,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
               />
             </div>
           </div>
-
           <div className="flex justify-end gap-2 pt-4">
             <button
               onClick={onCancel}
@@ -303,7 +276,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
       </motion.div>
     );
   };
-
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -314,13 +286,11 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
           Configure how and when your adventure is available for booking.
         </p>
       </div>
-
       {/* Availability Type */}
       <GlassCard variant="light" padding="md">
         <h4 className="font-medium text-gray-900 dark:text-white mb-4">
           Booking Model
         </h4>
-
         <div className="space-y-3">
           {AVAILABILITY_TYPES.map((type) => (
             <div key={type.value}>
@@ -346,14 +316,12 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
           ))}
         </div>
       </GlassCard>
-
       {/* Booking Settings */}
       <GlassCard variant="light" padding="md">
         <h4 className="font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <ClockIcon className="h-5 w-5" />
           Booking Settings
         </h4>
-
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -367,7 +335,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/50 dark:bg-gray-800/50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Min Group Size
@@ -380,7 +347,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/50 dark:bg-gray-800/50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Max Bookings/Day
@@ -395,7 +361,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
           </div>
         </div>
       </GlassCard>
-
       {/* Weekly Schedule (for open booking) */}
       {availability.type === 'open' && (
         <GlassCard variant="light" padding="md">
@@ -405,7 +370,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
             Select which days of the week you typically operate this adventure.
           </p>
-
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
             {WEEKDAYS.map((day) => (
               <label key={day.value} className="flex items-center gap-2 cursor-pointer">
@@ -423,7 +387,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
           </div>
         </GlassCard>
       )}
-
       {/* Scheduled Dates (for scheduled booking) */}
       {availability.type === 'scheduled' && (
         <GlassCard variant="light" padding="md">
@@ -439,7 +402,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
               Add Date
             </button>
           </div>
-
           <div className="space-y-3">
             <AnimatePresence>
               {showScheduleForm && (
@@ -449,7 +411,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
                 />
               )}
             </AnimatePresence>
-
             {availability.schedules?.length > 0 ? (
               <div className="space-y-2">
                 {availability.schedules.map((schedule) => (
@@ -495,7 +456,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
           </div>
         </GlassCard>
       )}
-
       {/* Blackout Dates */}
       <GlassCard variant="light" padding="md">
         <div className="flex items-center justify-between mb-4">
@@ -511,7 +471,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
             Add Blackout
           </button>
         </div>
-
         <div className="space-y-3">
           <AnimatePresence>
             {showBlackoutForm && (
@@ -521,7 +480,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
               />
             )}
           </AnimatePresence>
-
           {availability.blackoutDates?.length > 0 ? (
             <div className="space-y-2">
               {availability.blackoutDates.map((blackout) => (
@@ -559,7 +517,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
           )}
         </div>
       </GlassCard>
-
       {/* Calendar View */}
       <GlassCard variant="light" padding="md">
         <h4 className="font-medium text-gray-900 dark:text-white mb-4">
@@ -580,5 +537,4 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
     </div>
   );
 };
-
 export default AvailabilityConfiguration;

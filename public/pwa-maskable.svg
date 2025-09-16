@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+    <!-- Background with safe zone -->
+    <rect x="0" y="0" width="512" height="512" fill="#3b82f6"/>
+    <!-- Letter T (Travel) - smaller for safe zone -->
+    <text x="256" y="320"
+          font-family="Arial, sans-serif"
+          font-size="180"
+          font-weight="bold"
+          text-anchor="middle"
+          fill="white">T</text>
+  </svg>

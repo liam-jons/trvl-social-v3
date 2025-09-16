@@ -1,6 +1,5 @@
 import { MapView } from './index';
 import { MapboxProvider } from '../../contexts/MapboxContext';
-
 // Sample adventure data
 const sampleAdventures = [
   {
@@ -124,7 +123,6 @@ const sampleAdventures = [
     tags: ['historic', 'unique', 'guided'],
   },
 ];
-
 export default {
   title: 'Adventure/MapView',
   component: MapView,
@@ -146,7 +144,6 @@ export default {
     ),
   ],
 };
-
 export const Default = {
   args: {
     adventures: sampleAdventures,
@@ -155,7 +152,6 @@ export const Default = {
     allowClustering: true,
   },
 };
-
 export const WithDrawControls = {
   args: {
     adventures: sampleAdventures,
@@ -165,7 +161,6 @@ export const WithDrawControls = {
     allowClustering: true,
   },
 };
-
 export const NoClustering = {
   args: {
     adventures: sampleAdventures,
@@ -174,7 +169,6 @@ export const NoClustering = {
     allowClustering: false,
   },
 };
-
 export const NoSearch = {
   args: {
     adventures: sampleAdventures,
@@ -183,7 +177,6 @@ export const NoSearch = {
     allowClustering: true,
   },
 };
-
 export const Empty = {
   args: {
     adventures: [],
@@ -192,7 +185,6 @@ export const Empty = {
     allowClustering: true,
   },
 };
-
 export const SingleAdventure = {
   args: {
     adventures: [sampleAdventures[0]],
@@ -201,7 +193,6 @@ export const SingleAdventure = {
     allowClustering: true,
   },
 };
-
 // Story with event handlers
 export const WithEventHandlers = {
   args: {

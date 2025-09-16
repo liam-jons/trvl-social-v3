@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { onboardingService } from '../../services/onboarding-service';
-
 /**
  * OnboardingRedirect - Component that automatically redirects first-time users to onboarding
  * Should be included in components that authenticated users land on (Dashboard, etc.)
@@ -10,15 +9,12 @@ import { onboardingService } from '../../services/onboarding-service';
 const OnboardingRedirect = ({ children }) => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
-
   useEffect(() => {
     const checkAndRedirectToOnboarding = async () => {
       // Wait for authentication to complete
       if (loading || !user) return;
-
       try {
         const isFirstTime = await onboardingService.isFirstTimeUser(user);
-
         if (isFirstTime) {
           // Redirect to onboarding
           navigate('/onboarding', { replace: true });
@@ -28,10 +24,8 @@ const OnboardingRedirect = ({ children }) => {
         // On error, don't redirect to avoid infinite loops
       }
     };
-
     checkAndRedirectToOnboarding();
   }, [user, loading, navigate]);
-
   // Don't render children if we're still checking or if we're about to redirect
   if (loading) {
     return (
@@ -47,8 +41,6 @@ const OnboardingRedirect = ({ children }) => {
       </div>
     );
   }
-
   return children;
 };
-
 export default OnboardingRedirect;

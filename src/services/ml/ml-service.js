@@ -2,14 +2,12 @@
  * Main ML Service - Orchestrates all ML components
  * Provides high-level interface for ML operations
  */
-
 import DataPreprocessor from './data-preprocessing.js';
 import FeatureEngineer from './feature-engineering.js';
 import ModelTrainer from './model-trainer.js';
 import ModelManager from './model-manager.js';
 import RetrainingScheduler from './retraining-scheduler.js';
 import ABTestingFramework from './ab-testing-framework.js';
-
 export class MLService {
   constructor() {
     this.dataPreprocessor = new DataPreprocessor();
@@ -18,43 +16,33 @@ export class MLService {
     this.modelManager = new ModelManager();
     this.retrainingScheduler = new RetrainingScheduler();
     this.abTestingFramework = new ABTestingFramework();
-
     this.initialized = false;
   }
-
   /**
    * Initialize the ML service
    */
   async initialize() {
     if (this.initialized) return;
-
     try {
       console.log('Initializing ML Service...');
-
       // Start retraining scheduler
       await this.retrainingScheduler.start();
-
       // Load deployed models into cache
       await this.loadDeployedModels();
-
       // Set up default retraining triggers if none exist
       await this.setupDefaultTriggers();
-
       this.initialized = true;
       console.log('ML Service initialized successfully');
-
     } catch (error) {
       console.error('Failed to initialize ML Service:', error);
       throw error;
     }
   }
-
   /**
    * Load all deployed models into memory
    */
   async loadDeployedModels() {
     const modelTypes = ['compatibility_predictor', 'group_optimizer', 'preference_learner'];
-
     for (const modelType of modelTypes) {
       try {
         const deployedModel = await this.modelManager.getDeployedModel(modelType);
@@ -66,14 +54,12 @@ export class MLService {
       }
     }
   }
-
   /**
    * Set up default retraining triggers
    */
   async setupDefaultTriggers() {
     const defaultConfigs = RetrainingScheduler.getDefaultTriggerConfigs();
     const modelTypes = ['compatibility_predictor', 'group_optimizer'];
-
     for (const modelType of modelTypes) {
       for (const [configKey, config] of Object.entries(defaultConfigs)) {
         try {
@@ -89,7 +75,6 @@ export class MLService {
       }
     }
   }
-
   /**
    * Train a new compatibility prediction model
    */
@@ -114,34 +99,27 @@ export class MLService {
       ...ModelTrainer.getDefaultTrainingConfig('compatibility_predictor'),
       ...config
     };
-
     return await this.modelTrainer.trainModel(defaultConfig);
   }
-
   /**
    * Predict compatibility for user-group pair
    */
   async predictCompatibility(userId, groupId, options = {}) {
     const { modelVersion, includeExplanation = false } = options;
-
     // Get deployed model
     const model = await this.modelManager.getDeployedModel('compatibility_predictor');
     if (!model) {
       throw new Error('No compatibility prediction model deployed');
     }
-
     // Prepare feature context
     const context = await this.prepareFeatureContext(userId, groupId);
-
     // Extract features
     const featureConfig = FeatureEngineer.getFeatureConfigForModelType('compatibility_predictor');
     const features = await this.featureEngineer.extractFeatures(context, featureConfig);
-
     // Make prediction
     const startTime = Date.now();
     const prediction = await this.makePrediction(model, features);
     const predictionTime = Date.now() - startTime;
-
     // Record prediction for tracking
     await this.recordPrediction({
       modelType: 'compatibility_predictor',
@@ -151,7 +129,6 @@ export class MLService {
       prediction,
       predictionTime
     });
-
     const result = {
       compatibilityScore: prediction.score,
       confidence: prediction.confidence,
@@ -159,20 +136,16 @@ export class MLService {
       userId,
       groupId
     };
-
     if (includeExplanation) {
       result.explanation = await this.generatePredictionExplanation(features, prediction);
     }
-
     return result;
   }
-
   /**
    * Prepare feature extraction context
    */
   async prepareFeatureContext(userId, groupId) {
     const context = {};
-
     // Get user data with personality assessment
     const { data: userData } = await supabase
       .from('profiles')
@@ -182,14 +155,12 @@ export class MLService {
       `)
       .eq('id', userId)
       .single();
-
     if (userData) {
       context.user = {
         ...userData,
         personalityAssessment: userData.personality_assessments
       };
     }
-
     // Get group data with members
     const { data: groupData } = await supabase
       .from('groups')
@@ -207,7 +178,6 @@ export class MLService {
       `)
       .eq('id', groupId)
       .single();
-
     if (groupData) {
       context.group = {
         ...groupData,
@@ -218,14 +188,11 @@ export class MLService {
           joinedAt: member.joined_at
         }))
       };
-
       // Add target users (other group members) for compatibility features
       context.targetUsers = context.group.members.filter(member => member.id !== userId);
     }
-
     return context;
   }
-
   /**
    * Make prediction using loaded model
    */
@@ -234,30 +201,24 @@ export class MLService {
       // Convert features to tensor
       const featureArray = Object.values(features);
       const inputTensor = tf.tensor2d([featureArray]);
-
       // Get prediction
       const predictionTensor = model.predict(inputTensor);
       const predictionData = await predictionTensor.data();
-
       // Clean up tensors
       inputTensor.dispose();
       predictionTensor.dispose();
-
       const score = predictionData[0];
       const confidence = Math.abs(score - 0.5) * 2; // Convert to confidence score
-
       return {
         score,
         confidence,
         features: featureArray.length
       };
-
     } catch (error) {
       console.error('Prediction failed:', error);
       throw new Error('Failed to make prediction');
     }
   }
-
   /**
    * Record prediction for tracking and A/B testing
    */
@@ -270,18 +231,15 @@ export class MLService {
       prediction,
       predictionTime
     } = predictionData;
-
     try {
       // Get deployed model ID
       const deployedModel = await this.modelManager.getDeployedModel(modelType);
       const modelId = deployedModel ? await this.getModelId(deployedModel) : null;
-
       // Check for active A/B tests
       const activeExperiments = await this.abTestingFramework.getActiveExperiments();
       const relevantExperiment = activeExperiments.find(exp =>
         exp.control_model_id === modelId || exp.treatment_model_id === modelId
       );
-
       if (relevantExperiment) {
         // Record for A/B testing
         await this.abTestingFramework.recordPredictionResult(
@@ -310,12 +268,10 @@ export class MLService {
             created_at: new Date().toISOString()
           });
       }
-
     } catch (error) {
       console.error('Failed to record prediction:', error);
     }
   }
-
   /**
    * Get model ID from model instance (helper method)
    */
@@ -329,18 +285,15 @@ export class MLService {
     }
     return null;
   }
-
   /**
    * Generate prediction explanation
    */
   async generatePredictionExplanation(features, prediction) {
     // Simple feature importance explanation
     const featureImportance = await this.calculateFeatureImportance(features);
-
     const topFeatures = Object.entries(featureImportance)
       .sort(([,a], [,b]) => b - a)
       .slice(0, 5);
-
     return {
       score: prediction.score,
       confidence: prediction.confidence,
@@ -351,7 +304,6 @@ export class MLService {
       interpretation: this.interpretPrediction(prediction.score)
     };
   }
-
   /**
    * Calculate feature importance (simplified)
    */
@@ -359,7 +311,6 @@ export class MLService {
     // Simplified feature importance based on feature values
     // In a real implementation, you would use SHAP or similar techniques
     const importance = {};
-
     for (const [featureName, value] of Object.entries(features)) {
       // Higher values and values further from 0.5 (for normalized features) are more important
       if (typeof value === 'number') {
@@ -368,10 +319,8 @@ export class MLService {
         importance[featureName] = 0.1; // Low importance for categorical features
       }
     }
-
     return importance;
   }
-
   /**
    * Get human-readable feature names
    */
@@ -388,10 +337,8 @@ export class MLService {
       'adventure_seeking': 'Adventure Seeking',
       'social_oriented': 'Social Orientation'
     };
-
     return nameMap[featureName] || featureName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   }
-
   /**
    * Interpret prediction score
    */
@@ -406,7 +353,6 @@ export class MLService {
       return 'Low compatibility - consider other options';
     }
   }
-
   /**
    * Start A/B test between models
    */
@@ -419,17 +365,14 @@ export class MLService {
       treatmentModelId,
       ...config
     };
-
     return await this.abTestingFramework.createExperiment(defaultConfig);
   }
-
   /**
    * Get model performance metrics
    */
   async getModelPerformance(modelId, timeRange = null) {
     return await this.modelManager.getModelStats(modelId, timeRange);
   }
-
   /**
    * Get system health status
    */
@@ -439,7 +382,6 @@ export class MLService {
       components: {},
       lastChecked: new Date().toISOString()
     };
-
     try {
       // Check deployed models
       const deployedModels = await this.modelManager.getModels({ status: 'deployed' });
@@ -448,7 +390,6 @@ export class MLService {
         count: deployedModels.length,
         details: deployedModels.map(m => ({ id: m.id, type: m.model_type, version: m.version }))
       };
-
       // Check active experiments
       const activeExperiments = await this.abTestingFramework.getActiveExperiments();
       health.components.abTesting = {
@@ -456,13 +397,11 @@ export class MLService {
         activeExperiments: activeExperiments.length,
         details: activeExperiments.map(e => ({ id: e.id, name: e.name, status: e.status }))
       };
-
       // Check retraining triggers
       health.components.retraining = {
         status: this.retrainingScheduler.monitoringInterval ? 'healthy' : 'stopped',
         activeTriggers: this.retrainingScheduler.activeTriggers.size
       };
-
       // Overall system status
       const componentStatuses = Object.values(health.components).map(c => c.status);
       if (componentStatuses.some(s => s === 'error')) {
@@ -470,37 +409,28 @@ export class MLService {
       } else if (componentStatuses.some(s => s === 'warning')) {
         health.status = 'warning';
       }
-
     } catch (error) {
       health.status = 'error';
       health.error = error.message;
     }
-
     return health;
   }
-
   /**
    * Cleanup resources
    */
   async cleanup() {
     console.log('Cleaning up ML Service...');
-
     // Stop retraining scheduler
     this.retrainingScheduler.stop();
-
     // Clean up model manager
     await this.modelManager.cleanupModels();
-
     // Clear caches
     this.abTestingFramework.userAssignments.clear();
     this.abTestingFramework.activeExperiments.clear();
-
     this.initialized = false;
     console.log('ML Service cleanup complete');
   }
 }
-
 // Create singleton instance
 const mlService = new MLService();
-
 export default mlService;

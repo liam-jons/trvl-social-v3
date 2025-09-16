@@ -2,12 +2,10 @@
  * API endpoints for compatibility score cache management
  * GET/DELETE /api/compatibility/cache
  */
-
 import { compatibilityService } from '../../services/compatibility-service';
 import {
   CompatibilityScore
 } from '../../types/compatibility';
-
 /**
  * Get cached compatibility score
  * GET /api/compatibility/cache/:groupId/:userId
@@ -50,7 +48,6 @@ export async function getCachedScore(
     };
   }
 }
-
 /**
  * Invalidate compatibility cache
  * DELETE /api/compatibility/cache/:groupId?userId=...
@@ -65,7 +62,6 @@ export async function invalidateCompatibilityCache(
 }> {
   try {
     compatibilityService.invalidateCache(userId, groupId);
-
     let message = 'Cache invalidated successfully';
     if (userId && groupId) {
       message = `Cache invalidated for user ${userId} in group ${groupId}`;
@@ -76,7 +72,6 @@ export async function invalidateCompatibilityCache(
     } else {
       message = 'Entire compatibility cache cleared';
     }
-
     return {
       success: true,
       message
@@ -93,7 +88,6 @@ export async function invalidateCompatibilityCache(
     };
   }
 }
-
 /**
  * Get cache statistics
  * GET /api/compatibility/cache/stats
@@ -125,13 +119,11 @@ export async function getCacheStats(): Promise<{
     };
   }
 }
-
 // Express.js handlers
 export const getCachedScoreHandler = async (req: any, res: any) => {
   try {
     const { groupId, userId } = req.params;
     const { otherUserId } = req.query;
-
     if (!groupId || !userId) {
       return res.status(400).json({
         success: false,
@@ -141,7 +133,6 @@ export const getCachedScoreHandler = async (req: any, res: any) => {
         }
       });
     }
-
     const response = await getCachedScore(groupId, userId, otherUserId);
     res.status(response.success ? 200 : 400).json(response);
   } catch (error) {
@@ -155,12 +146,10 @@ export const getCachedScoreHandler = async (req: any, res: any) => {
     });
   }
 };
-
 export const invalidateCacheHandler = async (req: any, res: any) => {
   try {
     const { groupId } = req.params;
     const { userId } = req.query;
-
     const response = await invalidateCompatibilityCache(groupId, userId);
     res.status(response.success ? 200 : 500).json(response);
   } catch (error) {
@@ -175,7 +164,6 @@ export const invalidateCacheHandler = async (req: any, res: any) => {
     });
   }
 };
-
 export const getCacheStatsHandler = async (req: any, res: any) => {
   try {
     const response = await getCacheStats();
@@ -191,7 +179,6 @@ export const getCacheStatsHandler = async (req: any, res: any) => {
     });
   }
 };
-
 // Supabase Edge Function handlers
 export const supabaseGetCachedScoreHandler = async (req: Request): Promise<Response> => {
   try {
@@ -200,7 +187,6 @@ export const supabaseGetCachedScoreHandler = async (req: Request): Promise<Respo
     const groupId = pathParts[pathParts.length - 2];
     const userId = pathParts[pathParts.length - 1];
     const otherUserId = url.searchParams.get('otherUserId') || undefined;
-
     if (!groupId || !userId) {
       return new Response(JSON.stringify({
         success: false,
@@ -213,9 +199,7 @@ export const supabaseGetCachedScoreHandler = async (req: Request): Promise<Respo
         headers: { 'Content-Type': 'application/json' }
       });
     }
-
     const response = await getCachedScore(groupId, userId, otherUserId);
-
     return new Response(JSON.stringify(response), {
       status: response.success ? 200 : 400,
       headers: {
@@ -239,16 +223,13 @@ export const supabaseGetCachedScoreHandler = async (req: Request): Promise<Respo
     });
   }
 };
-
 export const supabaseInvalidateCacheHandler = async (req: Request): Promise<Response> => {
   try {
     const url = new URL(req.url);
     const pathParts = url.pathname.split('/');
     const groupId = pathParts[pathParts.length - 1];
     const userId = url.searchParams.get('userId') || undefined;
-
     const response = await invalidateCompatibilityCache(groupId, userId);
-
     return new Response(JSON.stringify(response), {
       status: response.success ? 200 : 500,
       headers: {
@@ -273,11 +254,9 @@ export const supabaseInvalidateCacheHandler = async (req: Request): Promise<Resp
     });
   }
 };
-
 export const supabaseGetCacheStatsHandler = async (req: Request): Promise<Response> => {
   try {
     const response = await getCacheStats();
-
     return new Response(JSON.stringify(response), {
       status: response.success ? 200 : 500,
       headers: {

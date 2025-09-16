@@ -2,9 +2,7 @@
  * Redis Cache Service for Compatibility Scores
  * High-performance caching layer for frequently accessed compatibility calculations
  */
-
 import Redis from 'ioredis';
-
 class RedisCacheService {
   constructor() {
     this.redis = null;
@@ -17,10 +15,8 @@ class RedisCacheService {
       errors: 0,
       operations: 0
     };
-
     this.initializeRedis();
   }
-
   async initializeRedis() {
     try {
       // Initialize Redis with connection pooling and retry logic
@@ -44,37 +40,30 @@ class RedisCacheService {
           return err.message.includes(targetError);
         },
       });
-
       // Event handlers
       this.redis.on('connect', () => {
         console.log('Redis Cache: Connected successfully');
         this.connected = true;
       });
-
       this.redis.on('ready', () => {
         console.log('Redis Cache: Ready for operations');
       });
-
       this.redis.on('error', (err) => {
         console.error('Redis Cache: Connection error', err);
         this.connected = false;
         this.metrics.errors++;
       });
-
       this.redis.on('close', () => {
         console.log('Redis Cache: Connection closed');
         this.connected = false;
       });
-
       // Attempt connection
       await this.redis.connect();
-
     } catch (error) {
       console.error('Redis Cache: Initialization failed, falling back to memory cache', error);
       this.connected = false;
     }
   }
-
   /**
    * Generate cache key for compatibility score
    */
@@ -84,7 +73,6 @@ class RedisCacheService {
     const groupPart = groupId ? `:group:${groupId}` : '';
     return `score:${version}:${id1}:${id2}${groupPart}`;
   }
-
   /**
    * Generate cache key for group analysis
    */
@@ -92,7 +80,6 @@ class RedisCacheService {
     const sortedIds = [...userIds].sort().join(',');
     return `analysis:${version}:${algorithmId}:${Buffer.from(sortedIds).toString('base64')}`;
   }
-
   /**
    * Generate cache key for bulk calculations
    */
@@ -101,37 +88,30 @@ class RedisCacheService {
     const optionsHash = Buffer.from(JSON.stringify(options)).toString('base64');
     return `bulk:v1:${Buffer.from(sortedIds).toString('base64')}:${optionsHash}`;
   }
-
   /**
    * Cache compatibility score with TTL
    */
   async cacheCompatibilityScore(user1Id, user2Id, score, options = {}) {
     try {
       this.metrics.operations++;
-
       const key = this.generateCompatibilityKey(
         user1Id,
         user2Id,
         options.groupId,
         options.version
       );
-
       const data = {
         ...score,
         cachedAt: new Date().toISOString(),
         ttl: options.ttl || 3600 // 1 hour default
       };
-
       if (this.connected && this.redis) {
         // Use Redis with compression for large objects
         const serialized = JSON.stringify(data);
         const compressed = this.compressData(serialized);
-
         await this.redis.setex(key, options.ttl || 3600, compressed);
-
         // Also cache quick lookup for exists checks
         await this.redis.setex(`exists:${key}`, options.ttl || 3600, '1');
-
       } else {
         // Fallback to memory cache
         this.manageFallbackCacheSize();
@@ -140,32 +120,26 @@ class RedisCacheService {
           expiresAt: Date.now() + ((options.ttl || 3600) * 1000)
         });
       }
-
       return true;
-
     } catch (error) {
       console.error('Failed to cache compatibility score:', error);
       this.metrics.errors++;
       return false;
     }
   }
-
   /**
    * Get cached compatibility score
    */
   async getCachedCompatibilityScore(user1Id, user2Id, options = {}) {
     try {
       this.metrics.operations++;
-
       const key = this.generateCompatibilityKey(
         user1Id,
         user2Id,
         options.groupId,
         options.version
       );
-
       let result = null;
-
       if (this.connected && this.redis) {
         const cached = await this.redis.get(key);
         if (cached) {
@@ -182,7 +156,6 @@ class RedisCacheService {
           this.fallbackCache.delete(key);
         }
       }
-
       if (result) {
         this.metrics.hits++;
         return {
@@ -194,21 +167,18 @@ class RedisCacheService {
         this.metrics.misses++;
         return null;
       }
-
     } catch (error) {
       console.error('Failed to get cached compatibility score:', error);
       this.metrics.errors++;
       return null;
     }
   }
-
   /**
    * Cache group compatibility analysis
    */
   async cacheGroupAnalysis(userIds, analysis, algorithmId = 'default', ttl = 7200) {
     try {
       this.metrics.operations++;
-
       const key = this.generateGroupAnalysisKey(userIds, algorithmId);
       const data = {
         ...analysis,
@@ -216,7 +186,6 @@ class RedisCacheService {
         userIds: [...userIds].sort(),
         algorithmId
       };
-
       if (this.connected && this.redis) {
         const serialized = JSON.stringify(data);
         const compressed = this.compressData(serialized);
@@ -228,26 +197,21 @@ class RedisCacheService {
           expiresAt: Date.now() + (ttl * 1000)
         });
       }
-
       return true;
-
     } catch (error) {
       console.error('Failed to cache group analysis:', error);
       this.metrics.errors++;
       return false;
     }
   }
-
   /**
    * Get cached group analysis
    */
   async getCachedGroupAnalysis(userIds, algorithmId = 'default') {
     try {
       this.metrics.operations++;
-
       const key = this.generateGroupAnalysisKey(userIds, algorithmId);
       let result = null;
-
       if (this.connected && this.redis) {
         const cached = await this.redis.get(key);
         if (cached) {
@@ -262,7 +226,6 @@ class RedisCacheService {
           this.fallbackCache.delete(key);
         }
       }
-
       if (result) {
         this.metrics.hits++;
         return result;
@@ -270,21 +233,18 @@ class RedisCacheService {
         this.metrics.misses++;
         return null;
       }
-
     } catch (error) {
       console.error('Failed to get cached group analysis:', error);
       this.metrics.errors++;
       return null;
     }
   }
-
   /**
    * Cache bulk calculation results
    */
   async cacheBulkResults(userIds, results, options = {}, ttl = 3600) {
     try {
       this.metrics.operations++;
-
       const key = this.generateBulkKey(userIds, options);
       const data = {
         results,
@@ -292,7 +252,6 @@ class RedisCacheService {
         userIds: [...userIds].sort(),
         options
       };
-
       if (this.connected && this.redis) {
         const serialized = JSON.stringify(data);
         const compressed = this.compressData(serialized);
@@ -304,26 +263,21 @@ class RedisCacheService {
           expiresAt: Date.now() + (ttl * 1000)
         });
       }
-
       return true;
-
     } catch (error) {
       console.error('Failed to cache bulk results:', error);
       this.metrics.errors++;
       return false;
     }
   }
-
   /**
    * Get cached bulk results
    */
   async getCachedBulkResults(userIds, options = {}) {
     try {
       this.metrics.operations++;
-
       const key = this.generateBulkKey(userIds, options);
       let result = null;
-
       if (this.connected && this.redis) {
         const cached = await this.redis.get(key);
         if (cached) {
@@ -338,7 +292,6 @@ class RedisCacheService {
           this.fallbackCache.delete(key);
         }
       }
-
       if (result) {
         this.metrics.hits++;
         return result.results;
@@ -346,28 +299,24 @@ class RedisCacheService {
         this.metrics.misses++;
         return null;
       }
-
     } catch (error) {
       console.error('Failed to get cached bulk results:', error);
       this.metrics.errors++;
       return null;
     }
   }
-
   /**
    * Invalidate cache entries
    */
   async invalidateCache(pattern = '*') {
     try {
       this.metrics.operations++;
-
       if (this.connected && this.redis) {
         const keys = await this.redis.keys(`trvl:compat:${pattern}`);
         if (keys.length > 0) {
           await this.redis.del(...keys);
         }
       }
-
       // Clear fallback cache if pattern is wildcard
       if (pattern === '*') {
         this.fallbackCache.clear();
@@ -380,30 +329,25 @@ class RedisCacheService {
           }
         }
       }
-
       return true;
-
     } catch (error) {
       console.error('Failed to invalidate cache:', error);
       this.metrics.errors++;
       return false;
     }
   }
-
   /**
    * Invalidate user-specific cache
    */
   async invalidateUserCache(userId) {
     return this.invalidateCache(`*:${userId}:*`);
   }
-
   /**
    * Invalidate group-specific cache
    */
   async invalidateGroupCache(groupId) {
     return this.invalidateCache(`*:group:${groupId}*`);
   }
-
   /**
    * Get cache statistics
    */
@@ -411,7 +355,6 @@ class RedisCacheService {
     const hitRate = this.metrics.operations > 0
       ? (this.metrics.hits / this.metrics.operations * 100).toFixed(2)
       : '0.00';
-
     return {
       connected: this.connected,
       hits: this.metrics.hits,
@@ -423,7 +366,6 @@ class RedisCacheService {
       redisAvailable: this.connected && this.redis !== null
     };
   }
-
   /**
    * Manage fallback cache size to prevent memory issues
    */
@@ -432,14 +374,12 @@ class RedisCacheService {
       // Remove oldest 25% of entries
       const entries = Array.from(this.fallbackCache.entries());
       const toRemove = Math.floor(entries.length * 0.25);
-
       entries
         .sort((a, b) => (a[1].expiresAt || 0) - (b[1].expiresAt || 0))
         .slice(0, toRemove)
         .forEach(([key]) => this.fallbackCache.delete(key));
     }
   }
-
   /**
    * Simple compression for cache data
    */
@@ -448,7 +388,6 @@ class RedisCacheService {
     // For now, just return the data
     return data;
   }
-
   /**
    * Simple decompression for cache data
    */
@@ -457,7 +396,6 @@ class RedisCacheService {
     // For now, just return the data
     return data;
   }
-
   /**
    * Health check for Redis connection
    */
@@ -485,7 +423,6 @@ class RedisCacheService {
       };
     }
   }
-
   /**
    * Close Redis connection
    */
@@ -496,7 +433,6 @@ class RedisCacheService {
     }
   }
 }
-
 // Export singleton instance
 export const redisCacheService = new RedisCacheService();
 export default RedisCacheService;

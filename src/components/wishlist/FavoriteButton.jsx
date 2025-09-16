@@ -5,7 +5,6 @@ import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '../../hooks/useAuth';
 import { useNotification } from '../../contexts/NotificationContext';
 import { WishlistService } from '../../services/wishlist-service';
-
 const FavoriteButton = ({
   adventureId,
   size = 'md',
@@ -20,7 +19,6 @@ const FavoriteButton = ({
   const [isFavorited, setIsFavorited] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-
   // Size configurations
   const sizeConfig = {
     sm: {
@@ -39,7 +37,6 @@ const FavoriteButton = ({
       text: 'text-base'
     }
   };
-
   // Variant configurations
   const variantConfig = {
     floating: 'bg-white/90 dark:bg-black/80 backdrop-blur-md shadow-lg hover:shadow-xl border border-white/20 dark:border-white/10',
@@ -47,15 +44,12 @@ const FavoriteButton = ({
     ghost: 'bg-transparent hover:bg-white/10 dark:hover:bg-white/5',
     minimal: 'bg-transparent'
   };
-
   const config = sizeConfig[size];
   const variantStyle = variantConfig[variant];
-
   // Check initial favorite status
   useEffect(() => {
     const checkFavoriteStatus = async () => {
       if (!user || !adventureId) return;
-
       try {
         const { isInWishlist, error } = await WishlistService.isInWishlist(user.id, adventureId);
         if (error) {
@@ -67,13 +61,10 @@ const FavoriteButton = ({
         console.error('Error checking favorite status:', error);
       }
     };
-
     checkFavoriteStatus();
   }, [user, adventureId]);
-
   const handleToggleFavorite = async (e) => {
     e.stopPropagation(); // Prevent parent click events
-
     if (!user) {
       addNotification({
         type: 'info',
@@ -82,16 +73,12 @@ const FavoriteButton = ({
       });
       return;
     }
-
     if (disabled || isLoading) return;
-
     setIsLoading(true);
-
     try {
       if (isFavorited) {
         // Remove from wishlist
         const { error } = await WishlistService.removeFromWishlist(user.id, adventureId);
-
         if (error) {
           addNotification({
             type: 'error',
@@ -100,7 +87,6 @@ const FavoriteButton = ({
           });
           return;
         }
-
         setIsFavorited(false);
         addNotification({
           type: 'success',
@@ -110,7 +96,6 @@ const FavoriteButton = ({
       } else {
         // Add to wishlist
         const { data, error } = await WishlistService.addToWishlist(user.id, adventureId);
-
         if (error) {
           if (error.message === 'Adventure already in wishlist') {
             setIsFavorited(true);
@@ -123,7 +108,6 @@ const FavoriteButton = ({
           });
           return;
         }
-
         setIsFavorited(true);
         addNotification({
           type: 'success',
@@ -131,12 +115,10 @@ const FavoriteButton = ({
           message: 'Adventure saved to your wishlist'
         });
       }
-
       // Trigger callback if provided
       if (onToggle) {
         onToggle(adventureId, !isFavorited);
       }
-
     } catch (error) {
       console.error('Error toggling favorite:', error);
       addNotification({
@@ -148,7 +130,6 @@ const FavoriteButton = ({
       setIsLoading(false);
     }
   };
-
   const heartVariants = {
     unfavorited: {
       scale: 1,
@@ -178,13 +159,11 @@ const FavoriteButton = ({
       }
     }
   };
-
   const buttonVariants = {
     initial: { scale: 1 },
     hover: { scale: 1.05 },
     tap: { scale: 0.95 }
   };
-
   // Floating hearts animation for celebration
   const FloatingHearts = () => (
     <AnimatePresence>
@@ -225,7 +204,6 @@ const FavoriteButton = ({
       )}
     </AnimatePresence>
   );
-
   return (
     <div className="relative group">
       <motion.button
@@ -268,10 +246,8 @@ const FavoriteButton = ({
             />
           )}
         </motion.div>
-
         <FloatingHearts />
       </motion.button>
-
       {/* Tooltip */}
       <AnimatePresence>
         {showTooltip && isHovered && (
@@ -290,5 +266,4 @@ const FavoriteButton = ({
     </div>
   );
 };
-
 export default FavoriteButton;

@@ -3,7 +3,6 @@ import { PhoneIcon, UsersIcon, ChatBubbleLeftRightIcon, CheckCircleIcon, Exclama
 import { supabase } from '../../lib/supabase';
 import useAuthStore from '../../stores/authStore';
 import { toast } from 'react-hot-toast';
-
 /**
  * WhatsApp Group Manager Component
  * Handles WhatsApp group creation and management for travel adventures
@@ -20,13 +19,11 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
     members: []
   });
   const [memberInput, setMemberInput] = useState({ name: '', phone: '' });
-
   useEffect(() => {
     if (adventureId) {
       loadExistingGroups();
     }
   }, [adventureId]);
-
   /**
    * Load existing WhatsApp groups for the adventure
    */
@@ -39,7 +36,6 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
         .eq('admin_user_id', user.id)
         .neq('status', 'deleted')
         .order('created_at', { ascending: false });
-
       if (error) throw error;
       setGroups(data || []);
     } catch (error) {
@@ -47,7 +43,6 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
       toast.error('Failed to load WhatsApp groups');
     }
   };
-
   /**
    * Handle form input changes
    */
@@ -57,7 +52,6 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
       [field]: value
     }));
   };
-
   /**
    * Add member to the group
    */
@@ -66,14 +60,12 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
       toast.error('Please enter both name and phone number');
       return;
     }
-
     // Basic phone number validation
     const phoneRegex = /^\+?[1-9]\d{1,14}$/;
     if (!phoneRegex.test(memberInput.phone.replace(/\s/g, ''))) {
       toast.error('Please enter a valid phone number');
       return;
     }
-
     const newMember = {
       id: Date.now(),
       name: memberInput.name.trim(),
@@ -81,15 +73,12 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
         ? memberInput.phone.replace(/\s/g, '')
         : `+${memberInput.phone.replace(/\s/g, '')}`
     };
-
     setFormData(prev => ({
       ...prev,
       members: [...prev.members, newMember]
     }));
-
     setMemberInput({ name: '', phone: '' });
   };
-
   /**
    * Remove member from the group
    */
@@ -99,7 +88,6 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
       members: prev.members.filter(member => member.id !== memberId)
     }));
   };
-
   /**
    * Create WhatsApp group
    */
@@ -108,14 +96,11 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
       toast.error('Group name is required');
       return;
     }
-
     if (!formData.adminPhoneNumber.trim()) {
       toast.error('Admin phone number is required');
       return;
     }
-
     setLoading(true);
-
     try {
       const response = await fetch('/api/whatsapp/groups', {
         method: 'POST',
@@ -131,16 +116,12 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
           adminPhoneNumber: formData.adminPhoneNumber.trim()
         })
       });
-
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to create WhatsApp group');
       }
-
       const result = await response.json();
-
       toast.success('WhatsApp group created! Check your phone for setup instructions.');
-
       // Reset form
       setFormData({
         name: '',
@@ -149,10 +130,8 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
         members: []
       });
       setShowCreateForm(false);
-
       // Reload groups
       await loadExistingGroups();
-
       // Notify parent component
       if (onGroupCreated) {
         onGroupCreated(result.group);
@@ -164,7 +143,6 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
       setLoading(false);
     }
   };
-
   /**
    * Update group with invitation link
    */
@@ -173,7 +151,6 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
       toast.error('Invitation link is required');
       return;
     }
-
     try {
       const response = await fetch(`/api/whatsapp/groups?groupId=${groupId}`, {
         method: 'PUT',
@@ -186,12 +163,10 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
           status: 'active'
         })
       });
-
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to update group');
       }
-
       toast.success('Group updated successfully! Invitations will be sent.');
       await loadExistingGroups();
     } catch (error) {
@@ -199,7 +174,6 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
       toast.error(error.message || 'Failed to update group');
     }
   };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -212,7 +186,6 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
             Create and manage WhatsApp groups for {adventureTitle}
           </p>
         </div>
-
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
@@ -221,7 +194,6 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
           Create Group
         </button>
       </div>
-
       {/* Existing Groups */}
       {groups.length > 0 && (
         <div className="space-y-4">
@@ -238,12 +210,10 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
           </div>
         </div>
       )}
-
       {/* Create Group Form */}
       {showCreateForm && (
         <div className="border border-gray-200 rounded-lg p-6 space-y-4">
           <h4 className="text-md font-medium text-gray-900">Create New WhatsApp Group</h4>
-
           {/* Group Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -257,7 +227,6 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
           </div>
-
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -271,7 +240,6 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
           </div>
-
           {/* Admin Phone Number */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -288,13 +256,11 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
               />
             </div>
           </div>
-
           {/* Members */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Group Members
             </label>
-
             {/* Add Member Form */}
             <div className="flex gap-2 mb-3">
               <input
@@ -318,7 +284,6 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
                 Add
               </button>
             </div>
-
             {/* Members List */}
             {formData.members.length > 0 && (
               <div className="space-y-2">
@@ -340,7 +305,6 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
               </div>
             )}
           </div>
-
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-4">
             <button
@@ -362,14 +326,12 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
     </div>
   );
 }
-
 /**
  * Individual Group Card Component
  */
 function GroupCard({ group, onUpdateLink, onReload }) {
   const [showLinkForm, setShowLinkForm] = useState(false);
   const [invitationLink, setInvitationLink] = useState('');
-
   const getStatusColor = (status) => {
     switch (status) {
       case 'active': return 'text-green-600 bg-green-100';
@@ -377,7 +339,6 @@ function GroupCard({ group, onUpdateLink, onReload }) {
       default: return 'text-gray-600 bg-gray-100';
     }
   };
-
   const getStatusText = (status) => {
     switch (status) {
       case 'active': return 'Active';
@@ -385,15 +346,12 @@ function GroupCard({ group, onUpdateLink, onReload }) {
       default: return status.replace('_', ' ').toUpperCase();
     }
   };
-
   const handleUpdateLink = async () => {
     if (!invitationLink.trim()) return;
-
     await onUpdateLink(group.id, invitationLink);
     setInvitationLink('');
     setShowLinkForm(false);
   };
-
   return (
     <div className="border border-gray-200 rounded-lg p-4 space-y-3">
       <div className="flex items-start justify-between">
@@ -407,14 +365,12 @@ function GroupCard({ group, onUpdateLink, onReload }) {
           {getStatusText(group.status)}
         </span>
       </div>
-
       <div className="flex items-center text-sm text-gray-500">
         <UsersIcon className="h-4 w-4 mr-1" />
         <span>{group.members?.length || 0} members</span>
         <PhoneIcon className="h-4 w-4 ml-4 mr-1" />
         <span>{group.admin_phone_number}</span>
       </div>
-
       {group.status === 'pending_creation' && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
           <div className="flex">
@@ -426,7 +382,6 @@ function GroupCard({ group, onUpdateLink, onReload }) {
               </p>
             </div>
           </div>
-
           {!showLinkForm ? (
             <button
               onClick={() => setShowLinkForm(true)}
@@ -459,7 +414,6 @@ function GroupCard({ group, onUpdateLink, onReload }) {
           )}
         </div>
       )}
-
       {group.status === 'active' && group.invitation_link && (
         <div className="bg-green-50 border border-green-200 rounded-md p-3">
           <div className="flex items-center">

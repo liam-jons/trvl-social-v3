@@ -1,4 +1,5 @@
 import StaticPageLayout from '../../components/layout/StaticPageLayout';
+import { Rocket, Handshake } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
 
@@ -57,7 +58,7 @@ const CareersPage = () => {
             </GlassCard>
 
             <GlassCard className="text-center p-6">
-              <div className="text-4xl mb-4">🚀</div>
+              <Rocket className="w-12 h-12 mx-auto mb-4 text-blue-500" />
               <h3 className="text-xl font-semibold mb-3">Innovation</h3>
               <p className="text-gray-600 dark:text-gray-300">
                 Work with cutting-edge technology in AI, machine learning, and social platforms.
@@ -65,7 +66,7 @@ const CareersPage = () => {
             </GlassCard>
 
             <GlassCard className="text-center p-6">
-              <div className="text-4xl mb-4">🤝</div>
+              <Handshake className="w-12 h-12 mx-auto mb-4 text-green-500" />
               <h3 className="text-xl font-semibold mb-3">Community</h3>
               <p className="text-gray-600 dark:text-gray-300">
                 Join a passionate team that practices what we preach - collaboration and adventure.

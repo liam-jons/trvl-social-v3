@@ -14,7 +14,6 @@ import useVideoStreamStore from '../../stores/videoStreamStore';
 import notificationService from '../../services/notification-service';
 import GlassCard from '../ui/GlassCard';
 import GlassButton from '../ui/GlassButton';
-
 const StreamScheduler = ({ vendorId, className = "" }) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingStream, setEditingStream] = useState(null);
@@ -31,7 +30,6 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
     enableRecording: true,
     enableChat: true
   });
-
   const {
     scheduledStreams,
     addScheduledStream,
@@ -39,10 +37,8 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
     updateScheduledStream,
     isLoading
   } = useVideoStreamStore();
-
   // Filter streams for current vendor
   const vendorStreams = scheduledStreams.filter(stream => stream.vendorId === vendorId);
-
   // Reset form
   const resetForm = () => {
     setFormData({
@@ -61,35 +57,28 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
     setEditingStream(null);
     setShowCreateForm(false);
   };
-
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const scheduledDateTime = new Date(`${formData.scheduledDate}T${formData.scheduledTime}`);
-
       if (isBefore(scheduledDateTime, new Date())) {
         alert('Cannot schedule stream in the past');
         return;
       }
-
       const streamData = {
         ...formData,
         vendorId,
         scheduledDateTime: scheduledDateTime.toISOString(),
         createdAt: new Date().toISOString()
       };
-
       if (editingStream) {
         updateScheduledStream(editingStream.id, streamData);
       } else {
         addScheduledStream(streamData);
-
         // Schedule notification
         if (formData.notifyBefore > 0) {
           const notifyTime = new Date(scheduledDateTime.getTime() - (formData.notifyBefore * 60 * 1000));
-
           await notificationService.scheduleNotification({
             title: 'Upcoming Stream',
             message: `"${formData.title}" starts in ${formData.notifyBefore} minutes`,
@@ -98,18 +87,15 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
           });
         }
       }
-
       resetForm();
     } catch (error) {
       console.error('Failed to schedule stream:', error);
       alert('Failed to schedule stream. Please try again.');
     }
   };
-
   // Handle edit stream
   const handleEditStream = (stream) => {
     const scheduledDate = new Date(stream.scheduledDateTime);
-
     setFormData({
       title: stream.title,
       description: stream.description || '',
@@ -123,24 +109,20 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
       enableRecording: stream.enableRecording !== false,
       enableChat: stream.enableChat !== false
     });
-
     setEditingStream(stream);
     setShowCreateForm(true);
   };
-
   // Handle delete stream
   const handleDeleteStream = (streamId) => {
     if (window.confirm('Are you sure you want to delete this scheduled stream?')) {
       removeScheduledStream(streamId);
     }
   };
-
   // Get stream status
   const getStreamStatus = (stream) => {
     const scheduledTime = new Date(stream.scheduledDateTime);
     const now = new Date();
     const endTime = new Date(scheduledTime.getTime() + (stream.duration * 60 * 1000));
-
     if (isBefore(now, scheduledTime)) {
       return 'scheduled';
     } else if (isAfter(now, scheduledTime) && isBefore(now, endTime)) {
@@ -149,7 +131,6 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
       return 'ended';
     }
   };
-
   // Get status color
   const getStatusColor = (status) => {
     switch (status) {
@@ -159,7 +140,6 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
       default: return 'text-gray-500';
     }
   };
-
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
@@ -173,7 +153,6 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
           <span>Schedule Stream</span>
         </GlassButton>
       </div>
-
       {/* Create/Edit Form */}
       {showCreateForm && (
         <motion.div
@@ -184,7 +163,6 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
             <h3 className="text-xl font-semibold mb-4">
               {editingStream ? 'Edit Scheduled Stream' : 'Schedule New Stream'}
             </h3>
-
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
@@ -200,7 +178,6 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium mb-2">
                     Description
@@ -213,7 +190,6 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Date *
@@ -227,7 +203,6 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Time *
@@ -240,7 +215,6 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Duration (minutes)
@@ -257,7 +231,6 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
                     <option value={180}>3 hours</option>
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Notify Before (minutes)
@@ -276,7 +249,6 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
                   </select>
                 </div>
               </div>
-
               <div className="flex items-center space-x-6">
                 <label className="flex items-center space-x-2">
                   <input
@@ -287,7 +259,6 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
                   />
                   <span className="text-sm">Enable Recording</span>
                 </label>
-
                 <label className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -298,7 +269,6 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
                   <span className="text-sm">Enable Chat</span>
                 </label>
               </div>
-
               <div className="flex items-center justify-end space-x-3 pt-4">
                 <GlassButton
                   type="button"
@@ -318,7 +288,6 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
           </GlassCard>
         </motion.div>
       )}
-
       {/* Scheduled Streams List */}
       <div className="space-y-4">
         {vendorStreams.length === 0 ? (
@@ -338,7 +307,6 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
           vendorStreams.map((stream) => {
             const status = getStreamStatus(stream);
             const scheduledDate = new Date(stream.scheduledDateTime);
-
             return (
               <motion.div
                 key={stream.id}
@@ -354,30 +322,25 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
                           {status.toUpperCase()}
                         </span>
                       </div>
-
                       {stream.description && (
                         <p className="text-gray-600 dark:text-gray-300 mb-3">
                           {stream.description}
                         </p>
                       )}
-
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                         <div className="flex items-center space-x-2">
                           <CalendarIcon className="h-4 w-4 text-gray-500" />
                           <span>{format(scheduledDate, 'MMM dd, yyyy')}</span>
                         </div>
-
                         <div className="flex items-center space-x-2">
                           <ClockIcon className="h-4 w-4 text-gray-500" />
                           <span>{format(scheduledDate, 'HH:mm')}</span>
                         </div>
-
                         <div className="flex items-center space-x-2">
                           <GlobeAltIcon className="h-4 w-4 text-gray-500" />
                           <span>{stream.duration} min</span>
                         </div>
                       </div>
-
                       {stream.notifyBefore > 0 && (
                         <div className="flex items-center space-x-2 mt-2 text-sm text-gray-500">
                           <BellIcon className="h-4 w-4" />
@@ -385,7 +348,6 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
                         </div>
                       )}
                     </div>
-
                     <div className="flex items-center space-x-2 ml-4">
                       <button
                         onClick={() => handleEditStream(stream)}
@@ -394,7 +356,6 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
                       >
                         <PencilIcon className="h-4 w-4" />
                       </button>
-
                       <button
                         onClick={() => handleDeleteStream(stream.id)}
                         className="p-2 text-gray-500 hover:text-red-500 transition-colors"
@@ -413,5 +374,4 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
     </div>
   );
 };
-
 export default StreamScheduler;

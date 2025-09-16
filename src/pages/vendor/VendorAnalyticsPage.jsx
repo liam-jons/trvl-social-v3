@@ -29,13 +29,11 @@ import {
 } from '@heroicons/react/24/outline';
 import { format, subDays, subMonths, startOfDay, endOfDay } from 'date-fns';
 import html2canvas from 'html2canvas';
-
 import useVendorDashboardStore from '../../stores/vendorDashboardStore';
 import { useAnalytics } from '../../contexts/AnalyticsContext';
 import GlassCard from '../../components/ui/GlassCard';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorMessage from '../../components/common/ErrorMessage';
-
 // Color palette for charts
 const CHART_COLORS = {
   primary: '#3B82F6',
@@ -48,9 +46,7 @@ const CHART_COLORS = {
   pink: '#EC4899',
   indigo: '#6366F1'
 };
-
 const COLORS = [CHART_COLORS.primary, CHART_COLORS.secondary, CHART_COLORS.success, CHART_COLORS.warning, CHART_COLORS.danger];
-
 // Date range options
 const DATE_RANGES = [
   { label: 'Last 7 Days', value: 7, key: 'week' },
@@ -59,7 +55,6 @@ const DATE_RANGES = [
   { label: 'Last 6 Months', value: 180, key: 'half-year' },
   { label: 'Last Year', value: 365, key: 'year' }
 ];
-
 // Custom tooltip component
 const CustomTooltip = ({ active, payload, label, formatter }) => {
   if (active && payload && payload.length) {
@@ -82,7 +77,6 @@ const CustomTooltip = ({ active, payload, label, formatter }) => {
   }
   return null;
 };
-
 // Analytics KPI Card Component
 const AnalyticsKPICard = ({ title, value, change, changeType, icon: Icon, color = 'blue' }) => {
   const colorClasses = {
@@ -92,10 +86,8 @@ const AnalyticsKPICard = ({ title, value, change, changeType, icon: Icon, color 
     orange: 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/20',
     red: 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/20',
   };
-
   const ChangeIcon = changeType === 'positive' ? ArrowTrendingUpIcon : ArrowTrendingDownIcon;
   const changeColor = changeType === 'positive' ? 'text-green-600' : 'text-red-600';
-
   return (
     <GlassCard variant="light" className="p-6">
       <div className="flex items-center justify-between">
@@ -122,12 +114,10 @@ const AnalyticsKPICard = ({ title, value, change, changeType, icon: Icon, color 
     </GlassCard>
   );
 };
-
 const VendorAnalyticsPage = () => {
   const [selectedDateRange, setSelectedDateRange] = useState(30);
   const [chartType, setChartType] = useState('revenue'); // 'revenue', 'bookings', 'customers'
   const [isExporting, setIsExporting] = useState(false);
-
   const {
     vendor,
     dashboardStats,
@@ -137,14 +127,11 @@ const VendorAnalyticsPage = () => {
     fetchAnalyticsData,
     getFormattedStats
   } = useVendorDashboardStore();
-
   const { trackEvent, trackFeatureUsage } = useAnalytics();
-
   // Generate mock analytics data (replace with real data fetching)
   const generateMockData = useMemo(() => {
     const days = selectedDateRange;
     const data = [];
-
     for (let i = days; i >= 0; i--) {
       const date = subDays(new Date(), i);
       data.push({
@@ -161,7 +148,6 @@ const VendorAnalyticsPage = () => {
     }
     return data;
   }, [selectedDateRange]);
-
   // Customer demographics data
   const demographicsData = [
     { name: '18-25', value: 25, color: CHART_COLORS.primary },
@@ -170,7 +156,6 @@ const VendorAnalyticsPage = () => {
     { name: '46-55', value: 15, color: CHART_COLORS.warning },
     { name: '55+', value: 5, color: CHART_COLORS.danger }
   ];
-
   // Booking source data
   const bookingSourceData = [
     { name: 'Direct', value: 40, color: CHART_COLORS.primary },
@@ -178,7 +163,6 @@ const VendorAnalyticsPage = () => {
     { name: 'Referral', value: 20, color: CHART_COLORS.success },
     { name: 'Search', value: 10, color: CHART_COLORS.warning }
   ];
-
   // Top adventures data
   const topAdventuresData = [
     { name: 'Mountain Hiking', bookings: 45, revenue: 13500, rating: 4.8 },
@@ -187,12 +171,10 @@ const VendorAnalyticsPage = () => {
     { name: 'Cultural Experience', bookings: 28, revenue: 8400, rating: 4.5 },
     { name: 'Night Photography', bookings: 22, revenue: 6600, rating: 4.9 }
   ];
-
   // Booking patterns heatmap data
   const bookingHeatmapData = useMemo(() => {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const hours = Array.from({ length: 24 }, (_, i) => i);
-
     return days.flatMap(day =>
       hours.map(hour => ({
         day,
@@ -202,27 +184,23 @@ const VendorAnalyticsPage = () => {
       }))
     );
   }, []);
-
   useEffect(() => {
     // Track analytics dashboard usage
     trackFeatureUsage('vendor_analytics_dashboard', {
       date_range: selectedDateRange,
       chart_type: chartType
     });
-
     // Fetch analytics data when component mounts or date range changes
     if (vendor?.id) {
       fetchAnalyticsData?.(vendor.id, selectedDateRange);
     }
   }, [vendor, selectedDateRange, trackFeatureUsage, chartType, fetchAnalyticsData]);
-
   // Calculate KPIs
   const kpis = useMemo(() => {
     const totalRevenue = generateMockData.reduce((sum, day) => sum + day.revenue, 0);
     const totalBookings = generateMockData.reduce((sum, day) => sum + day.bookings, 0);
     const avgBookingValue = totalBookings > 0 ? (totalRevenue / totalBookings) : 0;
     const totalCustomers = generateMockData.reduce((sum, day) => sum + day.customers, 0);
-
     return {
       totalRevenue: totalRevenue.toLocaleString(),
       totalBookings,
@@ -235,12 +213,10 @@ const VendorAnalyticsPage = () => {
       conversionChange: '-2.1%'
     };
   }, [generateMockData]);
-
   // Export functionality
   const handleExportPDF = async () => {
     setIsExporting(true);
     trackEvent('analytics_export', { format: 'pdf', date_range: selectedDateRange });
-
     try {
       const element = document.getElementById('analytics-dashboard');
       const canvas = await html2canvas(element, {
@@ -248,7 +224,6 @@ const VendorAnalyticsPage = () => {
         useCORS: true,
         allowTaint: true
       });
-
       const link = document.createElement('a');
       link.download = `vendor-analytics-${format(new Date(), 'yyyy-MM-dd')}.png`;
       link.href = canvas.toDataURL();
@@ -259,10 +234,8 @@ const VendorAnalyticsPage = () => {
       setIsExporting(false);
     }
   };
-
   const handleExportCSV = () => {
     trackEvent('analytics_export', { format: 'csv', date_range: selectedDateRange });
-
     const csvContent = [
       ['Date', 'Revenue', 'Bookings', 'Customers', 'Avg Booking Value', 'Conversion Rate'],
       ...generateMockData.map(day => [
@@ -274,7 +247,6 @@ const VendorAnalyticsPage = () => {
         (day.conversion * 100).toFixed(2) + '%'
       ])
     ].map(row => row.join(',')).join('\n');
-
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -283,7 +255,6 @@ const VendorAnalyticsPage = () => {
     link.click();
     window.URL.revokeObjectURL(url);
   };
-
   if (loading.stats) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -291,7 +262,6 @@ const VendorAnalyticsPage = () => {
       </div>
     );
   }
-
   if (error) {
     return (
       <ErrorMessage
@@ -300,7 +270,6 @@ const VendorAnalyticsPage = () => {
       />
     );
   }
-
   return (
     <div id="analytics-dashboard" className="space-y-6">
       {/* Header with controls */}
@@ -313,7 +282,6 @@ const VendorAnalyticsPage = () => {
             Comprehensive insights into your business performance
           </p>
         </div>
-
         <div className="flex flex-col sm:flex-row gap-3">
           {/* Date Range Selector */}
           <select
@@ -327,7 +295,6 @@ const VendorAnalyticsPage = () => {
               </option>
             ))}
           </select>
-
           {/* Export Buttons */}
           <div className="flex gap-2">
             <button
@@ -348,7 +315,6 @@ const VendorAnalyticsPage = () => {
           </div>
         </div>
       </div>
-
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <AnalyticsKPICard
@@ -384,7 +350,6 @@ const VendorAnalyticsPage = () => {
           color="orange"
         />
       </div>
-
       {/* Main Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue Trends Chart */}
@@ -403,7 +368,6 @@ const VendorAnalyticsPage = () => {
               <option value="customers">Customers</option>
             </select>
           </div>
-
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={generateMockData}>
@@ -443,13 +407,11 @@ const VendorAnalyticsPage = () => {
             </ResponsiveContainer>
           </div>
         </GlassCard>
-
         {/* Booking Patterns Chart */}
         <GlassCard variant="light" className="p-6">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
             Booking Patterns
           </h2>
-
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={generateMockData.slice(-7)}>
@@ -477,7 +439,6 @@ const VendorAnalyticsPage = () => {
           </div>
         </GlassCard>
       </div>
-
       {/* Demographics and Sources */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Customer Demographics */}
@@ -485,7 +446,6 @@ const VendorAnalyticsPage = () => {
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
             Customer Demographics
           </h2>
-
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -518,13 +478,11 @@ const VendorAnalyticsPage = () => {
             </ResponsiveContainer>
           </div>
         </GlassCard>
-
         {/* Booking Sources */}
         <GlassCard variant="light" className="p-6">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
             Booking Sources
           </h2>
-
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -558,13 +516,11 @@ const VendorAnalyticsPage = () => {
           </div>
         </GlassCard>
       </div>
-
       {/* Top Adventures Performance */}
       <GlassCard variant="light" className="p-6">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
           Top Adventure Performance
         </h2>
-
         <div className="overflow-hidden">
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
@@ -602,13 +558,11 @@ const VendorAnalyticsPage = () => {
           </div>
         </div>
       </GlassCard>
-
       {/* Adventure Performance Table */}
       <GlassCard variant="light" className="p-6">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
           Detailed Adventure Performance
         </h2>
-
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead>
@@ -685,5 +639,4 @@ const VendorAnalyticsPage = () => {
     </div>
   );
 };
-
 export default VendorAnalyticsPage;

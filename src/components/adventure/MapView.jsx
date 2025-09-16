@@ -16,10 +16,8 @@ import ClusterMarker from './ClusterMarker';
 import AdventurePopup from './AdventurePopup';
 import LocationSearch from './LocationSearch';
 import DrawControls from './DrawControls';
-
 // Import Mapbox CSS
 import 'mapbox-gl/dist/mapbox-gl.css';
-
 const MapView = ({
   adventures = [],
   onAdventureSelect,
@@ -34,19 +32,16 @@ const MapView = ({
   const { accessToken, defaultCenter, defaultZoom, isConfigured, defaultStyle, darkStyle } = useMapbox();
   const { isDark } = useTheme();
   const mapRef = useRef();
-
   // Map state
   const [viewState, setViewState] = useState({
     longitude: defaultCenter[0],
     latitude: defaultCenter[1],
     zoom: defaultZoom,
   });
-
   // Interaction state
   const [selectedAdventure, setSelectedAdventure] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
   const [isLocating, setIsLocating] = useState(false);
-
   // Clustering
   const { clusters, getClusterLeaves, getClusterExpansionZoom } = useMapClustering(
     adventures,
@@ -57,13 +52,11 @@ const MapView = ({
       minPoints: 2,
     } : { maxZoom: 0 } // Disable clustering
   );
-
   // Handle adventure marker click
   const handleMarkerClick = useCallback((adventure) => {
     setSelectedAdventure(adventure);
     onAdventureSelect?.(adventure);
   }, [onAdventureSelect]);
-
   // Handle cluster click
   const handleClusterClick = useCallback((cluster) => {
     const expansionZoom = getClusterExpansionZoom(cluster.properties.cluster_id);
@@ -76,12 +69,10 @@ const MapView = ({
       }));
     }
   }, [getClusterExpansionZoom]);
-
   // Handle popup close
   const handlePopupClose = useCallback(() => {
     setSelectedAdventure(null);
   }, []);
-
   // Handle location search result
   const handleLocationSearchResult = useCallback((result) => {
     const [longitude, latitude] = result.center;
@@ -92,7 +83,6 @@ const MapView = ({
     });
     onLocationSearch?.(result);
   }, [onLocationSearch]);
-
   // Handle user location found
   const handleGeolocate = useCallback((event) => {
     const { coords } = event;
@@ -101,14 +91,12 @@ const MapView = ({
       latitude: coords.latitude,
     });
   }, []);
-
   // Get current location programmatically
   const getCurrentLocation = useCallback(() => {
     if (!navigator.geolocation) {
       console.warn('Geolocation is not supported by this browser.');
       return;
     }
-
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -133,7 +121,6 @@ const MapView = ({
       }
     );
   }, []);
-
   // Handle map load
   const handleMapLoad = useCallback(() => {
     // Map is loaded and ready
@@ -141,7 +128,6 @@ const MapView = ({
       // Additional map setup can go here
     }
   }, []);
-
   if (!isConfigured) {
     return (
       <GlassCard className="flex items-center justify-center" style={{ height }}>
@@ -156,7 +142,6 @@ const MapView = ({
       </GlassCard>
     );
   }
-
   return (
     <div className={`relative ${className}`} style={{ height }}>
       {/* Location Search */}
@@ -168,7 +153,6 @@ const MapView = ({
           />
         </div>
       )}
-
       {/* Current Location Button */}
       <div className="absolute top-4 right-4 z-10">
         <GlassCard padding="none" className="p-2">
@@ -213,7 +197,6 @@ const MapView = ({
           </button>
         </GlassCard>
       </div>
-
       {/* Draw Controls */}
       {showDrawControls && (
         <div className="absolute bottom-4 left-4 z-10">
@@ -223,7 +206,6 @@ const MapView = ({
           />
         </div>
       )}
-
       {/* Map */}
       <Map
         ref={mapRef}
@@ -237,7 +219,6 @@ const MapView = ({
       >
         {/* Navigation Controls */}
         <NavigationControl position="bottom-right" />
-
         {/* Geolocation Control */}
         <GeolocateControl
           position="bottom-right"
@@ -245,7 +226,6 @@ const MapView = ({
           showUserHeading={true}
           onGeolocate={handleGeolocate}
         />
-
         {/* User Location Marker */}
         {userLocation && (
           <Marker
@@ -255,7 +235,6 @@ const MapView = ({
             <div className="w-4 h-4 bg-primary-500 border-2 border-white dark:border-gray-800 rounded-full shadow-lg" />
           </Marker>
         )}
-
         {/* Clustered Markers */}
         {(allowClustering ? clusters : adventures.map(adventure => ({
           type: 'Feature',
@@ -267,7 +246,6 @@ const MapView = ({
         }))).map((item) => {
           const [longitude, latitude] = item.geometry.coordinates;
           const isCluster = item.properties.cluster;
-
           return (
             <Marker
               key={isCluster ? `cluster-${item.properties.cluster_id}` : `adventure-${item.properties.adventure.id}`}
@@ -290,7 +268,6 @@ const MapView = ({
             </Marker>
           );
         })}
-
         {/* Selected Adventure Popup */}
         {selectedAdventure && (
           <Popup
@@ -311,5 +288,4 @@ const MapView = ({
     </div>
   );
 };
-
 export default MapView;

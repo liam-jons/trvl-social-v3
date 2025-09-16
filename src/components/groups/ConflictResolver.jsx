@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import GlassButton from '../ui/GlassButton';
 import GlassModal from '../ui/GlassModal';
-
 const ConflictResolver = ({
   conflicts = [],
   onResolveConflict,
@@ -11,20 +10,16 @@ const ConflictResolver = ({
 }) => {
   const [activeConflict, setActiveConflict] = useState(null);
   const [isResolving, setIsResolving] = useState(false);
-
   // Auto-resolve conflicts based on strategy
   useEffect(() => {
     if (conflicts.length === 0 || autoResolveStrategy === 'manual') return;
-
     const autoResolve = async () => {
       for (const conflict of conflicts) {
         await resolveConflictAutomatically(conflict);
       }
     };
-
     autoResolve();
   }, [conflicts, autoResolveStrategy]);
-
   // Automatically resolve conflict based on strategy
   const resolveConflictAutomatically = async (conflict) => {
     switch (autoResolveStrategy) {
@@ -35,7 +30,6 @@ const ConflictResolver = ({
         );
         await resolveConflict(conflict.id, latestUpdate);
         break;
-
       case 'merge':
         // Attempt to merge conflicting updates
         const mergedUpdate = await mergeConflictingUpdates(conflict);
@@ -46,66 +40,55 @@ const ConflictResolver = ({
           setActiveConflict(conflict);
         }
         break;
-
       default:
         break;
     }
   };
-
   // Merge conflicting updates
   const mergeConflictingUpdates = async (conflict) => {
     try {
       const { updates, resourceType, resourceId } = conflict;
-
       if (resourceType === 'group_members') {
         return await mergeGroupMemberUpdates(updates, resourceId);
       } else if (resourceType === 'group_settings') {
         return await mergeGroupSettingsUpdates(updates, resourceId);
       }
-
       return null;
     } catch (error) {
       console.error('Failed to merge conflicting updates:', error);
       return null;
     }
   };
-
   // Merge group member updates
   const mergeGroupMemberUpdates = async (updates, groupId) => {
     // Separate add and remove operations
     const additions = updates.filter(u => u.operation === 'INSERT');
     const removals = updates.filter(u => u.operation === 'DELETE');
     const modifications = updates.filter(u => u.operation === 'UPDATE');
-
     // Create merged member list
     let members = new Map();
-
     // Apply all additions
     additions.forEach(update => {
       if (update.new_record) {
         members.set(update.new_record.user_id, update.new_record);
       }
     });
-
     // Apply modifications (latest wins for each member)
     modifications.forEach(update => {
       if (update.new_record) {
         const existingTimestamp = members.get(update.new_record.user_id)?.updated_at || 0;
         const updateTimestamp = new Date(update.new_record.updated_at).getTime();
-
         if (updateTimestamp > existingTimestamp) {
           members.set(update.new_record.user_id, update.new_record);
         }
       }
     });
-
     // Apply removals
     removals.forEach(update => {
       if (update.old_record) {
         members.delete(update.old_record.user_id);
       }
     });
-
     return {
       operation: 'MERGE',
       resource_type: 'group_members',
@@ -115,13 +98,11 @@ const ConflictResolver = ({
       timestamp: Date.now()
     };
   };
-
   // Merge group settings updates
   const mergeGroupSettingsUpdates = async (updates, groupId) => {
     // Start with the oldest update as base
     const sortedUpdates = [...updates].sort((a, b) => a.timestamp - b.timestamp);
     let mergedSettings = { ...sortedUpdates[0].new_record };
-
     // Apply each subsequent update, field by field
     for (let i = 1; i < sortedUpdates.length; i++) {
       const update = sortedUpdates[i];
@@ -133,7 +114,6 @@ const ConflictResolver = ({
         });
       }
     }
-
     return {
       operation: 'MERGE',
       resource_type: 'group_settings',
@@ -143,11 +123,9 @@ const ConflictResolver = ({
       timestamp: Date.now()
     };
   };
-
   // Resolve a conflict
   const resolveConflict = async (conflictId, resolution) => {
     setIsResolving(true);
-
     try {
       await onResolveConflict(conflictId, resolution);
       setActiveConflict(null);
@@ -157,12 +135,10 @@ const ConflictResolver = ({
       setIsResolving(false);
     }
   };
-
   // Manual conflict resolution interface
   const ManualConflictResolver = ({ conflict }) => {
     const [selectedResolution, setSelectedResolution] = useState(null);
     const [customResolution, setCustomResolution] = useState('');
-
     const handleResolve = () => {
       if (selectedResolution === 'custom' && customResolution) {
         resolveConflict(conflict.id, {
@@ -174,7 +150,6 @@ const ConflictResolver = ({
         resolveConflict(conflict.id, selectedResolution);
       }
     };
-
     return (
       <GlassModal
         isOpen={true}
@@ -191,12 +166,10 @@ const ConflictResolver = ({
               Please choose how to resolve this conflict.
             </p>
           </div>
-
           <div className="space-y-3">
             <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Conflicting Updates:
             </div>
-
             {conflict.updates.map((update, index) => (
               <div
                 key={update.id}
@@ -227,7 +200,6 @@ const ConflictResolver = ({
                 </div>
               </div>
             ))}
-
             {/* Merge option */}
             <div
               className={`p-3 rounded-lg border cursor-pointer transition-colors ${
@@ -253,7 +225,6 @@ const ConflictResolver = ({
                 )}
               </div>
             </div>
-
             {/* Custom resolution */}
             <div
               className={`p-3 rounded-lg border ${
@@ -287,7 +258,6 @@ const ConflictResolver = ({
               />
             </div>
           </div>
-
           <div className="flex justify-end space-x-2 pt-4 border-t border-gray-200 dark:border-gray-700">
             <GlassButton
               variant="secondary"
@@ -307,9 +277,7 @@ const ConflictResolver = ({
       </GlassModal>
     );
   };
-
   if (conflicts.length === 0) return null;
-
   return (
     <div className={className}>
       {/* Conflict notification banner */}
@@ -337,7 +305,6 @@ const ConflictResolver = ({
           </div>
         </div>
       )}
-
       {/* Manual conflict resolution modal */}
       {activeConflict && (
         <ManualConflictResolver conflict={activeConflict} />
@@ -345,5 +312,4 @@ const ConflictResolver = ({
     </div>
   );
 };
-
 export default ConflictResolver;

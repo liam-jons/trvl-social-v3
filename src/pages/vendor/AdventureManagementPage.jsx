@@ -13,7 +13,6 @@ import GlassCard from '../../components/ui/GlassCard';
 import AdventureWizard from '../../components/vendor/adventures/AdventureWizard';
 import AdventureListView from '../../components/vendor/adventures/AdventureListView';
 import useVendorDashboardStore from '../../stores/vendorDashboardStore';
-
 const AdventureManagementPage = () => {
   const [showWizard, setShowWizard] = useState(false);
   const [editingAdventure, setEditingAdventure] = useState(null);
@@ -21,47 +20,38 @@ const AdventureManagementPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedAdventures, setSelectedAdventures] = useState([]);
-
   const { adventures, loadAdventures, isLoading } = useVendorDashboardStore();
-
   useEffect(() => {
     loadAdventures();
   }, [loadAdventures]);
-
   const handleCreateNew = () => {
     setEditingAdventure(null);
     setShowWizard(true);
   };
-
   const handleEditAdventure = (adventure) => {
     setEditingAdventure(adventure);
     setShowWizard(true);
   };
-
   const handleCloseWizard = () => {
     setShowWizard(false);
     setEditingAdventure(null);
   };
-
   const handleBulkAction = (action) => {
     // Handle bulk operations like publish, unpublish, delete
     console.log(`Bulk ${action} for adventures:`, selectedAdventures);
   };
-
   const filteredAdventures = adventures?.filter(adventure => {
     const matchesSearch = adventure.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          adventure.location?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || adventure.status === statusFilter;
     return matchesSearch && matchesStatus;
   }) || [];
-
   const stats = {
     total: adventures?.length || 0,
     published: adventures?.filter(a => a.status === 'published').length || 0,
     draft: adventures?.filter(a => a.status === 'draft').length || 0,
     archived: adventures?.filter(a => a.status === 'archived').length || 0
   };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -74,7 +64,6 @@ const AdventureManagementPage = () => {
             Create and manage your adventure listings
           </p>
         </div>
-
         <div className="flex items-center gap-3">
           <button
             onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
@@ -82,7 +71,6 @@ const AdventureManagementPage = () => {
           >
             {viewMode === 'grid' ? <Bars3Icon className="h-5 w-5" /> : <ViewColumnsIcon className="h-5 w-5" />}
           </button>
-
           {/* Bulk Operations Quick Link */}
           <a
             href="/vendor-portal/bulk-operations"
@@ -91,7 +79,6 @@ const AdventureManagementPage = () => {
             <Squares2X2Icon className="h-5 w-5" />
             Bulk Operations
           </a>
-
           <button
             onClick={handleCreateNew}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
@@ -101,7 +88,6 @@ const AdventureManagementPage = () => {
           </button>
         </div>
       </div>
-
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
@@ -120,7 +106,6 @@ const AdventureManagementPage = () => {
           </GlassCard>
         ))}
       </div>
-
       {/* Filters and Search */}
       <GlassCard variant="light" padding="md">
         <div className="flex flex-col sm:flex-row gap-4">
@@ -135,7 +120,6 @@ const AdventureManagementPage = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/50 dark:bg-gray-800/50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-400 transition-colors"
             />
           </div>
-
           {/* Status Filter */}
           <select
             value={statusFilter}
@@ -147,7 +131,6 @@ const AdventureManagementPage = () => {
             <option value="draft">Draft</option>
             <option value="archived">Archived</option>
           </select>
-
           {/* Bulk Actions */}
           {selectedAdventures.length > 0 && (
             <div className="flex items-center gap-2">
@@ -170,7 +153,6 @@ const AdventureManagementPage = () => {
           )}
         </div>
       </GlassCard>
-
       {/* Adventure List */}
       <AdventureListView
         adventures={filteredAdventures}
@@ -180,7 +162,6 @@ const AdventureManagementPage = () => {
         onEditAdventure={handleEditAdventure}
         isLoading={isLoading}
       />
-
       {/* Adventure Creation/Edit Wizard */}
       <AnimatePresence>
         {showWizard && (
@@ -211,5 +192,4 @@ const AdventureManagementPage = () => {
     </div>
   );
 };
-
 export default AdventureManagementPage;

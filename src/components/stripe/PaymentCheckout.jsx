@@ -2,7 +2,6 @@
  * PaymentCheckout Component
  * Complete payment checkout experience with method selection and new payment form
  */
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth.js';
 import { payments } from '../../services/stripe-service.js';
@@ -17,7 +16,6 @@ import {
   ArrowLeftIcon,
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
-
 const PaymentCheckout = ({
   amount,
   currency = 'usd',
@@ -31,7 +29,6 @@ const PaymentCheckout = ({
   requireBillingDetails = true,
 }) => {
   const { user } = useAuth();
-
   // State management
   const [step, setStep] = useState('method-selection'); // method-selection, new-payment, processing, success
   const [clientSecret, setClientSecret] = useState(null);
@@ -39,19 +36,16 @@ const PaymentCheckout = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [paymentResult, setPaymentResult] = useState(null);
-
   // Create payment intent when component mounts
   useEffect(() => {
     if (amount && vendorAccountId && bookingId && user) {
       createPaymentIntent();
     }
   }, [amount, vendorAccountId, bookingId, user]);
-
   const createPaymentIntent = async () => {
     try {
       setLoading(true);
       setError(null);
-
       const paymentData = await payments.createPaymentIntent({
         amount: Math.round(amount * 100), // Convert to cents
         currency,
@@ -60,7 +54,6 @@ const PaymentCheckout = ({
         userId: user.id,
         description: description || `Payment for booking ${bookingId}`,
       });
-
       setClientSecret(paymentData.clientSecret);
     } catch (error) {
       console.error('Error creating payment intent:', error);
@@ -70,28 +63,22 @@ const PaymentCheckout = ({
       setLoading(false);
     }
   };
-
   const handleMethodSelect = (methodId) => {
     setSelectedMethodId(methodId);
   };
-
   const handleAddNewMethod = () => {
     setStep('new-payment');
     setSelectedMethodId(null);
   };
-
   const handleBackToMethods = () => {
     setStep('method-selection');
     setError(null);
   };
-
   const handlePayWithSavedMethod = async () => {
     if (!selectedMethodId || !clientSecret) return;
-
     try {
       setLoading(true);
       setStep('processing');
-
       // Process payment with saved method
       const response = await fetch('/api/stripe/confirm-payment', {
         method: 'POST',
@@ -103,13 +90,10 @@ const PaymentCheckout = ({
           paymentMethodId: selectedMethodId,
         }),
       });
-
       if (!response.ok) {
         throw new Error('Payment confirmation failed');
       }
-
       const result = await response.json();
-
       if (result.success) {
         setPaymentResult(result);
         setStep('success');
@@ -126,25 +110,21 @@ const PaymentCheckout = ({
       setLoading(false);
     }
   };
-
   const handlePaymentSuccess = (result) => {
     setPaymentResult(result);
     setStep('success');
     onSuccess?.(result);
   };
-
   const handlePaymentError = (error) => {
     setError(error);
     onError?.(error);
   };
-
   const formatAmount = (amount, currency) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency.toUpperCase(),
     }).format(amount);
   };
-
   if (loading && !clientSecret) {
     return (
       <GlassCard className="p-6">
@@ -155,7 +135,6 @@ const PaymentCheckout = ({
       </GlassCard>
     );
   }
-
   if (error && !clientSecret) {
     return (
       <GlassCard className="p-6">
@@ -175,7 +154,6 @@ const PaymentCheckout = ({
       </GlassCard>
     );
   }
-
   if (step === 'success') {
     return (
       <GlassCard className="p-6 text-center">
@@ -192,7 +170,6 @@ const PaymentCheckout = ({
       </GlassCard>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Payment Summary */}
@@ -212,7 +189,6 @@ const PaymentCheckout = ({
           </div>
         </div>
       </GlassCard>
-
       {/* Payment Method Selection */}
       {step === 'method-selection' && showSavedMethods && (
         <div className="space-y-4">
@@ -223,7 +199,6 @@ const PaymentCheckout = ({
             onAddNewMethod={handleAddNewMethod}
             showAddButton={true}
           />
-
           {selectedMethodId && (
             <div className="flex space-x-4">
               <GlassButton
@@ -240,7 +215,6 @@ const PaymentCheckout = ({
                   `Pay ${formatAmount(amount, currency)}`
                 )}
               </GlassButton>
-
               <GlassButton
                 onClick={onCancel}
                 variant="outline"
@@ -249,7 +223,6 @@ const PaymentCheckout = ({
               </GlassButton>
             </div>
           )}
-
           {error && (
             <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-4">
               <p className="text-red-200 text-sm">{error}</p>
@@ -257,7 +230,6 @@ const PaymentCheckout = ({
           )}
         </div>
       )}
-
       {/* New Payment Form */}
       {(step === 'new-payment' || !showSavedMethods) && clientSecret && (
         <div className="space-y-4">
@@ -276,7 +248,6 @@ const PaymentCheckout = ({
               </h3>
             </div>
           )}
-
           <StripeProvider clientSecret={clientSecret}>
             <PaymentForm
               clientSecret={clientSecret}
@@ -291,7 +262,6 @@ const PaymentCheckout = ({
               mode="payment"
             />
           </StripeProvider>
-
           <div className="flex justify-center">
             <GlassButton
               onClick={onCancel}
@@ -302,7 +272,6 @@ const PaymentCheckout = ({
           </div>
         </div>
       )}
-
       {/* Processing State */}
       {step === 'processing' && (
         <GlassCard className="p-6 text-center">
@@ -316,5 +285,4 @@ const PaymentCheckout = ({
     </div>
   );
 };
-
 export default PaymentCheckout;

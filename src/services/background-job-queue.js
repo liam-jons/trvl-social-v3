@@ -2,11 +2,9 @@
  * Background Job Queue for Intensive Compatibility Calculations
  * Manages long-running compatibility calculations in the background
  */
-
 import { batchCompatibilityProcessor } from './batch-compatibility-processor.js';
 import { redisCacheService } from './redis-cache-service.js';
 import { supabase } from '../lib/supabase.js';
-
 class BackgroundJobQueue {
   constructor() {
     this.queues = {
@@ -14,13 +12,11 @@ class BackgroundJobQueue {
       normal: [],
       low: []
     };
-
     this.workers = [];
     this.maxWorkers = parseInt(process.env.JOB_QUEUE_WORKERS) || 3;
     this.activeJobs = new Map();
     this.completedJobs = new Map();
     this.maxCompletedJobs = 1000;
-
     this.jobTypes = {
       BULK_COMPATIBILITY: 'bulk_compatibility',
       GROUP_ANALYSIS: 'group_analysis',
@@ -28,7 +24,6 @@ class BackgroundJobQueue {
       CACHE_WARMING: 'cache_warming',
       SCORE_RECALCULATION: 'score_recalculation'
     };
-
     this.metrics = {
       totalJobs: 0,
       completedJobs: 0,
@@ -36,11 +31,9 @@ class BackgroundJobQueue {
       averageProcessingTime: 0,
       queueSizes: { high: 0, normal: 0, low: 0 }
     };
-
     this.isRunning = false;
     this.startWorkers();
   }
-
   /**
    * Add bulk compatibility calculation job
    */
@@ -69,13 +62,10 @@ class BackgroundJobQueue {
         estimatedDuration: this.estimateProcessingTime(userIds.length)
       }
     };
-
     this.queues[job.priority].push(job);
     this.metrics.totalJobs++;
     this.updateQueueSizes();
-
     console.log(`Added bulk compatibility job ${job.id} for ${userIds.length} users`);
-
     return {
       jobId: job.id,
       queuePosition: this.getQueuePosition(job),
@@ -83,7 +73,6 @@ class BackgroundJobQueue {
       estimatedDuration: job.metadata.estimatedDuration
     };
   }
-
   /**
    * Add group analysis job
    */
@@ -112,18 +101,15 @@ class BackgroundJobQueue {
         estimatedDuration: this.estimateAnalysisTime(userIds.length)
       }
     };
-
     this.queues[job.priority].push(job);
     this.metrics.totalJobs++;
     this.updateQueueSizes();
-
     return {
       jobId: job.id,
       queuePosition: this.getQueuePosition(job),
       estimatedStartTime: this.estimateStartTime(job)
     };
   }
-
   /**
    * Add algorithm comparison job
    */
@@ -152,17 +138,14 @@ class BackgroundJobQueue {
         estimatedDuration: this.estimateComparisonTime(userIds.length, algorithms.length)
       }
     };
-
     this.queues[job.priority].push(job);
     this.metrics.totalJobs++;
     this.updateQueueSizes();
-
     return {
       jobId: job.id,
       queuePosition: this.getQueuePosition(job)
     };
   }
-
   /**
    * Add cache warming job
    */
@@ -189,20 +172,16 @@ class BackgroundJobQueue {
         pairCount: (userIds.length * (userIds.length - 1)) / 2
       }
     };
-
     this.queues[job.priority].push(job);
     this.metrics.totalJobs++;
     this.updateQueueSizes();
-
     return { jobId: job.id };
   }
-
   /**
    * Process bulk compatibility job
    */
   async processBulkCompatibilityJob(job) {
     const { userIds, options } = job.data;
-
     const result = await batchCompatibilityProcessor.processBulkCompatibility(userIds, {
       ...options,
       onProgress: (progress) => {
@@ -210,23 +189,18 @@ class BackgroundJobQueue {
         this.updateJobProgress(job.id, progress);
       }
     });
-
     if (result.success) {
       // Store results in database for later retrieval
       await this.storeJobResults(job.id, result.data);
     }
-
     return result;
   }
-
   /**
    * Process group analysis job
    */
   async processGroupAnalysisJob(job) {
     const { userIds, algorithmId, options } = job.data;
-
     const { groupBuilderService } = await import('./group-builder-service.js');
-
     let result;
     switch (algorithmId) {
       case 'kmeans':
@@ -251,7 +225,6 @@ class BackgroundJobQueue {
         );
         break;
     }
-
     // Process and analyze conflicts if requested
     if (options.includeConflicts && result) {
       for (let i = 0; i < result.length; i++) {
@@ -262,7 +235,6 @@ class BackgroundJobQueue {
         result[i].conflicts = conflicts;
       }
     }
-
     return {
       success: true,
       data: {
@@ -273,17 +245,14 @@ class BackgroundJobQueue {
       }
     };
   }
-
   /**
    * Process algorithm comparison job
    */
   async processAlgorithmComparisonJob(job) {
     const { userIds, algorithms, options } = job.data;
     const results = {};
-
     for (const algorithm of algorithms) {
       const startTime = Date.now();
-
       try {
         // Process with current algorithm
         const analysisResult = await this.processGroupAnalysisJob({
@@ -296,12 +265,9 @@ class BackgroundJobQueue {
             }
           }
         });
-
         const processingTime = Date.now() - startTime;
-
         if (analysisResult.success) {
           const groups = analysisResult.data.groups;
-
           // Calculate metrics
           const metrics = {
             processingTime,
@@ -310,7 +276,6 @@ class BackgroundJobQueue {
             averageCompatibility: groups.reduce((sum, g) => sum + (g.compatibility?.averageScore || 0), 0) / groups.length,
             totalConflicts: groups.reduce((sum, g) => sum + (g.conflicts?.totalConflicts || 0), 0)
           };
-
           results[algorithm] = {
             success: true,
             groups,
@@ -323,12 +288,10 @@ class BackgroundJobQueue {
             processingTime
           };
         }
-
         // Update job progress
         const progress = ((algorithms.indexOf(algorithm) + 1) / algorithms.length) * 100;
         job.progress = { percentage: progress, currentAlgorithm: algorithm };
         this.updateJobProgress(job.id, job.progress);
-
       } catch (error) {
         results[algorithm] = {
           success: false,
@@ -337,10 +300,8 @@ class BackgroundJobQueue {
         };
       }
     }
-
     // Generate comparison report
     const comparison = this.generateComparisonReport(results);
-
     return {
       success: true,
       data: {
@@ -351,20 +312,17 @@ class BackgroundJobQueue {
       }
     };
   }
-
   /**
    * Process cache warming job
    */
   async processCacheWarmingJob(job) {
     const { userIds, options } = job.data;
     const { lazyScoreLoader } = await import('./lazy-score-loader.js');
-
     try {
       const result = await lazyScoreLoader.warmCache(userIds, {
         loadDetailed: options.warmDetailedScores,
         batchSize: options.batchSize
       });
-
       return {
         success: true,
         data: {
@@ -373,7 +331,6 @@ class BackgroundJobQueue {
           pairCount: (userIds.length * (userIds.length - 1)) / 2
         }
       };
-
     } catch (error) {
       return {
         success: false,
@@ -381,23 +338,18 @@ class BackgroundJobQueue {
       };
     }
   }
-
   /**
    * Start background workers
    */
   startWorkers() {
     if (this.isRunning) return;
-
     this.isRunning = true;
-
     for (let i = 0; i < this.maxWorkers; i++) {
       const worker = this.createWorker(`worker_${i}`);
       this.workers.push(worker);
     }
-
     console.log(`Started ${this.maxWorkers} background job workers`);
   }
-
   /**
    * Create individual worker
    */
@@ -408,26 +360,21 @@ class BackgroundJobQueue {
       currentJob: null,
       processedJobs: 0
     };
-
     const processNextJob = async () => {
       if (!this.isRunning || worker.active) return;
-
       const job = this.getNextJob();
       if (!job) {
         // No jobs available, wait and retry
         setTimeout(processNextJob, 1000);
         return;
       }
-
       worker.active = true;
       worker.currentJob = job;
       this.activeJobs.set(job.id, { job, workerId, startTime: Date.now() });
-
       try {
         job.status = 'processing';
         job.startedAt = new Date();
         job.workerId = workerId;
-
         let result;
         switch (job.type) {
           case this.jobTypes.BULK_COMPATIBILITY:
@@ -445,26 +392,20 @@ class BackgroundJobQueue {
           default:
             throw new Error(`Unknown job type: ${job.type}`);
         }
-
         // Job completed successfully
         job.status = 'completed';
         job.completedAt = new Date();
         job.result = result;
         job.processingTime = Date.now() - job.startedAt.getTime();
-
         this.completedJobs.set(job.id, job);
         this.metrics.completedJobs++;
-
         console.log(`Job ${job.id} completed by ${workerId} in ${job.processingTime}ms`);
-
       } catch (error) {
         console.error(`Job ${job.id} failed:`, error);
-
         job.status = 'failed';
         job.error = error.message;
         job.failedAt = new Date();
         job.processingTime = Date.now() - job.startedAt.getTime();
-
         // Retry if possible
         if (job.retryCount < job.maxRetries) {
           job.retryCount++;
@@ -476,26 +417,21 @@ class BackgroundJobQueue {
           this.completedJobs.set(job.id, job);
           this.metrics.failedJobs++;
         }
-
       } finally {
         this.activeJobs.delete(job.id);
         worker.active = false;
         worker.currentJob = null;
         worker.processedJobs++;
-
         // Clean up completed jobs if too many
         this.cleanupCompletedJobs();
-
         // Process next job
         setImmediate(processNextJob);
       }
     };
-
     // Start worker
     setImmediate(processNextJob);
     return worker;
   }
-
   /**
    * Get next job from highest priority queue
    */
@@ -511,7 +447,6 @@ class BackgroundJobQueue {
     }
     return null;
   }
-
   /**
    * Get job status and result
    */
@@ -527,7 +462,6 @@ class BackgroundJobQueue {
         estimatedTimeRemaining: job.metadata?.estimatedDuration - (Date.now() - startTime)
       };
     }
-
     // Check completed jobs
     if (this.completedJobs.has(jobId)) {
       const job = this.completedJobs.get(jobId);
@@ -540,7 +474,6 @@ class BackgroundJobQueue {
         failedAt: job.failedAt
       };
     }
-
     // Check queued jobs
     for (const queue of Object.values(this.queues)) {
       const job = queue.find(j => j.id === jobId);
@@ -552,10 +485,8 @@ class BackgroundJobQueue {
         };
       }
     }
-
     return { status: 'not_found' };
   }
-
   /**
    * Cancel queued job
    */
@@ -570,14 +501,12 @@ class BackgroundJobQueue {
     }
     return false;
   }
-
   /**
    * Generate unique job ID
    */
   generateJobId() {
     return `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
-
   /**
    * Estimate processing time based on user count
    */
@@ -586,21 +515,18 @@ class BackgroundJobQueue {
     const baseTime = 100; // ms per pair
     return Math.min(pairCount * baseTime, 300000); // Max 5 minutes
   }
-
   /**
    * Estimate analysis time
    */
   estimateAnalysisTime(userCount) {
     return Math.min(userCount * 1000, 600000); // Max 10 minutes
   }
-
   /**
    * Estimate comparison time
    */
   estimateComparisonTime(userCount, algorithmCount) {
     return this.estimateAnalysisTime(userCount) * algorithmCount;
   }
-
   /**
    * Get queue position for job
    */
@@ -608,7 +534,6 @@ class BackgroundJobQueue {
     const queue = this.queues[job.priority];
     return queue.indexOf(job) + 1;
   }
-
   /**
    * Estimate start time for job
    */
@@ -618,7 +543,6 @@ class BackgroundJobQueue {
     const estimatedWait = ((position - 1) / this.maxWorkers) * avgProcessingTime;
     return new Date(Date.now() + estimatedWait);
   }
-
   /**
    * Update queue size metrics
    */
@@ -627,7 +551,6 @@ class BackgroundJobQueue {
     this.metrics.queueSizes.normal = this.queues.normal.length;
     this.metrics.queueSizes.low = this.queues.low.length;
   }
-
   /**
    * Update job progress
    */
@@ -636,7 +559,6 @@ class BackgroundJobQueue {
       this.activeJobs.get(jobId).job.progress = progress;
     }
   }
-
   /**
    * Store job results in database
    */
@@ -653,7 +575,6 @@ class BackgroundJobQueue {
       console.error('Failed to store job results:', error);
     }
   }
-
   /**
    * Generate comparison report for algorithm comparison
    */
@@ -665,34 +586,27 @@ class BackgroundJobQueue {
       fewestConflicts: null,
       summary: {}
     };
-
     let fastestTime = Infinity;
     let highestCompatibility = 0;
     let fewestConflicts = Infinity;
-
     for (const [algorithm, result] of Object.entries(results)) {
       if (!result.success) continue;
-
       const metrics = result.metrics;
-
       // Track fastest
       if (metrics.processingTime < fastestTime) {
         fastestTime = metrics.processingTime;
         comparison.fastest = algorithm;
       }
-
       // Track most accurate
       if (metrics.averageCompatibility > highestCompatibility) {
         highestCompatibility = metrics.averageCompatibility;
         comparison.mostAccurate = algorithm;
       }
-
       // Track fewest conflicts
       if (metrics.totalConflicts < fewestConflicts) {
         fewestConflicts = metrics.totalConflicts;
         comparison.fewestConflicts = algorithm;
       }
-
       comparison.summary[algorithm] = {
         processingTime: metrics.processingTime,
         compatibility: metrics.averageCompatibility,
@@ -700,10 +614,8 @@ class BackgroundJobQueue {
         groupBalance: metrics.averageGroupSize
       };
     }
-
     return comparison;
   }
-
   /**
    * Clean up old completed jobs
    */
@@ -713,13 +625,11 @@ class BackgroundJobQueue {
       const toRemove = entries
         .sort((a, b) => a[1].completedAt - b[1].completedAt)
         .slice(0, Math.floor(this.maxCompletedJobs * 0.2));
-
       toRemove.forEach(([jobId]) => {
         this.completedJobs.delete(jobId);
       });
     }
   }
-
   /**
    * Get queue statistics
    */
@@ -740,30 +650,24 @@ class BackgroundJobQueue {
         : '0%'
     };
   }
-
   /**
    * Shutdown the job queue gracefully
    */
   async shutdown() {
     console.log('Shutting down background job queue...');
     this.isRunning = false;
-
     // Wait for active jobs to complete (with timeout)
     const shutdownTimeout = 30000; // 30 seconds
     const startTime = Date.now();
-
     while (this.activeJobs.size > 0 && (Date.now() - startTime) < shutdownTimeout) {
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
-
     if (this.activeJobs.size > 0) {
       console.warn(`${this.activeJobs.size} jobs were forcefully terminated during shutdown`);
     }
-
     console.log('Background job queue shutdown complete');
   }
 }
-
 // Export singleton instance
 export const backgroundJobQueue = new BackgroundJobQueue();
 export default BackgroundJobQueue;

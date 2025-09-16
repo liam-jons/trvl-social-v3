@@ -2,37 +2,30 @@
  * Mutual Connections Component
  * Display mutual connections between users
  */
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { connectionService } from '../../services/connection-service';
 import { supabase } from '../../lib/supabase';
 import { Users, UserPlus } from 'lucide-react';
-
 const MutualConnections = ({ userId, className = '' }) => {
   const [mutualConnections, setMutualConnections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
-
   useEffect(() => {
     if (userId) {
       loadMutualConnections();
     }
   }, [userId]);
-
   const loadMutualConnections = async () => {
     try {
       setLoading(true);
-
       const { data: { user } } = await supabase.auth.getUser();
       if (!user || user.id === userId) {
         setLoading(false);
         return;
       }
-
       const result = await connectionService.getMutualConnections(user.id, userId);
-
       if (result.success) {
         setMutualConnections(result.data);
       }
@@ -42,7 +35,6 @@ const MutualConnections = ({ userId, className = '' }) => {
       setLoading(false);
     }
   };
-
   if (loading) {
     return (
       <div className={`animate-pulse ${className}`}>
@@ -50,21 +42,17 @@ const MutualConnections = ({ userId, className = '' }) => {
       </div>
     );
   }
-
   if (mutualConnections.length === 0) {
     return null;
   }
-
   const displayConnections = expanded ? mutualConnections : mutualConnections.slice(0, 3);
   const hasMore = mutualConnections.length > 3;
-
   return (
     <div className={className}>
       <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
         <Users className="h-4 w-4" />
         <span>{mutualConnections.length} mutual connection{mutualConnections.length !== 1 ? 's' : ''}</span>
       </div>
-
       <div className="flex items-center gap-2 flex-wrap">
         {displayConnections.map((connection) => (
           <div
@@ -81,7 +69,6 @@ const MutualConnections = ({ userId, className = '' }) => {
             </span>
           </div>
         ))}
-
         {hasMore && !expanded && (
           <Button
             variant="ghost"
@@ -92,7 +79,6 @@ const MutualConnections = ({ userId, className = '' }) => {
             +{mutualConnections.length - 3} more
           </Button>
         )}
-
         {expanded && hasMore && (
           <Button
             variant="ghost"
@@ -107,5 +93,4 @@ const MutualConnections = ({ userId, className = '' }) => {
     </div>
   );
 };
-
 export default MutualConnections;

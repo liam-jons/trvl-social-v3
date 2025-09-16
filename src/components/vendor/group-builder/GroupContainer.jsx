@@ -9,7 +9,6 @@ import {
 } from '@heroicons/react/24/outline';
 import GlassCard from '../../ui/GlassCard';
 import ParticipantCard from './ParticipantCard';
-
 const CompatibilityDisplay = ({ compatibility }) => {
   if (!compatibility || !compatibility.averageScore) {
     return (
@@ -19,24 +18,19 @@ const CompatibilityDisplay = ({ compatibility }) => {
       </div>
     );
   }
-
   const { averageScore, groupDynamics } = compatibility;
-
   const getScoreColor = (score) => {
     if (score >= 85) return 'text-green-600 dark:text-green-400';
     if (score >= 70) return 'text-blue-600 dark:text-blue-400';
     if (score >= 50) return 'text-yellow-600 dark:text-yellow-400';
     return 'text-red-600 dark:text-red-400';
   };
-
   const getScoreIcon = (score) => {
     if (score >= 70) return CheckCircleIcon;
     if (score >= 50) return ExclamationTriangleIcon;
     return ExclamationTriangleIcon;
   };
-
   const Icon = getScoreIcon(averageScore);
-
   return (
     <div className="space-y-2">
       <div className="flex items-center space-x-2">
@@ -45,7 +39,6 @@ const CompatibilityDisplay = ({ compatibility }) => {
           {averageScore}% Compatible
         </span>
       </div>
-
       {groupDynamics && (
         <div className="text-xs text-gray-600 dark:text-gray-400">
           <div className="grid grid-cols-2 gap-2">
@@ -67,7 +60,6 @@ const CompatibilityDisplay = ({ compatibility }) => {
     </div>
   );
 };
-
 const GroupContainer = ({
   group,
   onParticipantRemove,
@@ -82,29 +74,23 @@ const GroupContainer = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [showCompatibilityDetails, setShowCompatibilityDetails] = useState(false);
-
   if (!group) return null;
-
   const { participants = [], maxSize = 6, compatibility = {} } = group;
   const isEmpty = participants.length === 0;
   const isFull = participants.length >= maxSize;
-
   const handleDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();
     onDragOver && onDragOver(group.id);
   };
-
   const handleDragLeave = (e) => {
     e.preventDefault();
     e.stopPropagation();
     onDragLeave && onDragLeave();
   };
-
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
-
     const participantData = e.dataTransfer.getData('application/json');
     if (participantData) {
       try {
@@ -115,7 +101,6 @@ const GroupContainer = ({
       }
     }
   };
-
   return (
     <GlassCard
       variant="light"
@@ -139,7 +124,6 @@ const GroupContainer = ({
           >
             <UsersIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
           </button>
-
           <div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               {group.name}
@@ -150,7 +134,6 @@ const GroupContainer = ({
             </p>
           </div>
         </div>
-
         <div className="flex items-center space-x-2">
           {/* Compatibility indicator */}
           <button
@@ -159,7 +142,6 @@ const GroupContainer = ({
           >
             <CompatibilityDisplay compatibility={compatibility} />
           </button>
-
           {/* Edit group button */}
           <button
             onClick={() => onGroupEdit && onGroupEdit(group)}
@@ -170,7 +152,6 @@ const GroupContainer = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
           </button>
-
           {/* Delete group button */}
           <button
             onClick={() => onGroupDelete && onGroupDelete(group.id)}
@@ -181,7 +162,6 @@ const GroupContainer = ({
           </button>
         </div>
       </div>
-
       {/* Compatibility details */}
       {showCompatibilityDetails && compatibility.groupDynamics && (
         <div className="mb-4 p-3 bg-white/10 dark:bg-white/5 rounded-lg">
@@ -207,7 +187,6 @@ const GroupContainer = ({
               </div>
             ))}
           </div>
-
           {compatibility.groupDynamics.recommendations?.length > 0 && (
             <div className="mt-3 space-y-1">
               <div className="text-sm font-medium text-gray-900 dark:text-white">
@@ -226,7 +205,6 @@ const GroupContainer = ({
           )}
         </div>
       )}
-
       {/* Participants */}
       {isExpanded && (
         <div className="space-y-3">
@@ -246,7 +224,6 @@ const GroupContainer = ({
                       e.dataTransfer.effectAllowed = 'move';
                     }}
                   />
-
                   {/* Remove participant button */}
                   <button
                     onClick={() => onParticipantRemove && onParticipantRemove(participant.id, group.id)}
@@ -269,7 +246,6 @@ const GroupContainer = ({
               </p>
             </div>
           )}
-
           {/* Add participant button */}
           {!isFull && (
             <button
@@ -282,7 +258,6 @@ const GroupContainer = ({
           )}
         </div>
       )}
-
       {/* Collapsed view */}
       {!isExpanded && participants.length > 0 && (
         <div className="flex items-center space-x-2">
@@ -315,5 +290,4 @@ const GroupContainer = ({
     </GlassCard>
   );
 };
-
 export default GroupContainer;

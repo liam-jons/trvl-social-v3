@@ -2,7 +2,6 @@
  * Payment Reconciliation Dashboard Component
  * Comprehensive payment reconciliation interface with transaction matching, discrepancy detection, and audit trails
  */
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -33,7 +32,6 @@ import {
   Zap,
 } from 'lucide-react';
 import { paymentReconciliationService } from '../../services/payment-reconciliation-service';
-
 const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
   const [reconciliationData, setReconciliationData] = useState(null);
   const [reconciliationHistory, setReconciliationHistory] = useState([]);
@@ -50,11 +48,9 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('desc');
-
   useEffect(() => {
     loadDashboardData();
   }, [vendorStripeAccountId, filters]);
-
   const loadDashboardData = async () => {
     setLoading(true);
     try {
@@ -69,25 +65,21 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
       setLoading(false);
     }
   };
-
   const loadLatestReconciliation = async () => {
     try {
       const endDate = new Date();
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - parseInt(filters.dateRange));
-
       const result = await paymentReconciliationService.performFullReconciliation({
         startDate,
         endDate,
         vendorAccountId: vendorStripeAccountId,
       });
-
       setReconciliationData(result);
     } catch (error) {
       console.error('Failed to load latest reconciliation:', error);
     }
   };
-
   const loadReconciliationHistory = async () => {
     try {
       const history = await paymentReconciliationService.getReconciliationHistory({
@@ -99,7 +91,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
       console.error('Failed to load reconciliation history:', error);
     }
   };
-
   const loadActiveDiscrepancies = async () => {
     try {
       // This would load unresolved discrepancies
@@ -111,29 +102,24 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
       console.error('Failed to load active discrepancies:', error);
     }
   };
-
   const runFullReconciliation = async () => {
     setProcessing(true);
     try {
       const endDate = new Date();
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - parseInt(filters.dateRange));
-
       const result = await paymentReconciliationService.performFullReconciliation({
         startDate,
         endDate,
         vendorAccountId: vendorStripeAccountId,
         forceRefresh: true,
       });
-
       setReconciliationData(result);
       await loadReconciliationHistory();
-
       // Auto-resolve simple discrepancies
       if (result.reconciliationId) {
         await paymentReconciliationService.autoResolveDiscrepancies(result.reconciliationId);
       }
-
     } catch (error) {
       console.error('Reconciliation failed:', error);
       alert('Reconciliation failed. Please try again.');
@@ -141,19 +127,16 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
       setProcessing(false);
     }
   };
-
   const exportReconciliationReport = async (format = 'csv') => {
     try {
       if (!reconciliationData?.reconciliationId) {
         alert('No reconciliation data to export');
         return;
       }
-
       const report = await paymentReconciliationService.generateReconciliationReport(
         reconciliationData.reconciliationId,
         format
       );
-
       if (format === 'csv') {
         const blob = new Blob([report.csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
@@ -176,7 +159,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
       alert('Failed to export report. Please try again.');
     }
   };
-
   const resolveDiscrepancy = async (discrepancyId, resolution) => {
     try {
       await paymentReconciliationService.resolveDiscrepancy(discrepancyId, resolution);
@@ -186,14 +168,12 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
       alert('Failed to resolve discrepancy. Please try again.');
     }
   };
-
   const formatAmount = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
     }).format(amount / 100);
   };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -203,19 +183,16 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
       minute: '2-digit',
     });
   };
-
   const getHealthScoreColor = (score) => {
     if (score >= 95) return 'text-green-600';
     if (score >= 85) return 'text-yellow-600';
     return 'text-red-600';
   };
-
   const getHealthScoreBadge = (score) => {
     if (score >= 95) return 'default';
     if (score >= 85) return 'secondary';
     return 'destructive';
   };
-
   const getSeverityBadge = (severity) => {
     const variants = {
       high: 'destructive',
@@ -224,7 +201,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
     };
     return variants[severity] || 'outline';
   };
-
   const getSeverityIcon = (severity) => {
     switch (severity) {
       case 'high':
@@ -237,18 +213,15 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
         return <Clock className="h-4 w-4 text-gray-500" />;
     }
   };
-
   const filterDiscrepancies = (discrepancies) => {
     return discrepancies.filter(discrepancy => {
       const matchesSearch = !searchTerm ||
         discrepancy.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesSeverity = filters.severity === 'all' || discrepancy.severity === filters.severity;
       const matchesType = filters.type === 'all' || discrepancy.type === filters.type;
-
       return matchesSearch && matchesSeverity && matchesType;
     });
   };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -257,10 +230,8 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
       </div>
     );
   }
-
   const summary = reconciliationData?.summary;
   const filteredDiscrepancies = filterDiscrepancies(discrepancies);
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -299,7 +270,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
           </Button>
         </div>
       </div>
-
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
@@ -315,7 +285,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -329,7 +298,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -343,7 +311,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -358,7 +325,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
           </CardContent>
         </Card>
       </div>
-
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <div className="flex justify-between items-center">
@@ -371,7 +337,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
             <TabsTrigger value="audit">Audit Trail</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
           </TabsList>
-
           {/* Filters */}
           <div className="flex space-x-2">
             <select
@@ -385,7 +350,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
             </select>
           </div>
         </div>
-
         <TabsContent value="overview" className="space-y-6">
           {/* Reconciliation Status */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -424,7 +388,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
                 </div>
               </CardContent>
             </Card>
-
             <Card>
               <CardHeader>
                 <CardTitle>Amount Reconciliation</CardTitle>
@@ -463,7 +426,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
               </CardContent>
             </Card>
           </div>
-
           {/* Recent History */}
           <Card>
             <CardHeader>
@@ -505,7 +467,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="discrepancies" className="space-y-6">
           {/* Discrepancy Filters */}
           <Card>
@@ -548,7 +509,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
               </div>
             </CardContent>
           </Card>
-
           {/* Discrepancies List */}
           <Card>
             <CardHeader>
@@ -619,7 +579,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="matching" className="space-y-6">
           <Card>
             <CardHeader>
@@ -649,7 +608,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
                       <div className="text-sm text-red-700">Unmatched</div>
                     </div>
                   </div>
-
                   {/* Sample Matches */}
                   <div className="space-y-4">
                     <h4 className="font-semibold">Recent Matches</h4>
@@ -689,7 +647,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="audit" className="space-y-6">
           <Card>
             <CardHeader>
@@ -706,7 +663,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="reports" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
@@ -741,7 +697,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
                 </Button>
               </CardContent>
             </Card>
-
             <Card>
               <CardHeader>
                 <CardTitle>Scheduled Reports</CardTitle>
@@ -763,5 +718,4 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
     </div>
   );
 };
-
 export default PaymentReconciliationDashboard;

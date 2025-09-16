@@ -19,7 +19,6 @@ import {
   MoreHorizontal
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-
 const ModerationTools = () => {
   const [activeTab, setActiveTab] = useState('flagged');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -27,14 +26,12 @@ const ModerationTools = () => {
   const [loading, setLoading] = useState(false);
   const [flaggedContent, setFlaggedContent] = useState([]);
   const [moderationLog, setModerationLog] = useState([]);
-
   // Mock current user (assuming they have moderation privileges)
   const currentVendor = {
     id: '1',
     business_name: 'ModeratorCorp',
     is_moderator: true
   };
-
   // Mock flagged content data
   const mockFlaggedContent = [
     {
@@ -81,7 +78,6 @@ const ModerationTools = () => {
       created_at: new Date(Date.now() - 6 * 60 * 60 * 1000)
     }
   ];
-
   // Mock moderation log data
   const mockModerationLog = [
     {
@@ -112,18 +108,15 @@ const ModerationTools = () => {
       created_at: new Date(Date.now() - 6 * 60 * 60 * 1000)
     }
   ];
-
   useEffect(() => {
     setFlaggedContent(mockFlaggedContent);
     setModerationLog(mockModerationLog);
   }, []);
-
   const handleModerationAction = async (contentId, action, reason = '') => {
     setLoading(true);
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
-
       // Update the content status
       setFlaggedContent(prev =>
         prev.map(item =>
@@ -132,7 +125,6 @@ const ModerationTools = () => {
             : item
         )
       );
-
       // Add to moderation log
       const newLogEntry = {
         id: Date.now().toString(),
@@ -143,9 +135,7 @@ const ModerationTools = () => {
         reason: reason || `Content ${action}d by moderator`,
         created_at: new Date()
       };
-
       setModerationLog(prev => [newLogEntry, ...prev]);
-
       console.log(`Action ${action} performed on content ${contentId}`);
     } catch (error) {
       console.error('Moderation action failed:', error);
@@ -153,7 +143,6 @@ const ModerationTools = () => {
       setLoading(false);
     }
   };
-
   const getActionIcon = (action) => {
     const icons = {
       pin_thread: Pin,
@@ -171,7 +160,6 @@ const ModerationTools = () => {
     };
     return icons[action] || Shield;
   };
-
   const getActionColor = (action) => {
     const colors = {
       pin_thread: 'text-yellow-600',
@@ -189,7 +177,6 @@ const ModerationTools = () => {
     };
     return colors[action] || 'text-gray-600';
   };
-
   const getStatusBadge = (status) => {
     const badges = {
       pending: 'bg-yellow-100 text-yellow-800',
@@ -198,25 +185,20 @@ const ModerationTools = () => {
     };
     return badges[status] || badges.pending;
   };
-
   const filteredFlaggedContent = flaggedContent.filter(item => {
     const matchesSearch = !searchQuery ||
       item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.vendor.business_name.toLowerCase().includes(searchQuery.toLowerCase());
-
     const matchesStatus = filterStatus === 'all' || item.status === filterStatus;
-
     return matchesSearch && matchesStatus;
   });
-
   const filteredModerationLog = moderationLog.filter(item => {
     return !searchQuery ||
       item.target_title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.moderator.business_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.reason.toLowerCase().includes(searchQuery.toLowerCase());
   });
-
   if (!currentVendor.is_moderator) {
     return (
       <div className="max-w-4xl mx-auto text-center py-12">
@@ -226,7 +208,6 @@ const ModerationTools = () => {
       </div>
     );
   }
-
   return (
     <div className="max-w-6xl mx-auto">
       {/* Header */}
@@ -234,7 +215,6 @@ const ModerationTools = () => {
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Moderation Tools</h1>
         <p className="text-gray-600">Manage community content and maintain forum quality</p>
       </div>
-
       {/* Navigation Tabs */}
       <div className="bg-white rounded-lg shadow mb-6">
         <div className="border-b border-gray-200">
@@ -263,7 +243,6 @@ const ModerationTools = () => {
             </button>
           </nav>
         </div>
-
         {/* Filters and Search */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
@@ -281,7 +260,6 @@ const ModerationTools = () => {
                 </select>
               )}
             </div>
-
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
@@ -294,7 +272,6 @@ const ModerationTools = () => {
             </div>
           </div>
         </div>
-
         {/* Content */}
         <div className="p-6">
           {activeTab === 'flagged' ? (
@@ -325,7 +302,6 @@ const ModerationTools = () => {
                           {item.flags.length} flag{item.flags.length !== 1 ? 's' : ''}
                         </span>
                       </div>
-
                       <div className="flex items-center space-x-2">
                         {item.status === 'pending' && (
                           <>
@@ -352,15 +328,12 @@ const ModerationTools = () => {
                         </button>
                       </div>
                     </div>
-
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
                       {item.title || item.thread_title}
                     </h3>
-
                     <div className="bg-gray-50 rounded-lg p-4 mb-4">
                       <p className="text-gray-700 line-clamp-3">{item.content}</p>
                     </div>
-
                     <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center">
@@ -373,7 +346,6 @@ const ModerationTools = () => {
                         </div>
                       </div>
                     </div>
-
                     {/* Flags */}
                     <div className="space-y-2">
                       <h4 className="text-sm font-medium text-gray-900">Flags:</h4>
@@ -415,13 +387,11 @@ const ModerationTools = () => {
                 filteredModerationLog.map((log) => {
                   const IconComponent = getActionIcon(log.action);
                   const iconColor = getActionColor(log.action);
-
                   return (
                     <div key={log.id} className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg">
                       <div className={`p-2 rounded-full bg-gray-100 ${iconColor}`}>
                         <IconComponent className="h-4 w-4" />
                       </div>
-
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <h4 className="text-sm font-medium text-gray-900">
@@ -431,13 +401,11 @@ const ModerationTools = () => {
                             {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}
                           </span>
                         </div>
-
                         <p className="text-sm text-gray-600 mt-1">
                           <span className="font-medium">{log.moderator.business_name}</span>
                           {' '}{log.action.includes('delete') ? 'deleted' : 'moderated'}
                           {' '}<span className="font-medium">{log.target_title}</span>
                         </p>
-
                         {log.reason && (
                           <p className="text-xs text-gray-500 mt-2">
                             Reason: {log.reason}
@@ -455,5 +423,4 @@ const ModerationTools = () => {
     </div>
   );
 };
-
 export default ModerationTools;

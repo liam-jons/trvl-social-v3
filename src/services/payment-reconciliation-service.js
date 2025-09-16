@@ -2,9 +2,7 @@
  * Payment Reconciliation Service
  * Handles comprehensive payment reconciliation, transaction matching, and discrepancy detection
  */
-
 import { supabase } from '../lib/supabase.js';
-
 // Configuration for reconciliation logic
 const RECONCILIATION_CONFIG = {
   matchingToleranceAmount: 50, // cents - allow small differences due to processing fees
@@ -27,13 +25,11 @@ const RECONCILIATION_CONFIG = {
     RESOLVED: 'resolved',
   },
 };
-
 class PaymentReconciliationService {
   constructor() {
     this.reconciliationCache = new Map();
     this.lastFullReconciliation = null;
   }
-
   /**
    * Perform comprehensive payment reconciliation
    */
@@ -44,10 +40,8 @@ class PaymentReconciliationService {
       vendorAccountId = null,
       forceRefresh = false,
     } = options;
-
     try {
       console.log('Starting full payment reconciliation...');
-
       // Get all payment data from multiple sources
       const [
         databasePayments,
@@ -60,7 +54,6 @@ class PaymentReconciliationService {
         this.getPayoutData(startDate, endDate, vendorAccountId),
         this.getRefundData(startDate, endDate, vendorAccountId),
       ]);
-
       // Create transaction matching engine
       const matchingResults = await this.performTransactionMatching({
         databasePayments,
@@ -68,10 +61,8 @@ class PaymentReconciliationService {
         payouts,
         refunds,
       });
-
       // Detect discrepancies
       const discrepancies = await this.detectDiscrepancies(matchingResults);
-
       // Calculate reconciliation summary
       const summary = this.calculateReconciliationSummary({
         matchingResults,
@@ -79,7 +70,6 @@ class PaymentReconciliationService {
         databasePayments,
         stripePayments,
       });
-
       // Store reconciliation results
       const reconciliationRecord = await this.storeReconciliationResults({
         startDate,
@@ -89,9 +79,7 @@ class PaymentReconciliationService {
         discrepancies,
         summary,
       });
-
       this.lastFullReconciliation = new Date();
-
       return {
         success: true,
         reconciliationId: reconciliationRecord.id,
@@ -100,13 +88,11 @@ class PaymentReconciliationService {
         matchingResults,
         timestamp: new Date(),
       };
-
     } catch (error) {
       console.error('Full reconciliation failed:', error);
       throw new Error(`Reconciliation failed: ${error.message}`);
     }
   }
-
   /**
    * Get payment data from database
    */
@@ -137,17 +123,13 @@ class PaymentReconciliationService {
       .gte('created_at', startDate.toISOString())
       .lte('created_at', endDate.toISOString())
       .order('created_at', { ascending: true });
-
     if (vendorAccountId) {
       query = query.eq('vendor_stripe_account_id', vendorAccountId);
     }
-
     const { data, error } = await query;
     if (error) throw new Error(`Failed to get database payments: ${error.message}`);
-
     return data || [];
   }
-
   /**
    * Get payment data from Stripe (via backend API)
    */
@@ -158,31 +140,25 @@ class PaymentReconciliationService {
         created_lte: Math.floor(endDate.getTime() / 1000),
         limit: 100,
       });
-
       if (vendorAccountId) {
         params.append('account', vendorAccountId);
       }
-
       const response = await fetch(`/api/stripe/payments?${params}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-
       if (!response.ok) {
         throw new Error(`Stripe API call failed: ${response.status}`);
       }
-
       const result = await response.json();
       return result.data || [];
-
     } catch (error) {
       console.error('Failed to get Stripe payments:', error);
       throw error;
     }
   }
-
   /**
    * Get payout data
    */
@@ -208,17 +184,13 @@ class PaymentReconciliationService {
       `)
       .gte('created_at', startDate.toISOString())
       .lte('created_at', endDate.toISOString());
-
     if (vendorAccountId) {
       query = query.eq('vendor_stripe_account_id', vendorAccountId);
     }
-
     const { data, error } = await query;
     if (error) throw new Error(`Failed to get payout data: ${error.message}`);
-
     return data || [];
   }
-
   /**
    * Get refund data
    */
@@ -240,20 +212,16 @@ class PaymentReconciliationService {
       `)
       .gte('created_at', startDate.toISOString())
       .lte('created_at', endDate.toISOString());
-
     const { data, error } = await query;
     if (error) throw new Error(`Failed to get refund data: ${error.message}`);
-
     // Filter by vendor if specified
     if (vendorAccountId && data) {
       return data.filter(refund =>
         refund.booking_payments?.vendor_stripe_account_id === vendorAccountId
       );
     }
-
     return data || [];
   }
-
   /**
    * Perform transaction matching between different data sources
    */
@@ -264,7 +232,6 @@ class PaymentReconciliationService {
       unmatched: [],
       partialMatches: [],
     };
-
     // Create lookup maps for efficient matching
     const stripePaymentMap = new Map(
       stripePayments.map(payment => [payment.id, payment])
@@ -275,14 +242,11 @@ class PaymentReconciliationService {
         payoutMap.set(item.payment_id, { ...payout, lineItem: item });
       });
     });
-
     // Match database payments with Stripe records
     for (const dbPayment of databasePayments) {
       const stripePayment = stripePaymentMap.get(dbPayment.stripe_payment_intent_id) ||
                            stripePaymentMap.get(dbPayment.stripe_charge_id);
-
       const payoutInfo = payoutMap.get(dbPayment.id);
-
       const match = {
         databasePayment: dbPayment,
         stripePayment,
@@ -291,11 +255,9 @@ class PaymentReconciliationService {
         discrepancies: [],
         status: RECONCILIATION_CONFIG.reconciliationStatuses.PENDING,
       };
-
       // Validate match quality
       if (stripePayment) {
         match.discrepancies = this.validatePaymentMatch(dbPayment, stripePayment);
-
         if (match.discrepancies.length === 0) {
           match.status = RECONCILIATION_CONFIG.reconciliationStatuses.MATCHED;
           matchingResults.matched.push(match);
@@ -315,14 +277,12 @@ class PaymentReconciliationService {
         matchingResults.unmatched.push(match);
       }
     }
-
     // Find orphaned Stripe payments (exist in Stripe but not in database)
     for (const stripePayment of stripePayments) {
       const foundInDb = databasePayments.find(dbPayment =>
         dbPayment.stripe_payment_intent_id === stripePayment.id ||
         dbPayment.stripe_charge_id === stripePayment.id
       );
-
       if (!foundInDb) {
         matchingResults.unmatched.push({
           databasePayment: null,
@@ -338,19 +298,15 @@ class PaymentReconciliationService {
         });
       }
     }
-
     return matchingResults;
   }
-
   /**
    * Calculate match score between database and Stripe payment
    */
   calculateMatchScore(dbPayment, stripePayment, payoutInfo) {
     if (!stripePayment) return 0;
-
     let score = 0;
     let totalChecks = 0;
-
     // Amount matching (most important)
     totalChecks += 3;
     const amountDiff = Math.abs(dbPayment.amount - stripePayment.amount);
@@ -361,40 +317,33 @@ class PaymentReconciliationService {
     } else if (amountDiff <= RECONCILIATION_CONFIG.matchingToleranceAmount * 2) {
       score += 1;
     }
-
     // Currency matching
     totalChecks += 1;
     if (dbPayment.currency === stripePayment.currency) {
       score += 1;
     }
-
     // Status matching
     totalChecks += 1;
     const statusMatch = this.mapStripeStatusToDb(stripePayment.status) === dbPayment.status;
     if (statusMatch) {
       score += 1;
     }
-
     // Timing check (within reasonable window)
     totalChecks += 1;
     const dbTime = new Date(dbPayment.created_at).getTime();
     const stripeTime = new Date(stripePayment.created * 1000).getTime();
     const timeDiff = Math.abs(dbTime - stripeTime);
     const timeWindow = RECONCILIATION_CONFIG.matchingTimeWindowHours * 60 * 60 * 1000;
-
     if (timeDiff <= timeWindow) {
       score += 1;
     }
-
     return score / totalChecks;
   }
-
   /**
    * Validate payment match and identify discrepancies
    */
   validatePaymentMatch(dbPayment, stripePayment) {
     const discrepancies = [];
-
     // Amount validation
     const amountDiff = Math.abs(dbPayment.amount - stripePayment.amount);
     if (amountDiff > RECONCILIATION_CONFIG.matchingToleranceAmount) {
@@ -407,7 +356,6 @@ class PaymentReconciliationService {
         difference: amountDiff,
       });
     }
-
     // Status validation
     const expectedDbStatus = this.mapStripeStatusToDb(stripePayment.status);
     if (dbPayment.status !== expectedDbStatus) {
@@ -419,7 +367,6 @@ class PaymentReconciliationService {
         expectedValue: expectedDbStatus,
       });
     }
-
     // Currency validation
     if (dbPayment.currency !== stripePayment.currency) {
       discrepancies.push({
@@ -430,13 +377,11 @@ class PaymentReconciliationService {
         stripeValue: stripePayment.currency,
       });
     }
-
     // Timing validation
     const dbTime = new Date(dbPayment.created_at).getTime();
     const stripeTime = new Date(stripePayment.created * 1000).getTime();
     const timeDiff = Math.abs(dbTime - stripeTime);
     const timeWindow = RECONCILIATION_CONFIG.matchingTimeWindowHours * 60 * 60 * 1000;
-
     if (timeDiff > timeWindow) {
       discrepancies.push({
         type: RECONCILIATION_CONFIG.discrepancyTypes.TIMING_DISCREPANCY,
@@ -447,10 +392,8 @@ class PaymentReconciliationService {
         timeDifferenceHours: Math.round(timeDiff / (60 * 60 * 1000)),
       });
     }
-
     return discrepancies;
   }
-
   /**
    * Map Stripe payment status to database status
    */
@@ -465,16 +408,13 @@ class PaymentReconciliationService {
       'requires_capture': 'pending',
       'canceled': 'cancelled',
     };
-
     return statusMap[stripeStatus] || 'unknown';
   }
-
   /**
    * Detect various types of discrepancies
    */
   async detectDiscrepancies(matchingResults) {
     const discrepancies = [];
-
     // High-value discrepancies
     matchingResults.partialMatches.forEach(match => {
       match.discrepancies.forEach(discrepancy => {
@@ -490,7 +430,6 @@ class PaymentReconciliationService {
         }
       });
     });
-
     // Duplicate payments detection
     const paymentAmounts = new Map();
     matchingResults.matched.concat(matchingResults.partialMatches).forEach(match => {
@@ -511,34 +450,27 @@ class PaymentReconciliationService {
         }
       }
     });
-
     // Orphaned payouts (payouts without corresponding payments)
     // This would be detected during payout reconciliation
-
     return discrepancies;
   }
-
   /**
    * Calculate reconciliation summary
    */
   calculateReconciliationSummary(data) {
     const { matchingResults, discrepancies, databasePayments, stripePayments } = data;
-
     const totalDbPayments = databasePayments.length;
     const totalStripePayments = stripePayments.length;
     const matchedCount = matchingResults.matched.length;
     const partialMatchCount = matchingResults.partialMatches.length;
     const unmatchedCount = matchingResults.unmatched.length;
-
     const totalDbAmount = databasePayments.reduce((sum, p) => sum + p.amount, 0);
     const totalStripeAmount = stripePayments.reduce((sum, p) => sum + p.amount, 0);
     const matchedDbAmount = matchingResults.matched.reduce((sum, m) =>
       sum + (m.databasePayment?.amount || 0), 0);
-
     const highSeverityDiscrepancies = discrepancies.filter(d => d.severity === 'high').length;
     const mediumSeverityDiscrepancies = discrepancies.filter(d => d.severity === 'medium').length;
     const lowSeverityDiscrepancies = discrepancies.filter(d => d.severity === 'low').length;
-
     return {
       reconciliationRate: totalDbPayments > 0 ? (matchedCount / totalDbPayments) * 100 : 0,
       totalTransactions: {
@@ -571,33 +503,27 @@ class PaymentReconciliationService {
       }),
     };
   }
-
   /**
    * Calculate overall reconciliation health score
    */
   calculateHealthScore({ reconciliationRate, discrepancyCount, totalTransactions }) {
     let score = 100;
-
     // Deduct points for low reconciliation rate
     if (reconciliationRate < 95) {
       score -= (95 - reconciliationRate) * 2;
     }
-
     // Deduct points for discrepancies
     const discrepancyRate = totalTransactions > 0 ? (discrepancyCount / totalTransactions) * 100 : 0;
     if (discrepancyRate > 1) {
       score -= (discrepancyRate - 1) * 10;
     }
-
     return Math.max(0, Math.min(100, score));
   }
-
   /**
    * Store reconciliation results in database
    */
   async storeReconciliationResults(data) {
     const { startDate, endDate, vendorAccountId, matchingResults, discrepancies, summary } = data;
-
     try {
       // Create main reconciliation record
       const { data: reconciliationRecord, error } = await supabase
@@ -621,9 +547,7 @@ class PaymentReconciliationService {
         })
         .select()
         .single();
-
       if (error) throw error;
-
       // Store individual discrepancies
       if (discrepancies.length > 0) {
         const discrepancyRecords = discrepancies.map(discrepancy => ({
@@ -638,24 +562,19 @@ class PaymentReconciliationService {
             matchId: undefined, // Remove to avoid duplication
           },
         }));
-
         const { error: discrepancyError } = await supabase
           .from('payment_discrepancies')
           .insert(discrepancyRecords);
-
         if (discrepancyError) {
           console.error('Failed to store discrepancies:', discrepancyError);
         }
       }
-
       return reconciliationRecord;
-
     } catch (error) {
       console.error('Failed to store reconciliation results:', error);
       throw error;
     }
   }
-
   /**
    * Get reconciliation history
    */
@@ -667,7 +586,6 @@ class PaymentReconciliationService {
       startDate = null,
       endDate = null,
     } = options;
-
     let query = supabase
       .from('payment_reconciliations')
       .select(`
@@ -682,31 +600,24 @@ class PaymentReconciliationService {
       `)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
-
     if (vendorAccountId) {
       query = query.eq('vendor_account_id', vendorAccountId);
     }
-
     if (startDate) {
       query = query.gte('start_date', startDate);
     }
-
     if (endDate) {
       query = query.lte('end_date', endDate);
     }
-
     const { data, error } = await query;
     if (error) throw error;
-
     return data || [];
   }
-
   /**
    * Resolve discrepancy
    */
   async resolveDiscrepancy(discrepancyId, resolution) {
     const { action, notes, resolvedBy } = resolution;
-
     const { error } = await supabase
       .from('payment_discrepancies')
       .update({
@@ -717,12 +628,9 @@ class PaymentReconciliationService {
         resolved_at: new Date().toISOString(),
       })
       .eq('id', discrepancyId);
-
     if (error) throw error;
-
     return { success: true };
   }
-
   /**
    * Auto-resolve simple discrepancies
    */
@@ -733,9 +641,7 @@ class PaymentReconciliationService {
       .eq('reconciliation_id', reconciliationId)
       .eq('auto_resolvable', true)
       .eq('status', 'pending');
-
     if (error) throw error;
-
     const resolved = [];
     for (const discrepancy of discrepancies) {
       try {
@@ -749,10 +655,8 @@ class PaymentReconciliationService {
         console.error(`Failed to auto-resolve discrepancy ${discrepancy.id}:`, error);
       }
     }
-
     return { resolvedCount: resolved.length, resolvedIds: resolved };
   }
-
   /**
    * Generate reconciliation report
    */
@@ -765,29 +669,23 @@ class PaymentReconciliationService {
       `)
       .eq('id', reconciliationId)
       .single();
-
     if (error) throw error;
-
     const report = {
       reconciliation,
       generatedAt: new Date().toISOString(),
       format,
     };
-
     if (format === 'csv') {
       // Generate CSV format for accounting systems
       return this.generateCSVReport(report);
     }
-
     return report;
   }
-
   /**
    * Generate CSV report for accounting systems
    */
   generateCSVReport(report) {
     const { reconciliation } = report;
-
     const headers = [
       'Date',
       'Total Transactions',
@@ -799,7 +697,6 @@ class PaymentReconciliationService {
       'Amount Variance',
       'Status',
     ];
-
     const row = [
       new Date(reconciliation.created_at).toLocaleDateString(),
       reconciliation.total_transactions,
@@ -811,16 +708,13 @@ class PaymentReconciliationService {
       reconciliation.amount_variance / 100, // Convert to dollars
       reconciliation.status,
     ];
-
     return {
       csv: [headers.join(','), row.join(',')].join('\n'),
       filename: `reconciliation-${reconciliation.id}-${new Date().toISOString().split('T')[0]}.csv`,
     };
   }
 }
-
 // Create and export singleton instance
 const paymentReconciliationService = new PaymentReconciliationService();
-
 export { paymentReconciliationService, RECONCILIATION_CONFIG };
 export default paymentReconciliationService;

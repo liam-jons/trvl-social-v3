@@ -1,0 +1,11 @@
+# Task ID: 18
+# Title: Optimize bundle sizes
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Code split large chunks (>500KB) to improve application performance
+# Details:
+Three chunks exceed 500KB limit: index.js (1514KB), mapbox-gl.js (1627KB), and several page components. Implement dynamic imports, configure manual chunks in rollup options, and optimize heavy dependencies.
+
+# Test Strategy:
+Verify bundle sizes reduced below 500KB, test lazy loading works correctly, ensure no functionality breaks

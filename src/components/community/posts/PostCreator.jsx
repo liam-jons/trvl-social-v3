@@ -8,7 +8,6 @@ import PostPreview from './PostPreview';
 import MediaUploader from '../../media/MediaUploader';
 import MediaGallery from '../../media/MediaGallery';
 import DOMPurify from 'dompurify';
-
 const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -18,18 +17,15 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
     category: initialData?.category || 'general',
     location_visibility: initialData?.location_visibility || 'public'
   });
-
   const [previewMode, setPreviewMode] = useState(false);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [mediaItems, setMediaItems] = useState(initialData?.mediaItems || []);
   const [showMediaUploader, setShowMediaUploader] = useState(false);
-
   // Auto-save draft to localStorage
   const draftKey = `post-draft-${Date.now()}`;
   const hasDraft = useRef(false);
-
   useEffect(() => {
     // Load existing draft if no initial data
     if (!initialData) {
@@ -45,7 +41,6 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
       }
     }
   }, [initialData]);
-
   useEffect(() => {
     // Auto-save draft every 30 seconds if form is dirty
     const interval = setInterval(() => {
@@ -53,17 +48,14 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
         localStorage.setItem('post-creator-draft', JSON.stringify(formData));
       }
     }, 30000);
-
     return () => clearInterval(interval);
   }, [formData, isDirty]);
-
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
     setIsDirty(true);
-
     // Clear field-specific errors
     if (errors[field]) {
       setErrors(prev => ({
@@ -72,37 +64,29 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
       }));
     }
   };
-
   const validateForm = () => {
     const newErrors = {};
-
     if (!formData.title.trim()) {
       newErrors.title = 'Title is required';
     } else if (formData.title.length > 200) {
       newErrors.title = 'Title must be under 200 characters';
     }
-
     if (!formData.content.trim() || formData.content === '<p></p>') {
       newErrors.content = 'Content is required';
     }
-
     const tagArray = formData.tags
       .split(',')
       .map(tag => tag.trim())
       .filter(tag => tag);
-
     if (tagArray.length > 10) {
       newErrors.tags = 'Maximum 10 tags allowed';
     }
-
     if (tagArray.some(tag => tag.length > 30)) {
       newErrors.tags = 'Each tag must be under 30 characters';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const sanitizeContent = (content) => {
     return DOMPurify.sanitize(content, {
       ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 's', 'code', 'pre', 'h1', 'h2', 'h3', 'ul', 'ol', 'li', 'a', 'blockquote'],
@@ -111,23 +95,18 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
       FORBID_ATTR: ['style', 'onerror', 'onload']
     });
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) {
       return;
     }
-
     setIsSubmitting(true);
-
     try {
       const sanitizedContent = sanitizeContent(formData.content);
       const tagArray = formData.tags
         .split(',')
         .map(tag => tag.trim())
         .filter(tag => tag);
-
       const postData = {
         title: formData.title.trim(),
         content: sanitizedContent,
@@ -136,13 +115,10 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
         location_visibility: formData.location_visibility,
         mediaItems: mediaItems
       };
-
       await onSubmit(postData);
-
       // Clear draft after successful submission
       localStorage.removeItem('post-creator-draft');
       setIsDirty(false);
-
     } catch (error) {
       console.error('Failed to create post:', error);
       setErrors({ submit: 'Failed to create post. Please try again.' });
@@ -150,7 +126,6 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
       setIsSubmitting(false);
     }
   };
-
   const handleCancel = () => {
     if (isDirty) {
       const shouldDiscard = window.confirm(
@@ -158,31 +133,26 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
       );
       if (!shouldDiscard) return;
     }
-
     localStorage.removeItem('post-creator-draft');
     onCancel?.();
     navigate(-1);
   };
-
   const saveDraft = () => {
     const draftData = { ...formData, mediaItems };
     localStorage.setItem('post-creator-draft', JSON.stringify(draftData));
     setIsDirty(false);
     alert('Draft saved successfully!');
   };
-
   // Media handling functions
   const handleMediaUploadComplete = (uploadedMedia) => {
     setMediaItems(prev => [...prev, ...uploadedMedia]);
     setShowMediaUploader(false);
     setIsDirty(true);
   };
-
   const handleMediaDelete = (mediaIds) => {
     setMediaItems(prev => prev.filter(item => !mediaIds.includes(item.id)));
     setIsDirty(true);
   };
-
   const handleMediaReorder = (fromIndex, toIndex) => {
     setMediaItems(prev => {
       const newItems = [...prev];
@@ -192,14 +162,12 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
     });
     setIsDirty(true);
   };
-
   const handleMediaError = (error) => {
     setErrors(prev => ({
       ...prev,
       media: error
     }));
   };
-
   const categories = [
     { value: 'general', label: 'General Discussion' },
     { value: 'tips', label: 'Travel Tips' },
@@ -210,13 +178,11 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
     { value: 'stories', label: 'Travel Stories' },
     { value: 'planning', label: 'Trip Planning' }
   ];
-
   const locationOptions = [
     { value: 'public', label: 'Public - Show my location' },
     { value: 'region', label: 'Regional - Show general area only' },
     { value: 'private', label: 'Private - Hide location' }
   ];
-
   if (previewMode) {
     return (
       <div className="space-y-4">
@@ -240,7 +206,6 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
             </GlassButton>
           </div>
         </div>
-
         <PostPreview
           title={formData.title}
           content={formData.content}
@@ -251,7 +216,6 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -264,14 +228,12 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
           </div>
         )}
       </div>
-
       <form onSubmit={handleSubmit} className="space-y-6">
         {errors.submit && (
           <GlassCard variant="accent" className="p-4">
             <p className="text-red-600 dark:text-red-400">{errors.submit}</p>
           </GlassCard>
         )}
-
         {/* Title */}
         <GlassInput
           label="Post Title"
@@ -282,7 +244,6 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
           error={errors.title}
           maxLength={200}
         />
-
         {/* Category */}
         <div className="space-y-1">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -300,7 +261,6 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
             ))}
           </select>
         </div>
-
         {/* Content Editor */}
         <div className="space-y-1">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -316,7 +276,6 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
             <p className="text-red-500 text-xs mt-1">{errors.content}</p>
           )}
         </div>
-
         {/* Tags */}
         <GlassInput
           label="Tags (comma-separated)"
@@ -326,7 +285,6 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
           error={errors.tags}
           className="w-full"
         />
-
         {/* Location Visibility */}
         <div className="space-y-1">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -344,7 +302,6 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
             ))}
           </select>
         </div>
-
         {/* Media Section */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -363,11 +320,9 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
               </GlassButton>
             )}
           </div>
-
           {errors.media && (
             <p className="text-red-500 text-xs">{errors.media}</p>
           )}
-
           {/* Media Uploader */}
           {showMediaUploader && (
             <MediaUploader
@@ -379,7 +334,6 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
               acceptVideos={true}
             />
           )}
-
           {/* Media Gallery */}
           {mediaItems.length > 0 && (
             <MediaGallery
@@ -391,7 +345,6 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
             />
           )}
         </div>
-
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 pt-4">
           <GlassButton
@@ -403,7 +356,6 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
           >
             Save Draft
           </GlassButton>
-
           <GlassButton
             type="button"
             onClick={() => setPreviewMode(true)}
@@ -413,7 +365,6 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
           >
             Preview
           </GlassButton>
-
           <div className="flex gap-3 flex-1 sm:flex-initial">
             <GlassButton
               type="button"
@@ -423,7 +374,6 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
             >
               Cancel
             </GlassButton>
-
             <GlassButton
               type="submit"
               disabled={isSubmitting}
@@ -437,5 +387,4 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
     </div>
   );
 };
-
 export default PostCreator;

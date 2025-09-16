@@ -1,5 +1,4 @@
 import { supabase } from '../lib/supabase';
-
 /**
  * Vendor Service - Handles all vendor-related database operations
  */
@@ -15,10 +14,8 @@ export const vendorService = {
       `)
       .eq('user_id', userId)
       .single();
-
     return { data, error };
   },
-
   // Get vendor profile by vendor ID
   async getVendorById(vendorId) {
     const { data, error } = await supabase
@@ -30,10 +27,8 @@ export const vendorService = {
       `)
       .eq('id', vendorId)
       .single();
-
     return { data, error };
   },
-
   // Create vendor profile
   async createVendor(vendorData) {
     const { data, error } = await supabase
@@ -41,10 +36,8 @@ export const vendorService = {
       .insert([vendorData])
       .select()
       .single();
-
     return { data, error };
   },
-
   // Update vendor profile
   async updateVendor(vendorId, updates) {
     const { data, error } = await supabase
@@ -53,10 +46,8 @@ export const vendorService = {
       .eq('id', vendorId)
       .select()
       .single();
-
     return { data, error };
   },
-
   // Get vendor adventures
   async getVendorAdventures(vendorId, options = {}) {
     let query = supabase
@@ -67,29 +58,23 @@ export const vendorService = {
         adventure_availability(*)
       `)
       .eq('vendor_id', vendorId);
-
     // Apply filters
     if (options.isActive !== undefined) {
       query = query.eq('is_active', options.isActive);
     }
-
     // Apply sorting
     const { orderBy = 'created_at', ascending = false } = options;
     query = query.order(orderBy, { ascending });
-
     // Apply pagination
     if (options.limit) {
       query = query.limit(options.limit);
     }
-
     if (options.offset) {
       query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
     }
-
     const { data, error } = await query;
     return { data, error };
   },
-
   // Get vendor bookings with detailed information
   async getVendorBookings(vendorId, options = {}) {
     let query = supabase
@@ -110,50 +95,40 @@ export const vendorService = {
         )
       `)
       .eq('adventures.vendor_id', vendorId);
-
     // Apply status filter
     if (options.status) {
       query = query.eq('status', options.status);
     }
-
     // Apply date filters
     if (options.startDate) {
       query = query.gte('booking_date', options.startDate);
     }
-
     if (options.endDate) {
       query = query.lte('booking_date', options.endDate);
     }
-
     // Apply sorting
     const { orderBy = 'booking_date', ascending = false } = options;
     query = query.order(orderBy, { ascending });
-
     // Apply pagination
     if (options.limit) {
       query = query.limit(options.limit);
     }
-
     const { data, error } = await query;
     return { data, error };
   },
-
   // Get today's bookings
   async getTodaysBookings(vendorId) {
     const today = new Date().toISOString().split('T')[0];
-
     return this.getVendorBookings(vendorId, {
       startDate: today,
       endDate: today,
       status: 'confirmed'
     });
   },
-
   // Get upcoming bookings (next 7 days)
   async getUpcomingBookings(vendorId, days = 7) {
     const today = new Date();
     const endDate = new Date(today.getTime() + days * 24 * 60 * 60 * 1000);
-
     return this.getVendorBookings(vendorId, {
       startDate: today.toISOString().split('T')[0],
       endDate: endDate.toISOString().split('T')[0],
@@ -162,7 +137,6 @@ export const vendorService = {
       ascending: true
     });
   },
-
   // Get vendor dashboard statistics
   async getDashboardStats(vendorId) {
     try {
@@ -172,26 +146,21 @@ export const vendorService = {
         this.getUpcomingBookings(vendorId),
         this.getVendorAdventures(vendorId, { limit: 1000 }) // Get all adventures for count
       ]);
-
       if (todaysBookingsResult.error || upcomingBookingsResult.error || totalAdventuresResult.error) {
         throw new Error('Failed to fetch dashboard stats');
       }
-
       // Get revenue stats for current month
       const currentMonth = new Date();
       const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
       const lastDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
-
       const monthlyBookingsResult = await this.getVendorBookings(vendorId, {
         startDate: firstDayOfMonth.toISOString().split('T')[0],
         endDate: lastDayOfMonth.toISOString().split('T')[0],
         status: 'confirmed'
       });
-
       const monthlyRevenue = monthlyBookingsResult.data?.reduce((total, booking) => {
         return total + (booking.total_amount || 0);
       }, 0) || 0;
-
       return {
         data: {
           todaysBookings: todaysBookingsResult.data || [],
@@ -208,7 +177,6 @@ export const vendorService = {
       return { data: null, error: error.message };
     }
   },
-
   // Get vendor recent activities (bookings, reviews, etc.)
   async getRecentActivities(vendorId, limit = 20) {
     try {
@@ -218,11 +186,9 @@ export const vendorService = {
         orderBy: 'created_at',
         ascending: false
       });
-
       if (recentBookingsResult.error) {
         throw recentBookingsResult.error;
       }
-
       // Transform bookings into activity format
       const activities = recentBookingsResult.data?.map(booking => ({
         id: booking.id,
@@ -239,18 +205,15 @@ export const vendorService = {
           bookingDate: booking.booking_date
         }
       })) || [];
-
       return { data: activities, error: null };
     } catch (error) {
       console.error('Recent activities error:', error);
       return { data: [], error: error.message };
     }
   },
-
   // Subscribe to real-time vendor updates
   subscribeToVendorUpdates(vendorId, callbacks = {}) {
     const subscriptions = [];
-
     // Subscribe to bookings updates
     if (callbacks.onBookingUpdate) {
       const bookingsSubscription = supabase
@@ -268,10 +231,8 @@ export const vendorService = {
           }
         )
         .subscribe();
-
       subscriptions.push(bookingsSubscription);
     }
-
     // Subscribe to adventure updates
     if (callbacks.onAdventureUpdate) {
       const adventuresSubscription = supabase
@@ -289,10 +250,8 @@ export const vendorService = {
           }
         )
         .subscribe();
-
       subscriptions.push(adventuresSubscription);
     }
-
     // Subscribe to trip requests (for new bid opportunities)
     if (callbacks.onTripRequestUpdate) {
       const tripRequestsSubscription = supabase
@@ -309,25 +268,20 @@ export const vendorService = {
           }
         )
         .subscribe();
-
       subscriptions.push(tripRequestsSubscription);
     }
-
     // Return cleanup function
     return () => {
       subscriptions.forEach(sub => sub.unsubscribe());
     };
   },
-
   // BID SUBMISSION SYSTEM METHODS
-
   // Get trip requests relevant to vendor based on location, services, and preferences
   async getTripRequestsForVendor(vendorId, options = {}) {
     try {
       // First get vendor details to match against trip requests
       const { data: vendor, error: vendorError } = await this.getVendorById(vendorId);
       if (vendorError) return { data: null, error: vendorError };
-
       let query = supabase
         .from('trip_requests')
         .select(`
@@ -346,54 +300,42 @@ export const vendorService = {
           )
         `)
         .eq('status', 'open');
-
       // Filter by destination if vendor has location preferences
       if (vendor.service_areas && vendor.service_areas.length > 0) {
         query = query.in('destination', vendor.service_areas);
       }
-
       // Filter by date range
       if (options.startDate) {
         query = query.gte('start_date', options.startDate);
       }
-
       if (options.endDate) {
         query = query.lte('end_date', options.endDate);
       }
-
       // Filter by budget range
       if (options.minBudget) {
         query = query.gte('budget_min', options.minBudget);
       }
-
       if (options.maxBudget) {
         query = query.lte('budget_max', options.maxBudget);
       }
-
       // Filter by group size if vendor has capacity preferences
       if (vendor.max_group_size) {
         query = query.lte('group_size', vendor.max_group_size);
       }
-
       // Apply sorting
       const { orderBy = 'created_at', ascending = false } = options;
       query = query.order(orderBy, { ascending });
-
       // Apply pagination
       if (options.limit) {
         query = query.limit(options.limit);
       }
-
       const { data, error } = await query;
-
       if (error) {
         return { data: null, error };
       }
-
       // Process results to add vendor-specific information
       const processedRequests = data?.map(request => {
         const existingBid = request.vendor_bids?.find(bid => bid.vendor_id === vendorId);
-
         return {
           ...request,
           hasExistingBid: !!existingBid,
@@ -401,45 +343,36 @@ export const vendorService = {
           matchScore: this.calculateRequestMatchScore(vendor, request)
         };
       }) || [];
-
       return { data: processedRequests, error: null };
-
     } catch (error) {
       console.error('Get trip requests error:', error);
       return { data: null, error: error.message };
     }
   },
-
   // Calculate how well a trip request matches vendor capabilities
   calculateRequestMatchScore(vendor, request) {
     let score = 0;
-
     // Location match (40% weight)
     if (vendor.service_areas?.includes(request.destination)) {
       score += 40;
     }
-
     // Group size compatibility (20% weight)
     if (request.group_size <= (vendor.max_group_size || 20)) {
       score += 20;
     }
-
     // Budget compatibility (20% weight)
     const vendorAvgPrice = vendor.average_price || 0;
     if (vendorAvgPrice >= request.budget_min && vendorAvgPrice <= request.budget_max) {
       score += 20;
     }
-
     // Service type match (20% weight)
     if (vendor.specialties?.some(specialty =>
       request.preferences?.activities?.includes(specialty.toLowerCase())
     )) {
       score += 20;
     }
-
     return Math.min(100, score);
   },
-
   // Submit a bid for a trip request
   async submitBid(bidData) {
     try {
@@ -454,12 +387,10 @@ export const vendorService = {
         attachments = [],
         validUntil = null
       } = bidData;
-
       // Validate required fields
       if (!tripRequestId || !vendorId || !proposedPrice) {
         throw new Error('Trip request ID, vendor ID, and proposed price are required');
       }
-
       // Check if vendor already has a bid for this request
       const { data: existingBid } = await supabase
         .from('vendor_bids')
@@ -467,15 +398,12 @@ export const vendorService = {
         .eq('trip_request_id', tripRequestId)
         .eq('vendor_id', vendorId)
         .single();
-
       if (existingBid) {
         throw new Error('You have already submitted a bid for this trip request');
       }
-
       // Set default expiration (72 hours from now)
       const defaultExpiration = new Date();
       defaultExpiration.setHours(defaultExpiration.getHours() + 72);
-
       const bidRecord = {
         trip_request_id: tripRequestId,
         vendor_id: vendorId,
@@ -488,17 +416,14 @@ export const vendorService = {
         valid_until: validUntil || defaultExpiration.toISOString(),
         created_at: new Date().toISOString()
       };
-
       const { data: bid, error: bidError } = await supabase
         .from('vendor_bids')
         .insert([bidRecord])
         .select()
         .single();
-
       if (bidError) {
         throw new Error(bidError.message);
       }
-
       // Handle file attachments if provided
       if (attachments.length > 0) {
         const attachmentResults = await this.attachFilesToBid(bid.id, attachments);
@@ -506,15 +431,12 @@ export const vendorService = {
           console.warn('Some attachments failed to upload:', attachmentResults.error);
         }
       }
-
       return { data: bid, error: null };
-
     } catch (error) {
       console.error('Submit bid error:', error);
       return { data: null, error: error.message };
     }
   },
-
   // Get vendor bids with detailed information
   async getVendorBids(vendorId, options = {}) {
     try {
@@ -539,58 +461,46 @@ export const vendorService = {
           bid_attachments(*)
         `)
         .eq('vendor_id', vendorId);
-
       // Apply status filter
       if (options.status) {
         query = query.eq('status', options.status);
       }
-
       // Apply date filters
       if (options.startDate) {
         query = query.gte('created_at', options.startDate);
       }
-
       if (options.endDate) {
         query = query.lte('created_at', options.endDate);
       }
-
       // Apply sorting
       const { orderBy = 'created_at', ascending = false } = options;
       query = query.order(orderBy, { ascending });
-
       // Apply pagination
       if (options.limit) {
         query = query.limit(options.limit);
       }
-
       const { data, error } = await query;
       return { data, error };
-
     } catch (error) {
       console.error('Get vendor bids error:', error);
       return { data: null, error: error.message };
     }
   },
-
   // Manage bid templates
   async getBidTemplates(vendorId, options = {}) {
     let query = supabase
       .from('bid_templates')
       .select('*')
       .eq('vendor_id', vendorId);
-
     if (options.adventureType) {
       query = query.eq('adventure_type', options.adventureType);
     }
-
     if (options.isActive !== undefined) {
       query = query.eq('is_active', options.isActive);
     }
-
     const { data, error } = await query.order('name');
     return { data, error };
   },
-
   async createBidTemplate(templateData) {
     const { data, error } = await supabase
       .from('bid_templates')
@@ -600,10 +510,8 @@ export const vendorService = {
       }])
       .select()
       .single();
-
     return { data, error };
   },
-
   async updateBidTemplate(templateId, updates) {
     const { data, error } = await supabase
       .from('bid_templates')
@@ -614,19 +522,15 @@ export const vendorService = {
       .eq('id', templateId)
       .select()
       .single();
-
     return { data, error };
   },
-
   async deleteBidTemplate(templateId) {
     const { data, error } = await supabase
       .from('bid_templates')
       .delete()
       .eq('id', templateId);
-
     return { data, error };
   },
-
   // Handle bid expiration and withdrawal
   async withdrawBid(bidId, vendorId) {
     try {
@@ -637,15 +541,12 @@ export const vendorService = {
         .eq('id', bidId)
         .eq('vendor_id', vendorId)
         .single();
-
       if (bidError || !bid) {
         throw new Error('Bid not found or access denied');
       }
-
       if (bid.status !== 'pending') {
         throw new Error('Only pending bids can be withdrawn');
       }
-
       const { data, error } = await supabase
         .from('vendor_bids')
         .update({
@@ -655,15 +556,12 @@ export const vendorService = {
         .eq('id', bidId)
         .select()
         .single();
-
       return { data, error };
-
     } catch (error) {
       console.error('Withdraw bid error:', error);
       return { data: null, error: error.message };
     }
   },
-
   async updateBidStatus(bidId, status, vendorId = null) {
     let query = supabase
       .from('vendor_bids')
@@ -672,41 +570,33 @@ export const vendorService = {
         updated_at: new Date().toISOString()
       })
       .eq('id', bidId);
-
     if (vendorId) {
       query = query.eq('vendor_id', vendorId);
     }
-
     const { data, error } = await query.select().single();
     return { data, error };
   },
-
   // Handle expired bids (to be called by a background job)
   async processExpiredBids() {
     const now = new Date().toISOString();
-
     const { data, error } = await supabase
       .from('vendor_bids')
       .update({ status: 'expired' })
       .eq('status', 'pending')
       .lt('valid_until', now)
       .select();
-
     return { data, error };
   },
-
   // Handle file attachments for bids
   async attachFilesToBid(bidId, files) {
     try {
       const attachmentResults = [];
-
       for (const file of files) {
         // Upload file to Supabase Storage
         const fileName = `bid-${bidId}/${Date.now()}-${file.name}`;
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('bid-attachments')
           .upload(fileName, file);
-
         if (uploadError) {
           attachmentResults.push({
             fileName: file.name,
@@ -715,7 +605,6 @@ export const vendorService = {
           });
           continue;
         }
-
         // Save attachment metadata
         const { data: attachmentData, error: attachmentError } = await supabase
           .from('bid_attachments')
@@ -729,7 +618,6 @@ export const vendorService = {
           }])
           .select()
           .single();
-
         if (attachmentError) {
           attachmentResults.push({
             fileName: file.name,
@@ -744,22 +632,18 @@ export const vendorService = {
           });
         }
       }
-
       const successCount = attachmentResults.filter(r => r.success).length;
       const errorCount = attachmentResults.length - successCount;
-
       return {
         data: attachmentResults,
         error: errorCount > 0 ? `${errorCount} files failed to upload` : null,
         summary: { total: files.length, success: successCount, failed: errorCount }
       };
-
     } catch (error) {
       console.error('Attach files error:', error);
       return { data: null, error: error.message };
     }
   },
-
   // Get signed URLs for bid attachments
   async getBidAttachmentUrls(bidId, expirationHours = 24) {
     try {
@@ -767,33 +651,26 @@ export const vendorService = {
         .from('bid_attachments')
         .select('*')
         .eq('bid_id', bidId);
-
       if (attachmentsError) {
         return { data: null, error: attachmentsError };
       }
-
       const urlPromises = attachments.map(async (attachment) => {
         const { data: urlData } = await supabase.storage
           .from('bid-attachments')
           .createSignedUrl(attachment.file_path, expirationHours * 3600);
-
         return {
           ...attachment,
           signedUrl: urlData?.signedUrl || null
         };
       });
-
       const attachmentsWithUrls = await Promise.all(urlPromises);
       return { data: attachmentsWithUrls, error: null };
-
     } catch (error) {
       console.error('Get attachment URLs error:', error);
       return { data: null, error: error.message };
     }
   },
-
   // Adventure CRUD Operations
-
   // Create new adventure
   async createAdventure(vendorId, adventureData) {
     try {
@@ -807,14 +684,12 @@ export const vendorService = {
         }])
         .select()
         .single();
-
       return { data, error };
     } catch (error) {
       console.error('Create adventure error:', error);
       return { data: null, error: error.message };
     }
   },
-
   // Update adventure
   async updateAdventure(adventureId, updates) {
     try {
@@ -827,14 +702,12 @@ export const vendorService = {
         .eq('id', adventureId)
         .select()
         .single();
-
       return { data, error };
     } catch (error) {
       console.error('Update adventure error:', error);
       return { data: null, error: error.message };
     }
   },
-
   // Delete adventure
   async deleteAdventure(adventureId) {
     try {
@@ -842,14 +715,12 @@ export const vendorService = {
         .from('adventures')
         .delete()
         .eq('id', adventureId);
-
       return { error };
     } catch (error) {
       console.error('Delete adventure error:', error);
       return { error: error.message };
     }
   },
-
   // Get adventure by ID
   async getAdventureById(adventureId) {
     try {
@@ -863,16 +734,13 @@ export const vendorService = {
         `)
         .eq('id', adventureId)
         .single();
-
       return { data, error };
     } catch (error) {
       console.error('Get adventure error:', error);
       return { data: null, error: error.message };
     }
   },
-
   // PERFORMANCE TRACKING METHODS
-
   /**
    * Get vendor performance overview for dashboard
    */
@@ -880,7 +748,6 @@ export const vendorService = {
     try {
       const endDate = new Date();
       const startDate = new Date(endDate.getTime() - timeRange * 24 * 60 * 60 * 1000);
-
       // Get key performance metrics
       const [bookingsResult, reviewsResult] = await Promise.all([
         this.getVendorBookings(vendorId, {
@@ -889,22 +756,17 @@ export const vendorService = {
         }),
         this.getVendorReviews(vendorId, startDate, endDate)
       ]);
-
       const bookings = bookingsResult.data || [];
       const reviews = reviewsResult.data || [];
-
       // Calculate key metrics
       const totalBookings = bookings.length;
       const completedBookings = bookings.filter(b => b.status === 'completed').length;
       const completionRate = totalBookings > 0 ? (completedBookings / totalBookings) * 100 : 0;
-
       const averageRating = reviews.length > 0 ?
         reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0;
-
       const totalRevenue = bookings
         .filter(b => b.status === 'completed')
         .reduce((sum, b) => sum + (b.total_amount || 0), 0);
-
       return {
         data: {
           totalBookings,
@@ -922,7 +784,6 @@ export const vendorService = {
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Get vendor reviews for performance analysis
    */
@@ -950,14 +811,12 @@ export const vendorService = {
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString())
         .order('created_at', { ascending: false });
-
       return { data, error };
     } catch (error) {
       console.error('Get vendor reviews error:', error);
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Track vendor performance metrics over time
    */
@@ -973,14 +832,12 @@ export const vendorService = {
         }])
         .select()
         .single();
-
       return { data, error };
     } catch (error) {
       console.error('Track performance metrics error:', error);
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Get performance alerts for vendor
    */
@@ -992,14 +849,12 @@ export const vendorService = {
         .eq('vendor_id', vendorId)
         .eq('is_resolved', false)
         .order('created_at', { ascending: false });
-
       return { data, error };
     } catch (error) {
       console.error('Get performance alerts error:', error);
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Create performance alert
    */
@@ -1019,14 +874,12 @@ export const vendorService = {
         }])
         .select()
         .single();
-
       return { data, error };
     } catch (error) {
       console.error('Create performance alert error:', error);
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Get performance improvement goals
    */
@@ -1038,14 +891,12 @@ export const vendorService = {
         .eq('vendor_id', vendorId)
         .eq('is_active', true)
         .order('created_at', { ascending: false });
-
       return { data, error };
     } catch (error) {
       console.error('Get performance goals error:', error);
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Set performance goal
    */
@@ -1065,7 +916,6 @@ export const vendorService = {
         }])
         .select()
         .single();
-
       return { data, error };
     } catch (error) {
       console.error('Set performance goal error:', error);
@@ -1073,5 +923,4 @@ export const vendorService = {
     }
   }
 };
-
 export default vendorService;

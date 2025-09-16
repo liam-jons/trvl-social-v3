@@ -2,7 +2,6 @@ import { useState } from 'react';
 import GlassCard from '../ui/GlassCard';
 import GlassButton from '../ui/GlassButton';
 import { deleteMedia } from '../../services/media-service';
-
 const MediaGallery = ({
   mediaItems = [],
   onDelete,
@@ -16,7 +15,6 @@ const MediaGallery = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const [previewItem, setPreviewItem] = useState(null);
   const [draggedIndex, setDraggedIndex] = useState(null);
-
   const handleSelectItem = (itemId, selected) => {
     const newSelected = new Set(selectedItems);
     if (selected) {
@@ -26,7 +24,6 @@ const MediaGallery = ({
     }
     setSelectedItems(newSelected);
   };
-
   const handleSelectAll = () => {
     if (selectedItems.size === mediaItems.length) {
       setSelectedItems(new Set());
@@ -34,22 +31,17 @@ const MediaGallery = ({
       setSelectedItems(new Set(mediaItems.map(item => item.id)));
     }
   };
-
   const handleDeleteSelected = async () => {
     if (selectedItems.size === 0) return;
-
     setIsDeleting(true);
     const itemsToDelete = mediaItems.filter(item => selectedItems.has(item.id));
-
     try {
       // Delete files from storage
       for (const item of itemsToDelete) {
         await deleteMedia(item.filePath, item.thumbnailPath);
       }
-
       // Notify parent component
       onDelete?.(Array.from(selectedItems));
-
       // Clear selection
       setSelectedItems(new Set());
     } catch (error) {
@@ -59,38 +51,31 @@ const MediaGallery = ({
       setIsDeleting(false);
     }
   };
-
   const handleDragStart = (e, index) => {
     if (!editable) return;
     setDraggedIndex(index);
     e.dataTransfer.effectAllowed = 'move';
   };
-
   const handleDragOver = (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
   };
-
   const handleDrop = (e, dropIndex) => {
     e.preventDefault();
     if (draggedIndex === null || draggedIndex === dropIndex || !editable) return;
-
     onReorder?.(draggedIndex, dropIndex);
     setDraggedIndex(null);
   };
-
   const handlePreview = (item) => {
     setPreviewItem(item);
     onPreview?.(item);
   };
-
   const formatFileSize = (bytes) => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     if (bytes === 0) return '0 Bytes';
     const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
     return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
   };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
@@ -99,7 +84,6 @@ const MediaGallery = ({
       minute: '2-digit'
     });
   };
-
   if (mediaItems.length === 0) {
     return (
       <GlassCard className={`p-8 text-center ${className}`}>
@@ -119,7 +103,6 @@ const MediaGallery = ({
       </GlassCard>
     );
   }
-
   return (
     <div className={className}>
       {/* Gallery Header */}
@@ -139,7 +122,6 @@ const MediaGallery = ({
                 </span>
               </label>
             </div>
-
             <div className="flex gap-2">
               {selectedItems.size > 0 && (
                 <GlassButton
@@ -156,7 +138,6 @@ const MediaGallery = ({
           </div>
         </GlassCard>
       )}
-
       {/* Media Grid */}
       <GlassCard className="p-4">
         <div
@@ -217,7 +198,6 @@ const MediaGallery = ({
                   </div>
                 )}
               </div>
-
               {/* Overlay with Controls */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                 <div className="absolute bottom-0 left-0 right-0 p-2">
@@ -230,7 +210,6 @@ const MediaGallery = ({
                     </div>
                   </div>
                 </div>
-
                 {/* Selection Checkbox */}
                 {editable && (
                   <div className="absolute top-2 left-2">
@@ -247,7 +226,6 @@ const MediaGallery = ({
                     </label>
                   </div>
                 )}
-
                 {/* Action Buttons */}
                 <div className="absolute top-2 right-2 flex gap-1">
                   {/* Preview Button */}
@@ -264,7 +242,6 @@ const MediaGallery = ({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                   </button>
-
                   {/* Download Button */}
                   <a
                     href={item.url}
@@ -277,7 +254,6 @@ const MediaGallery = ({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
                   </a>
-
                   {/* Delete Button */}
                   {editable && (
                     <button
@@ -300,7 +276,6 @@ const MediaGallery = ({
           ))}
         </div>
       </GlassCard>
-
       {/* Preview Modal */}
       {previewItem && (
         <div
@@ -317,7 +292,6 @@ const MediaGallery = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-
             {/* Media Content */}
             <div className="relative max-w-full max-h-full">
               {previewItem.type === 'image' ? (
@@ -335,7 +309,6 @@ const MediaGallery = ({
                   Your browser does not support the video tag.
                 </video>
               )}
-
               {/* Media Info */}
               <div className="absolute bottom-4 left-4 bg-black/70 text-white p-3 rounded-lg backdrop-blur-sm">
                 <p className="font-medium">{previewItem.fileName}</p>
@@ -350,5 +323,4 @@ const MediaGallery = ({
     </div>
   );
 };
-
 export default MediaGallery;

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import MainLayout from '../components/layout/MainLayout';
+import { useState } from 'react';
+import { Target, Tag, BarChart3, Brain, Users } from 'lucide-react';
 import GlassCard from '../components/ui/GlassCard';
 import GlassButton from '../components/ui/GlassButton';
 import {
@@ -10,10 +10,13 @@ import {
   CompatibilityScoreDisplay
 } from '../components/compatibility';
 import { ScoringDimensionType } from '../types/compatibility';
+import InteractivePersonalityQuiz from '../components/demo/InteractivePersonalityQuiz';
+import GroupCompatibilityDemo from '../components/demo/GroupCompatibilityDemo';
 
 const CompatibilityDemoPage = () => {
-  const [selectedDemo, setSelectedDemo] = useState('all');
+  const [selectedDemo, setSelectedDemo] = useState('interactive');
   const [showModal, setShowModal] = useState(false);
+  const [userPersonalityProfile, setUserPersonalityProfile] = useState(null);
 
   // Mock compatibility data
   const mockCompatibilityScore = {
@@ -70,11 +73,13 @@ const CompatibilityDemoPage = () => {
   };
 
   const demos = [
-    { id: 'all', name: 'Complete Display', icon: '🎯' },
-    { id: 'circular', name: 'Circular Progress', icon: '⭕' },
-    { id: 'badge', name: 'Compatibility Badge', icon: '🏷️' },
-    { id: 'radar', name: 'Radar Chart', icon: '📡' },
-    { id: 'modal', name: 'Breakdown Modal', icon: '📊' }
+    { id: 'interactive', name: 'Interactive Quiz', icon: Brain },
+    { id: 'group', name: 'Group Matching', icon: Users },
+    { id: 'all', name: 'Complete Display', icon: Target },
+    { id: 'circular', name: 'Circular Progress', icon: Target },
+    { id: 'badge', name: 'Compatibility Badge', icon: Tag },
+    { id: 'radar', name: 'Radar Chart', icon: BarChart3 },
+    { id: 'modal', name: 'Breakdown Modal', icon: BarChart3 }
   ];
 
   const scoreVariations = [
@@ -85,17 +90,16 @@ const CompatibilityDemoPage = () => {
   ];
 
   return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Compatibility Visualization Components
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Interactive demo of compatibility scoring and visualization components
-          </p>
-        </div>
+    <div className="container mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          Interactive Compatibility Demo
+        </h1>
+        <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          Experience our personality assessment and compatibility scoring system through interactive demos and visualizations
+        </p>
+      </div>
 
         {/* Demo Navigation */}
         <GlassCard className="mb-8">
@@ -107,7 +111,7 @@ const CompatibilityDemoPage = () => {
                 variant={selectedDemo === demo.id ? 'primary' : 'secondary'}
                 className="flex items-center gap-2"
               >
-                <span>{demo.icon}</span>
+                <demo.icon className="w-5 h-5" />
                 {demo.name}
               </GlassButton>
             ))}
@@ -116,6 +120,42 @@ const CompatibilityDemoPage = () => {
 
         {/* Demo Content */}
         <div className="space-y-8">
+          {/* Interactive Personality Quiz Demo */}
+          {selectedDemo === 'interactive' && (
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                  Interactive Personality Assessment
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                  Take a mini personality quiz and see real-time compatibility calculations with sample travel partners.
+                  This demonstrates how our personality assessment integrates with compatibility scoring.
+                </p>
+              </div>
+              <InteractivePersonalityQuiz
+                onProfileUpdate={setUserPersonalityProfile}
+              />
+            </div>
+          )}
+
+          {/* Group Matching Demo */}
+          {selectedDemo === 'group' && (
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                  Group Matching Demonstration
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                  Explore how our algorithm creates optimal travel groups by analyzing personality compatibility
+                  and matching travelers to specific trip scenarios. See compatibility matrices and group harmony scores.
+                </p>
+              </div>
+              <GroupCompatibilityDemo
+                userProfile={userPersonalityProfile}
+              />
+            </div>
+          )}
+
           {/* Complete Display Demo */}
           {selectedDemo === 'all' && (
             <div className="space-y-6">
@@ -343,16 +383,15 @@ const CompatibilityDemoPage = () => {
           )}
         </div>
 
-        {/* Demo Modal */}
-        <CompatibilityBreakdownModal
-          isOpen={showModal}
-          onClose={() => setShowModal(false)}
-          compatibilityScore={mockCompatibilityScore}
-          user1Name={mockUsers.user1.name}
-          user2Name={mockUsers.user2.name}
-        />
-      </div>
-    </MainLayout>
+      {/* Demo Modal */}
+      <CompatibilityBreakdownModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        compatibilityScore={mockCompatibilityScore}
+        user1Name={mockUsers.user1.name}
+        user2Name={mockUsers.user2.name}
+      />
+    </div>
   );
 };
 

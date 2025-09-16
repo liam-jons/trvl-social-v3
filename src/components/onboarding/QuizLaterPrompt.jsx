@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
 import { onboardingService } from '../../services/onboarding-service';
 import GlassCard from '../ui/GlassCard';
-
 /**
  * QuizLaterPrompt - Shows a dismissible prompt for users who skipped the quiz
  * during onboarding, encouraging them to take it later
@@ -14,15 +13,12 @@ const QuizLaterPrompt = () => {
   const { user } = useAuth();
   const [shouldShow, setShouldShow] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-
   useEffect(() => {
     const checkPromptStatus = async () => {
       if (!user) return;
-
       try {
         const shouldPrompt = await onboardingService.shouldPromptQuizLater(user);
         setShouldShow(shouldPrompt);
-
         // Show with delay for better UX
         if (shouldPrompt) {
           setTimeout(() => setIsVisible(true), 2000);
@@ -31,28 +27,22 @@ const QuizLaterPrompt = () => {
         console.error('Error checking quiz prompt status:', error);
       }
     };
-
     checkPromptStatus();
   }, [user]);
-
   const handleTakeQuiz = () => {
     navigate('/quiz');
   };
-
   const handleDismiss = () => {
     setIsVisible(false);
     // Mark as dismissed for this session
     sessionStorage.setItem('quizPromptDismissed', 'true');
   };
-
   const handleRemindLater = () => {
     setIsVisible(false);
     // Set reminder for next session (could be enhanced with more sophisticated logic)
     sessionStorage.setItem('quizPromptRemindLater', Date.now().toString());
   };
-
   if (!shouldShow) return null;
-
   return (
     <AnimatePresence>
       {isVisible && (
@@ -70,7 +60,6 @@ const QuizLaterPrompt = () => {
                   <span className="text-2xl">🌟</span>
                 </div>
               </div>
-
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
                   Complete Your Travel Profile
@@ -78,7 +67,6 @@ const QuizLaterPrompt = () => {
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                   Take our quick personality quiz to get personalized adventure recommendations tailored just for you!
                 </p>
-
                 <div className="flex flex-col gap-2">
                   <button
                     onClick={handleTakeQuiz}
@@ -86,7 +74,6 @@ const QuizLaterPrompt = () => {
                   >
                     Take Quiz Now ✨
                   </button>
-
                   <div className="flex gap-2">
                     <button
                       onClick={handleRemindLater}
@@ -103,7 +90,6 @@ const QuizLaterPrompt = () => {
                   </div>
                 </div>
               </div>
-
               {/* Close button */}
               <button
                 onClick={handleDismiss}
@@ -120,5 +106,4 @@ const QuizLaterPrompt = () => {
     </AnimatePresence>
   );
 };
-
 export default QuizLaterPrompt;

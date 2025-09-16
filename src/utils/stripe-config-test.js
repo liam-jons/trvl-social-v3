@@ -2,9 +2,7 @@
  * Stripe Configuration Test Utility
  * Validates Stripe Connect setup and configuration
  */
-
 import { stripeConfig, getStripe } from '../services/stripe-service.js';
-
 /**
  * Test Stripe configuration
  */
@@ -14,7 +12,6 @@ export async function testStripeConfiguration() {
     overall: 'pending',
     tests: []
   };
-
   // Test 1: Environment Variables
   try {
     stripeConfig.validateConfig();
@@ -31,7 +28,6 @@ export async function testStripeConfiguration() {
       critical: true
     });
   }
-
   // Test 2: Stripe.js Loading
   try {
     const stripe = await getStripe();
@@ -57,11 +53,9 @@ export async function testStripeConfiguration() {
       critical: true
     });
   }
-
   // Test 3: Platform Configuration
   try {
     const config = stripeConfig.getConfig();
-
     if (config.platformFeePercent > 0 && config.platformFeePercent <= 0.3) {
       results.tests.push({
         name: 'Platform Configuration',
@@ -82,11 +76,9 @@ export async function testStripeConfiguration() {
       message: error.message
     });
   }
-
   // Test 4: Supported Countries and Currencies
   try {
     const config = stripeConfig.getConfig();
-
     if (config.supportedCountries && config.supportedCountries.length > 0) {
       results.tests.push({
         name: 'Supported Regions',
@@ -107,7 +99,6 @@ export async function testStripeConfiguration() {
       message: error.message
     });
   }
-
   // Test 5: API Connectivity (if we have backend endpoints)
   try {
     // This would test the backend API endpoints
@@ -132,12 +123,10 @@ export async function testStripeConfiguration() {
       message: error.message
     });
   }
-
   // Determine overall status
   const criticalFailures = results.tests.filter(t => t.status === 'fail' && t.critical);
   const failures = results.tests.filter(t => t.status === 'fail');
   const warnings = results.tests.filter(t => t.status === 'warn');
-
   if (criticalFailures.length > 0) {
     results.overall = 'critical';
   } else if (failures.length > 0) {
@@ -147,10 +136,8 @@ export async function testStripeConfiguration() {
   } else {
     results.overall = 'pass';
   }
-
   return results;
 }
-
 /**
  * Format configuration test results for display
  */
@@ -162,30 +149,23 @@ export function formatTestResults(results) {
     info: 'ℹ️',
     critical: '🚨'
   };
-
   let output = `\n🔧 Stripe Configuration Test Results (${results.timestamp})\n`;
   output += `Overall Status: ${statusColors[results.overall]} ${results.overall.toUpperCase()}\n\n`;
-
   results.tests.forEach((test, index) => {
     output += `${index + 1}. ${statusColors[test.status]} ${test.name}\n`;
     output += `   ${test.message}\n\n`;
   });
-
   return output;
 }
-
 /**
  * Run configuration test and log results
  */
 export async function runConfigurationTest() {
   console.log('🧪 Running Stripe configuration tests...');
-
   try {
     const results = await testStripeConfiguration();
     const formatted = formatTestResults(results);
-
     console.log(formatted);
-
     // Return results for programmatic use
     return results;
   } catch (error) {
@@ -197,24 +177,19 @@ export async function runConfigurationTest() {
     };
   }
 }
-
 /**
  * Calculate platform fee for testing
  */
 export function testPlatformFeeCalculation() {
   const testAmounts = [1000, 5000, 10000, 25000]; // in cents
-
   console.log('\n💰 Platform Fee Calculation Test:');
-
   testAmounts.forEach(amount => {
     const fee = stripeConfig.calculatePlatformFee(amount);
     const vendorAmount = amount - fee;
     const feePercent = ((fee / amount) * 100).toFixed(2);
-
     console.log(`Amount: ${stripeConfig.formatAmount(amount)} | Fee: ${stripeConfig.formatAmount(fee)} (${feePercent}%) | Vendor: ${stripeConfig.formatAmount(vendorAmount)}`);
   });
 }
-
 // Export all utilities
 export default {
   testStripeConfiguration,

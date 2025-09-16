@@ -10,47 +10,38 @@ import {
 } from '@heroicons/react/24/outline';
 import { createClient } from '@supabase/supabase-js';
 import GlassCard from '../../ui/GlassCard';
-
 // Initialize Supabase client
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
-
 const MediaUpload = ({ data, onChange }) => {
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({});
   const [previewImage, setPreviewImage] = useState(null);
   const fileInputRef = useRef(null);
-
   const images = data.images || [];
-
   const updateImages = (newImages) => {
     onChange({ images: newImages });
   };
-
   const uploadToSupabase = async (file) => {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
     const filePath = `adventures/${fileName}`;
-
     const { data: uploadData, error } = await supabase.storage
       .from('images')
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: false
       });
-
     if (error) {
       throw error;
     }
-
     // Get public URL
     const { data: { publicUrl } } = supabase.storage
       .from('images')
       .getPublicUrl(filePath);
-
     return {
       id: Date.now(),
       url: publicUrl,
@@ -59,75 +50,60 @@ const MediaUpload = ({ data, onChange }) => {
       path: filePath
     };
   };
-
   const handleFiles = async (files) => {
     setUploading(true);
     const newImages = [];
-
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-
       // Validate file type
       if (!file.type.startsWith('image/')) {
         console.error('File is not an image:', file.name);
         continue;
       }
-
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         console.error('File too large:', file.name);
         continue;
       }
-
       try {
         setUploadProgress(prev => ({ ...prev, [file.name]: 0 }));
-
         const uploadedImage = await uploadToSupabase(file);
         newImages.push(uploadedImage);
-
         setUploadProgress(prev => ({ ...prev, [file.name]: 100 }));
       } catch (error) {
         console.error('Upload failed:', file.name, error);
         setUploadProgress(prev => ({ ...prev, [file.name]: -1 }));
       }
     }
-
     updateImages([...images, ...newImages]);
     setUploading(false);
     setUploadProgress({});
   };
-
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-
     const files = Array.from(e.dataTransfer.files);
     handleFiles(files);
   }, []);
-
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(true);
   }, []);
-
   const handleDragLeave = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
   }, []);
-
   const handleFileInput = (e) => {
     const files = Array.from(e.target.files || []);
     handleFiles(files);
   };
-
   const removeImage = (imageId) => {
     const updatedImages = images.filter(img => img.id !== imageId);
     updateImages(updatedImages);
   };
-
   const setFeaturedImage = (imageId) => {
     const updatedImages = images.map(img => ({
       ...img,
@@ -135,7 +111,6 @@ const MediaUpload = ({ data, onChange }) => {
     }));
     updateImages(updatedImages);
   };
-
   const reorderImages = (dragIndex, hoverIndex) => {
     const draggedImage = images[dragIndex];
     const reorderedImages = [...images];
@@ -143,12 +118,10 @@ const MediaUpload = ({ data, onChange }) => {
     reorderedImages.splice(hoverIndex, 0, draggedImage);
     updateImages(reorderedImages);
   };
-
   const copyImageUrl = (url) => {
     navigator.clipboard.writeText(url);
     // Could add toast notification here
   };
-
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -159,7 +132,6 @@ const MediaUpload = ({ data, onChange }) => {
           Upload high-quality images that showcase your adventure. The first image will be used as the main cover photo.
         </p>
       </div>
-
       {/* Upload Area */}
       <GlassCard variant="light" padding="lg">
         <div
@@ -179,7 +151,6 @@ const MediaUpload = ({ data, onChange }) => {
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
             PNG, JPG, GIF up to 5MB each
           </p>
-
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
@@ -188,7 +159,6 @@ const MediaUpload = ({ data, onChange }) => {
             <ArrowUpTrayIcon className="h-5 w-5 inline-block mr-2" />
             {uploading ? 'Uploading...' : 'Choose Files'}
           </button>
-
           <input
             ref={fileInputRef}
             type="file"
@@ -198,7 +168,6 @@ const MediaUpload = ({ data, onChange }) => {
             className="hidden"
           />
         </div>
-
         {/* Upload Progress */}
         <AnimatePresence>
           {Object.keys(uploadProgress).length > 0 && (
@@ -232,7 +201,6 @@ const MediaUpload = ({ data, onChange }) => {
           )}
         </AnimatePresence>
       </GlassCard>
-
       {/* Image Gallery */}
       {images.length > 0 && (
         <GlassCard variant="light" padding="md">
@@ -244,7 +212,6 @@ const MediaUpload = ({ data, onChange }) => {
               Drag to reorder • Click star to set as cover photo
             </p>
           </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <AnimatePresence>
               {images.map((image, index) => (
@@ -262,7 +229,6 @@ const MediaUpload = ({ data, onChange }) => {
                     alt={image.fileName}
                     className="w-full h-full object-cover"
                   />
-
                   {/* Overlay Controls */}
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <div className="flex items-center gap-2">
@@ -273,7 +239,6 @@ const MediaUpload = ({ data, onChange }) => {
                       >
                         <EyeIcon className="h-4 w-4" />
                       </button>
-
                       <button
                         onClick={() => setFeaturedImage(image.id)}
                         className={`p-2 rounded-full transition-colors ${
@@ -285,7 +250,6 @@ const MediaUpload = ({ data, onChange }) => {
                       >
                         <StarIcon className="h-4 w-4" />
                       </button>
-
                       <button
                         onClick={() => copyImageUrl(image.url)}
                         className="p-2 bg-white/20 text-white rounded-full hover:bg-white/30 transition-colors"
@@ -293,7 +257,6 @@ const MediaUpload = ({ data, onChange }) => {
                       >
                         <ClipboardDocumentIcon className="h-4 w-4" />
                       </button>
-
                       <button
                         onClick={() => removeImage(image.id)}
                         className="p-2 bg-red-500/80 text-white rounded-full hover:bg-red-500 transition-colors"
@@ -303,7 +266,6 @@ const MediaUpload = ({ data, onChange }) => {
                       </button>
                     </div>
                   </div>
-
                   {/* Featured Badge */}
                   {(image.featured || index === 0) && (
                     <div className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
@@ -311,7 +273,6 @@ const MediaUpload = ({ data, onChange }) => {
                       Cover
                     </div>
                   )}
-
                   {/* Image Info */}
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
                     <p className="text-white text-sm font-medium truncate">
@@ -327,7 +288,6 @@ const MediaUpload = ({ data, onChange }) => {
           </div>
         </GlassCard>
       )}
-
       {/* Image Preview Modal */}
       <AnimatePresence>
         {previewImage && (
@@ -351,13 +311,11 @@ const MediaUpload = ({ data, onChange }) => {
               >
                 <XMarkIcon className="h-6 w-6" />
               </button>
-
               <img
                 src={previewImage.url}
                 alt={previewImage.fileName}
                 className="w-full h-full object-contain"
               />
-
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
                 <p className="text-white font-medium">
                   {previewImage.fileName}
@@ -370,5 +328,4 @@ const MediaUpload = ({ data, onChange }) => {
     </div>
   );
 };
-
 export default MediaUpload;

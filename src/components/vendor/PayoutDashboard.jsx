@@ -2,7 +2,6 @@
  * Vendor Payout Dashboard Component
  * Comprehensive payout reporting and reconciliation interface
  */
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -26,7 +25,6 @@ import { supabase } from '../../lib/supabase';
 import { payoutProcessingService } from '../../services/payout-processing-service';
 import PaymentReconciliationDashboard from './PaymentReconciliationDashboard';
 import PaymentAuditTrail from './PaymentAuditTrail';
-
 const PayoutDashboard = ({ vendorStripeAccountId }) => {
   const [statistics, setStatistics] = useState(null);
   const [payoutHistory, setPayoutHistory] = useState([]);
@@ -38,11 +36,9 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
     period: '30',
     status: 'all',
   });
-
   useEffect(() => {
     loadDashboardData();
   }, [vendorStripeAccountId, filters]);
-
   const loadDashboardData = async () => {
     setLoading(true);
     try {
@@ -57,7 +53,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
       setLoading(false);
     }
   };
-
   const loadStatistics = async () => {
     try {
       const stats = await payoutProcessingService.getPayoutStatistics(vendorStripeAccountId);
@@ -66,25 +61,21 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
       console.error('Failed to load statistics:', error);
     }
   };
-
   const loadPayoutHistory = async () => {
     try {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - parseInt(filters.period));
-
       const options = {
         limit: 100,
         startDate: startDate.toISOString(),
         status: filters.status === 'all' ? null : filters.status,
       };
-
       const history = await payoutProcessingService.getPayoutHistory(vendorStripeAccountId, options);
       setPayoutHistory(history);
     } catch (error) {
       console.error('Failed to load payout history:', error);
     }
   };
-
   const loadPendingPayments = async () => {
     try {
       const { data, error } = await supabase
@@ -107,20 +98,17 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
         .in('payout_status', ['pending', 'eligible'])
         .order('created_at', { ascending: false })
         .limit(50);
-
       if (error) throw error;
       setPendingPayments(data || []);
     } catch (error) {
       console.error('Failed to load pending payments:', error);
     }
   };
-
   const refreshData = async () => {
     setRefreshing(true);
     await loadDashboardData();
     setRefreshing(false);
   };
-
   const requestManualPayout = async () => {
     try {
       const result = await payoutProcessingService.processVendorPayout({
@@ -129,7 +117,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
         currency: 'usd',
         description: 'Manual payout request',
       });
-
       if (result.success) {
         alert('Payout request submitted successfully!');
         await refreshData();
@@ -141,7 +128,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
       alert('Failed to request payout. Please try again.');
     }
   };
-
   const exportPayoutData = async (format = 'csv') => {
     try {
       const data = payoutHistory.map(payout => ({
@@ -153,13 +139,11 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
         arrival_date: payout.arrival_date || 'N/A',
         booking_count: payout.booking_count || 0,
       }));
-
       if (format === 'csv') {
         const csv = [
           Object.keys(data[0]).join(','),
           ...data.map(row => Object.values(row).join(','))
         ].join('\n');
-
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -173,14 +157,12 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
       alert('Failed to export data. Please try again.');
     }
   };
-
   const formatAmount = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
     }).format(amount / 100);
   };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -190,7 +172,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
       minute: '2-digit',
     });
   };
-
   const getStatusIcon = (status) => {
     switch (status) {
       case 'paid':
@@ -203,7 +184,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
         return <Clock className="h-4 w-4 text-gray-500" />;
     }
   };
-
   const getStatusBadge = (status) => {
     const variants = {
       paid: 'default',
@@ -213,7 +193,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
     };
     return <Badge variant={variants[status] || 'secondary'}>{status}</Badge>;
   };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -222,7 +201,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Header with actions */}
@@ -251,7 +229,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
           </Button>
         </div>
       </div>
-
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
@@ -267,7 +244,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -281,7 +257,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -295,7 +270,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -310,7 +284,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
           </CardContent>
         </Card>
       </div>
-
       {/* Quick Actions */}
       {statistics?.pendingAmount > 0 && (
         <Card>
@@ -333,7 +306,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
           </CardContent>
         </Card>
       )}
-
       {/* Main Content Tabs */}
       <Tabs defaultValue="history" className="space-y-4">
         <div className="flex justify-between items-center">
@@ -342,7 +314,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
             <TabsTrigger value="pending">Pending Payments</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
-
           {/* Filters */}
           <div className="flex space-x-2">
             <select
@@ -367,7 +338,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
             </select>
           </div>
         </div>
-
         <TabsContent value="history" className="space-y-4">
           <Card>
             <CardHeader>
@@ -415,7 +385,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="pending" className="space-y-4">
           <Card>
             <CardHeader>
@@ -464,7 +433,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="analytics" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
@@ -489,7 +457,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
                 )}
               </CardContent>
             </Card>
-
             <Card>
               <CardHeader>
                 <CardTitle>Key Metrics</CardTitle>
@@ -520,7 +487,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
           </div>
         </TabsContent>
       </Tabs>
-
       {/* Payout Detail Modal */}
       {selectedPayout && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -558,7 +524,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
                   <p>{selectedPayout.arrival_date || 'N/A'}</p>
                 </div>
               </div>
-
               {selectedPayout.payout_line_items && (
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">
@@ -581,5 +546,4 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
     </div>
   );
 };
-
 export default PayoutDashboard;

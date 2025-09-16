@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Target,
+  Star,
+  CheckCircle,
+  Zap,
+  X,
+  DollarSign,
+  Lightbulb
+} from 'lucide-react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import vendorPerformanceService from '../../services/vendor-performance-service';
-
 /**
  * KPI Tracker Component - Detailed performance metrics with trends and goals
  */
@@ -14,34 +22,27 @@ const KPITracker = ({ vendorId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedMetric, setSelectedMetric] = useState('overall');
-
   useEffect(() => {
     loadKPIData();
   }, [vendorId]);
-
   const loadKPIData = async () => {
     try {
       setLoading(true);
       setError(null);
-
       const [currentResult, historyResult] = await Promise.all([
         vendorPerformanceService.calculatePerformanceMetrics(vendorId, 30),
         vendorPerformanceService.getPerformanceHistory(vendorId, 6)
       ]);
-
       if (currentResult.error) {
         throw new Error(currentResult.error);
       }
-
       setKpiData(currentResult.data);
       setHistoricalData(historyResult.data);
-
       // Load saved goals
       const savedGoals = localStorage.getItem(`vendor-goals-${vendorId}`);
       if (savedGoals) {
         setGoals(JSON.parse(savedGoals));
       }
-
     } catch (err) {
       console.error('Load KPI data error:', err);
       setError(err.message);
@@ -49,21 +50,17 @@ const KPITracker = ({ vendorId }) => {
       setLoading(false);
     }
   };
-
   const updateGoal = (metric, value) => {
     const newGoals = { ...goals, [metric]: value };
     setGoals(newGoals);
     localStorage.setItem(`vendor-goals-${vendorId}`, JSON.stringify(newGoals));
   };
-
   const calculateProgress = (current, goal) => {
     if (!goal || goal === 0) return 0;
     return Math.min(100, (current / goal) * 100);
   };
-
   const getTrendIcon = (trend) => {
     if (!trend) return null;
-
     const icons = {
       up: (
         <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,10 +78,8 @@ const KPITracker = ({ vendorId }) => {
         </svg>
       )
     };
-
     return icons[trend];
   };
-
   const formatValue = (value, type) => {
     switch (type) {
       case 'percentage':
@@ -101,7 +96,6 @@ const KPITracker = ({ vendorId }) => {
         return Math.round(value).toLocaleString();
     }
   };
-
   const kpiMetrics = [
     {
       id: 'performance_score',
@@ -109,7 +103,7 @@ const KPITracker = ({ vendorId }) => {
       value: kpiData?.performanceScore || 0,
       goal: goals.performance_score || 85,
       type: 'number',
-      icon: '🎯',
+      icon: Target,
       description: 'Overall performance rating'
     },
     {
@@ -118,7 +112,7 @@ const KPITracker = ({ vendorId }) => {
       value: kpiData?.metrics.reviews.averageRating || 0,
       goal: goals.customer_rating || 4.5,
       type: 'rating',
-      icon: '⭐',
+      icon: Star,
       description: 'Average customer rating'
     },
     {
@@ -127,7 +121,7 @@ const KPITracker = ({ vendorId }) => {
       value: kpiData?.metrics.bookings.completionRate || 0,
       goal: goals.completion_rate || 90,
       type: 'percentage',
-      icon: '✅',
+      icon: CheckCircle,
       description: 'Booking completion percentage'
     },
     {
@@ -136,7 +130,7 @@ const KPITracker = ({ vendorId }) => {
       value: kpiData?.metrics.responseTime.averageResponseTime || 0,
       goal: goals.response_time || 4,
       type: 'hours',
-      icon: '⚡',
+      icon: Zap,
       description: 'Average response time to inquiries',
       reverse: true // Lower is better
     },
@@ -146,7 +140,7 @@ const KPITracker = ({ vendorId }) => {
       value: kpiData?.metrics.cancellations.cancellationRate || 0,
       goal: goals.cancellation_rate || 5,
       type: 'percentage',
-      icon: '❌',
+      icon: X,
       description: 'Percentage of cancelled bookings',
       reverse: true // Lower is better
     },
@@ -156,7 +150,7 @@ const KPITracker = ({ vendorId }) => {
       value: kpiData?.metrics.revenue.totalRevenue || 0,
       goal: goals.monthly_revenue || 5000,
       type: 'currency',
-      icon: '💰',
+      icon: DollarSign,
       description: 'Total revenue this month'
     },
     {
@@ -178,7 +172,6 @@ const KPITracker = ({ vendorId }) => {
       description: 'Customer satisfaction percentage'
     }
   ];
-
   if (loading) {
     return (
       <div className="space-y-6">
@@ -193,7 +186,6 @@ const KPITracker = ({ vendorId }) => {
       </div>
     );
   }
-
   if (error) {
     return (
       <Card className="p-6">
@@ -212,7 +204,6 @@ const KPITracker = ({ vendorId }) => {
       </Card>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -230,28 +221,24 @@ const KPITracker = ({ vendorId }) => {
           Refresh Data
         </Button>
       </div>
-
       {/* KPI Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {kpiMetrics.map((metric) => {
           const progress = metric.reverse
             ? Math.max(0, 100 - calculateProgress(metric.value, metric.goal))
             : calculateProgress(metric.value, metric.goal);
-
           const isOnTrack = metric.reverse
             ? metric.value <= metric.goal
             : metric.value >= metric.goal;
-
           return (
             <Card key={metric.id} className="p-4 hover:shadow-lg transition-shadow">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-2">
-                  <span className="text-2xl">{metric.icon}</span>
+                  <metric.icon className="w-6 h-6 text-blue-500" />
                   <h3 className="font-medium text-gray-900 text-sm">{metric.name}</h3>
                 </div>
                 {historicalData?.trends && getTrendIcon(historicalData.trends.performanceScore?.trend)}
               </div>
-
               <div className="space-y-3">
                 {/* Current Value */}
                 <div className="flex items-baseline justify-between">
@@ -262,7 +249,6 @@ const KPITracker = ({ vendorId }) => {
                     {isOnTrack ? 'On Track' : 'Behind'}
                   </Badge>
                 </div>
-
                 {/* Progress Bar */}
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs text-gray-500">
@@ -278,7 +264,6 @@ const KPITracker = ({ vendorId }) => {
                     ></div>
                   </div>
                 </div>
-
                 {/* Goal */}
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-gray-500">Goal: {formatValue(metric.goal, metric.type)}</span>
@@ -294,7 +279,6 @@ const KPITracker = ({ vendorId }) => {
                     Edit
                   </button>
                 </div>
-
                 {/* Description */}
                 <p className="text-xs text-gray-400">{metric.description}</p>
               </div>
@@ -302,7 +286,6 @@ const KPITracker = ({ vendorId }) => {
           );
         })}
       </div>
-
       {/* Historical Performance Chart */}
       {historicalData?.snapshots && historicalData.snapshots.length > 0 && (
         <Card className="p-6">
@@ -329,10 +312,12 @@ const KPITracker = ({ vendorId }) => {
           </div>
         </Card>
       )}
-
       {/* Goal Setting Guide */}
       <Card className="p-6 bg-blue-50 border-blue-200">
-        <h3 className="text-lg font-medium text-blue-900 mb-4">💡 Goal Setting Tips</h3>
+        <div className="flex items-center space-x-2 mb-4">
+          <Lightbulb className="w-5 h-5 text-blue-500" />
+          <h3 className="text-lg font-medium text-blue-900">Goal Setting Tips</h3>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-800">
           <div>
             <h4 className="font-medium mb-2">SMART Goals</h4>
@@ -356,5 +341,4 @@ const KPITracker = ({ vendorId }) => {
     </div>
   );
 };
-
 export default KPITracker;

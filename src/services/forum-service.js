@@ -1,6 +1,5 @@
 import sentryService from './sentry-service.js';
 import { supabase } from '../config/supabase';
-
 class ForumService {
   // Thread operations
   async getThreads(options = {}) {
@@ -13,7 +12,6 @@ class ForumService {
         limit = 20,
         offset = 0
       } = options;
-
       let query = supabase
         .from('vendor_forum_threads')
         .select(`
@@ -45,38 +43,29 @@ class ForumService {
           )
         `)
         .eq('is_moderated', false);
-
       // Apply filters
       if (category) {
         query = query.eq('category', category);
       }
-
       if (searchQuery) {
         query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%,tags.cs.{${searchQuery}}`);
       }
-
       // Apply sorting
       query = query.order(sortBy, { ascending: sortOrder === 'asc' });
-
       // Apply pinned threads first
       if (sortBy !== 'is_pinned') {
         query = query.order('is_pinned', { ascending: false });
       }
-
       // Apply pagination
       query = query.range(offset, offset + limit - 1);
-
       const { data, error } = await query;
-
       if (error) throw error;
-
       return { threads: data, error: null };
     } catch (error) {
       // console.error('Error fetching threads:', error);
       return { threads: [], error: error.message };
     }
   }
-
   async getThread(threadId) {
     try {
       const { data, error } = await supabase
@@ -106,19 +95,15 @@ class ForumService {
         `)
         .eq('id', threadId)
         .single();
-
       if (error) throw error;
-
       // Increment view count
       await this.incrementViewCount(threadId);
-
       return { thread: data, error: null };
     } catch (error) {
       // console.error('Error fetching thread:', error);
       return { thread: null, error: error.message };
     }
   }
-
   async createThread(threadData) {
     try {
       const { data, error } = await supabase
@@ -126,29 +111,24 @@ class ForumService {
         .insert([threadData])
         .select()
         .single();
-
       if (error) throw error;
-
       return { thread: data, error: null };
     } catch (error) {
       // console.error('Error creating thread:', error);
       return { thread: null, error: error.message };
     }
   }
-
   async incrementViewCount(threadId) {
     try {
       const { error } = await supabase
         .from('vendor_forum_threads')
         .update({ view_count: supabase.raw('view_count + 1') })
         .eq('id', threadId);
-
       if (error) throw error;
     } catch (error) {
       // console.error('Error incrementing view count:', error);
     }
   }
-
   // Reply operations
   async getReplies(threadId) {
     try {
@@ -174,16 +154,13 @@ class ForumService {
         .eq('thread_id', threadId)
         .eq('is_moderated', false)
         .order('created_at', { ascending: true });
-
       if (error) throw error;
-
       return { replies: data, error: null };
     } catch (error) {
       // console.error('Error fetching replies:', error);
       return { replies: [], error: error.message };
     }
   }
-
   async createReply(replyData) {
     try {
       const { data, error } = await supabase
@@ -191,16 +168,13 @@ class ForumService {
         .insert([replyData])
         .select()
         .single();
-
       if (error) throw error;
-
       return { reply: data, error: null };
     } catch (error) {
       // console.error('Error creating reply:', error);
       return { reply: null, error: error.message };
     }
   }
-
   async markSolution(replyId, threadId) {
     try {
       // First, unmark any existing solutions for this thread
@@ -208,28 +182,23 @@ class ForumService {
         .from('vendor_forum_replies')
         .update({ is_solution: false })
         .eq('thread_id', threadId);
-
       // Mark the new solution
       const { error } = await supabase
         .from('vendor_forum_replies')
         .update({ is_solution: true })
         .eq('id', replyId);
-
       if (error) throw error;
-
       return { error: null };
     } catch (error) {
       // console.error('Error marking solution:', error);
       return { error: error.message };
     }
   }
-
   // Voting operations
   async vote(targetId, targetType, voteType, vendorId) {
     try {
       const tableName = 'vendor_forum_votes';
       const targetColumn = targetType === 'thread' ? 'thread_id' : 'reply_id';
-
       // Check for existing vote
       const { data: existingVote } = await supabase
         .from(tableName)
@@ -237,7 +206,6 @@ class ForumService {
         .eq('vendor_id', vendorId)
         .eq(targetColumn, targetId)
         .single();
-
       if (existingVote) {
         if (existingVote.vote_type === voteType) {
           // Remove vote if same type
@@ -259,19 +227,16 @@ class ForumService {
           vote_type: voteType,
           [targetColumn]: targetId
         };
-
         await supabase
           .from(tableName)
           .insert([voteData]);
       }
-
       return { error: null };
     } catch (error) {
       // console.error('Error voting:', error);
       return { error: error.message };
     }
   }
-
   // Reputation operations
   async getVendorReputation(vendorId) {
     try {
@@ -280,18 +245,15 @@ class ForumService {
         .select('*')
         .eq('vendor_id', vendorId)
         .single();
-
       if (error && error.code !== 'PGRST116') { // Not found error
         throw error;
       }
-
       return { reputation: data, error: null };
     } catch (error) {
       // console.error('Error fetching reputation:', error);
       return { reputation: null, error: error.message };
     }
   }
-
   async getLeaderboard(limit = 10) {
     try {
       const { data, error } = await supabase
@@ -305,16 +267,13 @@ class ForumService {
         `)
         .order('total_points', { ascending: false })
         .limit(limit);
-
       if (error) throw error;
-
       return { leaderboard: data, error: null };
     } catch (error) {
       // console.error('Error fetching leaderboard:', error);
       return { leaderboard: [], error: error.message };
     }
   }
-
   // Moderation operations
   async getFlaggedContent() {
     try {
@@ -332,22 +291,17 @@ class ForumService {
           created_at
         `)
         .eq('is_moderated', true);
-
       if (error) throw error;
-
       return { flaggedContent: data, error: null };
     } catch (error) {
       // console.error('Error fetching flagged content:', error);
       return { flaggedContent: [], error: error.message };
     }
   }
-
   async moderateContent(contentId, contentType, action, reason, moderatorId) {
     try {
       const tableName = contentType === 'thread' ? 'vendor_forum_threads' : 'vendor_forum_replies';
-
       let updateData = {};
-
       switch (action) {
         case 'moderate':
           updateData.is_moderated = true;
@@ -376,14 +330,11 @@ class ForumService {
           }
           break;
       }
-
       const { error } = await supabase
         .from(tableName)
         .update(updateData)
         .eq('id', contentId);
-
       if (error) throw error;
-
       // Log moderation action
       await supabase
         .from('vendor_forum_moderation_log')
@@ -393,14 +344,12 @@ class ForumService {
           action_type: `${action}_${contentType}`,
           reason: reason
         }]);
-
       return { error: null };
     } catch (error) {
       // console.error('Error moderating content:', error);
       return { error: error.message };
     }
   }
-
   // Search operations
   async searchForum(query, options = {}) {
     try {
@@ -410,7 +359,6 @@ class ForumService {
         limit = 20,
         offset = 0
       } = options;
-
       let threadsQuery = supabase
         .from('vendor_forum_threads')
         .select(`
@@ -428,34 +376,26 @@ class ForumService {
           )
         `)
         .eq('is_moderated', false);
-
       if (query) {
         threadsQuery = threadsQuery.or(`title.ilike.%${query}%,content.ilike.%${query}%,tags.cs.{${query}}`);
       }
-
       if (category) {
         threadsQuery = threadsQuery.eq('category', category);
       }
-
       if (sortBy === 'relevance') {
         threadsQuery = threadsQuery.order('upvotes', { ascending: false });
       } else {
         threadsQuery = threadsQuery.order(sortBy, { ascending: false });
       }
-
       threadsQuery = threadsQuery.range(offset, offset + limit - 1);
-
       const { data, error } = await threadsQuery;
-
       if (error) throw error;
-
       return { results: data, error: null };
     } catch (error) {
       // console.error('Error searching forum:', error);
       return { results: [], error: error.message };
     }
   }
-
   // Notification operations
   async getForumNotifications(vendorId) {
     try {
@@ -479,25 +419,20 @@ class ForumService {
         .eq('vendor_id', vendorId)
         .order('created_at', { ascending: false })
         .limit(50);
-
       if (error) throw error;
-
       return { notifications: data, error: null };
     } catch (error) {
       // console.error('Error fetching forum notifications:', error);
       return { notifications: [], error: error.message };
     }
   }
-
   async markNotificationRead(notificationId) {
     try {
       const { error } = await supabase
         .from('vendor_forum_notifications')
         .update({ is_read: true })
         .eq('id', notificationId);
-
       if (error) throw error;
-
       return { error: null };
     } catch (error) {
       // console.error('Error marking notification as read:', error);
@@ -505,5 +440,4 @@ class ForumService {
     }
   }
 }
-
 export default new ForumService();

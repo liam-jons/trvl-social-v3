@@ -2,7 +2,6 @@
  * SplitPaymentContainer - Main component for managing group payment splitting
  * Orchestrates participant management, split calculations, and payment tracking
  */
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
@@ -16,7 +15,6 @@ import PaymentDeadlineManager from './PaymentDeadlineManager';
 import { groupPaymentManager, paymentSplitting } from '../../services/split-payment-service';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-
 const SplitPaymentContainer = ({
   bookingId,
   totalAmount,
@@ -33,7 +31,6 @@ const SplitPaymentContainer = ({
   const [splitPaymentId, setSplitPaymentId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
   // Split payment state
   const [participants, setParticipants] = useState(initialParticipants);
   const [splitType, setSplitType] = useState('equal');
@@ -41,15 +38,12 @@ const SplitPaymentContainer = ({
   const [paymentDeadline, setPaymentDeadline] = useState(
     new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() // 3 days from now
   );
-
   // Payment tracking state
   const [splitPaymentDetails, setSplitPaymentDetails] = useState(null);
   const [paymentStats, setPaymentStats] = useState(null);
   const [individualPayments, setIndividualPayments] = useState([]);
-
   // Calculate split preview
   const [splitPreview, setSplitPreview] = useState(null);
-
   useEffect(() => {
     if (participants.length > 0) {
       try {
@@ -69,12 +63,10 @@ const SplitPaymentContainer = ({
       }
     }
   }, [participants, splitType, customSplits, totalAmount, user?.id]);
-
   // Load existing split payment if available
   useEffect(() => {
     const loadExistingSplitPayment = async () => {
       if (!bookingId || !user?.id) return;
-
       try {
         // Check if split payment already exists for this booking
         const { data, error } = await supabase
@@ -82,7 +74,6 @@ const SplitPaymentContainer = ({
           .select('*')
           .eq('booking_id', bookingId)
           .single();
-
         if (data && !error) {
           setSplitPaymentId(data.id);
           await loadSplitPaymentDetails(data.id);
@@ -93,10 +84,8 @@ const SplitPaymentContainer = ({
         console.log('No existing split payment found');
       }
     };
-
     loadExistingSplitPayment();
   }, [bookingId, user?.id]);
-
   const loadSplitPaymentDetails = async (id) => {
     try {
       const details = await groupPaymentManager.getSplitPaymentDetails(id);
@@ -107,16 +96,13 @@ const SplitPaymentContainer = ({
       setError(`Failed to load payment details: ${err.message}`);
     }
   };
-
   const handleCreateSplitPayment = async () => {
     if (!user?.id || !participants.length) {
       setError('Missing required information');
       return;
     }
-
     setLoading(true);
     setError(null);
-
     try {
       const paymentData = {
         bookingId,
@@ -139,19 +125,14 @@ const SplitPaymentContainer = ({
           createdAt: new Date().toISOString(),
         },
       };
-
       const result = await groupPaymentManager.createSplitPayment(paymentData);
-
       setSplitPaymentId(result.splitPaymentId);
       setSplitPaymentDetails(result.splitPayment);
       setIndividualPayments(result.individualPayments);
-
       // Calculate initial stats
       const stats = groupPaymentManager.calculatePaymentStats(result.individualPayments);
       setPaymentStats(stats);
-
       setCurrentTab('links');
-
     } catch (err) {
       setError(`Failed to create split payment: ${err.message}`);
       onError?.(err);
@@ -159,26 +140,21 @@ const SplitPaymentContainer = ({
       setLoading(false);
     }
   };
-
   const handlePaymentUpdate = async () => {
     if (!splitPaymentId) return;
-
     try {
       await loadSplitPaymentDetails(splitPaymentId);
     } catch (err) {
       setError(`Failed to refresh payment details: ${err.message}`);
     }
   };
-
   const handlePaymentComplete = (paymentData) => {
     // Refresh payment details
     handlePaymentUpdate();
     onPaymentComplete?.(paymentData);
   };
-
   const canCreateSplit = participants.length > 0 && splitPreview && !splitPaymentId && !disabled;
   const hasActiveSplit = splitPaymentId && splitPaymentDetails;
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -199,7 +175,6 @@ const SplitPaymentContainer = ({
           </Badge>
         )}
       </div>
-
       {/* Error Display */}
       {error && (
         <Card className="p-4 border-destructive">
@@ -214,7 +189,6 @@ const SplitPaymentContainer = ({
           </Button>
         </Card>
       )}
-
       {/* Main Content */}
       <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
         <TabsList className="grid w-full grid-cols-5">
@@ -234,7 +208,6 @@ const SplitPaymentContainer = ({
             Deadlines
           </TabsTrigger>
         </TabsList>
-
         <TabsContent value="participants" className="space-y-4">
           <ParticipantManager
             participants={participants}
@@ -243,7 +216,6 @@ const SplitPaymentContainer = ({
             disabled={hasActiveSplit || disabled}
             maxParticipants={20}
           />
-
           {participants.length > 0 && (
             <div className="flex justify-end">
               <Button
@@ -255,7 +227,6 @@ const SplitPaymentContainer = ({
             </div>
           )}
         </TabsContent>
-
         <TabsContent value="calculator" className="space-y-4">
           <SplitCalculator
             totalAmount={totalAmount}
@@ -270,7 +241,6 @@ const SplitPaymentContainer = ({
             onPaymentDeadlineChange={setPaymentDeadline}
             disabled={hasActiveSplit || disabled}
           />
-
           <div className="flex justify-between">
             <Button
               variant="outline"
@@ -286,7 +256,6 @@ const SplitPaymentContainer = ({
             </Button>
           </div>
         </TabsContent>
-
         <TabsContent value="links" className="space-y-4">
           {hasActiveSplit && (
             <PaymentLinkGenerator
@@ -298,7 +267,6 @@ const SplitPaymentContainer = ({
             />
           )}
         </TabsContent>
-
         <TabsContent value="tracking" className="space-y-4">
           {hasActiveSplit && (
             <PaymentTracker
@@ -312,7 +280,6 @@ const SplitPaymentContainer = ({
             />
           )}
         </TabsContent>
-
         <TabsContent value="deadlines" className="space-y-4">
           {hasActiveSplit && (
             <PaymentDeadlineManager
@@ -329,5 +296,4 @@ const SplitPaymentContainer = ({
     </div>
   );
 };
-
 export default SplitPaymentContainer;

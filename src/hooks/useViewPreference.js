@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
-
 const VIEW_PREFERENCE_KEY = 'adventure_view_preference';
-
 export const useViewPreference = (defaultView = 'grid') => {
   const [viewMode, setViewMode] = useState(() => {
     try {
@@ -12,7 +10,6 @@ export const useViewPreference = (defaultView = 'grid') => {
       return defaultView;
     }
   });
-
   const setViewPreference = (newView) => {
     try {
       setViewMode(newView);
@@ -23,7 +20,6 @@ export const useViewPreference = (defaultView = 'grid') => {
       setViewMode(newView);
     }
   };
-
   // Sync with localStorage changes from other tabs
   useEffect(() => {
     const handleStorageChange = (event) => {
@@ -36,10 +32,8 @@ export const useViewPreference = (defaultView = 'grid') => {
         }
       }
     };
-
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
-
   return [viewMode, setViewPreference];
 };

@@ -9,7 +9,6 @@ import {
   MessageSquare,
   AlertCircle
 } from 'lucide-react';
-
 const CreateThread = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -22,7 +21,6 @@ const CreateThread = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-
   const categories = [
     { id: 'marketing', name: 'Marketing', description: 'Social media, advertising, and promotion strategies' },
     { id: 'safety', name: 'Safety', description: 'Safety protocols, risk management, and emergency procedures' },
@@ -35,14 +33,12 @@ const CreateThread = () => {
     { id: 'technology', name: 'Technology', description: 'Software tools, apps, and digital solutions' },
     { id: 'general_discussion', name: 'General Discussion', description: 'Open conversations and community topics' }
   ];
-
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
-
   const addTag = () => {
     if (newTag.trim() && !formData.tags.includes(newTag.trim()) && formData.tags.length < 5) {
       setFormData(prev => ({
@@ -52,17 +48,14 @@ const CreateThread = () => {
       setNewTag('');
     }
   };
-
   const removeTag = (tagToRemove) => {
     setFormData(prev => ({
       ...prev,
       tags: prev.tags.filter(tag => tag !== tagToRemove)
     }));
   };
-
   const validateForm = () => {
     const newErrors = {};
-
     if (!formData.title.trim()) {
       newErrors.title = 'Title is required';
     } else if (formData.title.length < 10) {
@@ -70,40 +63,31 @@ const CreateThread = () => {
     } else if (formData.title.length > 200) {
       newErrors.title = 'Title cannot exceed 200 characters';
     }
-
     if (!formData.content.trim()) {
       newErrors.content = 'Content is required';
     } else if (formData.content.length < 50) {
       newErrors.content = 'Content must be at least 50 characters long';
     }
-
     if (!formData.category) {
       newErrors.category = 'Please select a category';
     }
-
     if (formData.tags.length === 0) {
       newErrors.tags = 'Add at least one tag to help others find your thread';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) {
       return;
     }
-
     setLoading(true);
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-
       // In real implementation, this would create the thread via API
       console.log('Creating thread:', formData);
-
       // Redirect to the new thread
       navigate('/vendor/forum/thread/new-thread-id');
     } catch (error) {
@@ -113,7 +97,6 @@ const CreateThread = () => {
       setLoading(false);
     }
   };
-
   const getCategoryColor = (category) => {
     const colors = {
       marketing: 'bg-pink-100 text-pink-800 border-pink-200',
@@ -129,9 +112,7 @@ const CreateThread = () => {
     };
     return colors[category] || colors.general_discussion;
   };
-
   const selectedCategory = categories.find(cat => cat.id === formData.category);
-
   return (
     <div className="max-w-4xl mx-auto">
       {/* Header */}
@@ -146,7 +127,6 @@ const CreateThread = () => {
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">Create New Thread</h1>
         </div>
-
         <div className="flex items-center space-x-3">
           <button
             type="button"
@@ -158,13 +138,11 @@ const CreateThread = () => {
           </button>
         </div>
       </div>
-
       {showPreview ? (
         /* Preview Mode */
         <div className="bg-white rounded-lg shadow">
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Thread Preview</h2>
-
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
                 {selectedCategory && (
@@ -173,11 +151,9 @@ const CreateThread = () => {
                   </span>
                 )}
               </div>
-
               <h1 className="text-2xl font-bold text-gray-900">
                 {formData.title || 'Thread Title'}
               </h1>
-
               <div className="prose max-w-none">
                 {formData.content ? (
                   formData.content.split('\n').map((paragraph, index) => (
@@ -189,7 +165,6 @@ const CreateThread = () => {
                   <p className="text-gray-500 italic">Thread content will appear here...</p>
                 )}
               </div>
-
               {formData.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {formData.tags.map((tag) => (
@@ -233,7 +208,6 @@ const CreateThread = () => {
                 </p>
               </div>
             </div>
-
             {/* Category */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -268,7 +242,6 @@ const CreateThread = () => {
                 <p className="text-sm text-red-600 mt-1">{errors.category}</p>
               )}
             </div>
-
             {/* Tags */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -321,7 +294,6 @@ const CreateThread = () => {
               </p>
             </div>
           </div>
-
           {/* Content */}
           <div className="bg-white rounded-lg shadow p-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -345,7 +317,6 @@ const CreateThread = () => {
               </p>
             </div>
           </div>
-
           {/* Guidelines */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-start">
@@ -362,7 +333,6 @@ const CreateThread = () => {
               </div>
             </div>
           </div>
-
           {/* Submit */}
           <div className="flex items-center justify-between">
             <Link
@@ -371,7 +341,6 @@ const CreateThread = () => {
             >
               Cancel
             </Link>
-
             <div className="flex items-center space-x-3">
               {errors.submit && (
                 <p className="text-sm text-red-600">{errors.submit}</p>
@@ -400,5 +369,4 @@ const CreateThread = () => {
     </div>
   );
 };
-
 export default CreateThread;

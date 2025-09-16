@@ -2,7 +2,6 @@
  * PaymentDeadlineManager - Component for managing payment deadlines and enforcement
  * Handles deadline updates, reminder scheduling, and deadline enforcement actions
  */
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
@@ -22,7 +21,6 @@ import {
   DollarSign,
   UserX
 } from 'lucide-react';
-
 const PaymentDeadlineManager = ({
   splitPaymentId,
   splitPaymentDetails,
@@ -36,19 +34,15 @@ const PaymentDeadlineManager = ({
   const [enforcingDeadlines, setEnforcingDeadlines] = useState(false);
   const [reminderSettings, setReminderSettings] = useState(null);
   const [showEnforcementOptions, setShowEnforcementOptions] = useState(false);
-
   const config = getSplitPaymentConfig();
-
   useEffect(() => {
     if (splitPaymentDetails?.payment_deadline) {
       setNewDeadline(new Date(splitPaymentDetails.payment_deadline).toISOString().slice(0, 16));
     }
   }, [splitPaymentDetails]);
-
   useEffect(() => {
     loadReminderSettings();
   }, [splitPaymentId]);
-
   const loadReminderSettings = async () => {
     try {
       const { data, error } = await supabase
@@ -56,7 +50,6 @@ const PaymentDeadlineManager = ({
         .select('*')
         .eq('split_payment_id', splitPaymentId)
         .single();
-
       if (data && !error) {
         setReminderSettings(data);
       } else {
@@ -71,10 +64,8 @@ const PaymentDeadlineManager = ({
       console.error('Failed to load reminder settings:', err);
     }
   };
-
   const handleUpdateDeadline = async () => {
     if (!newDeadline) return;
-
     setUpdatingDeadline(true);
     try {
       // Update split payment deadline
@@ -85,9 +76,7 @@ const PaymentDeadlineManager = ({
           updated_at: new Date().toISOString(),
         })
         .eq('id', splitPaymentId);
-
       if (splitError) throw splitError;
-
       // Update individual payment deadlines
       const { error: individualError } = await supabase
         .from('individual_payments')
@@ -96,18 +85,14 @@ const PaymentDeadlineManager = ({
           updated_at: new Date().toISOString(),
         })
         .eq('split_payment_id', splitPaymentId);
-
       if (individualError) throw individualError;
-
       onDeadlineUpdate?.();
-
     } catch (err) {
       console.error('Failed to update deadline:', err);
     } finally {
       setUpdatingDeadline(false);
     }
   };
-
   const handleSendReminders = async () => {
     try {
       await paymentDeadlineManager.sendPaymentReminders();
@@ -116,7 +101,6 @@ const PaymentDeadlineManager = ({
       console.error('Failed to send reminders:', err);
     }
   };
-
   const handleEnforceDeadlines = async () => {
     setEnforcingDeadlines(true);
     try {
@@ -128,12 +112,10 @@ const PaymentDeadlineManager = ({
       setEnforcingDeadlines(false);
     }
   };
-
   const handleProceedWithPartial = async () => {
     if (!window.confirm('Proceed with booking despite incomplete payments? This action cannot be undone.')) {
       return;
     }
-
     try {
       await paymentDeadlineManager.proceedWithPartialPayment(splitPaymentDetails, paymentStats);
       onDeadlineUpdate?.();
@@ -141,12 +123,10 @@ const PaymentDeadlineManager = ({
       console.error('Failed to proceed with partial payment:', err);
     }
   };
-
   const handleCancelAndRefund = async () => {
     if (!window.confirm('Cancel the booking and refund all paid participants? This action cannot be undone.')) {
       return;
     }
-
     try {
       await paymentDeadlineManager.cancelAndRefundSplitPayment(splitPaymentDetails, paymentStats);
       onDeadlineUpdate?.();
@@ -154,7 +134,6 @@ const PaymentDeadlineManager = ({
       console.error('Failed to cancel and refund:', err);
     }
   };
-
   const formatDateTime = (dateString) => {
     if (!dateString) return 'Not set';
     return new Date(dateString).toLocaleString('en-US', {
@@ -166,39 +145,31 @@ const PaymentDeadlineManager = ({
       minute: '2-digit',
     });
   };
-
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: splitPaymentDetails?.currency?.toUpperCase() || 'USD',
     }).format(amount / 100);
   };
-
   const getTimeUntilDeadline = () => {
     if (!splitPaymentDetails?.payment_deadline) return null;
-
     const deadline = new Date(splitPaymentDetails.payment_deadline);
     const now = new Date();
     const diff = deadline - now;
-
     if (diff <= 0) {
       return { expired: true, text: 'Deadline has passed' };
     }
-
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-
     return {
       expired: false,
       text: days > 0 ? `${days} day(s) ${hours} hour(s) remaining` : `${hours} hour(s) remaining`,
       critical: diff < 24 * 60 * 60 * 1000, // Less than 24 hours
     };
   };
-
   const timeInfo = getTimeUntilDeadline();
   const isDeadlineCritical = timeInfo?.critical || timeInfo?.expired;
   const needsEnforcement = timeInfo?.expired && paymentStats?.completionPercentage < 100;
-
   return (
     <div className="space-y-6">
       {/* Deadline Status */}
@@ -217,7 +188,6 @@ const PaymentDeadlineManager = ({
             </Badge>
           )}
         </div>
-
         <div className="space-y-4">
           {/* Current Deadline */}
           <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
@@ -231,7 +201,6 @@ const PaymentDeadlineManager = ({
               <AlertTriangle className="w-5 h-5 text-amber-500" />
             )}
           </div>
-
           {/* Update Deadline */}
           <div className="space-y-3">
             <label className="text-sm font-medium">Update Deadline</label>
@@ -257,14 +226,12 @@ const PaymentDeadlineManager = ({
           </div>
         </div>
       </Card>
-
       {/* Reminder Management */}
       <Card className="p-4">
         <h4 className="text-md font-medium mb-4 flex items-center">
           <Bell className="w-4 h-4 mr-2" />
           Reminder Management
         </h4>
-
         <div className="space-y-4">
           {/* Reminder Schedule */}
           {reminderSettings && (
@@ -275,7 +242,6 @@ const PaymentDeadlineManager = ({
               </p>
             </div>
           )}
-
           {/* Individual Reminder Status */}
           <div className="space-y-2">
             <p className="text-sm font-medium">Participant Reminder Status</p>
@@ -302,7 +268,6 @@ const PaymentDeadlineManager = ({
               </div>
             ))}
           </div>
-
           {/* Manual Reminder Actions */}
           <div className="flex space-x-2">
             <Button
@@ -317,7 +282,6 @@ const PaymentDeadlineManager = ({
           </div>
         </div>
       </Card>
-
       {/* Deadline Enforcement */}
       {needsEnforcement && (
         <Card className="p-4 border-amber-200 bg-amber-50">
@@ -335,12 +299,10 @@ const PaymentDeadlineManager = ({
               Options
             </Button>
           </div>
-
           <div className="space-y-3">
             <p className="text-sm text-amber-700">
               The payment deadline has passed. Choose how to proceed:
             </p>
-
             {/* Payment Status Summary */}
             <div className="bg-white p-3 rounded-lg border border-amber-200">
               <div className="grid grid-cols-2 gap-4 text-sm">
@@ -366,7 +328,6 @@ const PaymentDeadlineManager = ({
                 </div>
               </div>
             </div>
-
             {showEnforcementOptions && (
               <div className="space-y-3">
                 {paymentStats?.meetsMinimumThreshold ? (
@@ -384,7 +345,6 @@ const PaymentDeadlineManager = ({
                     <p>Need at least 80% of total amount to proceed with booking.</p>
                   </div>
                 )}
-
                 <Button
                   variant="destructive"
                   onClick={handleCancelAndRefund}
@@ -394,14 +354,12 @@ const PaymentDeadlineManager = ({
                   <UserX className="w-3 h-3 mr-1" />
                   Cancel Booking & Refund All Payments
                 </Button>
-
                 <div className="text-xs text-muted-foreground bg-white p-2 rounded border">
                   <p className="font-medium mb-1">Automatic Enforcement</p>
                   <p>If no action is taken within {config.refundProcessingDays} days, the system will automatically cancel and refund based on the minimum threshold.</p>
                 </div>
               </div>
             )}
-
             {/* Quick Actions */}
             <div className="flex space-x-2">
               <Button
@@ -417,7 +375,6 @@ const PaymentDeadlineManager = ({
           </div>
         </Card>
       )}
-
       {/* Configuration Info */}
       <Card className="p-4 bg-muted/30">
         <h4 className="text-md font-medium mb-3">Configuration</h4>
@@ -443,5 +400,4 @@ const PaymentDeadlineManager = ({
     </div>
   );
 };
-
 export default PaymentDeadlineManager;

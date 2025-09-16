@@ -14,7 +14,6 @@ import AvailabilityConfiguration from './AvailabilityConfiguration';
 import ItineraryBuilder from './ItineraryBuilder';
 import AdventurePreview from './AdventurePreview';
 import useVendorDashboardStore from '../../../stores/vendorDashboardStore';
-
 const WIZARD_STEPS = [
   { id: 'details', title: 'Basic Details', description: 'Adventure info & description' },
   { id: 'pricing', title: 'Pricing', description: 'Set rates & variations' },
@@ -22,7 +21,6 @@ const WIZARD_STEPS = [
   { id: 'availability', title: 'Availability', description: 'Calendar & schedules' },
   { id: 'itinerary', title: 'Itinerary', description: 'Day-by-day activities' }
 ];
-
 const AdventureWizard = ({ adventure, onClose, onSave }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
@@ -49,9 +47,7 @@ const AdventureWizard = ({ adventure, onClose, onSave }) => {
   });
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-
   const { createAdventure, updateAdventure, isLoading } = useVendorDashboardStore();
-
   // Initialize form with existing adventure data
   useEffect(() => {
     if (adventure) {
@@ -61,7 +57,6 @@ const AdventureWizard = ({ adventure, onClose, onSave }) => {
       });
     }
   }, [adventure]);
-
   // Track unsaved changes
   useEffect(() => {
     if (adventure) {
@@ -78,26 +73,22 @@ const AdventureWizard = ({ adventure, onClose, onSave }) => {
       }));
     }
   }, [formData, adventure]);
-
   const updateFormData = (stepData) => {
     setFormData(prev => ({
       ...prev,
       ...stepData
     }));
   };
-
   const handleNext = () => {
     if (currentStep < WIZARD_STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
     }
   };
-
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
   };
-
   const handleSave = async (isDraft = false) => {
     try {
       const adventureData = {
@@ -105,7 +96,6 @@ const AdventureWizard = ({ adventure, onClose, onSave }) => {
         status: isDraft ? 'draft' : 'published',
         updatedAt: new Date().toISOString()
       };
-
       if (adventure) {
         await updateAdventure(adventure.id, adventureData);
       } else {
@@ -114,19 +104,16 @@ const AdventureWizard = ({ adventure, onClose, onSave }) => {
           createdAt: new Date().toISOString()
         });
       }
-
       onSave();
     } catch (error) {
       console.error('Failed to save adventure:', error);
       // Could add toast notification here
     }
   };
-
   const renderStepContent = () => {
     if (isPreviewMode) {
       return <AdventurePreview adventureData={formData} />;
     }
-
     switch (WIZARD_STEPS[currentStep].id) {
       case 'details':
         return (
@@ -167,7 +154,6 @@ const AdventureWizard = ({ adventure, onClose, onSave }) => {
         return null;
     }
   };
-
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -182,7 +168,6 @@ const AdventureWizard = ({ adventure, onClose, onSave }) => {
             </p>
           )}
         </div>
-
         <div className="flex items-center gap-3">
           {/* Preview Toggle */}
           <button
@@ -192,7 +177,6 @@ const AdventureWizard = ({ adventure, onClose, onSave }) => {
             {isPreviewMode ? <EyeSlashIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
             {isPreviewMode ? 'Edit' : 'Preview'}
           </button>
-
           {/* Close Button */}
           <button
             onClick={onClose}
@@ -202,7 +186,6 @@ const AdventureWizard = ({ adventure, onClose, onSave }) => {
           </button>
         </div>
       </div>
-
       {/* Progress Bar */}
       {!isPreviewMode && (
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
@@ -240,7 +223,6 @@ const AdventureWizard = ({ adventure, onClose, onSave }) => {
           </div>
         </div>
       )}
-
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         <AnimatePresence mode="wait">
@@ -256,7 +238,6 @@ const AdventureWizard = ({ adventure, onClose, onSave }) => {
           </motion.div>
         </AnimatePresence>
       </div>
-
       {/* Footer */}
       {!isPreviewMode && (
         <div className="flex items-center justify-between p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
@@ -268,7 +249,6 @@ const AdventureWizard = ({ adventure, onClose, onSave }) => {
             <ChevronLeftIcon className="h-4 w-4" />
             Previous
           </button>
-
           <div className="flex items-center gap-3">
             {/* Save as Draft */}
             <button
@@ -278,7 +258,6 @@ const AdventureWizard = ({ adventure, onClose, onSave }) => {
             >
               Save Draft
             </button>
-
             {/* Next/Publish */}
             {currentStep === WIZARD_STEPS.length - 1 ? (
               <button
@@ -300,7 +279,6 @@ const AdventureWizard = ({ adventure, onClose, onSave }) => {
           </div>
         </div>
       )}
-
       {/* Unsaved Changes Warning */}
       {hasUnsavedChanges && (
         <div className="absolute bottom-20 left-6 right-6 bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded-lg p-3">
@@ -312,5 +290,4 @@ const AdventureWizard = ({ adventure, onClose, onSave }) => {
     </div>
   );
 };
-
 export default AdventureWizard;

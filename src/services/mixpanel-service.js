@@ -1,11 +1,9 @@
 import mixpanel from 'mixpanel-browser';
-
 class MixpanelService {
   constructor() {
     this.isInitialized = false;
     this.eventQueue = [];
     this.isOnline = navigator.onLine;
-
     // Listen for online/offline events
     window.addEventListener('online', () => {
       this.isOnline = true;
@@ -15,19 +13,15 @@ class MixpanelService {
       this.isOnline = false;
     });
   }
-
   // Initialize Mixpanel
   init() {
     if (this.isInitialized) return;
-
     const token = import.meta.env.VITE_MIXPANEL_TOKEN;
     if (!token || token === 'YOUR_MIXPANEL_TOKEN_HERE') {
       console.warn('Mixpanel token not configured. Analytics disabled.');
       return;
     }
-
     const isProduction = import.meta.env.NODE_ENV === 'production';
-
     mixpanel.init(token, {
       debug: !isProduction,
       track_pageview: false, // We'll handle this manually
@@ -49,36 +43,30 @@ class MixpanelService {
         });
       }
     });
-
     this.isInitialized = true;
     this.flushEventQueue();
   }
-
   // Event naming conventions
   static EVENT_NAMES = {
     // Page Views
     PAGE_VIEW: 'Page View',
-
     // Authentication
     USER_SIGNUP: 'User Signup',
     USER_LOGIN: 'User Login',
     USER_LOGOUT: 'User Logout',
     ONBOARDING_COMPLETED: 'Onboarding Completed',
-
     // Adventure & Search
     ADVENTURE_SEARCH: 'Adventure Search',
     ADVENTURE_VIEW: 'Adventure View',
     ADVENTURE_SHARE: 'Adventure Share',
     ADVENTURE_SAVE: 'Adventure Save',
     ADVENTURE_UNSAVE: 'Adventure Unsave',
-
     // Booking Funnel
     BOOKING_INITIATED: 'Booking Initiated',
     BOOKING_PAYMENT_INFO: 'Booking Payment Info Entered',
     BOOKING_COMPLETED: 'Booking Completed',
     BOOKING_CANCELLED: 'Booking Cancelled',
     BOOKING_FAILED: 'Booking Failed',
-
     // Group Interactions
     GROUP_CREATED: 'Group Created',
     GROUP_JOINED: 'Group Joined',
@@ -86,47 +74,38 @@ class MixpanelService {
     GROUP_INVITATION_SENT: 'Group Invitation Sent',
     GROUP_MESSAGE_SENT: 'Group Message Sent',
     GROUP_COMPATIBILITY_VIEWED: 'Group Compatibility Viewed',
-
     // Vendor Actions
     VENDOR_PROFILE_CREATED: 'Vendor Profile Created',
     VENDOR_LISTING_CREATED: 'Vendor Listing Created',
     VENDOR_LISTING_UPDATED: 'Vendor Listing Updated',
     VENDOR_DASHBOARD_VIEWED: 'Vendor Dashboard Viewed',
     VENDOR_ANALYTICS_VIEWED: 'Vendor Analytics Viewed',
-
     // Personality Assessment
     ASSESSMENT_STARTED: 'Personality Assessment Started',
     ASSESSMENT_COMPLETED: 'Personality Assessment Completed',
     ASSESSMENT_ABANDONED: 'Personality Assessment Abandoned',
-
     // Notifications
     NOTIFICATION_RECEIVED: 'Notification Received',
     NOTIFICATION_OPENED: 'Notification Opened',
     NOTIFICATION_DISMISSED: 'Notification Dismissed',
-
     // Errors
     ERROR_OCCURRED: 'Error Occurred'
   };
-
   // User identification
   identify(userId, userData = {}) {
     if (!this.isInitialized) return;
-
     mixpanel.identify(userId);
     this.setUserProperties(userData);
   }
-
   // Set user properties for segmentation
   setUserProperties(properties) {
     if (!this.isInitialized) return;
-
     // Standardize user properties
     const userProps = {
       $email: properties.email,
       $name: properties.full_name || properties.name,
       $avatar: properties.avatar_url,
       $created: properties.created_at,
-
       // Custom properties
       user_type: properties.user_type || 'traveler', // traveler, vendor, admin
       subscription_status: properties.subscription_status || 'free',
@@ -138,7 +117,6 @@ class MixpanelService {
       total_bookings: properties.total_bookings || 0,
       total_groups: properties.total_groups || 0,
       last_active: new Date().toISOString(),
-
       // Vendor specific
       ...(properties.user_type === 'vendor' && {
         vendor_category: properties.vendor_category,
@@ -147,10 +125,8 @@ class MixpanelService {
         average_rating: properties.average_rating
       })
     };
-
     mixpanel.people.set(userProps);
   }
-
   // Track events
   track(eventName, properties = {}) {
     const eventData = {
@@ -162,7 +138,6 @@ class MixpanelService {
       screen_resolution: `${window.screen.width}x${window.screen.height}`,
       viewport_size: `${window.innerWidth}x${window.innerHeight}`
     };
-
     if (this.isOnline && this.isInitialized) {
       mixpanel.track(eventName, eventData);
     } else {
@@ -170,18 +145,14 @@ class MixpanelService {
       this.eventQueue.push({ eventName, properties: eventData });
     }
   }
-
   // Flush queued events
   flushEventQueue() {
     if (!this.isInitialized || this.eventQueue.length === 0) return;
-
     this.eventQueue.forEach(({ eventName, properties }) => {
       mixpanel.track(eventName, properties);
     });
-
     this.eventQueue = [];
   }
-
   // Page tracking
   trackPageView(pageName, properties = {}) {
     this.track(MixpanelService.EVENT_NAMES.PAGE_VIEW, {
@@ -190,7 +161,6 @@ class MixpanelService {
       ...properties
     });
   }
-
   // Adventure search tracking
   trackAdventureSearch(searchParams) {
     this.track(MixpanelService.EVENT_NAMES.ADVENTURE_SEARCH, {
@@ -205,7 +175,6 @@ class MixpanelService {
       search_duration: searchParams.searchDuration
     });
   }
-
   // Booking funnel tracking
   trackBookingFunnel(stage, bookingData) {
     const eventMap = {
@@ -215,7 +184,6 @@ class MixpanelService {
       cancelled: MixpanelService.EVENT_NAMES.BOOKING_CANCELLED,
       failed: MixpanelService.EVENT_NAMES.BOOKING_FAILED
     };
-
     this.track(eventMap[stage], {
       booking_id: bookingData.bookingId,
       adventure_id: bookingData.adventureId,
@@ -229,7 +197,6 @@ class MixpanelService {
       ...(stage === 'failed' && { error_code: bookingData.errorCode })
     });
   }
-
   // Group interaction tracking
   trackGroupInteraction(action, groupData) {
     const eventMap = {
@@ -240,7 +207,6 @@ class MixpanelService {
       message_sent: MixpanelService.EVENT_NAMES.GROUP_MESSAGE_SENT,
       compatibility_viewed: MixpanelService.EVENT_NAMES.GROUP_COMPATIBILITY_VIEWED
     };
-
     this.track(eventMap[action], {
       group_id: groupData.groupId,
       group_type: groupData.groupType,
@@ -249,7 +215,6 @@ class MixpanelService {
       compatibility_score: groupData.compatibilityScore
     });
   }
-
   // Vendor action tracking
   trackVendorAction(action, vendorData) {
     const eventMap = {
@@ -259,7 +224,6 @@ class MixpanelService {
       dashboard_viewed: MixpanelService.EVENT_NAMES.VENDOR_DASHBOARD_VIEWED,
       analytics_viewed: MixpanelService.EVENT_NAMES.VENDOR_ANALYTICS_VIEWED
     };
-
     this.track(eventMap[action], {
       vendor_id: vendorData.vendorId,
       listing_id: vendorData.listingId,
@@ -268,7 +232,6 @@ class MixpanelService {
       price_range: vendorData.priceRange
     });
   }
-
   // Error tracking
   trackError(error, context = {}) {
     this.track(MixpanelService.EVENT_NAMES.ERROR_OCCURRED, {
@@ -279,7 +242,6 @@ class MixpanelService {
       user_id: mixpanel.get_distinct_id()
     });
   }
-
   // Create conversion funnel
   createFunnel(funnelName, steps) {
     // Mixpanel funnels are created in the dashboard, but we can track funnel steps
@@ -290,7 +252,6 @@ class MixpanelService {
       });
     });
   }
-
   // A/B testing support
   trackExperiment(experimentName, variant, properties = {}) {
     this.track(`Experiment: ${experimentName}`, {
@@ -299,31 +260,26 @@ class MixpanelService {
       ...properties
     });
   }
-
   // Reset user (logout)
   reset() {
     if (!this.isInitialized) return;
     mixpanel.reset();
   }
-
   // Opt out user
   optOut() {
     if (!this.isInitialized) return;
     mixpanel.opt_out_tracking();
   }
-
   // Opt in user
   optIn() {
     if (!this.isInitialized) return;
     mixpanel.opt_in_tracking();
   }
-
   // Get user properties
   getUserProperties() {
     if (!this.isInitialized) return {};
     return mixpanel.people.get_property() || {};
   }
-
   // Custom cohort analysis
   trackCohortEvent(eventName, cohortData) {
     this.track(eventName, {
@@ -333,9 +289,7 @@ class MixpanelService {
     });
   }
 }
-
 // Create singleton instance
 const mixpanelService = new MixpanelService();
-
 export default mixpanelService;
 export { MixpanelService };

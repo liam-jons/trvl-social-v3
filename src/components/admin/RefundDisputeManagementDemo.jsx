@@ -2,13 +2,11 @@
  * RefundDisputeManagementDemo - Comprehensive demo showcasing refund and dispute management
  * This component demonstrates the integration of all refund and dispute features
  */
-
 import React, { useState } from 'react';
 import RefundRequestModal from '../booking/RefundRequestModal.jsx';
 import RefundManagementDashboard from '../vendor/RefundManagementDashboard.jsx';
 import DisputeResolutionInterface from './DisputeResolutionInterface.jsx';
 import RefundTrackingTable from '../common/RefundTrackingTable.jsx';
-
 const RefundDisputeManagementDemo = () => {
   const [activeView, setActiveView] = useState('overview');
   const [demoData, setDemoData] = useState({
@@ -18,10 +16,8 @@ const RefundDisputeManagementDemo = () => {
     bookingId: 'demo-booking-101',
     splitPaymentId: 'demo-payment-202',
   });
-
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [selectedRefund, setSelectedRefund] = useState(null);
-
   const viewOptions = [
     {
       key: 'overview',
@@ -54,7 +50,6 @@ const RefundDisputeManagementDemo = () => {
       icon: '📈',
     },
   ];
-
   const systemFeatures = [
     {
       category: 'Customer Features',
@@ -97,7 +92,6 @@ const RefundDisputeManagementDemo = () => {
       ],
     },
   ];
-
   const workflowSteps = [
     {
       step: 1,
@@ -135,7 +129,6 @@ const RefundDisputeManagementDemo = () => {
       outcomes: ['Dispute resolved', 'Evidence submitted'],
     },
   ];
-
   const renderOverview = () => (
     <div className="space-y-8">
       {/* System Overview */}
@@ -147,7 +140,6 @@ const RefundDisputeManagementDemo = () => {
           A comprehensive system for handling customer refunds, vendor refund management,
           and payment dispute resolution. Built with Stripe integration for seamless payment processing.
         </p>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {systemFeatures.map((category) => (
             <div key={category.category} className="bg-gray-50 rounded-lg p-4">
@@ -164,7 +156,6 @@ const RefundDisputeManagementDemo = () => {
           ))}
         </div>
       </div>
-
       {/* Workflow Diagram */}
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h3 className="text-xl font-bold text-gray-900 mb-6">Refund Processing Workflow</h3>
@@ -202,7 +193,6 @@ const RefundDisputeManagementDemo = () => {
           ))}
         </div>
       </div>
-
       {/* Quick Actions */}
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h3 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h3>
@@ -243,7 +233,6 @@ const RefundDisputeManagementDemo = () => {
       </div>
     </div>
   );
-
   const renderCustomerRequest = () => (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
@@ -252,7 +241,6 @@ const RefundDisputeManagementDemo = () => {
           This demonstrates the customer-facing refund request modal. Customers can submit refund requests
           with detailed reasons and supporting information.
         </p>
-
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <h4 className="font-medium text-blue-900 mb-2">Key Features:</h4>
           <ul className="text-sm text-blue-800 space-y-1">
@@ -263,7 +251,6 @@ const RefundDisputeManagementDemo = () => {
             <li>• Real-time validation and feedback</li>
           </ul>
         </div>
-
         <button
           onClick={() => setShowRefundModal(true)}
           className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -271,7 +258,6 @@ const RefundDisputeManagementDemo = () => {
           Open Refund Request Modal
         </button>
       </div>
-
       {showRefundModal && (
         <RefundRequestModal
           isOpen={showRefundModal}
@@ -287,7 +273,6 @@ const RefundDisputeManagementDemo = () => {
       )}
     </div>
   );
-
   const renderVendorManagement = () => (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
@@ -296,7 +281,6 @@ const RefundDisputeManagementDemo = () => {
           Vendors can efficiently manage all refund requests for their adventures. The dashboard provides
           comprehensive tools for reviewing, approving, and processing refunds.
         </p>
-
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
           <h4 className="font-medium text-green-900 mb-2">Vendor Capabilities:</h4>
           <ul className="text-sm text-green-800 space-y-1">
@@ -308,11 +292,9 @@ const RefundDisputeManagementDemo = () => {
           </ul>
         </div>
       </div>
-
       <RefundManagementDashboard vendorId={demoData.vendorId} />
     </div>
   );
-
   const renderAdminDisputes = () => (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
@@ -321,7 +303,6 @@ const RefundDisputeManagementDemo = () => {
           Admins can handle payment disputes, chargebacks, and escalated refund issues. The interface
           provides tools for evidence submission and dispute resolution.
         </p>
-
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
           <h4 className="font-medium text-red-900 mb-2">Admin Functions:</h4>
           <ul className="text-sm text-red-800 space-y-1">
@@ -333,11 +314,9 @@ const RefundDisputeManagementDemo = () => {
           </ul>
         </div>
       </div>
-
       <DisputeResolutionInterface adminId={demoData.adminId} />
     </div>
   );
-
   const renderTrackingReports = () => (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
@@ -346,7 +325,6 @@ const RefundDisputeManagementDemo = () => {
           Comprehensive tracking and reporting for all refunds across the platform. Supports filtering,
           sorting, exporting, and detailed analytics.
         </p>
-
         <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
           <h4 className="font-medium text-purple-900 mb-2">Reporting Features:</h4>
           <ul className="text-sm text-purple-800 space-y-1">
@@ -358,7 +336,6 @@ const RefundDisputeManagementDemo = () => {
           </ul>
         </div>
       </div>
-
       <RefundTrackingTable
         adminView={true}
         onRefundSelect={(refund) => {
@@ -368,7 +345,6 @@ const RefundDisputeManagementDemo = () => {
       />
     </div>
   );
-
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -381,7 +357,6 @@ const RefundDisputeManagementDemo = () => {
             Comprehensive demo of refund request handling, vendor management, and dispute resolution
           </p>
         </div>
-
         {/* Navigation */}
         <div className="mb-8">
           <nav className="flex space-x-8 overflow-x-auto">
@@ -404,7 +379,6 @@ const RefundDisputeManagementDemo = () => {
             ))}
           </nav>
         </div>
-
         {/* Content */}
         <div className="mb-8">
           {activeView === 'overview' && renderOverview()}
@@ -413,7 +387,6 @@ const RefundDisputeManagementDemo = () => {
           {activeView === 'admin-disputes' && renderAdminDisputes()}
           {activeView === 'tracking-reports' && renderTrackingReports()}
         </div>
-
         {/* Footer */}
         <div className="border-t border-gray-200 pt-8">
           <div className="bg-white rounded-lg shadow p-6">
@@ -446,5 +419,4 @@ const RefundDisputeManagementDemo = () => {
     </div>
   );
 };
-
 export default RefundDisputeManagementDemo;

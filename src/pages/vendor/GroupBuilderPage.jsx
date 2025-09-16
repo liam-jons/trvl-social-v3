@@ -17,7 +17,6 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import ParticipantCard from '../../components/vendor/group-builder/ParticipantCard';
 import GroupContainer from '../../components/vendor/group-builder/GroupContainer';
-
 const GroupBuilderPage = () => {
   const { user } = useAuth();
   const { vendor, adventures } = useVendorDashboardStore();
@@ -44,65 +43,52 @@ const GroupBuilderPage = () => {
     canRedo,
     clearAll
   } = useGroupBuilderStore();
-
   const [draggedParticipant, setDraggedParticipant] = useState(null);
   const [dragOverGroupId, setDragOverGroupId] = useState(null);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [saveConfigName, setSaveConfigName] = useState('');
   const [showOptimizationSettings, setShowOptimizationSettings] = useState(false);
-
   // Load adventures when vendor data is available
   useEffect(() => {
     if (!vendor || !adventures.length) return;
-
     // Set first adventure as default if none selected
     if (!selectedAdventure && adventures.length > 0) {
       const defaultAdventure = adventures.find(a => a.is_active) || adventures[0];
       setSelectedAdventure(defaultAdventure);
     }
   }, [vendor, adventures, selectedAdventure, setSelectedAdventure]);
-
   // Load participants when adventure is selected
   useEffect(() => {
     if (selectedAdventure) {
       loadParticipants(selectedAdventure.id);
     }
   }, [selectedAdventure, loadParticipants]);
-
   const handleAdventureSelect = (adventure) => {
     setSelectedAdventure(adventure);
     clearAll(); // Clear existing groups when switching adventures
   };
-
   const handleCreateGroup = () => {
     createGroup();
   };
-
   const handleParticipantDragStart = (participant, fromGroupId = null) => {
     setDraggedParticipant({
       ...participant,
       fromGroupId
     });
   };
-
   const handleParticipantDragEnd = () => {
     setDraggedParticipant(null);
     setDragOverGroupId(null);
   };
-
   const handleGroupDragOver = (groupId) => {
     setDragOverGroupId(groupId);
   };
-
   const handleGroupDragLeave = () => {
     setDragOverGroupId(null);
   };
-
   const handleParticipantDrop = async (participant, groupId) => {
     setDragOverGroupId(null);
-
     if (!participant || !groupId) return;
-
     try {
       if (participant.fromGroupId) {
         // Moving between groups
@@ -114,36 +100,28 @@ const GroupBuilderPage = () => {
     } catch (error) {
       console.error('Error dropping participant:', error);
     }
-
     setDraggedParticipant(null);
   };
-
   const handleOptimizeGroups = async () => {
     const settings = {
       targetGroupSize: 6,
       maxGroups: 10,
       prioritizeCompatibility: true
     };
-
     await generateOptimalGroups(settings);
   };
-
   const handleSaveConfiguration = async () => {
     if (!saveConfigName.trim()) return;
-
     const result = await saveGroupConfiguration(
       saveConfigName,
       `Group configuration for ${selectedAdventure?.title || 'adventure'}`
     );
-
     if (result.success) {
       setShowSaveDialog(false);
       setSaveConfigName('');
     }
   };
-
   const groupStats = getGroupStatistics();
-
   const getAvailableParticipantsForDisplay = () => {
     return availableParticipants.filter(participant =>
       !groups.some(group =>
@@ -151,7 +129,6 @@ const GroupBuilderPage = () => {
       )
     );
   };
-
   if (loading.participants) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -159,7 +136,6 @@ const GroupBuilderPage = () => {
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -170,7 +146,6 @@ const GroupBuilderPage = () => {
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -183,7 +158,6 @@ const GroupBuilderPage = () => {
             AI-powered group formation with compatibility optimization
           </p>
         </div>
-
         <div className="flex items-center space-x-3">
           {/* Undo/Redo buttons */}
           <button
@@ -194,7 +168,6 @@ const GroupBuilderPage = () => {
           >
             <ArrowPathIcon className="h-5 w-5 scale-x-[-1]" />
           </button>
-
           <button
             onClick={redo}
             disabled={!canRedo()}
@@ -203,7 +176,6 @@ const GroupBuilderPage = () => {
           >
             <ArrowPathIcon className="h-5 w-5" />
           </button>
-
           {/* Auto-optimize button */}
           <GlassButton
             onClick={handleOptimizeGroups}
@@ -215,7 +187,6 @@ const GroupBuilderPage = () => {
             <SparklesIcon className="h-4 w-4" />
             <span>Auto-Optimize</span>
           </GlassButton>
-
           {/* Save configuration */}
           <GlassButton
             onClick={() => setShowSaveDialog(true)}
@@ -229,7 +200,6 @@ const GroupBuilderPage = () => {
           </GlassButton>
         </div>
       </div>
-
       {/* Adventure selector */}
       <GlassCard variant="light" padding="md">
         <div className="flex items-center justify-between mb-4">
@@ -237,7 +207,6 @@ const GroupBuilderPage = () => {
             Select Adventure
           </h2>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {adventures?.map((adventure) => (
             <button
@@ -265,7 +234,6 @@ const GroupBuilderPage = () => {
           ))}
         </div>
       </GlassCard>
-
       {/* Statistics */}
       {groups.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -275,21 +243,18 @@ const GroupBuilderPage = () => {
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">Total Groups</div>
           </GlassCard>
-
           <GlassCard variant="light" padding="sm" className="text-center">
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">
               {groupStats.totalParticipants}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">Participants</div>
           </GlassCard>
-
           <GlassCard variant="light" padding="sm" className="text-center">
             <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
               {groupStats.averageCompatibility}%
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">Avg Compatibility</div>
           </GlassCard>
-
           <GlassCard variant="light" padding="sm" className="text-center">
             <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
               {groupStats.averageGroupSize}
@@ -298,7 +263,6 @@ const GroupBuilderPage = () => {
           </GlassCard>
         </div>
       )}
-
       {selectedAdventure && (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Available Participants */}
@@ -312,7 +276,6 @@ const GroupBuilderPage = () => {
                   {getAvailableParticipantsForDisplay().length} available
                 </span>
               </div>
-
               <div className="space-y-3">
                 {getAvailableParticipantsForDisplay().map((participant) => (
                   <ParticipantCard
@@ -327,7 +290,6 @@ const GroupBuilderPage = () => {
                     onDragEnd={handleParticipantDragEnd}
                   />
                 ))}
-
                 {getAvailableParticipantsForDisplay().length === 0 && (
                   <div className="text-center py-8">
                     <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
@@ -342,14 +304,12 @@ const GroupBuilderPage = () => {
               </div>
             </GlassCard>
           </div>
-
           {/* Groups */}
           <div className="lg:col-span-3">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Groups
               </h2>
-
               <GlassButton
                 onClick={handleCreateGroup}
                 variant="secondary"
@@ -360,7 +320,6 @@ const GroupBuilderPage = () => {
                 <span>Create Group</span>
               </GlassButton>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {groups.map((group) => (
                 <GroupContainer
@@ -374,7 +333,6 @@ const GroupBuilderPage = () => {
                   onDrop={handleParticipantDrop}
                 />
               ))}
-
               {groups.length === 0 && (
                 <div className="md:col-span-2">
                   <GlassCard variant="light" padding="lg" className="text-center">
@@ -413,7 +371,6 @@ const GroupBuilderPage = () => {
           </div>
         </div>
       )}
-
       {/* Save Configuration Dialog */}
       {showSaveDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
@@ -421,7 +378,6 @@ const GroupBuilderPage = () => {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Save Group Configuration
             </h3>
-
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -435,7 +391,6 @@ const GroupBuilderPage = () => {
                   className="w-full px-3 py-2 border border-gray-300/20 dark:border-gray-700/50 rounded-lg bg-white/10 dark:bg-black/10 backdrop-blur-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-
               <div className="flex items-center justify-end space-x-3">
                 <GlassButton
                   onClick={() => setShowSaveDialog(false)}
@@ -460,5 +415,4 @@ const GroupBuilderPage = () => {
     </div>
   );
 };
-
 export default GroupBuilderPage;

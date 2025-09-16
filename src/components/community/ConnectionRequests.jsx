@@ -2,7 +2,6 @@
  * Connection Requests Component
  * Handle incoming and outgoing connection requests
  */
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
@@ -19,30 +18,24 @@ import {
   MessageCircle,
   Send
 } from 'lucide-react';
-
 const ConnectionRequests = ({ onUpdate }) => {
   const [receivedRequests, setReceivedRequests] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processingRequest, setProcessingRequest] = useState(null);
-
   useEffect(() => {
     loadRequests();
   }, []);
-
   const loadRequests = async () => {
     try {
       setLoading(true);
-
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-
       // Load received requests
       const receivedResult = await connectionService.getPendingRequests(user.id, 'received');
       if (receivedResult.success) {
         setReceivedRequests(receivedResult.data);
       }
-
       // Load sent requests
       const sentResult = await connectionService.getPendingRequests(user.id, 'sent');
       if (sentResult.success) {
@@ -54,13 +47,10 @@ const ConnectionRequests = ({ onUpdate }) => {
       setLoading(false);
     }
   };
-
   const handleRespondToRequest = async (requestId, response) => {
     try {
       setProcessingRequest(requestId);
-
       const result = await connectionService.respondToConnectionRequest(requestId, response);
-
       if (result.success) {
         // Remove from received requests
         setReceivedRequests(prev => prev.filter(req => req.id !== requestId));
@@ -74,17 +64,14 @@ const ConnectionRequests = ({ onUpdate }) => {
       setProcessingRequest(null);
     }
   };
-
   const handleCancelRequest = async (requestId) => {
     try {
       setProcessingRequest(requestId);
-
       // Update request status to cancelled
       const { error } = await supabase
         .from('connection_requests')
         .update({ status: 'cancelled' })
         .eq('id', requestId);
-
       if (!error) {
         setSentRequests(prev => prev.filter(req => req.id !== requestId));
         onUpdate?.();
@@ -95,7 +82,6 @@ const ConnectionRequests = ({ onUpdate }) => {
       setProcessingRequest(null);
     }
   };
-
   const formatTimeAgo = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -103,7 +89,6 @@ const ConnectionRequests = ({ onUpdate }) => {
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
     if (diffMinutes < 60) {
       return `${diffMinutes}m ago`;
     } else if (diffHours < 24) {
@@ -112,7 +97,6 @@ const ConnectionRequests = ({ onUpdate }) => {
       return `${diffDays}d ago`;
     }
   };
-
   const ReceivedRequestItem = ({ request }) => (
     <Card className="p-4">
       <div className="flex items-start gap-4">
@@ -122,7 +106,6 @@ const ConnectionRequests = ({ onUpdate }) => {
           alt={`${request.requester_profile?.first_name} ${request.requester_profile?.last_name}`}
           className="h-12 w-12 rounded-full object-cover"
         />
-
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
@@ -131,20 +114,17 @@ const ConnectionRequests = ({ onUpdate }) => {
             </h3>
             <span className="text-sm text-gray-500">{formatTimeAgo(request.created_at)}</span>
           </div>
-
           {request.requester_profile?.location && (
             <div className="flex items-center gap-1 text-sm text-gray-600 mb-2">
               <MapPin className="h-3 w-3" />
               <span>{request.requester_profile.location}</span>
             </div>
           )}
-
           {request.message && (
             <div className="bg-gray-50 rounded-lg p-3 mb-3">
               <p className="text-sm text-gray-700">{request.message}</p>
             </div>
           )}
-
           {/* Actions */}
           <div className="flex items-center gap-2">
             <Button
@@ -179,7 +159,6 @@ const ConnectionRequests = ({ onUpdate }) => {
       </div>
     </Card>
   );
-
   const SentRequestItem = ({ request }) => (
     <Card className="p-4">
       <div className="flex items-start gap-4">
@@ -189,7 +168,6 @@ const ConnectionRequests = ({ onUpdate }) => {
           alt={`${request.recipient_profile?.first_name} ${request.recipient_profile?.last_name}`}
           className="h-12 w-12 rounded-full object-cover"
         />
-
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
@@ -202,20 +180,17 @@ const ConnectionRequests = ({ onUpdate }) => {
             </span>
             <span className="text-sm text-gray-500">{formatTimeAgo(request.created_at)}</span>
           </div>
-
           {request.recipient_profile?.location && (
             <div className="flex items-center gap-1 text-sm text-gray-600 mb-2">
               <MapPin className="h-3 w-3" />
               <span>{request.recipient_profile.location}</span>
             </div>
           )}
-
           {request.message && (
             <div className="bg-blue-50 rounded-lg p-3 mb-3">
               <p className="text-sm text-gray-700">{request.message}</p>
             </div>
           )}
-
           {/* Actions */}
           <div className="flex items-center gap-2">
             <Button
@@ -241,7 +216,6 @@ const ConnectionRequests = ({ onUpdate }) => {
       </div>
     </Card>
   );
-
   if (loading) {
     return (
       <div className="space-y-4">
@@ -261,7 +235,6 @@ const ConnectionRequests = ({ onUpdate }) => {
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       <Tabs defaultValue="received" className="w-full">
@@ -285,7 +258,6 @@ const ConnectionRequests = ({ onUpdate }) => {
             )}
           </TabsTrigger>
         </TabsList>
-
         <TabsContent value="received" className="mt-6">
           {receivedRequests.length === 0 ? (
             <Card className="p-8 text-center">
@@ -309,7 +281,6 @@ const ConnectionRequests = ({ onUpdate }) => {
             </div>
           )}
         </TabsContent>
-
         <TabsContent value="sent" className="mt-6">
           {sentRequests.length === 0 ? (
             <Card className="p-8 text-center">
@@ -337,5 +308,4 @@ const ConnectionRequests = ({ onUpdate }) => {
     </div>
   );
 };
-
 export default ConnectionRequests;

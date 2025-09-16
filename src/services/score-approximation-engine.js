@@ -2,9 +2,7 @@
  * Score Approximation Engine
  * Fast approximation system for compatibility scores using lightweight algorithms
  */
-
 import { supabase } from '../lib/supabase.js';
-
 class ScoreApproximationEngine {
   constructor() {
     this.personalityCache = new Map();
@@ -13,11 +11,9 @@ class ScoreApproximationEngine {
       demographics: 0.25,
       preferences: 0.35
     };
-
     // Precomputed personality archetypes for faster matching
     this.personalityArchetypes = new Map();
     this.initializeArchetypes();
-
     this.metrics = {
       approximations: 0,
       cacheHits: 0,
@@ -25,7 +21,6 @@ class ScoreApproximationEngine {
       totalTime: 0
     };
   }
-
   /**
    * Initialize common personality archetypes for pattern matching
    */
@@ -37,7 +32,6 @@ class ScoreApproximationEngine {
       risk_tolerance: 80,
       planning_style: 30
     });
-
     this.personalityArchetypes.set('planner', {
       energy_level: 65,
       social_preference: 60,
@@ -45,7 +39,6 @@ class ScoreApproximationEngine {
       risk_tolerance: 40,
       planning_style: 95
     });
-
     this.personalityArchetypes.set('socializer', {
       energy_level: 80,
       social_preference: 95,
@@ -53,7 +46,6 @@ class ScoreApproximationEngine {
       risk_tolerance: 60,
       planning_style: 50
     });
-
     this.personalityArchetypes.set('explorer', {
       energy_level: 75,
       social_preference: 45,
@@ -61,7 +53,6 @@ class ScoreApproximationEngine {
       risk_tolerance: 85,
       planning_style: 25
     });
-
     this.personalityArchetypes.set('balanced', {
       energy_level: 60,
       social_preference: 60,
@@ -70,50 +61,41 @@ class ScoreApproximationEngine {
       planning_style: 60
     });
   }
-
   /**
    * Generate fast compatibility approximation
    */
   async approximateCompatibility(user1Id, user2Id, options = {}) {
     const startTime = Date.now();
-
     try {
       // Load lightweight user profiles
       const [profile1, profile2] = await Promise.all([
         this.loadLightweightProfile(user1Id),
         this.loadLightweightProfile(user2Id)
       ]);
-
       if (!profile1 || !profile2) {
         return this.getFallbackApproximation(user1Id, user2Id);
       }
-
       // Calculate approximation using multiple factors
       const personalityScore = this.approximatePersonalityMatch(
         profile1.personality,
         profile2.personality
       );
-
       const demographicScore = this.approximateDemographicMatch(
         profile1.demographics,
         profile2.demographics
       );
-
       const preferenceScore = this.approximatePreferenceMatch(
         profile1.preferences,
         profile2.preferences
       );
-
       // Weighted overall score
       const overallScore = Math.round(
         personalityScore * this.scoringWeights.personality +
         demographicScore * this.scoringWeights.demographics +
         preferenceScore * this.scoringWeights.preferences
       );
-
       const processingTime = Date.now() - startTime;
       this.updateMetrics(processingTime);
-
       return {
         user1Id,
         user2Id,
@@ -130,13 +112,11 @@ class ScoreApproximationEngine {
         isApproximation: true,
         algorithm: 'fast-approximation-v1'
       };
-
     } catch (error) {
       console.error('Score approximation failed:', error);
       return this.getFallbackApproximation(user1Id, user2Id, { error: error.message });
     }
   }
-
   /**
    * Load lightweight user profile optimized for approximation
    */
@@ -149,7 +129,6 @@ class ScoreApproximationEngine {
         return cached.profile;
       }
     }
-
     try {
       // Load minimal data needed for approximation
       const { data, error } = await supabase
@@ -171,11 +150,9 @@ class ScoreApproximationEngine {
         `)
         .eq('id', userId)
         .single();
-
       if (error || !data?.personality_assessments) {
         return this.generateSyntheticProfile(userId);
       }
-
       const assessment = data.personality_assessments;
       const profile = {
         userId,
@@ -199,27 +176,22 @@ class ScoreApproximationEngine {
         },
         archetype: this.identifyPersonalityArchetype(assessment)
       };
-
       // Cache the profile
       this.personalityCache.set(userId, {
         profile,
         timestamp: Date.now()
       });
-
       return profile;
-
     } catch (error) {
       console.error(`Failed to load lightweight profile for ${userId}:`, error);
       return this.generateSyntheticProfile(userId);
     }
   }
-
   /**
    * Approximate personality compatibility using fast algorithm
    */
   approximatePersonalityMatch(personality1, personality2) {
     if (!personality1 || !personality2) return 50;
-
     const dimensions = [
       'energy_level',
       'social_preference',
@@ -227,19 +199,15 @@ class ScoreApproximationEngine {
       'risk_tolerance',
       'planning_style'
     ];
-
     let totalScore = 0;
     let validDimensions = 0;
-
     for (const dimension of dimensions) {
       const value1 = personality1[dimension];
       const value2 = personality2[dimension];
-
       if (value1 !== undefined && value2 !== undefined) {
         // Use compatibility curve instead of linear similarity
         const difference = Math.abs(value1 - value2);
         let dimensionScore;
-
         // Different dimensions have different optimal difference ranges
         switch (dimension) {
           case 'energy_level':
@@ -259,82 +227,66 @@ class ScoreApproximationEngine {
           default:
             dimensionScore = this.calculateSimilarityScore(difference);
         }
-
         totalScore += dimensionScore;
         validDimensions++;
       }
     }
-
     return validDimensions > 0 ? (totalScore / validDimensions) : 50;
   }
-
   /**
    * Approximate demographic compatibility
    */
   approximateDemographicMatch(demographics1, demographics2) {
     if (!demographics1 || !demographics2) return 70; // Neutral default
-
     let score = 0;
     let factors = 0;
-
     // Age compatibility (optimal range varies)
     if (demographics1.age && demographics2.age) {
       const ageDiff = Math.abs(demographics1.age - demographics2.age);
       let ageScore;
-
       if (ageDiff <= 5) ageScore = 90;
       else if (ageDiff <= 10) ageScore = 75;
       else if (ageDiff <= 15) ageScore = 60;
       else if (ageDiff <= 20) ageScore = 45;
       else ageScore = 30;
-
       score += ageScore;
       factors++;
     }
-
     // Location compatibility (simplified)
     if (demographics1.location && demographics2.location) {
       const sameLocation = demographics1.location === demographics2.location;
       score += sameLocation ? 80 : 65;
       factors++;
     }
-
     return factors > 0 ? (score / factors) : 70;
   }
-
   /**
    * Approximate preference compatibility
    */
   approximatePreferenceMatch(preferences1, preferences2) {
     if (!preferences1 || !preferences2) return 60; // Neutral default
-
     let score = 0;
     let factors = 0;
-
     // Budget compatibility
     if (preferences1.budget_preference && preferences2.budget_preference) {
       const budgetMatch = preferences1.budget_preference === preferences2.budget_preference;
       score += budgetMatch ? 85 : 60;
       factors++;
     }
-
     // Group size preference
     if (preferences1.group_size_preference && preferences2.group_size_preference) {
       const groupMatch = preferences1.group_size_preference === preferences2.group_size_preference;
       score += groupMatch ? 75 : 55;
       factors++;
     }
-
     // Activity level
     if (preferences1.activity_level && preferences2.activity_level) {
       const activityMatch = preferences1.activity_level === preferences2.activity_level;
       score += activityMatch ? 80 : 65;
       factors++;
     }
-
     return factors > 0 ? (score / factors) : 60;
   }
-
   /**
    * Calculate complementary score (some difference is good)
    */
@@ -346,7 +298,6 @@ class ScoreApproximationEngine {
     if (difference <= 60) return 60; // Large difference
     return 40; // Too different
   }
-
   /**
    * Calculate similarity score (less difference is better)
    */
@@ -357,7 +308,6 @@ class ScoreApproximationEngine {
     if (difference <= 40) return 55;
     return 35;
   }
-
   /**
    * Calculate balanced score (moderate difference is optimal)
    */
@@ -368,18 +318,15 @@ class ScoreApproximationEngine {
     if (difference <= 50) return 65; // Getting different
     return 45; // Too different
   }
-
   /**
    * Identify personality archetype for faster matching
    */
   identifyPersonalityArchetype(personality) {
     let bestMatch = 'balanced';
     let bestScore = 0;
-
     for (const [archetype, archetypeProfile] of this.personalityArchetypes.entries()) {
       let matchScore = 0;
       let dimensions = 0;
-
       for (const [dimension, value] of Object.entries(archetypeProfile)) {
         if (personality[dimension] !== undefined) {
           const difference = Math.abs(personality[dimension] - value);
@@ -387,7 +334,6 @@ class ScoreApproximationEngine {
           dimensions++;
         }
       }
-
       if (dimensions > 0) {
         const avgScore = matchScore / dimensions;
         if (avgScore > bestScore) {
@@ -396,45 +342,36 @@ class ScoreApproximationEngine {
         }
       }
     }
-
     return bestMatch;
   }
-
   /**
    * Calculate confidence level based on data completeness
    */
   calculateConfidence(profile1, profile2) {
     let confidenceFactors = 0;
     let totalFactors = 6;
-
     // Check personality data completeness
     if (profile1.personality && profile2.personality) {
       confidenceFactors += 2;
     }
-
     // Check demographic data
     if (profile1.demographics?.age && profile2.demographics?.age) {
       confidenceFactors++;
     }
-
     // Check preference data
     if (profile1.preferences && profile2.preferences) {
       confidenceFactors++;
     }
-
     // Check if archetypes were identified
     if (profile1.archetype !== 'balanced' || profile2.archetype !== 'balanced') {
       confidenceFactors++;
     }
-
     // Check recency of data
     if (profile1.personality?.completed_at && profile2.personality?.completed_at) {
       confidenceFactors++;
     }
-
     return Math.round((confidenceFactors / totalFactors) * 0.8 * 100) / 100; // Max 0.8 for approximations
   }
-
   /**
    * Generate synthetic profile when data is missing
    */
@@ -463,7 +400,6 @@ class ScoreApproximationEngine {
       isSynthetic: true
     };
   }
-
   /**
    * Generate normally distributed random number
    */
@@ -474,7 +410,6 @@ class ScoreApproximationEngine {
     const value = mean + stdDev * randStdNormal;
     return Math.max(0, Math.min(100, Math.round(value)));
   }
-
   /**
    * Get fallback approximation when calculation fails
    */
@@ -497,24 +432,20 @@ class ScoreApproximationEngine {
       error: options.error
     };
   }
-
   /**
    * Batch approximation for multiple pairs
    */
   async approximateBatch(userPairs, options = {}) {
     const results = new Map();
     const batchSize = options.batchSize || 20;
-
     // Process in batches to avoid overwhelming the database
     const batches = this.chunkArray(userPairs, batchSize);
-
     for (const batch of batches) {
       const batchPromises = batch.map(async ([user1Id, user2Id]) => {
         try {
           const approximation = await this.approximateCompatibility(user1Id, user2Id, options);
           results.set(`${user1Id}_${user2Id}`, approximation);
           return approximation;
-
         } catch (error) {
           const fallback = this.getFallbackApproximation(user1Id, user2Id, {
             ...options,
@@ -524,15 +455,12 @@ class ScoreApproximationEngine {
           return fallback;
         }
       });
-
       await Promise.all(batchPromises);
-
       // Small delay between batches
       if (batches.indexOf(batch) < batches.length - 1) {
         await new Promise(resolve => setTimeout(resolve, 50));
       }
     }
-
     return {
       success: true,
       data: Object.fromEntries(results),
@@ -541,17 +469,14 @@ class ScoreApproximationEngine {
       processingTime: this.metrics.totalTime / this.metrics.approximations
     };
   }
-
   /**
    * Calculate average score from results
    */
   calculateAverageScore(approximations) {
     if (approximations.length === 0) return 0;
-
     const totalScore = approximations.reduce((sum, approx) => sum + approx.overallScore, 0);
     return Math.round(totalScore / approximations.length);
   }
-
   /**
    * Update metrics
    */
@@ -560,7 +485,6 @@ class ScoreApproximationEngine {
     this.metrics.totalTime += processingTime;
     this.metrics.averageTime = this.metrics.totalTime / this.metrics.approximations;
   }
-
   /**
    * Get performance metrics
    */
@@ -573,7 +497,6 @@ class ScoreApproximationEngine {
       cacheSize: this.personalityCache.size
     };
   }
-
   /**
    * Chunk array helper
    */
@@ -584,7 +507,6 @@ class ScoreApproximationEngine {
     }
     return chunks;
   }
-
   /**
    * Clear caches and reset
    */
@@ -598,7 +520,6 @@ class ScoreApproximationEngine {
     };
   }
 }
-
 // Export singleton instance
 export const scoreApproximationEngine = new ScoreApproximationEngine();
 export default ScoreApproximationEngine;

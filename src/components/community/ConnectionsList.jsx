@@ -2,7 +2,6 @@
  * Connections List Component
  * Display and manage user's connections with search and filtering
  */
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
@@ -18,7 +17,6 @@ import {
   MapPin,
   Star
 } from 'lucide-react';
-
 const ConnectionsList = ({ onUpdate }) => {
   const [connections, setConnections] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,11 +24,9 @@ const ConnectionsList = ({ onUpdate }) => {
   const [sortBy, setSortBy] = useState('recent');
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-
   useEffect(() => {
     loadConnections(true);
   }, [sortBy]);
-
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
       if (searchTerm !== '') {
@@ -39,20 +35,15 @@ const ConnectionsList = ({ onUpdate }) => {
         loadConnections(true);
       }
     }, 300);
-
     return () => clearTimeout(debounceTimer);
   }, [searchTerm]);
-
   const loadConnections = async (reset = false) => {
     try {
       setLoading(true);
-
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-
       const currentPage = reset ? 0 : page;
       const limit = 10;
-
       const result = await connectionService.getUserConnections(user.id, {
         search: searchTerm,
         sortBy,
@@ -60,7 +51,6 @@ const ConnectionsList = ({ onUpdate }) => {
         offset: currentPage * limit,
         includeProfile: true
       });
-
       if (result.success) {
         if (reset) {
           setConnections(result.data);
@@ -76,30 +66,24 @@ const ConnectionsList = ({ onUpdate }) => {
       setLoading(false);
     }
   };
-
   const handleLoadMore = () => {
     setPage(prev => prev + 1);
     loadConnections(false);
   };
-
   const handleStartConversation = async (connectionId) => {
     // Navigate to chat or open messaging interface
     console.log('Start conversation with:', connectionId);
   };
-
   const handleViewProfile = (userId) => {
     // Navigate to user profile
     console.log('View profile:', userId);
   };
-
   const formatLastInteraction = (lastInteraction) => {
     if (!lastInteraction) return 'No recent activity';
-
     const date = new Date(lastInteraction);
     const now = new Date();
     const diffMs = now - date;
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
     if (diffDays === 0) {
       return 'Today';
     } else if (diffDays === 1) {
@@ -112,21 +96,18 @@ const ConnectionsList = ({ onUpdate }) => {
       return `${Math.floor(diffDays / 30)} months ago`;
     }
   };
-
   const getConnectionStrengthColor = (strength) => {
     if (strength >= 0.8) return 'text-green-600';
     if (strength >= 0.6) return 'text-blue-600';
     if (strength >= 0.4) return 'text-yellow-600';
     return 'text-gray-600';
   };
-
   const getConnectionStrengthLabel = (strength) => {
     if (strength >= 0.8) return 'Strong';
     if (strength >= 0.6) return 'Good';
     if (strength >= 0.4) return 'Growing';
     return 'New';
   };
-
   if (loading && connections.length === 0) {
     return (
       <div className="space-y-4">
@@ -146,7 +127,6 @@ const ConnectionsList = ({ onUpdate }) => {
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Search and Filter Controls */}
@@ -171,7 +151,6 @@ const ConnectionsList = ({ onUpdate }) => {
           </select>
         </div>
       </div>
-
       {/* Connections List */}
       {connections.length === 0 ? (
         <Card className="p-8 text-center">
@@ -205,7 +184,6 @@ const ConnectionsList = ({ onUpdate }) => {
                     connection.connection_strength >= 0.4 ? 'bg-yellow-500' : 'bg-gray-400'
                   }`}></div>
                 </div>
-
                 {/* Profile Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -216,7 +194,6 @@ const ConnectionsList = ({ onUpdate }) => {
                       {getConnectionStrengthLabel(connection.connection_strength)}
                     </span>
                   </div>
-
                   <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
                     {connection.connected_profile?.location && (
                       <div className="flex items-center gap-1">
@@ -234,7 +211,6 @@ const ConnectionsList = ({ onUpdate }) => {
                     </div>
                   </div>
                 </div>
-
                 {/* Actions */}
                 <div className="flex items-center gap-2">
                   <Button
@@ -246,7 +222,6 @@ const ConnectionsList = ({ onUpdate }) => {
                     <MessageCircle className="h-4 w-4" />
                     Message
                   </Button>
-
                   <Button
                     variant="ghost"
                     size="sm"
@@ -254,7 +229,6 @@ const ConnectionsList = ({ onUpdate }) => {
                   >
                     View Profile
                   </Button>
-
                   <Button
                     variant="ghost"
                     size="sm"
@@ -266,7 +240,6 @@ const ConnectionsList = ({ onUpdate }) => {
               </div>
             </Card>
           ))}
-
           {/* Load More Button */}
           {hasMore && (
             <div className="text-center pt-4">
@@ -285,5 +258,4 @@ const ConnectionsList = ({ onUpdate }) => {
     </div>
   );
 };
-
 export default ConnectionsList;

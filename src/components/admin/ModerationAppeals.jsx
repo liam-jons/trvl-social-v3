@@ -2,7 +2,6 @@
  * ModerationAppeals Component
  * Handles user appeals for moderation actions and content decisions
  */
-
 import React, { useState, useEffect } from 'react';
 import {
   FileText,
@@ -23,7 +22,6 @@ import {
   MessageCircle,
   Gavel
 } from 'lucide-react';
-
 const ModerationAppeals = () => {
   const [appeals, setAppeals] = useState([]);
   const [activeTab, setActiveTab] = useState('pending');
@@ -34,7 +32,6 @@ const ModerationAppeals = () => {
     priority: ''
   });
   const [searchTerm, setSearchTerm] = useState('');
-
   // Mock appeals data
   useEffect(() => {
     setAppeals([
@@ -132,7 +129,6 @@ const ModerationAppeals = () => {
       }
     ]);
   }, []);
-
   const getStatusColor = (status) => {
     const colors = {
       pending: 'bg-yellow-100 text-yellow-800',
@@ -143,7 +139,6 @@ const ModerationAppeals = () => {
     };
     return colors[status] || colors.pending;
   };
-
   const getPriorityColor = (priority) => {
     const colors = {
       low: 'bg-green-100 text-green-800',
@@ -152,7 +147,6 @@ const ModerationAppeals = () => {
     };
     return colors[priority] || colors.medium;
   };
-
   const filteredAppeals = appeals.filter(appeal => {
     if (activeTab !== 'all' && appeal.status !== activeTab) return false;
     if (filters.type && appeal.appealType !== filters.type) return false;
@@ -161,7 +155,6 @@ const ModerationAppeals = () => {
         !appeal.appealReason.toLowerCase().includes(searchTerm.toLowerCase())) return false;
     return true;
   });
-
   const handleApproveAppeal = async (appealId) => {
     try {
       // API call to approve appeal
@@ -174,7 +167,6 @@ const ModerationAppeals = () => {
       console.error('Failed to approve appeal:', error);
     }
   };
-
   const handleRejectAppeal = async (appealId, reason) => {
     try {
       // API call to reject appeal
@@ -200,7 +192,6 @@ const ModerationAppeals = () => {
       console.error('Failed to reject appeal:', error);
     }
   };
-
   const AppealCard = ({ appeal }) => (
     <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-sm transition-shadow">
       <div className="flex items-start justify-between mb-4">
@@ -224,7 +215,6 @@ const ModerationAppeals = () => {
           </span>
         </div>
       </div>
-
       <div className="space-y-3 mb-4">
         <div>
           <span className="text-sm font-medium text-gray-700">Original Action: </span>
@@ -239,14 +229,12 @@ const ModerationAppeals = () => {
           <span className="text-sm text-gray-900">{appeal.appealReason}</span>
         </div>
       </div>
-
       {appeal.contentPreview && (
         <div className="bg-gray-50 rounded-lg p-3 mb-4">
           <h4 className="text-sm font-medium text-gray-700 mb-1">Content Preview:</h4>
           <p className="text-sm text-gray-600 italic">"{appeal.contentPreview}"</p>
         </div>
       )}
-
       <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
         <div className="flex items-center space-x-4">
           <span>Submitted: {new Date(appeal.submittedAt).toLocaleDateString()}</span>
@@ -260,7 +248,6 @@ const ModerationAppeals = () => {
           <span>{appeal.moderatorNotes.length} notes</span>
         </div>
       </div>
-
       <div className="flex items-center justify-between">
         <button
           onClick={() => setSelectedAppeal(appeal)}
@@ -269,7 +256,6 @@ const ModerationAppeals = () => {
           <Eye className="w-3 h-3" />
           <span>View Details</span>
         </button>
-
         {appeal.status === 'pending' && (
           <div className="flex space-x-2">
             <button
@@ -288,7 +274,6 @@ const ModerationAppeals = () => {
             </button>
           </div>
         )}
-
         {appeal.status === 'under_review' && (
           <div className="flex space-x-2">
             <button
@@ -308,13 +293,10 @@ const ModerationAppeals = () => {
       </div>
     </div>
   );
-
   const AppealDetailModal = ({ appeal, onClose }) => {
     const [newNote, setNewNote] = useState('');
-
     const handleAddNote = () => {
       if (!newNote.trim()) return;
-
       setAppeals(prev => prev.map(a =>
         a.id === appeal.id
           ? {
@@ -334,7 +316,6 @@ const ModerationAppeals = () => {
       ));
       setNewNote('');
     };
-
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -353,7 +334,6 @@ const ModerationAppeals = () => {
               <XCircle className="w-5 h-5 text-gray-500" />
             </button>
           </div>
-
           <div className="p-6 space-y-6">
             {/* Appeal Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -382,7 +362,6 @@ const ModerationAppeals = () => {
                   </div>
                 </div>
               </div>
-
               <div>
                 <h3 className="font-semibold text-gray-900 mb-3">Original Action</h3>
                 <div className="space-y-2 text-sm">
@@ -405,7 +384,6 @@ const ModerationAppeals = () => {
                 </div>
               </div>
             </div>
-
             {/* Content Preview */}
             {appeal.contentPreview && (
               <div>
@@ -418,7 +396,6 @@ const ModerationAppeals = () => {
                 </div>
               </div>
             )}
-
             {/* Appeal Explanation */}
             <div>
               <h3 className="font-semibold text-gray-900 mb-3">User's Appeal</h3>
@@ -432,7 +409,6 @@ const ModerationAppeals = () => {
                 )}
               </div>
             </div>
-
             {/* Evidence */}
             {appeal.evidenceUrls && appeal.evidenceUrls.length > 0 && (
               <div>
@@ -447,7 +423,6 @@ const ModerationAppeals = () => {
                 </div>
               </div>
             )}
-
             {/* Moderator Notes */}
             <div>
               <h3 className="font-semibold text-gray-900 mb-3">Moderator Notes</h3>
@@ -464,7 +439,6 @@ const ModerationAppeals = () => {
                   </div>
                 ))}
               </div>
-
               {/* Add Note */}
               <div className="flex space-x-2">
                 <input
@@ -483,7 +457,6 @@ const ModerationAppeals = () => {
                 </button>
               </div>
             </div>
-
             {/* Actions */}
             {appeal.status === 'pending' || appeal.status === 'under_review' ? (
               <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
@@ -526,7 +499,6 @@ const ModerationAppeals = () => {
       </div>
     );
   };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -544,7 +516,6 @@ const ModerationAppeals = () => {
           </button>
         </div>
       </div>
-
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg border border-gray-200 p-4">
@@ -584,7 +555,6 @@ const ModerationAppeals = () => {
           </p>
         </div>
       </div>
-
       {/* Filters and Search */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
@@ -623,7 +593,6 @@ const ModerationAppeals = () => {
           </div>
         </div>
       </div>
-
       {/* Tabs */}
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
@@ -651,7 +620,6 @@ const ModerationAppeals = () => {
           ))}
         </nav>
       </div>
-
       {/* Appeals List */}
       <div className="space-y-4">
         {filteredAppeals.length > 0 ? (
@@ -666,7 +634,6 @@ const ModerationAppeals = () => {
           </div>
         )}
       </div>
-
       {/* Appeal Detail Modal */}
       {selectedAppeal && (
         <AppealDetailModal
@@ -677,5 +644,4 @@ const ModerationAppeals = () => {
     </div>
   );
 };
-
 export default ModerationAppeals;

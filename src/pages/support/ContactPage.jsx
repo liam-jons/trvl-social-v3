@@ -2,7 +2,6 @@ import { useState } from 'react';
 import StaticPageLayout from '../../components/layout/StaticPageLayout';
 import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
-
 const ContactPage = () => {
   const breadcrumbs = [{ title: "Contact Us" }];
   const [formData, setFormData] = useState({
@@ -12,7 +11,6 @@ const ContactPage = () => {
     category: '',
     message: ''
   });
-
   const contactMethods = [
     {
       type: 'General Support',
@@ -43,7 +41,6 @@ const ContactPage = () => {
       responseTime: '1-2 business days'
     }
   ];
-
   const categories = [
     'General Inquiry',
     'Technical Support',
@@ -54,20 +51,17 @@ const ContactPage = () => {
     'Partnership',
     'Other'
   ];
-
   const handleSubmit = (e) => {
     e.preventDefault();
     // Handle form submission
     console.log('Form submitted:', formData);
   };
-
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
   };
-
   return (
     <StaticPageLayout
       title="Contact Us"
@@ -96,7 +90,6 @@ const ContactPage = () => {
             ))}
           </div>
         </section>
-
         {/* Contact Form */}
         <section>
           <h2 className="text-3xl font-bold mb-8 text-center">Send Us a Message</h2>
@@ -129,7 +122,6 @@ const ContactPage = () => {
                     />
                   </div>
                 </div>
-
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium mb-2">Category *</label>
@@ -159,7 +151,6 @@ const ContactPage = () => {
                     />
                   </div>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium mb-2">Message *</label>
                   <textarea
@@ -172,7 +163,6 @@ const ContactPage = () => {
                     placeholder="Please provide detailed information about your inquiry..."
                   />
                 </div>
-
                 <div className="text-center">
                   <GlassButton type="submit" variant="primary" size="lg">
                     Send Message
@@ -182,7 +172,6 @@ const ContactPage = () => {
             </GlassCard>
           </div>
         </section>
-
         {/* FAQ Quick Links */}
         <section className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl p-8">
           <h2 className="text-3xl font-bold mb-8 text-center">Before You Contact Us</h2>
@@ -204,7 +193,6 @@ const ContactPage = () => {
             </GlassButton>
           </div>
         </section>
-
         {/* Office Information */}
         <section>
           <h2 className="text-3xl font-bold mb-8 text-center">Our Offices</h2>
@@ -218,7 +206,6 @@ const ContactPage = () => {
                 United States
               </p>
             </GlassCard>
-            
             <GlassCard className="text-center p-6">
               <div className="text-4xl mb-4">🇬🇧</div>
               <h3 className="text-lg font-semibold mb-2">London, UK</h3>
@@ -228,7 +215,6 @@ const ContactPage = () => {
                 United Kingdom
               </p>
             </GlassCard>
-            
             <GlassCard className="text-center p-6">
               <div className="text-4xl mb-4">🇸🇬</div>
               <h3 className="text-lg font-semibold mb-2">Singapore</h3>
@@ -240,7 +226,6 @@ const ContactPage = () => {
             </GlassCard>
           </div>
         </section>
-
         {/* Support Hours */}
         <GlassCard className="text-center p-8">
           <h2 className="text-2xl font-bold mb-6">Support Hours</h2>
@@ -267,5 +252,4 @@ const ContactPage = () => {
     </StaticPageLayout>
   );
 };
-
 export default ContactPage;

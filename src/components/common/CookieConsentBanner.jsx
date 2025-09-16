@@ -2,40 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import gdprConsentService from '../../services/gdpr-consent-service';
-
 const CookieConsentBanner = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [consentStatus, setConsentStatus] = useState(null);
   const [loading, setLoading] = useState(false);
-
   useEffect(() => {
     // Initialize and check if banner should be shown
     const initializeBanner = async () => {
       await gdprConsentService.init();
       const status = gdprConsentService.getConsentStatus();
       setConsentStatus(status);
-
       const shouldShow = gdprConsentService.shouldShowBanner();
       setIsVisible(shouldShow);
-
       if (shouldShow) {
         gdprConsentService.markBannerShown();
       }
     };
-
     initializeBanner();
-
     // Listen for consent changes
     const removeListener = gdprConsentService.addEventListener((eventType, data) => {
       if (eventType === 'consentChanged' || eventType === 'multipleConsentChanged') {
         setConsentStatus(gdprConsentService.getConsentStatus());
       }
     });
-
     return removeListener;
   }, []);
-
   const handleAcceptAll = async () => {
     setLoading(true);
     try {
@@ -47,7 +39,6 @@ const CookieConsentBanner = () => {
       setLoading(false);
     }
   };
-
   const handleRejectAll = async () => {
     setLoading(true);
     try {
@@ -59,19 +50,15 @@ const CookieConsentBanner = () => {
       setLoading(false);
     }
   };
-
   const handleCategoryToggle = (category, enabled) => {
     gdprConsentService.setConsent(category, enabled, true);
   };
-
   const handleSavePreferences = () => {
     setIsVisible(false);
   };
-
   if (!isVisible || !consentStatus) {
     return null;
   }
-
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm">
       <Card className="mx-4 mb-4 max-w-4xl bg-white shadow-2xl">
@@ -88,7 +75,6 @@ const CookieConsentBanner = () => {
                     analyze site usage, and assist with marketing efforts. You can customize
                     your preferences or accept all cookies.
                   </p>
-
                   {consentStatus.requiresExplicitConsent && (
                     <p className="mt-2 text-xs text-blue-600">
                       {consentStatus.region === 'EU' && "GDPR compliance: "}
@@ -99,7 +85,6 @@ const CookieConsentBanner = () => {
                   )}
                 </div>
               </div>
-
               <div className="flex flex-col space-y-3 sm:flex-row sm:space-x-3 sm:space-y-0">
                 <Button
                   onClick={handleAcceptAll}
@@ -108,7 +93,6 @@ const CookieConsentBanner = () => {
                 >
                   {loading ? 'Processing...' : 'Accept All'}
                 </Button>
-
                 <Button
                   onClick={handleRejectAll}
                   disabled={loading}
@@ -117,7 +101,6 @@ const CookieConsentBanner = () => {
                 >
                   {loading ? 'Processing...' : 'Reject All'}
                 </Button>
-
                 <Button
                   onClick={() => setShowDetails(true)}
                   variant="outline"
@@ -126,7 +109,6 @@ const CookieConsentBanner = () => {
                   Customize Preferences
                 </Button>
               </div>
-
               <div className="text-xs text-gray-500">
                 By continuing to use our site, you agree to our{' '}
                 <a href="/privacy-policy" className="text-blue-600 hover:underline">
@@ -150,7 +132,6 @@ const CookieConsentBanner = () => {
                   these settings at any time.
                 </p>
               </div>
-
               <div className="space-y-4">
                 {Object.entries(consentStatus.categories).map(([category, info]) => (
                   <div key={category} className="border border-gray-200 rounded-lg p-4">
@@ -165,7 +146,6 @@ const CookieConsentBanner = () => {
                           )}
                         </div>
                         <p className="mt-1 text-sm text-gray-600">{info.description}</p>
-
                         {info.purposes && info.purposes.length > 0 && (
                           <div className="mt-2">
                             <p className="text-xs font-medium text-gray-700">Used for:</p>
@@ -177,7 +157,6 @@ const CookieConsentBanner = () => {
                           </div>
                         )}
                       </div>
-
                       <div className="ml-4">
                         <label className="flex items-center">
                           <input
@@ -196,7 +175,6 @@ const CookieConsentBanner = () => {
                   </div>
                 ))}
               </div>
-
               <div className="flex flex-col space-y-3 sm:flex-row sm:space-x-3 sm:space-y-0">
                 <Button
                   onClick={handleSavePreferences}
@@ -204,7 +182,6 @@ const CookieConsentBanner = () => {
                 >
                   Save Preferences
                 </Button>
-
                 <Button
                   onClick={() => setShowDetails(false)}
                   variant="outline"
@@ -213,7 +190,6 @@ const CookieConsentBanner = () => {
                   Back
                 </Button>
               </div>
-
               <div className="border-t border-gray-200 pt-4">
                 <h5 className="text-sm font-medium text-gray-900">Data Retention</h5>
                 <div className="mt-2 space-y-1 text-xs text-gray-600">
@@ -223,7 +199,6 @@ const CookieConsentBanner = () => {
                   <p>• Consent records: Retained for 7 years (compliance)</p>
                 </div>
               </div>
-
               <div className="border-t border-gray-200 pt-4">
                 <h5 className="text-sm font-medium text-gray-900">Your Rights</h5>
                 <div className="mt-2 space-y-1 text-xs text-gray-600">
@@ -241,5 +216,4 @@ const CookieConsentBanner = () => {
     </div>
   );
 };
-
 export default CookieConsentBanner;

@@ -2,11 +2,9 @@
  * CancellationModal - Interface for booking cancellation with policy enforcement
  * Provides guided workflow for full and partial cancellations
  */
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase.js';
 import { cancellationPolicyEngine } from '../../services/booking-modification-service.js';
-
 const CancellationModal = ({
   isOpen,
   onClose,
@@ -26,7 +24,6 @@ const CancellationModal = ({
   const [bookingDetails, setBookingDetails] = useState(null);
   const [policyEvaluation, setPolicyEvaluation] = useState(null);
   const [error, setError] = useState('');
-
   const cancellationReasons = [
     {
       id: 'personal_emergency',
@@ -77,30 +74,25 @@ const CancellationModal = ({
       requiresEvidence: false,
     },
   ];
-
   const specialCircumstances = [
     { id: 'emergency', label: 'Medical Emergency', requiresEvidence: true },
     { id: 'weather', label: 'Weather/Natural Disaster', requiresEvidence: false },
     { id: 'vendor_cancellation', label: 'Vendor Cancelled', requiresEvidence: false },
     { id: 'quality_issues', label: 'Service Quality Issues', requiresEvidence: true },
   ];
-
   useEffect(() => {
     if (isOpen && bookingId) {
       loadBookingDetails();
     }
   }, [isOpen, bookingId]);
-
   useEffect(() => {
     if (bookingDetails && cancellationData.type) {
       evaluatePolicy();
     }
   }, [bookingDetails, cancellationData.type, cancellationData.specialCircumstances]);
-
   const loadBookingDetails = async () => {
     try {
       setLoading(true);
-
       const { data: booking, error } = await supabase
         .from('bookings')
         .select(`
@@ -130,10 +122,8 @@ const CancellationModal = ({
         `)
         .eq('id', bookingId)
         .single();
-
       if (error) throw error;
       setBookingDetails(booking);
-
       // Initialize participants for partial cancellation
       if (booking.split_payments?.[0]?.individual_payments) {
         const participants = booking.split_payments[0].individual_payments.map(ip => ({
@@ -145,29 +135,24 @@ const CancellationModal = ({
         }));
         setCancellationData(prev => ({ ...prev, participantsToCancel: participants }));
       }
-
     } catch (error) {
       setError(`Failed to load booking details: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
-
   const evaluatePolicy = async () => {
     try {
       if (!bookingDetails) return;
-
       const evaluation = await cancellationPolicyEngine.evaluateCancellationPolicy(
         bookingId,
         cancellationData.type
       );
-
       setPolicyEvaluation(evaluation);
     } catch (error) {
       console.error('Failed to evaluate policy:', error);
     }
   };
-
   const handleParticipantToggle = (participantIndex) => {
     setCancellationData(prev => ({
       ...prev,
@@ -176,26 +161,21 @@ const CancellationModal = ({
       ),
     }));
   };
-
   const submitCancellation = async () => {
     try {
       setLoading(true);
       setError('');
-
       // Validate form
       if (!cancellationData.reason) {
         throw new Error('Please select a reason for cancellation');
       }
-
       if (cancellationData.type === 'partial') {
         const selectedParticipants = cancellationData.participantsToCancel.filter(p => p.selected);
         if (selectedParticipants.length === 0) {
           throw new Error('Please select participants to cancel');
         }
       }
-
       let result;
-
       if (cancellationData.type === 'partial') {
         // Process partial cancellation
         const selectedParticipants = cancellationData.participantsToCancel.filter(p => p.selected);
@@ -216,26 +196,22 @@ const CancellationModal = ({
           evidence: cancellationData.evidence,
         });
       }
-
       setStep(4);
       if (onCancellationRequested) {
         onCancellationRequested(result);
       }
-
     } catch (error) {
       setError(`Failed to process cancellation: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
-
   const renderStep1 = () => (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium text-gray-900 mb-4">
           Cancellation Type
         </h3>
-
         <div className="space-y-4">
           <label className="flex items-start space-x-3 cursor-pointer">
             <input
@@ -255,7 +231,6 @@ const CancellationModal = ({
               </div>
             </div>
           </label>
-
           {bookingDetails?.split_payments?.[0] && (
             <label className="flex items-start space-x-3 cursor-pointer">
               <input
@@ -278,7 +253,6 @@ const CancellationModal = ({
           )}
         </div>
       </div>
-
       {cancellationData.type === 'partial' && bookingDetails?.split_payments?.[0] && (
         <div>
           <h4 className="text-sm font-medium text-gray-900 mb-3">
@@ -306,7 +280,6 @@ const CancellationModal = ({
           </div>
         </div>
       )}
-
       <div>
         <h4 className="text-sm font-medium text-gray-900 mb-3">
           Reason for Cancellation
@@ -337,7 +310,6 @@ const CancellationModal = ({
           ))}
         </div>
       </div>
-
       {['personal_emergency', 'quality_concerns'].includes(cancellationData.reason) && (
         <div>
           <h4 className="text-sm font-medium text-gray-900 mb-3">
@@ -367,7 +339,6 @@ const CancellationModal = ({
           </div>
         </div>
       )}
-
       {bookingDetails && (
         <div className="bg-gray-50 rounded-lg p-4">
           <h4 className="text-sm font-medium text-gray-900 mb-2">Booking Details</h4>
@@ -386,14 +357,12 @@ const CancellationModal = ({
       )}
     </div>
   );
-
   const renderStep2 = () => (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium text-gray-900 mb-4">
           Cancellation Policy & Refund Information
         </h3>
-
         {policyEvaluation && (
           <div className="space-y-4">
             <div className="bg-gray-50 rounded-lg p-4">
@@ -405,7 +374,6 @@ const CancellationModal = ({
                 <p><strong>Total amount paid:</strong> ${(policyEvaluation.booking.totalAmount / 100).toFixed(2)}</p>
               </div>
             </div>
-
             <div className={`rounded-lg p-4 ${
               policyEvaluation.eligibility.eligible
                 ? 'bg-green-50 border border-green-200'
@@ -443,7 +411,6 @@ const CancellationModal = ({
                 </div>
               </div>
             </div>
-
             {policyEvaluation.eligibility.eligible && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h4 className="text-sm font-medium text-blue-800 mb-2">
@@ -477,7 +444,6 @@ const CancellationModal = ({
                 </div>
               </div>
             )}
-
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
@@ -507,7 +473,6 @@ const CancellationModal = ({
       </div>
     </div>
   );
-
   const renderStep3 = () => (
     <div className="space-y-6">
       <div>
@@ -551,7 +516,6 @@ const CancellationModal = ({
           )}
         </div>
       </div>
-
       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
         <div className="flex">
           <div className="flex-shrink-0">
@@ -574,7 +538,6 @@ const CancellationModal = ({
       </div>
     </div>
   );
-
   const renderStep4 = () => (
     <div className="text-center space-y-6">
       <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
@@ -603,9 +566,7 @@ const CancellationModal = ({
       </div>
     </div>
   );
-
   if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
@@ -635,7 +596,6 @@ const CancellationModal = ({
             </div>
           )}
         </div>
-
         <div className="px-6 py-4">
           {loading && (
             <div className="text-center py-4">
@@ -643,13 +603,11 @@ const CancellationModal = ({
               <p className="mt-2 text-sm text-gray-500">Loading...</p>
             </div>
           )}
-
           {error && (
             <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-3">
               <div className="text-sm text-red-600">{error}</div>
             </div>
           )}
-
           {!loading && (
             <>
               {step === 1 && renderStep1()}
@@ -659,7 +617,6 @@ const CancellationModal = ({
             </>
           )}
         </div>
-
         {!loading && step < 4 && (
           <div className="px-6 py-4 border-t border-gray-200">
             <div className="flex justify-between">
@@ -701,7 +658,6 @@ const CancellationModal = ({
             </div>
           </div>
         )}
-
         {step === 4 && (
           <div className="px-6 py-4 border-t border-gray-200">
             <button
@@ -716,5 +672,4 @@ const CancellationModal = ({
     </div>
   );
 };
-
 export default CancellationModal;

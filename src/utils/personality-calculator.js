@@ -1,6 +1,5 @@
 import { PERSONALITY_DIMENSIONS } from '../types/personality';
 import { generatePersonalityDescriptions } from '../services/ai-service.js';
-
 /**
  * Calculate personality profile from quiz answers
  * @param {Array} answers - Array of quiz answers with trait scores
@@ -12,7 +11,6 @@ export async function calculatePersonalityProfile(answers, options = { useAI: tr
   if (!answers || answers.length === 0) {
     throw new Error('No answers provided for calculation');
   }
-
   // Initialize trait totals and counts
   const traitTotals = {
     energyLevel: 0,
@@ -20,14 +18,12 @@ export async function calculatePersonalityProfile(answers, options = { useAI: tr
     adventureStyle: 0,
     riskTolerance: 0
   };
-
   const traitCounts = {
     energyLevel: 0,
     socialPreference: 0,
     adventureStyle: 0,
     riskTolerance: 0
   };
-
   // Aggregate trait scores from all answers
   answers.forEach(answer => {
     if (answer.traitScores) {
@@ -39,7 +35,6 @@ export async function calculatePersonalityProfile(answers, options = { useAI: tr
       });
     }
   });
-
   // Calculate average scores for each trait
   const averageScores = {};
   Object.keys(traitTotals).forEach(trait => {
@@ -50,13 +45,10 @@ export async function calculatePersonalityProfile(answers, options = { useAI: tr
       averageScores[trait] = 50;
     }
   });
-
   // Normalize scores to 0-100 range
   const normalizedScores = normalizeScores(averageScores);
-
   // Apply weights based on question frequency
   const weightedScores = applyWeights(normalizedScores, traitCounts, answers.length);
-
   // Generate personality profile
   const profile = {
     energyLevel: Math.round(weightedScores.energyLevel),
@@ -67,10 +59,8 @@ export async function calculatePersonalityProfile(answers, options = { useAI: tr
     totalQuestions: answers.length,
     answeredQuestions: answers.filter(a => a.traitScores).length
   };
-
   // Add personality type classification
   profile.personalityType = classifyPersonalityType(profile);
-
   // Add trait descriptions using AI or fallback
   try {
     if (options.useAI) {
@@ -90,10 +80,8 @@ export async function calculatePersonalityProfile(answers, options = { useAI: tr
     profile.descriptionSource = 'fallback';
     profile.descriptionError = error.message;
   }
-
   return profile;
 }
-
 /**
  * Normalize scores to ensure they're within 0-100 range
  * @param {Object} scores - Raw trait scores
@@ -101,7 +89,6 @@ export async function calculatePersonalityProfile(answers, options = { useAI: tr
  */
 function normalizeScores(scores) {
   const normalized = {};
-
   Object.entries(scores).forEach(([trait, score]) => {
     const dimension = PERSONALITY_DIMENSIONS[trait];
     if (dimension) {
@@ -113,10 +100,8 @@ function normalizeScores(scores) {
       normalized[trait] = score;
     }
   });
-
   return normalized;
 }
-
 /**
  * Apply weights based on how many questions contributed to each trait
  * @param {Object} scores - Normalized trait scores
@@ -126,21 +111,16 @@ function normalizeScores(scores) {
  */
 function applyWeights(scores, counts, totalQuestions) {
   const weighted = {};
-
   Object.entries(scores).forEach(([trait, score]) => {
     const questionWeight = counts[trait] / totalQuestions;
-
     // If trait was measured by fewer questions, reduce confidence
     // but don't completely nullify the score
     const confidenceFactor = Math.min(1, (counts[trait] / 3) + 0.5);
-
     // Apply confidence factor to move score toward middle (50)
     weighted[trait] = score * confidenceFactor + 50 * (1 - confidenceFactor);
   });
-
   return weighted;
 }
-
 /**
  * Classify personality into a type based on trait scores
  * @param {Object} profile - Calculated personality profile
@@ -148,37 +128,30 @@ function applyWeights(scores, counts, totalQuestions) {
  */
 function classifyPersonalityType(profile) {
   const { energyLevel, socialPreference, adventureStyle, riskTolerance } = profile;
-
   // High energy + High social + High adventure + High risk = "The Thrill Seeker"
   if (energyLevel > 70 && socialPreference > 70 && adventureStyle > 70 && riskTolerance > 70) {
     return 'The Thrill Seeker';
   }
-
   // Low energy + Low social + Low adventure + Low risk = "The Comfort Traveler"
   if (energyLevel < 40 && socialPreference < 40 && adventureStyle < 40 && riskTolerance < 40) {
     return 'The Comfort Traveler';
   }
-
   // High energy + Low social + High adventure = "The Solo Explorer"
   if (energyLevel > 60 && socialPreference < 40 && adventureStyle > 60) {
     return 'The Solo Explorer';
   }
-
   // Low energy + High social + Moderate adventure = "The Social Butterfly"
   if (energyLevel < 50 && socialPreference > 70 && adventureStyle > 40 && adventureStyle < 70) {
     return 'The Social Butterfly';
   }
-
   // High adventure + High risk + Moderate energy = "The Adventurer"
   if (adventureStyle > 70 && riskTolerance > 70 && energyLevel > 50) {
     return 'The Adventurer';
   }
-
   // High social + Low risk + Moderate energy = "The Group Planner"
   if (socialPreference > 70 && riskTolerance < 40 && energyLevel > 40 && energyLevel < 70) {
     return 'The Group Planner';
   }
-
   // Moderate everything = "The Balanced Wanderer"
   if (
     energyLevel > 40 && energyLevel < 70 &&
@@ -188,21 +161,17 @@ function classifyPersonalityType(profile) {
   ) {
     return 'The Balanced Wanderer';
   }
-
   // High energy + High adventure + Low social = "The Active Soloist"
   if (energyLevel > 70 && adventureStyle > 70 && socialPreference < 40) {
     return 'The Active Soloist';
   }
-
   // Low energy + High social + Low risk = "The Leisure Socializer"
   if (energyLevel < 40 && socialPreference > 60 && riskTolerance < 40) {
     return 'The Leisure Socializer';
   }
-
   // Default fallback
   return 'The Curious Traveler';
 }
-
 /**
  * Generate descriptive text for each trait level
  * @param {Object} profile - Calculated personality profile
@@ -210,7 +179,6 @@ function classifyPersonalityType(profile) {
  */
 function generateTraitDescriptions(profile) {
   const descriptions = {};
-
   // Energy Level description
   if (profile.energyLevel > 70) {
     descriptions.energyLevel = 'You thrive on high-energy activities and packed itineraries';
@@ -219,7 +187,6 @@ function generateTraitDescriptions(profile) {
   } else {
     descriptions.energyLevel = 'You prefer a relaxed pace with plenty of downtime';
   }
-
   // Social Preference description
   if (profile.socialPreference > 70) {
     descriptions.socialPreference = 'You love traveling with groups and meeting new people';
@@ -228,7 +195,6 @@ function generateTraitDescriptions(profile) {
   } else {
     descriptions.socialPreference = 'You prefer solo adventures or intimate travel experiences';
   }
-
   // Adventure Style description
   if (profile.adventureStyle > 70) {
     descriptions.adventureStyle = 'You seek out unique, off-the-beaten-path experiences';
@@ -237,7 +203,6 @@ function generateTraitDescriptions(profile) {
   } else {
     descriptions.adventureStyle = 'You prefer well-planned, comfortable travel experiences';
   }
-
   // Risk Tolerance description
   if (profile.riskTolerance > 70) {
     descriptions.riskTolerance = 'You embrace challenges and thrive on adrenaline';
@@ -246,10 +211,8 @@ function generateTraitDescriptions(profile) {
   } else {
     descriptions.riskTolerance = 'You prioritize safety and predictability in your travels';
   }
-
   return descriptions;
 }
-
 /**
  * Validate quiz answers format
  * @param {Array} answers - Array of quiz answers
@@ -259,7 +222,6 @@ export function validateAnswers(answers) {
   if (!Array.isArray(answers)) {
     return false;
   }
-
   return answers.every(answer =>
     answer &&
     typeof answer.questionId === 'number' &&
@@ -267,7 +229,6 @@ export function validateAnswers(answers) {
     typeof answer.traitScores === 'object'
   );
 }
-
 /**
  * Calculate completion percentage
  * @param {Array} answers - Array of quiz answers
@@ -278,7 +239,6 @@ export function calculateCompletionPercentage(answers, totalQuestions) {
   if (!answers || totalQuestions === 0) {
     return 0;
   }
-
   const answeredCount = answers.filter(a => a && a.traitScores).length;
   return Math.round((answeredCount / totalQuestions) * 100);
 }

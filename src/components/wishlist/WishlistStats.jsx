@@ -3,23 +3,18 @@ import { motion } from 'framer-motion';
 import { WishlistService } from '../../services/wishlist-service';
 import GlassCard from '../ui/GlassCard';
 import { HeartIcon, FolderIcon, ClockIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
-
 const WishlistStats = ({ userId, className = '' }) => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     const loadStats = async () => {
       if (!userId) return;
-
       try {
         const { data, error } = await WishlistService.getWishlistStats(userId);
-
         if (error) {
           console.error('Error loading wishlist stats:', error);
           return;
         }
-
         setStats(data);
       } catch (error) {
         console.error('Error loading wishlist stats:', error);
@@ -27,10 +22,8 @@ const WishlistStats = ({ userId, className = '' }) => {
         setLoading(false);
       }
     };
-
     loadStats();
   }, [userId]);
-
   if (loading || !stats) {
     return (
       <div className={`${className}`}>
@@ -50,7 +43,6 @@ const WishlistStats = ({ userId, className = '' }) => {
       </div>
     );
   }
-
   const statItems = [
     {
       icon: HeartIcon,
@@ -81,7 +73,6 @@ const WishlistStats = ({ userId, className = '' }) => {
       bgColor: 'bg-yellow-50 dark:bg-yellow-900/20'
     }
   ];
-
   return (
     <div className={className}>
       <motion.div
@@ -116,5 +107,4 @@ const WishlistStats = ({ userId, className = '' }) => {
     </div>
   );
 };
-
 export default WishlistStats;

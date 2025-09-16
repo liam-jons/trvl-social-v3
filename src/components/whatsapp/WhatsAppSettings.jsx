@@ -4,7 +4,6 @@ import { supabase } from '../../lib/supabase';
 import useAuthStore from '../../stores/authStore';
 import useNotificationStore from '../../stores/notificationStore';
 import { toast } from 'react-hot-toast';
-
 /**
  * WhatsApp Settings Component
  * Manages WhatsApp notification preferences and opt-in/opt-out
@@ -22,12 +21,10 @@ export default function WhatsAppSettings() {
     groupInvitations: true,
     customerSupport: true
   });
-
   useEffect(() => {
     loadUserProfile();
     loadWhatsAppPreferences();
   }, []);
-
   /**
    * Load user profile including phone number
    */
@@ -38,17 +35,14 @@ export default function WhatsAppSettings() {
         .select('phone_number')
         .eq('id', user.id)
         .single();
-
       if (error && error.code !== 'PGRST116') {
         throw error;
       }
-
       setPhoneNumber(profile?.phone_number || '');
     } catch (error) {
       console.error('Error loading profile:', error);
     }
   };
-
   /**
    * Load WhatsApp notification preferences
    */
@@ -59,11 +53,9 @@ export default function WhatsAppSettings() {
         .select('whatsapp_notifications, whatsapp_preferences')
         .eq('user_id', user.id)
         .single();
-
       if (error && error.code !== 'PGRST116') {
         throw error;
       }
-
       if (prefs) {
         setWhatsappPreferences({
           enabled: prefs.whatsapp_notifications !== false,
@@ -74,7 +66,6 @@ export default function WhatsAppSettings() {
       console.error('Error loading WhatsApp preferences:', error);
     }
   };
-
   /**
    * Update phone number
    */
@@ -83,7 +74,6 @@ export default function WhatsAppSettings() {
       toast.error('Phone number is required');
       return;
     }
-
     // Basic phone number validation
     const phoneRegex = /^\+?[1-9]\d{1,14}$/;
     const cleanPhone = phoneNumber.replace(/\s/g, '');
@@ -91,12 +81,9 @@ export default function WhatsAppSettings() {
       toast.error('Please enter a valid phone number with country code');
       return;
     }
-
     setLoading(true);
-
     try {
       const formattedPhone = cleanPhone.startsWith('+') ? cleanPhone : `+${cleanPhone}`;
-
       const { error } = await supabase
         .from('profiles')
         .upsert({
@@ -104,9 +91,7 @@ export default function WhatsAppSettings() {
           phone_number: formattedPhone,
           updated_at: new Date().toISOString()
         });
-
       if (error) throw error;
-
       setPhoneNumber(formattedPhone);
       toast.success('Phone number updated successfully');
     } catch (error) {
@@ -116,18 +101,15 @@ export default function WhatsAppSettings() {
       setLoading(false);
     }
   };
-
   /**
    * Update WhatsApp preferences
    */
   const updateWhatsAppPreferences = async (newPreferences) => {
     setLoading(true);
-
     try {
       // Update local state
       const updatedPrefs = { ...whatsappPreferences, ...newPreferences };
       setWhatsappPreferences(updatedPrefs);
-
       // Update in database
       const { error } = await supabase
         .from('user_preferences')
@@ -143,26 +125,21 @@ export default function WhatsAppSettings() {
           },
           updated_at: new Date().toISOString()
         });
-
       if (error) throw error;
-
       // Update notification store
       await updatePreferences({
         whatsappNotifications: updatedPrefs.enabled
       });
-
       toast.success('WhatsApp preferences updated');
     } catch (error) {
       console.error('Error updating WhatsApp preferences:', error);
       toast.error('Failed to update preferences');
-
       // Revert local state
       loadWhatsAppPreferences();
     } finally {
       setLoading(false);
     }
   };
-
   /**
    * Send test WhatsApp message
    */
@@ -171,14 +148,11 @@ export default function WhatsAppSettings() {
       toast.error('Please add your phone number first');
       return;
     }
-
     if (!whatsappPreferences.enabled) {
       toast.error('Please enable WhatsApp notifications first');
       return;
     }
-
     setLoading(true);
-
     try {
       const response = await fetch('/api/whatsapp/messages', {
         method: 'POST',
@@ -192,12 +166,10 @@ export default function WhatsAppSettings() {
           message: '🎯 Test message from TRVL!\n\nYour WhatsApp notifications are working correctly. You\'ll now receive updates about your adventures directly on WhatsApp!'
         })
       });
-
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to send test message');
       }
-
       toast.success('Test message sent! Check your WhatsApp.');
     } catch (error) {
       console.error('Error sending test message:', error);
@@ -206,7 +178,6 @@ export default function WhatsAppSettings() {
       setLoading(false);
     }
   };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -216,14 +187,12 @@ export default function WhatsAppSettings() {
           Manage your WhatsApp notifications and communication preferences
         </p>
       </div>
-
       {/* Phone Number Section */}
       <div className="border border-gray-200 rounded-lg p-6 space-y-4">
         <div className="flex items-center">
           <PhoneIcon className="h-5 w-5 text-gray-400 mr-2" />
           <h4 className="text-md font-medium text-gray-900">Phone Number</h4>
         </div>
-
         <div className="space-y-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -249,7 +218,6 @@ export default function WhatsAppSettings() {
               </button>
             </div>
           </div>
-
           {phoneNumber && (
             <div className="flex items-center text-sm text-green-600">
               <CheckCircleIcon className="h-4 w-4 mr-1" />
@@ -258,11 +226,9 @@ export default function WhatsAppSettings() {
           )}
         </div>
       </div>
-
       {/* WhatsApp Notifications */}
       <div className="border border-gray-200 rounded-lg p-6 space-y-4">
         <h4 className="text-md font-medium text-gray-900">WhatsApp Notifications</h4>
-
         {!phoneNumber && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
             <div className="flex">
@@ -276,7 +242,6 @@ export default function WhatsAppSettings() {
             </div>
           </div>
         )}
-
         {/* Master Toggle */}
         <div className="flex items-center justify-between py-2">
           <div>
@@ -297,7 +262,6 @@ export default function WhatsAppSettings() {
             />
           </button>
         </div>
-
         {/* Specific Notifications */}
         {whatsappPreferences.enabled && phoneNumber && (
           <div className="space-y-3 pl-4 border-l-2 border-green-100">
@@ -350,7 +314,6 @@ export default function WhatsAppSettings() {
             ))}
           </div>
         )}
-
         {/* Test Message */}
         {whatsappPreferences.enabled && phoneNumber && (
           <div className="pt-4 border-t border-gray-200">
@@ -367,7 +330,6 @@ export default function WhatsAppSettings() {
           </div>
         )}
       </div>
-
       {/* Privacy Notice */}
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
         <h5 className="text-sm font-medium text-gray-900 mb-2">Privacy & Data</h5>

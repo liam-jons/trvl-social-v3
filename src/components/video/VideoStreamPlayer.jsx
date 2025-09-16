@@ -12,7 +12,6 @@ import {
 } from '@heroicons/react/24/outline';
 import useVideoStreamStore from '../../stores/videoStreamStore';
 import GlassCard from '../ui/GlassCard';
-
 const VideoStreamPlayer = ({
   streamUrl,
   streamTitle = "Live Adventure Stream",
@@ -28,7 +27,6 @@ const VideoStreamPlayer = ({
   const [showSettings, setShowSettings] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [chatMessage, setChatMessage] = useState('');
-
   const {
     isStreaming,
     isLoading,
@@ -44,7 +42,6 @@ const VideoStreamPlayer = ({
     sendChatMessage,
     clearError
   } = useVideoStreamStore();
-
   // Initialize video streaming
   useEffect(() => {
     if (videoContainerRef.current && streamUrl) {
@@ -66,7 +63,6 @@ const VideoStreamPlayer = ({
               }
             }
           });
-
           if (autoplay) {
             await joinStream(streamUrl, {
               userName: 'Viewer',
@@ -78,15 +74,12 @@ const VideoStreamPlayer = ({
           console.error('Failed to initialize video player:', error);
         }
       };
-
       initVideo();
     }
-
     return () => {
       leaveStream();
     };
   }, [streamUrl]);
-
   // Handle play/pause
   const handlePlayPause = async () => {
     if (isPlaying && isStreaming) {
@@ -101,13 +94,11 @@ const VideoStreamPlayer = ({
       setIsPlaying(true);
     }
   };
-
   // Handle volume control
   const handleVolumeChange = (newVolume) => {
     setVolume(newVolume);
     setIsMuted(newVolume === 0);
   };
-
   // Handle mute toggle
   const handleMuteToggle = () => {
     if (isMuted) {
@@ -118,25 +109,21 @@ const VideoStreamPlayer = ({
       setIsMuted(true);
     }
   };
-
   // Handle fullscreen toggle
   const handleFullscreenToggle = () => {
     const newFullscreen = !streamSettings.fullscreen;
     setFullscreen(newFullscreen);
-
     if (newFullscreen) {
       videoContainerRef.current?.requestFullscreen?.();
     } else {
       document.exitFullscreen?.();
     }
   };
-
   // Handle quality change
   const handleQualityChange = (quality) => {
     setStreamQuality(quality);
     setShowSettings(false);
   };
-
   // Handle chat message send
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -145,7 +132,6 @@ const VideoStreamPlayer = ({
       setChatMessage('');
     }
   };
-
   if (error) {
     return (
       <GlassCard className={`p-6 ${className}`}>
@@ -169,7 +155,6 @@ const VideoStreamPlayer = ({
       </GlassCard>
     );
   }
-
   return (
     <GlassCard className={`relative overflow-hidden ${className}`}>
       {/* Stream Info Header */}
@@ -184,13 +169,11 @@ const VideoStreamPlayer = ({
             <div className="text-xs text-gray-300">{streamerName}</div>
           </div>
         </div>
-
         <div className="flex items-center space-x-2 bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2">
           <EyeIcon className="h-4 w-4 text-white" />
           <span className="text-white text-sm">{streamMetrics.viewerCount}</span>
         </div>
       </div>
-
       {/* Video Container */}
       <div
         ref={videoContainerRef}
@@ -203,7 +186,6 @@ const VideoStreamPlayer = ({
           </div>
         )}
       </div>
-
       {/* Controls Overlay */}
       {showControls && (
         <div className="absolute bottom-4 left-4 right-4 z-10">
@@ -221,7 +203,6 @@ const VideoStreamPlayer = ({
                   <PlayIcon className="h-6 w-6" />
                 )}
               </button>
-
               <button
                 onClick={handleMuteToggle}
                 className="text-white hover:text-blue-400 transition-colors"
@@ -232,7 +213,6 @@ const VideoStreamPlayer = ({
                   <SpeakerWaveIcon className="h-6 w-6" />
                 )}
               </button>
-
               <input
                 type="range"
                 min="0"
@@ -243,7 +223,6 @@ const VideoStreamPlayer = ({
                 className="w-20 accent-blue-500"
               />
             </div>
-
             {/* Right Controls */}
             <div className="flex items-center space-x-3">
               {/* Chat Toggle */}
@@ -253,7 +232,6 @@ const VideoStreamPlayer = ({
               >
                 <ChatBubbleLeftIcon className="h-6 w-6" />
               </button>
-
               {/* Settings */}
               <button
                 onClick={() => setShowSettings(!showSettings)}
@@ -261,7 +239,6 @@ const VideoStreamPlayer = ({
               >
                 <Cog6ToothIcon className="h-6 w-6" />
               </button>
-
               {/* Fullscreen */}
               <button
                 onClick={handleFullscreenToggle}
@@ -277,7 +254,6 @@ const VideoStreamPlayer = ({
           </div>
         </div>
       )}
-
       {/* Settings Menu */}
       {showSettings && (
         <div className="absolute bottom-20 right-4 z-20">
@@ -301,7 +277,6 @@ const VideoStreamPlayer = ({
           </GlassCard>
         </div>
       )}
-
       {/* Chat Panel */}
       {showChat && (
         <div className="absolute top-0 right-0 bottom-0 w-80 bg-black/50 backdrop-blur-sm border-l border-gray-600">
@@ -309,7 +284,6 @@ const VideoStreamPlayer = ({
             <div className="p-4 border-b border-gray-600">
               <h3 className="text-white font-semibold">Live Chat</h3>
             </div>
-
             <div className="flex-1 p-4 overflow-y-auto">
               <div className="space-y-3">
                 {/* Chat messages would be rendered here */}
@@ -318,7 +292,6 @@ const VideoStreamPlayer = ({
                 </div>
               </div>
             </div>
-
             <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-600">
               <div className="flex space-x-2">
                 <input
@@ -342,5 +315,4 @@ const VideoStreamPlayer = ({
     </GlassCard>
   );
 };
-
 export default VideoStreamPlayer;

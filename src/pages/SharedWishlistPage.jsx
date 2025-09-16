@@ -13,24 +13,20 @@ import {
   ShareIcon,
   CalendarIcon
 } from '@heroicons/react/24/outline';
-
 const SharedWishlistPage = () => {
   const { shareId } = useParams();
   const [wishlistData, setWishlistData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   useEffect(() => {
     const loadSharedWishlist = async () => {
       try {
         setLoading(true);
         const { data, error } = await WishlistService.getPublicWishlist(shareId);
-
         if (error) {
           setError('Wishlist not found or is private');
           return;
         }
-
         setWishlistData(data);
       } catch (error) {
         console.error('Error loading shared wishlist:', error);
@@ -39,20 +35,16 @@ const SharedWishlistPage = () => {
         setLoading(false);
       }
     };
-
     if (shareId) {
       loadSharedWishlist();
     }
   }, [shareId]);
-
   const handleAdventureClick = (adventure) => {
     window.location.href = `/adventures/${adventure.id}`;
   };
-
   if (loading) {
     return <LoadingSpinner fullScreen />;
   }
-
   if (error || !wishlistData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900">
@@ -80,7 +72,6 @@ const SharedWishlistPage = () => {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900">
       <div className="container mx-auto px-4 py-8">
@@ -105,7 +96,6 @@ const SharedWishlistPage = () => {
                     <UserIcon className="w-8 h-8 text-gray-400" />
                   </div>
                 )}
-
                 <div className="flex-1">
                   <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
                     <UserIcon className="w-4 h-4" />
@@ -114,18 +104,15 @@ const SharedWishlistPage = () => {
                     <EyeIcon className="w-4 h-4" />
                     <span>Public Collection</span>
                   </div>
-
                   <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3 mb-2">
                     <FolderIcon className="w-8 h-8 text-blue-500" />
                     {wishlistData.name}
                   </h1>
-
                   {wishlistData.description && (
                     <p className="text-gray-600 dark:text-gray-300 mb-3">
                       {wishlistData.description}
                     </p>
                   )}
-
                   <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                     <div className="flex items-center gap-1">
                       <HeartIcon className="w-4 h-4" />
@@ -140,7 +127,6 @@ const SharedWishlistPage = () => {
                   </div>
                 </div>
               </div>
-
               {/* Actions */}
               <div className="flex items-center gap-3">
                 <button
@@ -153,7 +139,6 @@ const SharedWishlistPage = () => {
                   <ShareIcon className="w-4 h-4" />
                   Share
                 </button>
-
                 <Link
                   to="/adventures"
                   className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
@@ -164,7 +149,6 @@ const SharedWishlistPage = () => {
             </div>
           </GlassCard>
         </motion.div>
-
         {/* Adventures Grid */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -206,7 +190,6 @@ const SharedWishlistPage = () => {
             </GlassCard>
           )}
         </motion.div>
-
         {/* Call to Action */}
         {wishlistData.wishlists && wishlistData.wishlists.length > 0 && (
           <motion.div
@@ -243,5 +226,4 @@ const SharedWishlistPage = () => {
     </div>
   );
 };
-
 export default SharedWishlistPage;

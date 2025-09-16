@@ -2,18 +2,15 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import QuizHistory from '../../components/quiz/QuizHistory';
 import { assessmentService } from '../../services/assessment-service';
-
 export default function QuizHistoryPage() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-
   const handleRetakeQuiz = () => {
     // Clear any existing session data and navigate to quiz
     sessionStorage.removeItem('personalityProfile');
     sessionStorage.removeItem('quizAnswers');
     navigate('/quiz');
   };
-
   const handleViewResult = async (assessment) => {
     try {
       // Store the selected assessment in session storage to view in results page
@@ -32,7 +29,6 @@ export default function QuizHistoryPage() {
       console.error('Error viewing assessment result:', error);
     }
   };
-
   // Show loading while auth is being determined
   if (authLoading) {
     return (
@@ -44,7 +40,6 @@ export default function QuizHistoryPage() {
       </div>
     );
   }
-
   // Redirect to login if not authenticated
   if (!user) {
     navigate('/login', {
@@ -56,7 +51,6 @@ export default function QuizHistoryPage() {
     });
     return null;
   }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
       <QuizHistory

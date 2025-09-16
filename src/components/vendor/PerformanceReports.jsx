@@ -3,7 +3,6 @@ import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import vendorPerformanceService from '../../services/vendor-performance-service';
-
 /**
  * Performance Reports Component - Generate and view comprehensive performance reports
  */
@@ -20,11 +19,9 @@ const PerformanceReports = ({ vendorId }) => {
     includeTrends: true,
     format: 'detailed'
   });
-
   useEffect(() => {
     loadReportHistory();
   }, [vendorId]);
-
   const loadReportHistory = async () => {
     try {
       setLoading(true);
@@ -40,22 +37,18 @@ const PerformanceReports = ({ vendorId }) => {
       setLoading(false);
     }
   };
-
   const generateReport = async () => {
     try {
       setGenerating(true);
       setError(null);
-
       const [performanceResult, benchmarkResult, historyResult] = await Promise.all([
         vendorPerformanceService.calculatePerformanceMetrics(vendorId, parseInt(reportConfig.period)),
         vendorPerformanceService.getBenchmarkComparison(vendorId, parseInt(reportConfig.period)),
         vendorPerformanceService.getPerformanceHistory(vendorId, 12)
       ]);
-
       if (performanceResult.error || benchmarkResult.error) {
         throw new Error('Failed to generate performance report');
       }
-
       // Generate recommendations if requested
       let recommendations = [];
       if (reportConfig.includeRecommendations) {
@@ -65,10 +58,8 @@ const PerformanceReports = ({ vendorId }) => {
           benchmarkResult.data
         );
       }
-
       // Generate alerts
       const alerts = await vendorPerformanceService.checkPerformanceAlerts(vendorId, performanceResult.data);
-
       const report = {
         id: Date.now().toString(),
         vendorId,
@@ -83,13 +74,11 @@ const PerformanceReports = ({ vendorId }) => {
           alerts
         }
       };
-
       // Save report
       const savedReports = [...reports, report];
       setReports(savedReports);
       localStorage.setItem(`vendor-reports-${vendorId}`, JSON.stringify(savedReports));
       setCurrentReport(report);
-
     } catch (err) {
       console.error('Generate report error:', err);
       setError(err.message);
@@ -97,7 +86,6 @@ const PerformanceReports = ({ vendorId }) => {
       setGenerating(false);
     }
   };
-
   const exportReport = (report, format = 'json') => {
     if (format === 'json') {
       const dataStr = JSON.stringify(report, null, 2);
@@ -120,7 +108,6 @@ const PerformanceReports = ({ vendorId }) => {
       URL.revokeObjectURL(url);
     }
   };
-
   const generateCSVReport = (report) => {
     const metrics = report.data.performance.metrics;
     const headers = [
@@ -131,7 +118,6 @@ const PerformanceReports = ({ vendorId }) => {
       'Status',
       'Period'
     ].join(',');
-
     const rows = [
       ['Performance Score', report.data.performance.performanceScore, 'Score', '', '', `${report.period} days`],
       ['Customer Rating', metrics.reviews.averageRating.toFixed(2), 'Rating', '4.2', '', ''],
@@ -142,10 +128,8 @@ const PerformanceReports = ({ vendorId }) => {
       ['Total Bookings', metrics.bookings.totalBookings, 'Count', '', '', ''],
       ['Total Reviews', metrics.reviews.totalReviews, 'Count', '', '', '']
     ].map(row => row.join(',')).join('\n');
-
     return `${headers}\n${rows}`;
   };
-
   const formatMetric = (value, type) => {
     switch (type) {
       case 'percentage':
@@ -160,13 +144,11 @@ const PerformanceReports = ({ vendorId }) => {
         return Math.round(value).toLocaleString();
     }
   };
-
   const getScoreColor = (score) => {
     if (score >= 85) return 'text-green-600';
     if (score >= 70) return 'text-yellow-600';
     return 'text-red-600';
   };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -178,7 +160,6 @@ const PerformanceReports = ({ vendorId }) => {
           </p>
         </div>
       </div>
-
       {/* Report Generation */}
       <Card className="p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Generate New Report</h3>
@@ -261,7 +242,6 @@ const PerformanceReports = ({ vendorId }) => {
           </div>
         </div>
       </Card>
-
       {/* Current Report Display */}
       {currentReport && (
         <Card className="p-6">
@@ -291,7 +271,6 @@ const PerformanceReports = ({ vendorId }) => {
               </Button>
             </div>
           </div>
-
           {/* Executive Summary */}
           <div className="mb-6">
             <h4 className="text-md font-medium text-gray-900 mb-3">Executive Summary</h4>
@@ -323,7 +302,6 @@ const PerformanceReports = ({ vendorId }) => {
               </p>
             </div>
           </div>
-
           {/* Key Metrics */}
           <div className="mb-6">
             <h4 className="text-md font-medium text-gray-900 mb-3">Key Performance Metrics</h4>
@@ -366,7 +344,6 @@ const PerformanceReports = ({ vendorId }) => {
               </div>
             </div>
           </div>
-
           {/* Alerts */}
           {currentReport.data.alerts.length > 0 && (
             <div className="mb-6">
@@ -386,7 +363,6 @@ const PerformanceReports = ({ vendorId }) => {
               </div>
             </div>
           )}
-
           {/* Recommendations */}
           {currentReport.config.includeRecommendations && currentReport.data.recommendations.length > 0 && (
             <div className="mb-6">
@@ -411,7 +387,6 @@ const PerformanceReports = ({ vendorId }) => {
           )}
         </Card>
       )}
-
       {/* Report History */}
       {reports.length > 0 && (
         <Card className="p-6">
@@ -449,7 +424,6 @@ const PerformanceReports = ({ vendorId }) => {
           </div>
         </Card>
       )}
-
       {/* Error Display */}
       {error && (
         <Card className="p-6 border-red-200 bg-red-50">
@@ -464,5 +438,4 @@ const PerformanceReports = ({ vendorId }) => {
     </div>
   );
 };
-
 export default PerformanceReports;

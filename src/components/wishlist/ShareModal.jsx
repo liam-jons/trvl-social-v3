@@ -12,27 +12,21 @@ import {
   EnvelopeIcon,
   EyeSlashIcon
 } from '@heroicons/react/24/outline';
-
 const ShareModal = ({ isOpen, onClose, collection }) => {
   const { addNotification } = useNotification();
   const [shareUrl, setShareUrl] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
-
   useEffect(() => {
     if (isOpen && collection) {
       generateShareLink();
     }
   }, [isOpen, collection]);
-
   const generateShareLink = async () => {
     if (!collection || collection.is_private) return;
-
     setIsGenerating(true);
-
     try {
       const { data, error } = await WishlistService.generateShareLink(collection.user_id, collection.id);
-
       if (error) {
         addNotification({
           type: 'error',
@@ -41,7 +35,6 @@ const ShareModal = ({ isOpen, onClose, collection }) => {
         });
         return;
       }
-
       setShareUrl(data.shareUrl);
     } catch (error) {
       console.error('Error generating share link:', error);
@@ -54,7 +47,6 @@ const ShareModal = ({ isOpen, onClose, collection }) => {
       setIsGenerating(false);
     }
   };
-
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
@@ -64,7 +56,6 @@ const ShareModal = ({ isOpen, onClose, collection }) => {
         title: 'Copied!',
         message: 'Share link copied to clipboard'
       });
-
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       console.error('Failed to copy to clipboard:', error);
@@ -75,7 +66,6 @@ const ShareModal = ({ isOpen, onClose, collection }) => {
       });
     }
   };
-
   const shareViaEmail = () => {
     const subject = encodeURIComponent(`Check out my "${collection?.name}" adventure collection`);
     const body = encodeURIComponent(
@@ -83,18 +73,14 @@ const ShareModal = ({ isOpen, onClose, collection }) => {
     );
     window.open(`mailto:?subject=${subject}&body=${body}`);
   };
-
   const shareViaTwitter = () => {
     const text = encodeURIComponent(`Check out my "${collection?.name}" adventure collection!`);
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(shareUrl)}`);
   };
-
   const shareViaFacebook = () => {
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`);
   };
-
   if (!collection) return null;
-
   return (
     <GlassModal isOpen={isOpen} onClose={onClose}>
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md">
@@ -115,7 +101,6 @@ const ShareModal = ({ isOpen, onClose, collection }) => {
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
-
         {/* Collection Info */}
         <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
           <h3 className="font-medium text-gray-900 dark:text-white mb-1">
@@ -130,7 +115,6 @@ const ShareModal = ({ isOpen, onClose, collection }) => {
             {collection.wishlists_count?.length || 0} adventures • Public collection
           </p>
         </div>
-
         {collection.is_private ? (
           <div className="text-center py-8">
             <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -159,7 +143,6 @@ const ShareModal = ({ isOpen, onClose, collection }) => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Share Link
               </label>
-
               {isGenerating ? (
                 <div className="flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <div className="w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
@@ -189,7 +172,6 @@ const ShareModal = ({ isOpen, onClose, collection }) => {
                 </div>
               )}
             </div>
-
             {/* Social Sharing */}
             {shareUrl && (
               <div className="mb-6">
@@ -204,7 +186,6 @@ const ShareModal = ({ isOpen, onClose, collection }) => {
                     <EnvelopeIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
                     <span className="text-xs text-gray-600 dark:text-gray-300">Email</span>
                   </button>
-
                   <button
                     onClick={shareViaTwitter}
                     className="flex flex-col items-center gap-2 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
@@ -214,7 +195,6 @@ const ShareModal = ({ isOpen, onClose, collection }) => {
                     </div>
                     <span className="text-xs text-blue-600 dark:text-blue-400">Twitter</span>
                   </button>
-
                   <button
                     onClick={shareViaFacebook}
                     className="flex flex-col items-center gap-2 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
@@ -227,7 +207,6 @@ const ShareModal = ({ isOpen, onClose, collection }) => {
                 </div>
               </div>
             )}
-
             {/* Share Tips */}
             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
               <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
@@ -242,7 +221,6 @@ const ShareModal = ({ isOpen, onClose, collection }) => {
             </div>
           </>
         )}
-
         {/* Close Button */}
         <div className="mt-6">
           <button
@@ -256,5 +234,4 @@ const ShareModal = ({ isOpen, onClose, collection }) => {
     </GlassModal>
   );
 };
-
 export default ShareModal;

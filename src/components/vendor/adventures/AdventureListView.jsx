@@ -17,7 +17,6 @@ import { Menu, Transition } from '@headlessui/react';
 import GlassCard from '../../ui/GlassCard';
 import LoadingSpinner from '../../common/LoadingSpinner';
 import useVendorDashboardStore from '../../../stores/vendorDashboardStore';
-
 const AdventureListView = ({
   adventures = [],
   viewMode = 'grid',
@@ -27,9 +26,7 @@ const AdventureListView = ({
   isLoading = false
 }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
-
   const { deleteAdventure, duplicateAdventure, updateAdventure } = useVendorDashboardStore();
-
   const handleSelectAdventure = (adventureId) => {
     if (selectedAdventures.includes(adventureId)) {
       onSelectionChange(selectedAdventures.filter(id => id !== adventureId));
@@ -37,7 +34,6 @@ const AdventureListView = ({
       onSelectionChange([...selectedAdventures, adventureId]);
     }
   };
-
   const handleSelectAll = () => {
     if (selectedAdventures.length === adventures.length) {
       onSelectionChange([]);
@@ -45,7 +41,6 @@ const AdventureListView = ({
       onSelectionChange(adventures.map(a => a.id));
     }
   };
-
   const handleDeleteAdventure = async (adventureId) => {
     try {
       await deleteAdventure(adventureId);
@@ -54,7 +49,6 @@ const AdventureListView = ({
       console.error('Failed to delete adventure:', error);
     }
   };
-
   const handleDuplicateAdventure = async (adventure) => {
     try {
       await duplicateAdventure(adventure);
@@ -62,7 +56,6 @@ const AdventureListView = ({
       console.error('Failed to duplicate adventure:', error);
     }
   };
-
   const handleStatusChange = async (adventureId, newStatus) => {
     try {
       await updateAdventure(adventureId, { status: newStatus });
@@ -70,7 +63,6 @@ const AdventureListView = ({
       console.error('Failed to update status:', error);
     }
   };
-
   const getStatusBadge = (status) => {
     const statusConfig = {
       published: { color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400', label: 'Published' },
@@ -78,22 +70,18 @@ const AdventureListView = ({
       archived: { color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400', label: 'Archived' },
       paused: { color: 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400', label: 'Paused' }
     };
-
     const config = statusConfig[status] || statusConfig.draft;
-
     return (
       <span className={`px-2 py-1 text-xs font-medium rounded-full ${config.color}`}>
         {config.label}
       </span>
     );
   };
-
   const ActionDropdown = ({ adventure }) => (
     <Menu as="div" className="relative">
       <Menu.Button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
         <EllipsisVerticalIcon className="h-5 w-5" />
       </Menu.Button>
-
       <Transition
         as="div"
         enter="transition ease-out duration-100"
@@ -118,7 +106,6 @@ const AdventureListView = ({
                 </button>
               )}
             </Menu.Item>
-
             <Menu.Item>
               {({ active }) => (
                 <button
@@ -132,9 +119,7 @@ const AdventureListView = ({
                 </button>
               )}
             </Menu.Item>
-
             <div className="border-t border-gray-200 dark:border-gray-600 my-1" />
-
             <Menu.Item>
               {({ active }) => (
                 <button
@@ -148,7 +133,6 @@ const AdventureListView = ({
                 </button>
               )}
             </Menu.Item>
-
             <Menu.Item>
               {({ active }) => (
                 <button
@@ -161,9 +145,7 @@ const AdventureListView = ({
                 </button>
               )}
             </Menu.Item>
-
             <div className="border-t border-gray-200 dark:border-gray-600 my-1" />
-
             <Menu.Item>
               {({ active }) => (
                 <button
@@ -182,11 +164,9 @@ const AdventureListView = ({
       </Transition>
     </Menu>
   );
-
   if (isLoading) {
     return <LoadingSpinner fullScreen message="Loading adventures..." />;
   }
-
   if (adventures.length === 0) {
     return (
       <GlassCard variant="light" padding="lg" className="text-center">
@@ -200,7 +180,6 @@ const AdventureListView = ({
       </GlassCard>
     );
   }
-
   return (
     <div className="space-y-4">
       {/* Bulk Selection Header */}
@@ -234,7 +213,6 @@ const AdventureListView = ({
           </div>
         </GlassCard>
       )}
-
       {/* Adventure Grid/List */}
       <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6' : 'space-y-4'}`}>
         <AnimatePresence>
@@ -263,7 +241,6 @@ const AdventureListView = ({
                     className="text-blue-500 focus:ring-blue-500 rounded bg-white/80 dark:bg-gray-800/80"
                   />
                 </div>
-
                 {/* Image */}
                 <div className={`relative ${viewMode === 'list' ? 'w-48 h-32' : 'w-full h-48'} bg-gray-200 dark:bg-gray-800`}>
                   {adventure.images?.length > 0 ? (
@@ -277,12 +254,10 @@ const AdventureListView = ({
                       <PhotoIcon className="h-12 w-12 text-gray-400" />
                     </div>
                   )}
-
                   {/* Status Badge */}
                   <div className="absolute top-3 right-3">
                     {getStatusBadge(adventure.status)}
                   </div>
-
                   {/* Featured Badge */}
                   {adventure.featured && (
                     <div className="absolute bottom-3 left-3 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
@@ -291,7 +266,6 @@ const AdventureListView = ({
                     </div>
                   )}
                 </div>
-
                 {/* Content */}
                 <div className="flex-1 p-4">
                   <div className="flex items-start justify-between mb-3">
@@ -300,24 +274,20 @@ const AdventureListView = ({
                     </h3>
                     <ActionDropdown adventure={adventure} />
                   </div>
-
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300">
                       <MapPinIcon className="h-4 w-4" />
                       {adventure.location}
                     </div>
-
                     <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300">
                       <ClockIcon className="h-4 w-4" />
                       {adventure.duration}
                     </div>
-
                     <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300">
                       <CurrencyDollarIcon className="h-4 w-4" />
                       From ${adventure.basePrice}
                     </div>
                   </div>
-
                   {/* Stats */}
                   <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <div className="text-center">
@@ -339,7 +309,6 @@ const AdventureListView = ({
                       <div className="text-xs text-gray-500 dark:text-gray-400">Revenue</div>
                     </div>
                   </div>
-
                   {/* Quick Actions */}
                   <div className="flex items-center gap-2 mt-4">
                     <button
@@ -368,7 +337,6 @@ const AdventureListView = ({
           ))}
         </AnimatePresence>
       </div>
-
       {/* Delete Confirmation Modal */}
       <AnimatePresence>
         {showDeleteConfirm && (
@@ -397,11 +365,9 @@ const AdventureListView = ({
                   </p>
                 </div>
               </div>
-
               <p className="text-gray-600 dark:text-gray-400 mb-6">
                 Are you sure you want to permanently delete this adventure? All associated bookings and data will be lost.
               </p>
-
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setShowDeleteConfirm(null)}
@@ -423,5 +389,4 @@ const AdventureListView = ({
     </div>
   );
 };
-
 export default AdventureListView;

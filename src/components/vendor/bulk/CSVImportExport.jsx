@@ -11,7 +11,6 @@ import {
 } from '@heroicons/react/24/outline';
 import GlassCard from '../../ui/GlassCard';
 import { bulkOperationsService } from '../../../services/bulk-operations-service';
-
 const CSVImportExport = ({ vendorId, onActionComplete }) => {
   const [activeTab, setActiveTab] = useState('export');
   const [isLoading, setIsLoading] = useState(false);
@@ -24,21 +23,17 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
     status: [],
     dateRange: { start: '', end: '' }
   });
-
   const fileInputRef = useRef(null);
-
   const handleExport = async () => {
     setIsLoading(true);
     try {
       let result;
-
       switch (exportType) {
         case 'adventures':
           result = await bulkOperationsService.exportAdventuresToCSV(vendorId, {
             isActive: exportFilters.status.length > 0 ? exportFilters.status.includes('published') : undefined
           });
           break;
-
         case 'bookings':
           result = await bulkOperationsService.exportBookingsToCSV(vendorId, {
             dateRange: exportFilters.dateRange.start && exportFilters.dateRange.end
@@ -46,15 +41,12 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
               : undefined
           });
           break;
-
         default:
           throw new Error('Invalid export type');
       }
-
       if (result.error) {
         throw new Error(result.error);
       }
-
       // Create and download the file
       const blob = new Blob([result.data.csvContent], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
@@ -65,7 +57,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-
       // Log the action
       await bulkOperationsService.logBulkAction(vendorId, {
         type: 'csv_export',
@@ -74,9 +65,7 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
         details: { exportType, filters: exportFilters },
         results: { exported: result.data.count }
       });
-
       onActionComplete?.();
-
     } catch (error) {
       console.error('Export failed:', error);
       alert('Export failed: ' + error.message);
@@ -84,7 +73,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
       setIsLoading(false);
     }
   };
-
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
     if (file && file.type === 'text/csv') {
@@ -93,15 +81,12 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
       alert('Please select a valid CSV file');
     }
   };
-
   const handleImport = async () => {
     if (!importFile) return;
-
     setIsLoading(true);
     try {
       const fileContent = await readFileContent(importFile);
       let result;
-
       switch (importType) {
         case 'adventures':
           result = await bulkOperationsService.importAdventuresFromCSV(
@@ -110,14 +95,11 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
             { autoActivate: false }
           );
           break;
-
         default:
           throw new Error('Invalid import type');
       }
-
       setImportResults(result.data);
       setShowResults(true);
-
       // Log the action
       await bulkOperationsService.logBulkAction(vendorId, {
         type: 'csv_import',
@@ -126,9 +108,7 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
         details: { importType, filename: importFile.name },
         results: result.data
       });
-
       onActionComplete?.();
-
     } catch (error) {
       console.error('Import failed:', error);
       setImportResults({
@@ -141,7 +121,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
       setIsLoading(false);
     }
   };
-
   const readFileContent = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -150,10 +129,8 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
       reader.readAsText(file);
     });
   };
-
   const downloadTemplate = (type) => {
     let headers, sampleRow, filename;
-
     switch (type) {
       case 'adventures':
         headers = [
@@ -180,16 +157,13 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
         ];
         filename = 'adventure_import_template.csv';
         break;
-
       default:
         return;
     }
-
     const csvContent = [
       headers.join(','),
       sampleRow.map(value => `"${value}"`).join(',')
     ].join('\n');
-
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -200,7 +174,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
   };
-
   const renderExportTab = () => (
     <div className="space-y-6">
       {/* Export Type Selection */}
@@ -227,7 +200,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
               Export all adventure listings
             </div>
           </button>
-
           <button
             onClick={() => setExportType('bookings')}
             className={`
@@ -248,7 +220,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
           </button>
         </div>
       </GlassCard>
-
       {/* Export Filters */}
       <GlassCard variant="light" padding="md">
         <h3 className="font-medium text-gray-900 dark:text-white mb-4">
@@ -276,7 +247,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
               </select>
             </div>
           )}
-
           {exportType === 'bookings' && (
             <>
               <div>
@@ -293,7 +263,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/50 dark:bg-gray-800/50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   End Date
@@ -312,7 +281,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
           )}
         </div>
       </GlassCard>
-
       {/* Export Button */}
       <div className="flex justify-end">
         <button
@@ -335,7 +303,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
       </div>
     </div>
   );
-
   const renderImportTab = () => (
     <div className="space-y-6">
       {/* Import Type Selection */}
@@ -362,7 +329,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
               Import adventure listings from CSV
             </div>
           </button>
-
           <div className="p-4 rounded-lg border-2 border-gray-200 dark:border-gray-700 opacity-50">
             <DocumentArrowUpIcon className="h-6 w-6 mb-2 text-gray-400" />
             <div className="font-medium text-gray-400">
@@ -374,7 +340,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
           </div>
         </div>
       </GlassCard>
-
       {/* Template Download */}
       <GlassCard variant="info" padding="md">
         <div className="flex items-start gap-3">
@@ -396,13 +361,11 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
           </div>
         </div>
       </GlassCard>
-
       {/* File Upload */}
       <GlassCard variant="light" padding="md">
         <h3 className="font-medium text-gray-900 dark:text-white mb-4">
           Upload CSV File
         </h3>
-
         <div
           onClick={() => fileInputRef.current?.click()}
           className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors cursor-pointer"
@@ -430,7 +393,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
             )}
           </div>
         </div>
-
         <input
           ref={fileInputRef}
           type="file"
@@ -439,7 +401,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
           className="hidden"
         />
       </GlassCard>
-
       {/* Import Button */}
       {importFile && (
         <div className="flex justify-end">
@@ -464,10 +425,8 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
       )}
     </div>
   );
-
   const renderResults = () => {
     if (!importResults) return null;
-
     return (
       <GlassCard variant="light" padding="md" className="mt-6">
         <div className="flex items-center justify-between mb-4">
@@ -481,7 +440,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">
@@ -502,7 +460,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
             <div className="text-sm text-gray-600 dark:text-gray-400">Total</div>
           </div>
         </div>
-
         {importResults.failed && importResults.failed.length > 0 && (
           <div className="mt-4">
             <h4 className="font-medium text-red-600 dark:text-red-400 mb-2">
@@ -520,7 +477,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
       </GlassCard>
     );
   };
-
   return (
     <div className="space-y-6">
       {/* Tab Navigation */}
@@ -532,7 +488,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
-
             return (
               <button
                 key={tab.id}
@@ -553,7 +508,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
           })}
         </nav>
       </div>
-
       {/* Tab Content */}
       <motion.div
         key={activeTab}
@@ -563,11 +517,9 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
       >
         {activeTab === 'export' ? renderExportTab() : renderImportTab()}
       </motion.div>
-
       {/* Results */}
       {showResults && renderResults()}
     </div>
   );
 };
-
 export default CSVImportExport;

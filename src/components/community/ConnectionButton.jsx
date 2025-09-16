@@ -2,7 +2,6 @@
  * Connection Button Component
  * Reusable button for managing connection states (connect, pending, connected, blocked)
  */
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { connectionService } from '../../services/connection-service';
@@ -16,7 +15,6 @@ import {
   X,
   MoreVertical
 } from 'lucide-react';
-
 const ConnectionButton = ({
   userId,
   userProfile,
@@ -29,23 +27,19 @@ const ConnectionButton = ({
   const [loading, setLoading] = useState(true);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-
   useEffect(() => {
     if (userId) {
       loadConnectionStatus();
     }
   }, [userId]);
-
   const loadConnectionStatus = async () => {
     try {
       setLoading(true);
-
       const { data: { user } } = await supabase.auth.getUser();
       if (!user || user.id === userId) {
         setLoading(false);
         return;
       }
-
       const status = await connectionService.getConnectionStatus(user.id, userId);
       setConnectionStatus(status);
     } catch (error) {
@@ -54,25 +48,20 @@ const ConnectionButton = ({
       setLoading(false);
     }
   };
-
   const handleConnect = () => {
     setShowRequestModal(true);
   };
-
   const handleConnectionSuccess = () => {
     loadConnectionStatus();
     onConnectionChange?.();
   };
-
   const handleCancelRequest = async () => {
     if (!connectionStatus?.request) return;
-
     try {
       const { error } = await supabase
         .from('connection_requests')
         .update({ status: 'cancelled' })
         .eq('id', connectionStatus.request.id);
-
       if (!error) {
         setConnectionStatus(null);
         onConnectionChange?.();
@@ -81,27 +70,22 @@ const ConnectionButton = ({
       console.error('Error cancelling request:', error);
     }
   };
-
   const handleDisconnect = async () => {
     if (!connectionStatus?.connection) return;
-
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-
       // Remove mutual connections
       await supabase
         .from('community_connections')
         .delete()
         .or(`and(user_id.eq.${user.id},connected_user_id.eq.${userId}),and(user_id.eq.${userId},connected_user_id.eq.${user.id})`);
-
       setConnectionStatus(null);
       onConnectionChange?.();
     } catch (error) {
       console.error('Error disconnecting:', error);
     }
   };
-
   const handleBlock = async () => {
     try {
       const result = await connectionService.blockUser(userId, true);
@@ -113,7 +97,6 @@ const ConnectionButton = ({
       console.error('Error blocking user:', error);
     }
   };
-
   const handleUnblock = async () => {
     try {
       const result = await connectionService.blockUser(userId, false);
@@ -125,7 +108,6 @@ const ConnectionButton = ({
       console.error('Error unblocking user:', error);
     }
   };
-
   if (loading) {
     return (
       <Button variant={variant} size={size} disabled className={className}>
@@ -133,9 +115,7 @@ const ConnectionButton = ({
       </Button>
     );
   }
-
   const [currentUser, setCurrentUser] = useState(null);
-
   useEffect(() => {
     const getCurrentUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -143,12 +123,10 @@ const ConnectionButton = ({
     };
     getCurrentUser();
   }, []);
-
   // Don't show button for own profile
   if (currentUser?.id === userId) {
     return null;
   }
-
   // Handle different connection states
   if (!connectionStatus) {
     // No connection or request - show connect button
@@ -163,7 +141,6 @@ const ConnectionButton = ({
           <UserPlus className="h-4 w-4" />
           Connect
         </Button>
-
         <SendConnectionRequest
           recipientId={userId}
           recipientProfile={userProfile}
@@ -174,10 +151,8 @@ const ConnectionButton = ({
       </>
     );
   }
-
   if (connectionStatus.type === 'request') {
     const isRequester = connectionStatus.request.requester_id === currentUser?.id;
-
     if (isRequester) {
       // User sent the request - show pending with option to cancel
       return (
@@ -192,7 +167,6 @@ const ConnectionButton = ({
             Pending
             <MoreVertical className="h-3 w-3" />
           </Button>
-
           {showDropdown && (
             <div className="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
               <button
@@ -215,7 +189,6 @@ const ConnectionButton = ({
       );
     }
   }
-
   if (connectionStatus.type === 'connected') {
     // Users are connected - show message button with dropdown for more options
     return (
@@ -230,7 +203,6 @@ const ConnectionButton = ({
           Message
           <MoreVertical className="h-3 w-3" />
         </Button>
-
         {showDropdown && (
           <div className="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
             <button
@@ -256,7 +228,6 @@ const ConnectionButton = ({
       </div>
     );
   }
-
   if (connectionStatus.type === 'blocked') {
     // User is blocked - show unblock option
     return (
@@ -271,8 +242,6 @@ const ConnectionButton = ({
       </Button>
     );
   }
-
   return null;
 };
-
 export default ConnectionButton;

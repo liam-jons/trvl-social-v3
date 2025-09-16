@@ -5,7 +5,6 @@ import InvoiceService from '../../services/invoice-service';
 import CurrencyService from '../../services/currency-service';
 import { supabase } from '../../lib/supabase';
 import { Download, Mail, Eye, FileText, DollarSign, Clock, Check, X } from 'lucide-react';
-
 const InvoiceManagement = ({
   userId = null,
   vendorId = null,
@@ -18,17 +17,14 @@ const InvoiceManagement = ({
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [actionLoading, setActionLoading] = useState({});
-
   useEffect(() => {
     loadInvoices();
     loadStats();
   }, [userId, vendorId, bookingId]);
-
   const loadInvoices = async () => {
     try {
       setLoading(true);
       let invoiceData;
-
       if (bookingId) {
         // Load invoices for specific booking
         const { data } = await supabase
@@ -36,7 +32,6 @@ const InvoiceManagement = ({
           .select('*')
           .eq('booking_id', bookingId)
           .order('created_at', { ascending: false });
-
         invoiceData = data || [];
       } else if (userId) {
         invoiceData = await InvoiceService.getUserInvoices(userId);
@@ -45,7 +40,6 @@ const InvoiceManagement = ({
       } else {
         invoiceData = [];
       }
-
       setInvoices(invoiceData);
     } catch (error) {
       console.error('Failed to load invoices:', error);
@@ -54,7 +48,6 @@ const InvoiceManagement = ({
       setLoading(false);
     }
   };
-
   const loadStats = async () => {
     try {
       const statsData = await InvoiceService.getInvoiceStats(userId, vendorId);
@@ -63,13 +56,10 @@ const InvoiceManagement = ({
       console.error('Failed to load invoice stats:', error);
     }
   };
-
   const handleDownloadPDF = async (invoiceId, template = 'standard') => {
     try {
       setActionLoading(prev => ({ ...prev, [`download-${invoiceId}`]: true }));
-
       const pdfBlob = await InvoiceService.generatePDF(invoiceId, template);
-
       // Create download link
       const url = URL.createObjectURL(pdfBlob);
       const link = document.createElement('a');
@@ -86,18 +76,14 @@ const InvoiceManagement = ({
       setActionLoading(prev => ({ ...prev, [`download-${invoiceId}`]: false }));
     }
   };
-
   const handleSendEmail = async (invoiceId, recipientEmail) => {
     try {
       setActionLoading(prev => ({ ...prev, [`email-${invoiceId}`]: true }));
-
       await InvoiceService.sendInvoiceEmail(invoiceId, recipientEmail);
-
       // Update invoice status
       setInvoices(prev => prev.map(inv =>
         inv.id === invoiceId ? { ...inv, status: 'sent' } : inv
       ));
-
       alert('Invoice sent successfully!');
     } catch (error) {
       console.error('Failed to send invoice:', error);
@@ -106,20 +92,15 @@ const InvoiceManagement = ({
       setActionLoading(prev => ({ ...prev, [`email-${invoiceId}`]: false }));
     }
   };
-
   const handleCancelInvoice = async (invoiceId, reason = '') => {
     if (!confirm('Are you sure you want to cancel this invoice?')) return;
-
     try {
       setActionLoading(prev => ({ ...prev, [`cancel-${invoiceId}`]: true }));
-
       await InvoiceService.cancelInvoice(invoiceId, reason);
-
       // Update invoice status
       setInvoices(prev => prev.map(inv =>
         inv.id === invoiceId ? { ...inv, status: 'cancelled' } : inv
       ));
-
       alert('Invoice cancelled successfully.');
     } catch (error) {
       console.error('Failed to cancel invoice:', error);
@@ -128,7 +109,6 @@ const InvoiceManagement = ({
       setActionLoading(prev => ({ ...prev, [`cancel-${invoiceId}`]: false }));
     }
   };
-
   const getStatusIcon = (status) => {
     switch (status) {
       case 'paid':
@@ -141,7 +121,6 @@ const InvoiceManagement = ({
         return <FileText className="w-4 h-4 text-gray-600" />;
     }
   };
-
   const getStatusColor = (status) => {
     switch (status) {
       case 'paid':
@@ -156,7 +135,6 @@ const InvoiceManagement = ({
         return 'bg-yellow-100 text-yellow-800';
     }
   };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center p-8">
@@ -164,7 +142,6 @@ const InvoiceManagement = ({
       </div>
     );
   }
-
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Invoice Statistics */}
@@ -181,7 +158,6 @@ const InvoiceManagement = ({
               </div>
             </CardContent>
           </Card>
-
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center">
@@ -195,7 +171,6 @@ const InvoiceManagement = ({
               </div>
             </CardContent>
           </Card>
-
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center">
@@ -207,7 +182,6 @@ const InvoiceManagement = ({
               </div>
             </CardContent>
           </Card>
-
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center">
@@ -221,7 +195,6 @@ const InvoiceManagement = ({
           </Card>
         </div>
       )}
-
       {/* Invoice List */}
       <Card>
         <CardContent className="p-6">
@@ -235,7 +208,6 @@ const InvoiceManagement = ({
               Refresh
             </Button>
           </div>
-
           {invoices.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <FileText className="w-12 h-12 mx-auto mb-3 text-gray-400" />
@@ -258,7 +230,6 @@ const InvoiceManagement = ({
                         </p>
                       </div>
                     </div>
-
                     <div className="flex items-center space-x-4">
                       <div className="text-right">
                         <p className="font-semibold">
@@ -268,7 +239,6 @@ const InvoiceManagement = ({
                           {invoice.status}
                         </span>
                       </div>
-
                       <div className="flex space-x-2">
                         <Button
                           size="sm"
@@ -278,7 +248,6 @@ const InvoiceManagement = ({
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
-
                         <Button
                           size="sm"
                           variant="outline"
@@ -287,7 +256,6 @@ const InvoiceManagement = ({
                         >
                           <Download className="w-4 h-4" />
                         </Button>
-
                         {invoice.status === 'draft' && (
                           <Button
                             size="sm"
@@ -301,7 +269,6 @@ const InvoiceManagement = ({
                             <Mail className="w-4 h-4" />
                           </Button>
                         )}
-
                         {['draft', 'sent'].includes(invoice.status) && (
                           <Button
                             size="sm"
@@ -316,7 +283,6 @@ const InvoiceManagement = ({
                       </div>
                     </div>
                   </div>
-
                   {/* Invoice Details */}
                   {invoice.customer_info && (
                     <div className="mt-3 pt-3 border-t border-gray-200">
@@ -331,7 +297,6 @@ const InvoiceManagement = ({
           )}
         </CardContent>
       </Card>
-
       {/* Invoice Detail Modal */}
       {selectedInvoice && (
         <InvoiceDetailModal
@@ -345,13 +310,10 @@ const InvoiceManagement = ({
     </div>
   );
 };
-
 // Invoice Detail Modal Component
 const InvoiceDetailModal = ({ invoice, isOpen, onClose, onDownload, onSendEmail }) => {
   const [selectedTemplate, setSelectedTemplate] = useState('standard');
-
   if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto m-4">
@@ -362,7 +324,6 @@ const InvoiceDetailModal = ({ invoice, isOpen, onClose, onDownload, onSendEmail 
               <X className="w-4 h-4" />
             </Button>
           </div>
-
           <div className="space-y-4">
             {/* Invoice Header */}
             <div className="grid grid-cols-2 gap-4">
@@ -377,7 +338,6 @@ const InvoiceDetailModal = ({ invoice, isOpen, onClose, onDownload, onSendEmail 
                 </p>
               </div>
             </div>
-
             {/* Customer Info */}
             {invoice.customer_info && (
               <div>
@@ -395,7 +355,6 @@ const InvoiceDetailModal = ({ invoice, isOpen, onClose, onDownload, onSendEmail 
                 </div>
               </div>
             )}
-
             {/* Line Items */}
             {invoice.line_items && invoice.line_items.length > 0 && (
               <div>
@@ -426,7 +385,6 @@ const InvoiceDetailModal = ({ invoice, isOpen, onClose, onDownload, onSendEmail 
                 </div>
               </div>
             )}
-
             {/* Actions */}
             <div className="border-t pt-4">
               <div className="flex items-center space-x-4">
@@ -442,7 +400,6 @@ const InvoiceDetailModal = ({ invoice, isOpen, onClose, onDownload, onSendEmail 
                     <option value="branded">Branded</option>
                   </select>
                 </div>
-
                 <div className="flex space-x-2">
                   <Button
                     onClick={() => onDownload(selectedTemplate)}
@@ -451,7 +408,6 @@ const InvoiceDetailModal = ({ invoice, isOpen, onClose, onDownload, onSendEmail 
                     <Download className="w-4 h-4" />
                     <span>Download PDF</span>
                   </Button>
-
                   {invoice.status === 'draft' && (
                     <Button
                       variant="outline"
@@ -474,5 +430,4 @@ const InvoiceDetailModal = ({ invoice, isOpen, onClose, onDownload, onSendEmail 
     </div>
   );
 };
-
 export default InvoiceManagement;

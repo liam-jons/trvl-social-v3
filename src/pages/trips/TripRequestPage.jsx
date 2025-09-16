@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { Target } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
 import GlassInput from '../../components/ui/GlassInput';
 import { parseTripDescription, getConfidenceExplanation } from '../../services/nlp-service';
-
 const TripRequestPage = () => {
   const [formData, setFormData] = useState({
     description: '',
@@ -14,7 +14,6 @@ const TripRequestPage = () => {
     groupSize: 2,
     inspirationImages: []
   });
-
   const [errors, setErrors] = useState({});
   const [characterCount, setCharacterCount] = useState(0);
   const [isDraftSaved, setIsDraftSaved] = useState(false);
@@ -23,7 +22,6 @@ const TripRequestPage = () => {
   const [isParsingNLP, setIsParsingNLP] = useState(false);
   const [showNLPPreview, setShowNLPPreview] = useState(false);
   const fileInputRef = useRef(null);
-
   // Draft auto-save functionality
   useEffect(() => {
     const savedDraft = localStorage.getItem('tripRequestDraft');
@@ -37,7 +35,6 @@ const TripRequestPage = () => {
       }
     }
   }, []);
-
   // Auto-save every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
@@ -47,56 +44,43 @@ const TripRequestPage = () => {
         setTimeout(() => setIsDraftSaved(false), 2000);
       }
     }, 30000);
-
     return () => clearInterval(interval);
   }, [formData]);
-
   const validateForm = () => {
     const newErrors = {};
-
     if (formData.description.length < 100) {
       newErrors.description = 'Please provide at least 100 characters to help us understand your adventure better';
     }
-
     if (formData.description.length > 2000) {
       newErrors.description = 'Description must be less than 2000 characters';
     }
-
     if (formData.startDate && formData.endDate && formData.startDate > formData.endDate) {
       newErrors.endDate = 'End date must be after start date';
     }
-
     if (formData.groupSize < 1 || formData.groupSize > 20) {
       newErrors.groupSize = 'Group size must be between 1 and 20 people';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleDescriptionChange = (e) => {
     const value = e.target.value;
     setFormData(prev => ({ ...prev, description: value }));
     setCharacterCount(value.length);
-
     if (errors.description) {
       setErrors(prev => ({ ...prev, description: '' }));
     }
   };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
-
   const handleFileUpload = (e) => {
     const files = Array.from(e.target.files);
     const imageFiles = files.filter(file => file.type.startsWith('image/'));
-
     if (imageFiles.length > 0) {
       setFormData(prev => ({
         ...prev,
@@ -104,27 +88,21 @@ const TripRequestPage = () => {
       }));
     }
   };
-
   const removeImage = (index) => {
     setFormData(prev => ({
       ...prev,
       inspirationImages: prev.inspirationImages.filter((_, i) => i !== index)
     }));
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) {
       return;
     }
-
     try {
       setIsParsingNLP(true);
-
       // Parse the natural language description
       const parsedTrip = await parseTripDescription(formData.description);
-
       // Combine parsed data with form data
       const requestData = {
         ...formData,
@@ -132,27 +110,20 @@ const TripRequestPage = () => {
         confidence: parsedTrip.overallConfidence,
         source: parsedTrip.source
       };
-
       // Clear draft on successful submission
       localStorage.removeItem('tripRequestDraft');
-
       // Log the parsed data for now (will integrate with backend later)
       console.log('Trip request submitted:', requestData);
       console.log('NLP Analysis:', parsedTrip);
-
       // Store the result for display
       setNlpResult(parsedTrip);
       setShowNLPPreview(true);
-
       alert(`Trip request parsed successfully!
-
 Confidence: ${Math.round(parsedTrip.overallConfidence * 100)}%
 Destination: ${parsedTrip.destinations.primary || 'Not specified'}
 Activities: ${parsedTrip.activities.interests.slice(0, 3).join(', ') || 'Not specified'}
 Source: ${parsedTrip.source}
-
 We'll start finding perfect adventures for you!`);
-
     } catch (error) {
       console.error('Error parsing trip description:', error);
       setErrors({ submit: `Failed to parse trip description: ${error.message}` });
@@ -160,7 +131,6 @@ We'll start finding perfect adventures for you!`);
       setIsParsingNLP(false);
     }
   };
-
   const clearDraft = () => {
     localStorage.removeItem('tripRequestDraft');
     setFormData({
@@ -176,18 +146,15 @@ We'll start finding perfect adventures for you!`);
     setNlpResult(null);
     setShowNLPPreview(false);
   };
-
   // Preview NLP parsing without submitting
   const previewParsing = async () => {
     if (formData.description.length < 100) {
       setErrors({ description: 'Please provide at least 100 characters before previewing' });
       return;
     }
-
     try {
       setIsParsingNLP(true);
       setErrors({});
-
       const parsedTrip = await parseTripDescription(formData.description);
       setNlpResult(parsedTrip);
       setShowNLPPreview(true);
@@ -198,14 +165,12 @@ We'll start finding perfect adventures for you!`);
       setIsParsingNLP(false);
     }
   };
-
   const examplePrompts = [
     "I want a 5-day adventure in the Colorado Rockies this summer. Looking for hiking, camping, and rock climbing with a budget around $2000. Prefer small group experiences with experienced guides.",
     "Seeking a cultural immersion experience in Southeast Asia for 2 weeks. Interested in cooking classes, temple visits, local markets, and staying with families. Budget is flexible, around $3000.",
     "Planning a romantic getaway to the Mediterranean. Love wine tasting, coastal walks, historic sites, and luxury accommodations. 7-10 days, budget up to $8000 for two people.",
     "Adventure family trip with teens to Costa Rica. Want zip-lining, wildlife viewing, beach time, and eco-friendly lodges. 10 days, budget around $6000 for family of four."
   ];
-
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Header */}
@@ -218,7 +183,6 @@ We'll start finding perfect adventures for you!`);
           who can make it happen. The more details you share, the better we can match you!
         </p>
       </div>
-
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Main Form */}
         <div className="lg:col-span-2">
@@ -234,7 +198,6 @@ We'll start finding perfect adventures for you!`);
                   Tell us about your ideal trip. Include destinations, activities, dates, budget,
                   group size, and any special preferences or requirements.
                 </p>
-
                 <GlassInput
                   type="textarea"
                   value={formData.description}
@@ -243,7 +206,6 @@ We'll start finding perfect adventures for you!`);
                   placeholder="I'm dreaming of an adventure where..."
                   error={errors.description}
                 />
-
                 <div className="flex justify-between items-center mt-2">
                   <span className={`text-sm ${
                     characterCount < 100 ? 'text-red-500' :
@@ -263,7 +225,6 @@ We'll start finding perfect adventures for you!`);
                   )}
                 </div>
               </div>
-
               {/* Optional Details */}
               <div className="border-t border-white/20 pt-6">
                 <h3 className="text-lg font-medium mb-4">Optional Details</h3>
@@ -288,7 +249,6 @@ We'll start finding perfect adventures for you!`);
                       error={errors.endDate}
                     />
                   </div>
-
                   {/* Budget */}
                   <div>
                     <label className="block text-sm font-medium mb-2">
@@ -310,7 +270,6 @@ We'll start finding perfect adventures for you!`);
                       </div>
                     </div>
                   </div>
-
                   {/* Group Size */}
                   <div>
                     <GlassInput
@@ -326,14 +285,12 @@ We'll start finding perfect adventures for you!`);
                   </div>
                 </div>
               </div>
-
               {/* Inspiration Images */}
               <div className="border-t border-white/20 pt-6">
                 <h3 className="text-lg font-medium mb-2">Inspiration Images</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                   Upload up to 5 images that capture what you're looking for
                 </p>
-
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -342,7 +299,6 @@ We'll start finding perfect adventures for you!`);
                   onChange={handleFileUpload}
                   className="hidden"
                 />
-
                 <GlassButton
                   type="button"
                   variant="secondary"
@@ -354,7 +310,6 @@ We'll start finding perfect adventures for you!`);
                   </svg>
                   Add Images ({formData.inspirationImages.length}/5)
                 </GlassButton>
-
                 {formData.inspirationImages.length > 0 && (
                   <div className="grid grid-cols-3 gap-4 mt-4">
                     {formData.inspirationImages.map((file, index) => (
@@ -376,14 +331,12 @@ We'll start finding perfect adventures for you!`);
                   </div>
                 )}
               </div>
-
               {/* Error Display */}
               {errors.submit && (
                 <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
                   {errors.submit}
                 </div>
               )}
-
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-3 pt-6">
                 <GlassButton
@@ -402,7 +355,6 @@ We'll start finding perfect adventures for you!`);
                     'Submit Trip Request'
                   )}
                 </GlassButton>
-
                 <GlassButton
                   type="button"
                   variant="accent"
@@ -413,7 +365,6 @@ We'll start finding perfect adventures for you!`);
                 >
                   Preview Analysis
                 </GlassButton>
-
                 <GlassButton
                   type="button"
                   variant="secondary"
@@ -427,7 +378,6 @@ We'll start finding perfect adventures for you!`);
             </form>
           </GlassCard>
         </div>
-
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Example Prompts */}
@@ -454,7 +404,6 @@ We'll start finding perfect adventures for you!`);
               ))}
             </div>
           </GlassCard>
-
           {/* Previous Requests */}
           <GlassCard>
             <div className="flex items-center justify-between mb-4">
@@ -468,7 +417,6 @@ We'll start finding perfect adventures for you!`);
                 {showPreviousRequests ? 'Hide' : 'Show'} History
               </GlassButton>
             </div>
-
             {showPreviousRequests && (
               <div className="space-y-3">
                 <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
@@ -477,7 +425,6 @@ We'll start finding perfect adventures for you!`);
               </div>
             )}
           </GlassCard>
-
           {/* NLP Analysis Preview */}
           {showNLPPreview && nlpResult && (
             <GlassCard>
@@ -492,7 +439,6 @@ We'll start finding perfect adventures for you!`);
                   </svg>
                 </button>
               </div>
-
               <div className="space-y-3">
                 {/* Confidence Score */}
                 <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
@@ -513,7 +459,6 @@ We'll start finding perfect adventures for you!`);
                     </span>
                   </div>
                 </div>
-
                 {/* Key Findings */}
                 {nlpResult.destinations.primary && (
                   <div className="p-3 bg-blue-500/10 rounded-lg">
@@ -524,17 +469,15 @@ We'll start finding perfect adventures for you!`);
                     <p className="text-sm">{nlpResult.destinations.primary}</p>
                   </div>
                 )}
-
                 {nlpResult.activities.interests.length > 0 && (
                   <div className="p-3 bg-green-500/10 rounded-lg">
                     <div className="flex items-center space-x-2 mb-1">
-                      <span className="text-green-500">🎯</span>
+                      <Target className="w-5 h-5 text-green-500" />
                       <span className="text-sm font-medium">Activities</span>
                     </div>
                     <p className="text-sm">{nlpResult.activities.interests.slice(0, 3).join(', ')}</p>
                   </div>
                 )}
-
                 {nlpResult.budget.amount && (
                   <div className="p-3 bg-yellow-500/10 rounded-lg">
                     <div className="flex items-center space-x-2 mb-1">
@@ -547,12 +490,10 @@ We'll start finding perfect adventures for you!`);
                     </p>
                   </div>
                 )}
-
                 {/* Source Info */}
                 <div className="text-xs text-gray-500 text-center pt-2">
                   Analyzed using: {nlpResult.source === 'openai' ? 'OpenAI' : nlpResult.source === 'anthropic' ? 'Claude AI' : 'Pattern Matching'}
                 </div>
-
                 {/* Confidence Explanation */}
                 {getConfidenceExplanation(nlpResult).length > 0 && (
                   <div className="pt-2 border-t border-white/10">
@@ -570,7 +511,6 @@ We'll start finding perfect adventures for you!`);
               </div>
             </GlassCard>
           )}
-
           {/* Tips */}
           <GlassCard>
             <h3 className="text-lg font-medium mb-4">Tips for Better Matches</h3>
@@ -602,5 +542,4 @@ We'll start finding perfect adventures for you!`);
     </div>
   );
 };
-
 export default TripRequestPage;

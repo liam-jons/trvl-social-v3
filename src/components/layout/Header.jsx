@@ -1,5 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
+import {
+  Search,
+  Mountain,
+  Plane,
+  Heart,
+  Users,
+  Handshake,
+  Building2,
+  Briefcase,
+  Puzzle
+} from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../contexts/ThemeContext';
 import GlassCard from '../ui/GlassCard';
@@ -39,16 +50,16 @@ const Header = () => {
   }, [isAuthenticated, initialize]);
 
   const navItems = [
-    { path: '/search', label: 'Search', icon: '🔍' },
-    { path: '/adventures', label: 'Adventures', icon: '🏔️' },
-    { path: '/trips/request', label: 'Plan Trip', icon: '✈️' },
-    { path: '/wishlist', label: 'Wishlist', icon: '❤️', requiresAuth: true },
-    { path: '/community', label: 'Community', icon: '👥' },
-    { path: '/connections', label: 'Connections', icon: '🤝', requiresAuth: true },
-    { path: '/groups', label: 'Groups', icon: '👥' },
-    { path: '/vendors', label: 'Vendors', icon: '🏪' },
-    { path: '/offers', label: 'Offers', icon: '💼', requiresAuth: true },
-    { path: '/compatibility-demo', label: 'Compatibility', icon: '🧩' },
+    { path: '/search', label: 'Search', icon: Search },
+    { path: '/adventures', label: 'Adventures', icon: Mountain },
+    { path: '/trips/request', label: 'Plan Trip', icon: Plane },
+    { path: '/wishlist', label: 'Wishlist', icon: Heart, requiresAuth: true },
+    { path: '/community', label: 'Community', icon: Users },
+    { path: '/connections', label: 'Connections', icon: Handshake, requiresAuth: true },
+    { path: '/groups', label: 'Groups', icon: Users },
+    { path: '/vendors', label: 'Vendors', icon: Building2 },
+    { path: '/offers', label: 'Offers', icon: Briefcase, requiresAuth: true },
+    { path: '/compatibility-demo', label: 'Compatibility', icon: Puzzle },
   ];
 
   const handleSignOut = async () => {
@@ -104,7 +115,7 @@ const Header = () => {
                     }`
                   }
                 >
-                  <span>{item.icon}</span>
+                  <item.icon className="w-4 h-4" />
                   <span>{item.label}</span>
                 </NavLink>
               );
@@ -235,14 +246,14 @@ const Header = () => {
                   key={item.path}
                   to={item.path}
                   className={({ isActive }) =>
-                    `block px-4 py-2 rounded-lg transition-all duration-200 ${
+                    `block px-4 py-2 rounded-lg transition-all duration-200 flex items-center ${
                       isActive
                         ? 'bg-glass-heavy text-blue-600 dark:text-blue-400'
                         : 'hover:bg-glass-light'
                     }`
                   }
                 >
-                  <span className="mr-2">{item.icon}</span>
+                  <item.icon className="w-4 h-4 mr-2" />
                   {item.label}
                 </NavLink>
               );

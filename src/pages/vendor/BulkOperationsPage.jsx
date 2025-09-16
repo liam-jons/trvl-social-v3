@@ -3,11 +3,9 @@ import { motion } from 'framer-motion';
 import BulkOperationsManager from '../../components/vendor/BulkOperationsManager';
 import VendorDashboardLayout from '../../components/vendor/VendorDashboardLayout';
 import useVendorDashboardStore from '../../stores/vendorDashboardStore';
-
 const BulkOperationsPage = () => {
   const { currentVendor, loadCurrentVendor } = useVendorDashboardStore();
   const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
     const initializePage = async () => {
       try {
@@ -18,10 +16,8 @@ const BulkOperationsPage = () => {
         setIsLoading(false);
       }
     };
-
     initializePage();
   }, [loadCurrentVendor]);
-
   if (isLoading) {
     return (
       <VendorDashboardLayout>
@@ -31,7 +27,6 @@ const BulkOperationsPage = () => {
       </VendorDashboardLayout>
     );
   }
-
   if (!currentVendor) {
     return (
       <VendorDashboardLayout>
@@ -46,7 +41,6 @@ const BulkOperationsPage = () => {
       </VendorDashboardLayout>
     );
   }
-
   return (
     <VendorDashboardLayout>
       <motion.div
@@ -59,5 +53,4 @@ const BulkOperationsPage = () => {
     </VendorDashboardLayout>
   );
 };
-
 export default BulkOperationsPage;

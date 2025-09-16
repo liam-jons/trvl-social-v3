@@ -2,7 +2,6 @@
  * Group Payment Tracker Component
  * Shows payment status for all participants in a split payment
  */
-
 import React, { useState, useEffect } from 'react';
 import { GlassCard } from '../ui/GlassCard.jsx';
 import { GlassButton } from '../ui/GlassButton.jsx';
@@ -21,7 +20,6 @@ import {
 import { CheckCircleIcon as CheckCircleIconSolid } from '@heroicons/react/24/solid';
 import { groupPaymentManager } from '../../services/split-payment-service.js';
 import { paymentCollectionWorkflow } from '../../services/payment-collection-service.js';
-
 const GroupPaymentTracker = ({
   splitPaymentId,
   currentUserId,
@@ -32,11 +30,9 @@ const GroupPaymentTracker = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
-
   // Auto-refresh payment status
   useEffect(() => {
     let interval;
-
     const fetchPaymentData = async () => {
       try {
         setError(null);
@@ -49,18 +45,14 @@ const GroupPaymentTracker = ({
         setRefreshing(false);
       }
     };
-
     fetchPaymentData();
-
     if (refreshInterval > 0) {
       interval = setInterval(fetchPaymentData, refreshInterval);
     }
-
     return () => {
       if (interval) clearInterval(interval);
     };
   }, [splitPaymentId, refreshInterval]);
-
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
@@ -72,7 +64,6 @@ const GroupPaymentTracker = ({
       setRefreshing(false);
     }
   };
-
   const getPaymentStatusIcon = (status) => {
     switch (status) {
       case 'paid':
@@ -88,7 +79,6 @@ const GroupPaymentTracker = ({
         return <ClockIcon className="h-6 w-6 text-yellow-500" />;
     }
   };
-
   const getPaymentStatusText = (status) => {
     switch (status) {
       case 'paid':
@@ -104,7 +94,6 @@ const GroupPaymentTracker = ({
         return { text: 'Pending', color: 'text-yellow-400' };
     }
   };
-
   const getSplitStatusColor = (status) => {
     switch (status) {
       case 'completed':
@@ -119,39 +108,30 @@ const GroupPaymentTracker = ({
         return 'bg-gray-500/20 border-gray-500/30 text-gray-400';
     }
   };
-
   const formatAmount = (amountInCents) => {
     return `$${(amountInCents / 100).toFixed(2)}`;
   };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString();
   };
-
   const isDeadlinePassed = (deadline) => {
     return new Date() > new Date(deadline);
   };
-
   const getTimeUntilDeadline = (deadline) => {
     const now = new Date();
     const deadlineDate = new Date(deadline);
     const timeDiff = deadlineDate.getTime() - now.getTime();
-
     if (timeDiff <= 0) return 'Overdue';
-
     const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-
     if (days > 0) return `${days}d ${hours}h remaining`;
     if (hours > 0) return `${hours}h ${minutes}m remaining`;
     return `${minutes}m remaining`;
   };
-
   const handlePayNow = (individualPaymentId) => {
     onPayNow?.(individualPaymentId);
   };
-
   const sendReminder = async (individualPaymentId) => {
     try {
       // This would integrate with your reminder system
@@ -161,7 +141,6 @@ const GroupPaymentTracker = ({
       console.error('Failed to send reminder:', error);
     }
   };
-
   if (loading) {
     return (
       <GlassCard className="p-6">
@@ -172,7 +151,6 @@ const GroupPaymentTracker = ({
       </GlassCard>
     );
   }
-
   if (error) {
     return (
       <GlassCard className="p-6">
@@ -188,11 +166,9 @@ const GroupPaymentTracker = ({
       </GlassCard>
     );
   }
-
   const { splitPayment, individualPayments, stats } = paymentData;
   const currentUserPayment = individualPayments.find(p => p.user_id === currentUserId);
   const isOrganizer = splitPayment.organizer_id === currentUserId;
-
   return (
     <div className="space-y-6">
       {/* Split Payment Overview */}
@@ -214,7 +190,6 @@ const GroupPaymentTracker = ({
             )}
           </GlassButton>
         </div>
-
         {/* Status Banner */}
         <div className={`rounded-lg border p-4 mb-6 ${getSplitStatusColor(splitPayment.status)}`}>
           <div className="flex items-center justify-between">
@@ -239,7 +214,6 @@ const GroupPaymentTracker = ({
               </div>
             </div>
           </div>
-
           {/* Progress Bar */}
           <div className="mt-4 bg-black/20 rounded-full h-2">
             <div
@@ -248,7 +222,6 @@ const GroupPaymentTracker = ({
             />
           </div>
         </div>
-
         {/* Deadline Information */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-white/5 rounded-lg p-4">
@@ -265,7 +238,6 @@ const GroupPaymentTracker = ({
               {getTimeUntilDeadline(splitPayment.payment_deadline)}
             </div>
           </div>
-
           <div className="bg-white/5 rounded-lg p-4">
             <div className="flex items-center text-gray-300 mb-2">
               <UserIcon className="h-4 w-4 mr-2" />
@@ -278,7 +250,6 @@ const GroupPaymentTracker = ({
               {stats.pendingCount} pending
             </div>
           </div>
-
           <div className="bg-white/5 rounded-lg p-4">
             <div className="flex items-center text-gray-300 mb-2">
               <CurrencyDollarIcon className="h-4 w-4 mr-2" />
@@ -292,7 +263,6 @@ const GroupPaymentTracker = ({
             </div>
           </div>
         </div>
-
         {/* Current User's Payment Status (if not organizer) */}
         {currentUserPayment && !isOrganizer && (
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mb-6">
@@ -324,19 +294,16 @@ const GroupPaymentTracker = ({
           </div>
         )}
       </GlassCard>
-
       {/* Individual Payment Status */}
       <GlassCard className="p-6">
         <h3 className="text-lg font-medium text-white mb-4 flex items-center">
           <UserIcon className="h-5 w-5 mr-2" />
           Participant Status
         </h3>
-
         <div className="space-y-4">
           {individualPayments.map((payment) => {
             const statusInfo = getPaymentStatusText(payment.status);
             const isCurrentUser = payment.user_id === currentUserId;
-
             return (
               <div
                 key={payment.id}
@@ -348,7 +315,6 @@ const GroupPaymentTracker = ({
               >
                 <div className="flex items-center space-x-4">
                   {getPaymentStatusIcon(payment.status)}
-
                   <div>
                     <div className="flex items-center">
                       <span className="text-white font-medium">
@@ -365,7 +331,6 @@ const GroupPaymentTracker = ({
                     </div>
                   </div>
                 </div>
-
                 <div className="flex items-center space-x-4">
                   <div className="text-right">
                     <div className="text-white font-medium">
@@ -380,7 +345,6 @@ const GroupPaymentTracker = ({
                       </div>
                     )}
                   </div>
-
                   {/* Action buttons for organizer */}
                   {isOrganizer && payment.status === 'pending' && (
                     <GlassButton
@@ -392,7 +356,6 @@ const GroupPaymentTracker = ({
                       Remind
                     </GlassButton>
                   )}
-
                   {/* Pay button for current user */}
                   {isCurrentUser && payment.status === 'pending' && (
                     <GlassButton
@@ -407,7 +370,6 @@ const GroupPaymentTracker = ({
             );
           })}
         </div>
-
         {individualPayments.length === 0 && (
           <div className="text-center py-8 text-gray-400">
             <UserIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
@@ -415,7 +377,6 @@ const GroupPaymentTracker = ({
           </div>
         )}
       </GlassCard>
-
       {/* Additional Information */}
       {(stats.meetsMinimumThreshold || splitPayment.status === 'completed_partial') && (
         <GlassCard className="p-4">
@@ -434,5 +395,4 @@ const GroupPaymentTracker = ({
     </div>
   );
 };
-
 export default GroupPaymentTracker;

@@ -2,7 +2,6 @@
  * ModerationDashboard Component
  * Main admin interface for content moderation and user management
  */
-
 import React, { useState, useEffect } from 'react';
 import {
   Shield,
@@ -28,7 +27,6 @@ import {
   VolumeX
 } from 'lucide-react';
 import ContentModerationService from '../../services/content-moderation-service';
-
 const ModerationDashboard = () => {
   const [activeTab, setActiveTab] = useState('queue');
   const [moderationQueue, setModerationQueue] = useState([]);
@@ -41,11 +39,9 @@ const ModerationDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedItems, setSelectedItems] = useState([]);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     loadDashboardData();
   }, [filters]);
-
   const loadDashboardData = async () => {
     setLoading(true);
     try {
@@ -53,11 +49,9 @@ const ModerationDashboard = () => {
         ContentModerationService.getModerationQueue(filters),
         ContentModerationService.getModerationStats(7)
       ]);
-
       if (queueResult.success) {
         setModerationQueue(queueResult.data || []);
       }
-
       if (statsResult.success) {
         setStats(statsResult.data || {});
       }
@@ -67,46 +61,38 @@ const ModerationDashboard = () => {
       setLoading(false);
     }
   };
-
   const handleApprove = async (itemId) => {
     try {
       const item = moderationQueue.find(q => q.id === itemId);
       if (!item) return;
-
       await ContentModerationService.processAutomatedAction(
         item.content_id,
         item.content_type,
         'approve',
         'Approved by moderator'
       );
-
       await loadDashboardData();
     } catch (error) {
       console.error('Failed to approve content:', error);
     }
   };
-
   const handleReject = async (itemId, reason = 'Violates community guidelines') => {
     try {
       const item = moderationQueue.find(q => q.id === itemId);
       if (!item) return;
-
       await ContentModerationService.processAutomatedAction(
         item.content_id,
         item.content_type,
         'block',
         reason
       );
-
       await loadDashboardData();
     } catch (error) {
       console.error('Failed to reject content:', error);
     }
   };
-
   const handleBulkAction = async (action) => {
     if (selectedItems.length === 0) return;
-
     try {
       for (const itemId of selectedItems) {
         const item = moderationQueue.find(q => q.id === itemId);
@@ -124,7 +110,6 @@ const ModerationDashboard = () => {
       console.error('Failed to process bulk action:', error);
     }
   };
-
   const StatCard = ({ icon: Icon, title, value, change, color = 'blue' }) => (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       <div className="flex items-center justify-between">
@@ -143,7 +128,6 @@ const ModerationDashboard = () => {
       </div>
     </div>
   );
-
   const ModerationQueueItem = ({ item }) => {
     const isSelected = selectedItems.includes(item.id);
     const priorityColors = {
@@ -151,7 +135,6 @@ const ModerationDashboard = () => {
       medium: 'bg-yellow-100 text-yellow-800',
       low: 'bg-green-100 text-green-800'
     };
-
     return (
       <div className={`border rounded-lg p-4 transition-all ${
         isSelected ? 'border-blue-300 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
@@ -170,7 +153,6 @@ const ModerationDashboard = () => {
             }}
             className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
           />
-
           {/* Content Preview */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-2">
@@ -191,7 +173,6 @@ const ModerationDashboard = () => {
                 <MoreVertical className="w-4 h-4 text-gray-500" />
               </button>
             </div>
-
             {/* Report Information */}
             {item.content_reports && item.content_reports.length > 0 && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
@@ -209,7 +190,6 @@ const ModerationDashboard = () => {
                 </p>
               </div>
             )}
-
             {/* Content Preview */}
             <div className="bg-gray-50 rounded-lg p-3 mb-3">
               <div className="flex items-center space-x-2 mb-2">
@@ -220,7 +200,6 @@ const ModerationDashboard = () => {
                 "This is a preview of the reported content that needs moderation review..."
               </p>
             </div>
-
             {/* Metadata */}
             <div className="flex items-center space-x-6 text-xs text-gray-500">
               <div className="flex items-center space-x-1">
@@ -241,7 +220,6 @@ const ModerationDashboard = () => {
               </div>
             </div>
           </div>
-
           {/* Actions */}
           <div className="flex flex-col space-y-2">
             <button
@@ -267,7 +245,6 @@ const ModerationDashboard = () => {
       </div>
     );
   };
-
   const UserManagementTab = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -281,7 +258,6 @@ const ModerationDashboard = () => {
           </button>
         </div>
       </div>
-
       {/* User Management Content */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="p-6">
@@ -315,7 +291,6 @@ const ModerationDashboard = () => {
               color="gray"
             />
           </div>
-
           {/* User List */}
           <div className="space-y-4">
             {[1, 2, 3].map((user) => (
@@ -352,7 +327,6 @@ const ModerationDashboard = () => {
       </div>
     </div>
   );
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
@@ -370,7 +344,6 @@ const ModerationDashboard = () => {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -389,7 +362,6 @@ const ModerationDashboard = () => {
             </button>
           </div>
         </div>
-
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <StatCard
@@ -421,7 +393,6 @@ const ModerationDashboard = () => {
             color="blue"
           />
         </div>
-
         {/* Tabs */}
         <div className="border-b border-gray-200">
           <nav className="-mb-px flex space-x-8">
@@ -446,7 +417,6 @@ const ModerationDashboard = () => {
             ))}
           </nav>
         </div>
-
         {/* Tab Content */}
         {activeTab === 'queue' && (
           <div className="space-y-6">
@@ -486,7 +456,6 @@ const ModerationDashboard = () => {
                     <option value="review">Reviews</option>
                   </select>
                 </div>
-
                 {/* Bulk Actions */}
                 {selectedItems.length > 0 && (
                   <div className="flex items-center space-x-2">
@@ -509,7 +478,6 @@ const ModerationDashboard = () => {
                 )}
               </div>
             </div>
-
             {/* Moderation Queue */}
             <div className="space-y-4">
               {moderationQueue.length > 0 ? (
@@ -526,16 +494,13 @@ const ModerationDashboard = () => {
             </div>
           </div>
         )}
-
         {activeTab === 'users' && <UserManagementTab />}
-
         {activeTab === 'analytics' && (
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Moderation Analytics</h3>
             <p className="text-gray-600">Analytics and reporting features coming soon...</p>
           </div>
         )}
-
         {activeTab === 'policies' && (
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Content Policies</h3>
@@ -546,5 +511,4 @@ const ModerationDashboard = () => {
     </div>
   );
 };
-
 export default ModerationDashboard;

@@ -18,26 +18,21 @@ import BulkNotificationSystem from './bulk/BulkNotificationSystem';
 import BulkActionHistory from './bulk/BulkActionHistory';
 import { bulkOperationsService } from '../../services/bulk-operations-service';
 import useVendorDashboardStore from '../../stores/vendorDashboardStore';
-
 const BulkOperationsManager = ({ vendorId }) => {
   const [activeTab, setActiveTab] = useState('adventures');
   const [activeBatchJobs, setActiveBatchJobs] = useState([]);
   const [recentActions, setRecentActions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
   const { currentVendor } = useVendorDashboardStore();
-
   useEffect(() => {
     loadRecentActions();
     loadActiveBatchJobs();
   }, [vendorId]);
-
   const loadRecentActions = async () => {
     try {
       const { data, error } = await bulkOperationsService.getBulkActionHistory(vendorId, {
         limit: 5
       });
-
       if (!error && data) {
         setRecentActions(data);
       }
@@ -45,13 +40,11 @@ const BulkOperationsManager = ({ vendorId }) => {
       console.error('Failed to load recent actions:', error);
     }
   };
-
   const loadActiveBatchJobs = async () => {
     // Implementation for loading active batch jobs
     // This would typically fetch from a real-time subscription
     setActiveBatchJobs([]);
   };
-
   const tabs = [
     {
       id: 'adventures',
@@ -84,7 +77,6 @@ const BulkOperationsManager = ({ vendorId }) => {
       description: 'Action history & undo'
     }
   ];
-
   const renderTabContent = () => {
     switch (activeTab) {
       case 'adventures':
@@ -101,7 +93,6 @@ const BulkOperationsManager = ({ vendorId }) => {
         return null;
     }
   };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -115,7 +106,6 @@ const BulkOperationsManager = ({ vendorId }) => {
           </p>
         </div>
       </div>
-
       {/* Active Batch Jobs Alert */}
       {activeBatchJobs.length > 0 && (
         <GlassCard variant="warning" padding="md">
@@ -146,7 +136,6 @@ const BulkOperationsManager = ({ vendorId }) => {
           </div>
         </GlassCard>
       )}
-
       {/* Recent Actions Summary */}
       {recentActions.length > 0 && (
         <GlassCard variant="light" padding="md">
@@ -170,14 +159,12 @@ const BulkOperationsManager = ({ vendorId }) => {
           </div>
         </GlassCard>
       )}
-
       {/* Navigation Tabs */}
       <div className="border-b border-gray-200 dark:border-gray-700">
         <nav className="-mb-px flex space-x-8 overflow-x-auto">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
-
             return (
               <button
                 key={tab.id}
@@ -198,7 +185,6 @@ const BulkOperationsManager = ({ vendorId }) => {
           })}
         </nav>
       </div>
-
       {/* Tab Content */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -211,7 +197,6 @@ const BulkOperationsManager = ({ vendorId }) => {
           {renderTabContent()}
         </motion.div>
       </AnimatePresence>
-
       {/* Loading Overlay */}
       {isLoading && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
@@ -226,5 +211,4 @@ const BulkOperationsManager = ({ vendorId }) => {
     </div>
   );
 };
-
 export default BulkOperationsManager;

@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { XMarkIcon, FolderIcon, LockClosedIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 import GlassModal from '../ui/GlassModal';
 import GlassButton from '../ui/GlassButton';
-
 const CollectionModal = ({ isOpen, onClose, onCreate }) => {
   const [formData, setFormData] = useState({
     name: '',
@@ -11,19 +10,14 @@ const CollectionModal = ({ isOpen, onClose, onCreate }) => {
     isPrivate: false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!formData.name.trim()) {
       return;
     }
-
     setIsSubmitting(true);
-
     try {
       await onCreate(formData.name.trim(), formData.description.trim(), formData.isPrivate);
-
       // Reset form
       setFormData({
         name: '',
@@ -36,7 +30,6 @@ const CollectionModal = ({ isOpen, onClose, onCreate }) => {
       setIsSubmitting(false);
     }
   };
-
   const handleClose = () => {
     if (!isSubmitting) {
       setFormData({
@@ -47,7 +40,6 @@ const CollectionModal = ({ isOpen, onClose, onCreate }) => {
       onClose();
     }
   };
-
   return (
     <GlassModal isOpen={isOpen} onClose={handleClose}>
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md">
@@ -69,7 +61,6 @@ const CollectionModal = ({ isOpen, onClose, onCreate }) => {
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
-
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Collection Name */}
@@ -87,7 +78,6 @@ const CollectionModal = ({ isOpen, onClose, onCreate }) => {
               required
             />
           </div>
-
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -102,7 +92,6 @@ const CollectionModal = ({ isOpen, onClose, onCreate }) => {
               disabled={isSubmitting}
             />
           </div>
-
           {/* Privacy Setting */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
@@ -127,7 +116,6 @@ const CollectionModal = ({ isOpen, onClose, onCreate }) => {
                   </div>
                 </div>
               </label>
-
               <label className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                 <input
                   type="radio"
@@ -148,7 +136,6 @@ const CollectionModal = ({ isOpen, onClose, onCreate }) => {
               </label>
             </div>
           </div>
-
           {/* Actions */}
           <div className="flex gap-3 pt-4">
             <button
@@ -172,5 +159,4 @@ const CollectionModal = ({ isOpen, onClose, onCreate }) => {
     </GlassModal>
   );
 };
-
 export default CollectionModal;

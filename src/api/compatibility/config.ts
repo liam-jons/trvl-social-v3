@@ -2,14 +2,12 @@
  * API endpoints for managing compatibility algorithm configuration
  * GET/PUT /api/compatibility/config
  */
-
 import { compatibilityService } from '../../services/compatibility-service';
 import {
   AlgorithmConfigResponse,
   UpdateAlgorithmConfigRequest,
   ScoringParameters
 } from '../../types/compatibility';
-
 /**
  * Get current algorithm configuration
  * GET /api/compatibility/config
@@ -19,7 +17,6 @@ export async function getAlgorithmConfig(
 ): Promise<AlgorithmConfigResponse> {
   try {
     const parameters = await compatibilityService.getAlgorithmParameters(algorithmId);
-
     // Convert parameters back to CompatibilityAlgorithm format
     const algorithm = {
       id: parameters.algorithmId,
@@ -45,7 +42,6 @@ export async function getAlgorithmConfig(
         compressionEnabled: true
       }
     };
-
     return {
       success: true,
       data: algorithm
@@ -61,7 +57,6 @@ export async function getAlgorithmConfig(
     };
   }
 }
-
 /**
  * Update algorithm configuration
  * PUT /api/compatibility/config
@@ -79,7 +74,6 @@ export async function updateAlgorithmConfig(
       }
     };
   }
-
   if (!request.updates || Object.keys(request.updates).length === 0) {
     return {
       success: false,
@@ -89,7 +83,6 @@ export async function updateAlgorithmConfig(
       }
     };
   }
-
   // Validate weight values if provided
   if (request.updates.personalityWeights) {
     const weights = Object.values(request.updates.personalityWeights);
@@ -103,7 +96,6 @@ export async function updateAlgorithmConfig(
       };
     }
   }
-
   if (request.updates.travelPreferenceWeights) {
     const weights = Object.values(request.updates.travelPreferenceWeights);
     if (weights.some(w => w < 0 || w > 1)) {
@@ -116,7 +108,6 @@ export async function updateAlgorithmConfig(
       };
     }
   }
-
   try {
     const response = await compatibilityService.updateAlgorithmConfig(
       request.algorithmId,
@@ -134,13 +125,11 @@ export async function updateAlgorithmConfig(
     };
   }
 }
-
 // Express.js handlers
 export const getAlgorithmConfigHandler = async (req: any, res: any) => {
   try {
     const algorithmId = req.params.algorithmId || req.query.algorithmId;
     const response = await getAlgorithmConfig(algorithmId);
-
     res.status(response.success ? 200 : 400).json(response);
   } catch (error) {
     console.error('Express handler error:', error);
@@ -153,16 +142,13 @@ export const getAlgorithmConfigHandler = async (req: any, res: any) => {
     });
   }
 };
-
 export const updateAlgorithmConfigHandler = async (req: any, res: any) => {
   try {
     const request: UpdateAlgorithmConfigRequest = {
       algorithmId: req.params.algorithmId || req.body.algorithmId,
       updates: req.body.updates || req.body
     };
-
     const response = await updateAlgorithmConfig(request);
-
     res.status(response.success ? 200 : 400).json(response);
   } catch (error) {
     console.error('Express handler error:', error);
@@ -175,15 +161,12 @@ export const updateAlgorithmConfigHandler = async (req: any, res: any) => {
     });
   }
 };
-
 // Supabase Edge Function handlers
 export const supabaseGetConfigHandler = async (req: Request): Promise<Response> => {
   try {
     const url = new URL(req.url);
     const algorithmId = url.searchParams.get('algorithmId') || undefined;
-
     const response = await getAlgorithmConfig(algorithmId);
-
     return new Response(JSON.stringify(response), {
       status: response.success ? 200 : 400,
       headers: {
@@ -207,20 +190,16 @@ export const supabaseGetConfigHandler = async (req: Request): Promise<Response> 
     });
   }
 };
-
 export const supabaseUpdateConfigHandler = async (req: Request): Promise<Response> => {
   try {
     const body = await req.json();
     const url = new URL(req.url);
     const algorithmId = url.searchParams.get('algorithmId') || body.algorithmId;
-
     const request: UpdateAlgorithmConfigRequest = {
       algorithmId,
       updates: body.updates || body
     };
-
     const response = await updateAlgorithmConfig(request);
-
     return new Response(JSON.stringify(response), {
       status: response.success ? 200 : 400,
       headers: {

@@ -1315,11 +1315,114 @@
             "parentTaskId": 13
           }
         ]
+      },
+      {
+        "id": 14,
+        "title": "Remove all console statements from production code",
+        "description": "Remove all console.log/warn/error statements from 196 files in production code",
+        "details": "Systematically remove all console statements from production code for security and performance. 196 files identified with console statements that need cleaning.",
+        "testStrategy": "Run build after cleanup to verify no errors introduced",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 15,
+        "title": "Fix compatibility demo page",
+        "description": "Add interactive personality assessment and matching demo to empty compatibility page",
+        "details": "The /compatibility page exists but has no content. Implement interactive personality assessment quiz, real-time compatibility scoring visualization, sample group matching demonstration, and integration with existing personality assessment system.",
+        "testStrategy": "Verify interactive elements work, personality assessment calculates correctly, compatibility scores display properly",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Review existing compatibility demo page structure",
+            "description": "Examine the current empty compatibility page and understand the existing personality assessment system",
+            "details": "Check src/pages/CompatibilityDemoPage.jsx, review personality assessment services and types",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 15
+          },
+          {
+            "id": 2,
+            "title": "Create interactive personality quiz component",
+            "description": "Build the interactive quiz UI with questions and answer tracking",
+            "details": "Create quiz component with multiple choice questions, progress indicator, and state management for answers",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 15
+          },
+          {
+            "id": 3,
+            "title": "Implement compatibility scoring visualization",
+            "description": "Create visual components to display compatibility scores and analysis",
+            "details": "Build charts, progress bars, and compatibility percentage displays with animated transitions",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 15
+          },
+          {
+            "id": 4,
+            "title": "Add sample group matching demonstration",
+            "description": "Create demo functionality showing group compatibility matching",
+            "details": "Implement sample users, group formation demo, and compatibility matrix visualization",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 15
+          }
+        ]
+      },
+      {
+        "id": 16,
+        "title": "Replace all emoji icons with Lucide React icons",
+        "description": "Systematically replace emoji icons with professional Lucide React icons throughout the application",
+        "details": "Replace emojis in header navigation, footer, UI feedback messages, and button labels with appropriate Lucide React icons for a more professional appearance.",
+        "testStrategy": "Visual inspection of all UI components, verify icons render correctly",
+        "status": "done",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 17,
+        "title": "Implement Progressive Web App (PWA) functionality",
+        "description": "Add PWA capabilities with offline support, service workers, and app-like features",
+        "details": "Create manifest.json, configure service worker registration, set up workbox for caching strategies, add install prompt UI, implement offline functionality with cached assets and offline page, queue API requests for sync, add push notifications support, implement app-like features including splash screen and pull-to-refresh.",
+        "testStrategy": "Test offline functionality, verify service worker registration, test on multiple devices, run Lighthouse PWA audit for 90+ score",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 18,
+        "title": "Optimize bundle sizes",
+        "description": "Code split large chunks (>500KB) to improve application performance",
+        "details": "Three chunks exceed 500KB limit: index.js (1514KB), mapbox-gl.js (1627KB), and several page components. Implement dynamic imports, configure manual chunks in rollup options, and optimize heavy dependencies.",
+        "testStrategy": "Verify bundle sizes reduced below 500KB, test lazy loading works correctly, ensure no functionality breaks",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 19,
+        "title": "Implement rate limiting for API endpoints",
+        "description": "Add rate limiting to protect API endpoints from abuse",
+        "details": "Implement rate limiting middleware for all API endpoints to prevent abuse and ensure fair usage. Configure appropriate limits for different endpoint types.",
+        "testStrategy": "Test rate limits are enforced, verify appropriate error messages, ensure legitimate traffic is not blocked",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-09-13T20:13:47.735Z",
-      "updated": "2025-09-16T09:59:56.690Z",
+      "updated": "2025-09-16T12:52:17.975Z",
       "description": "Tasks for master context"
     }
   }

@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
 import Supercluster from 'supercluster';
-
 const useMapClustering = (
   adventures = [],
   viewState,
@@ -13,9 +12,7 @@ const useMapClustering = (
     extent = 512,
     nodeSize = 64,
   } = options;
-
   const [clusters, setClusters] = useState([]);
-
   // Create supercluster instance
   const supercluster = useMemo(() => {
     const cluster = new Supercluster({
@@ -25,10 +22,8 @@ const useMapClustering = (
       extent,
       nodeSize,
     });
-
     return cluster;
   }, [maxZoom, radius, minPoints, extent, nodeSize]);
-
   // Convert adventures to GeoJSON features
   const points = useMemo(() => {
     return adventures
@@ -51,21 +46,17 @@ const useMapClustering = (
         },
       }));
   }, [adventures]);
-
   // Update clusters when points or viewState change
   useEffect(() => {
     if (!points.length || !viewState) {
       setClusters([]);
       return;
     }
-
     // Load points into supercluster
     supercluster.load(points);
-
     // Get clusters for current viewport
     const bounds = getBounds(viewState);
     const zoom = Math.floor(viewState.zoom);
-
     try {
       const clusterData = supercluster.getClusters(bounds, zoom);
       setClusters(clusterData);
@@ -74,17 +65,13 @@ const useMapClustering = (
       setClusters(points); // Fallback to original points
     }
   }, [points, viewState, supercluster]);
-
   // Get bounds from viewState
   const getBounds = (viewState) => {
     if (!viewState) return [-180, -85, 180, 85];
-
     const { longitude, latitude, zoom } = viewState;
-
     // Calculate approximate bounds based on zoom level
     const latDelta = 180 / Math.pow(2, zoom);
     const lngDelta = 360 / Math.pow(2, zoom);
-
     return [
       longitude - lngDelta,
       latitude - latDelta,
@@ -92,7 +79,6 @@ const useMapClustering = (
       latitude + latDelta,
     ];
   };
-
   // Get cluster leaves (individual points in a cluster)
   const getClusterLeaves = (clusterId, limit = 10, offset = 0) => {
     if (!supercluster) return [];
@@ -103,7 +89,6 @@ const useMapClustering = (
       return [];
     }
   };
-
   // Expand cluster to show individual points
   const getClusterExpansionZoom = (clusterId) => {
     if (!supercluster) return null;
@@ -114,7 +99,6 @@ const useMapClustering = (
       return null;
     }
   };
-
   return {
     clusters,
     getClusterLeaves,
@@ -122,5 +106,4 @@ const useMapClustering = (
     totalPoints: points.length,
   };
 };
-
 export default useMapClustering;

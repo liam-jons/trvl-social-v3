@@ -1,5 +1,4 @@
 const isDevelopment = import.meta.env.DEV;
-
 export const logger = {
   log: isDevelopment ? console.log : () => {},
   warn: isDevelopment ? console.warn : () => {},

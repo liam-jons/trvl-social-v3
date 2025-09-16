@@ -1,4 +1,5 @@
 import StaticPageLayout from '../../components/layout/StaticPageLayout';
+import { Star, Rocket } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
 
@@ -137,13 +138,13 @@ const PressPage = () => {
             </GlassCard>
 
             <GlassCard className="text-center p-6">
-              <div className="text-4xl mb-4">⭐</div>
+              <Star className="w-12 h-12 mx-auto mb-4 text-yellow-500" />
               <h3 className="text-lg font-semibold mb-2">Best Travel App</h3>
               <p className="text-sm text-gray-600 dark:text-gray-300">Travel + Leisure 2024</p>
             </GlassCard>
 
             <GlassCard className="text-center p-6">
-              <div className="text-4xl mb-4">🚀</div>
+              <Rocket className="w-12 h-12 mx-auto mb-4 text-blue-500" />
               <h3 className="text-lg font-semibold mb-2">Fast Company's Most Innovative</h3>
               <p className="text-sm text-gray-600 dark:text-gray-300">Travel Companies 2024</p>
             </GlassCard>

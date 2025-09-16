@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Search, RefreshCw, AlertCircle, Loader2, Users } from 'lucide-react';
-
 import RecommendationCard from './components/RecommendationCard';
 import RecommendationFilters from './components/RecommendationFilters';
 import { useInfiniteScroll } from '../../../hooks/useInfiniteScroll';
-
 import { recommendationEngine } from './utils/recommendationEngine';
 import { mockGroups, mockUserProfile } from './utils/mockGroupsData';
-
 const RecommendationsPage = () => {
   // State management
   const [userProfile, setUserProfile] = useState(mockUserProfile);
@@ -18,7 +15,6 @@ const RecommendationsPage = () => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [error, setError] = useState(null);
   const [totalCompatibleGroups, setTotalCompatibleGroups] = useState(0);
-
   // Recommendation loading function for infinite scroll
   const fetchMoreRecommendations = useCallback(async ({ page, pageSize }) => {
     try {
@@ -33,7 +29,6 @@ const RecommendationsPage = () => {
           forceRecalculation: false
         }
       );
-
       // Add new recommendations to existing ones
       if (page === 0) {
         setRecommendations(result.recommendations);
@@ -42,7 +37,6 @@ const RecommendationsPage = () => {
       } else {
         setRecommendations(prev => [...prev, ...result.recommendations]);
       }
-
       return {
         hasMore: result.pagination.hasNext,
         nextPage: result.pagination.currentPage + 1,
@@ -53,7 +47,6 @@ const RecommendationsPage = () => {
       throw err;
     }
   }, [userProfile, activeFilters]);
-
   // Infinite scroll hook
   const {
     isLoading: isLoadingMore,
@@ -67,13 +60,11 @@ const RecommendationsPage = () => {
     enabled: true,
     threshold: 300
   });
-
   // Initial load
   useEffect(() => {
     const loadInitialRecommendations = async () => {
       setIsInitialLoading(true);
       setError(null);
-
       try {
         await fetchMoreRecommendations({ page: 0, pageSize: 10 });
       } catch (err) {
@@ -82,19 +73,15 @@ const RecommendationsPage = () => {
         setIsInitialLoading(false);
       }
     };
-
     loadInitialRecommendations();
   }, []); // Only run on mount
-
   // Handle filter changes
   const handleFiltersChange = useCallback(async (newFilters) => {
     setActiveFilters(newFilters);
     setIsInitialLoading(true);
     setError(null);
-
     // Reset infinite scroll and reload with new filters
     reset();
-
     try {
       const result = await recommendationEngine.getRecommendations(
         userProfile,
@@ -107,7 +94,6 @@ const RecommendationsPage = () => {
           forceRecalculation: false
         }
       );
-
       setRecommendations(result.recommendations);
       setAvailableFilters(result.filters);
       setTotalCompatibleGroups(result.totalCompatibleGroups);
@@ -117,17 +103,14 @@ const RecommendationsPage = () => {
       setIsInitialLoading(false);
     }
   }, [userProfile, reset]);
-
   // Handle search
   const handleSearch = useCallback(async (query) => {
     setSearchQuery(query);
-
     if (query.trim() === '') {
       // Reset to show all recommendations
       handleFiltersChange(activeFilters);
       return;
     }
-
     // Filter recommendations by search query
     const filteredRecommendations = recommendations.filter(rec =>
       rec.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -137,22 +120,18 @@ const RecommendationsPage = () => {
         activity.toLowerCase().includes(query.toLowerCase())
       )
     );
-
     setRecommendations(filteredRecommendations);
   }, [recommendations, activeFilters, handleFiltersChange]);
-
   // Clear all filters
   const clearAllFilters = useCallback(() => {
     handleFiltersChange({});
     setSearchQuery('');
   }, [handleFiltersChange]);
-
   // Refresh recommendations
   const refreshRecommendations = useCallback(async () => {
     setIsInitialLoading(true);
     setError(null);
     reset();
-
     try {
       const result = await recommendationEngine.getRecommendations(
         userProfile,
@@ -165,7 +144,6 @@ const RecommendationsPage = () => {
           forceRecalculation: true // Force recalculation on refresh
         }
       );
-
       setRecommendations(result.recommendations);
       setAvailableFilters(result.filters);
       setTotalCompatibleGroups(result.totalCompatibleGroups);
@@ -175,20 +153,17 @@ const RecommendationsPage = () => {
       setIsInitialLoading(false);
     }
   }, [userProfile, activeFilters, reset]);
-
   // Handle group actions
   const handleViewDetails = useCallback((group) => {
     console.log('View details for group:', group.id);
     // Navigate to group details page
     // In a real app: navigate(`/groups/${group.id}`);
   }, []);
-
   const handleJoinGroup = useCallback((group) => {
     console.log('Join group:', group.id);
     // Handle join group logic
     // In a real app: show join modal or navigate to join flow
   }, []);
-
   // Loading state
   if (isInitialLoading && recommendations.length === 0) {
     return (
@@ -202,7 +177,6 @@ const RecommendationsPage = () => {
       </div>
     );
   }
-
   // Error state
   if (error && recommendations.length === 0) {
     return (
@@ -225,7 +199,6 @@ const RecommendationsPage = () => {
       </div>
     );
   }
-
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
@@ -236,7 +209,6 @@ const RecommendationsPage = () => {
         <p className="text-gray-600">
           Discover travel groups that match your personality and preferences
         </p>
-
         {/* Stats */}
         <div className="mt-4 flex items-center gap-4 text-sm text-gray-600">
           <div className="flex items-center">
@@ -248,7 +220,6 @@ const RecommendationsPage = () => {
           </div>
         </div>
       </div>
-
       {/* Search and Actions */}
       <div className="mb-6 flex flex-col md:flex-row gap-4">
         <div className="flex-1 relative">
@@ -261,7 +232,6 @@ const RecommendationsPage = () => {
             className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
-
         <button
           onClick={refreshRecommendations}
           disabled={isInitialLoading}
@@ -271,7 +241,6 @@ const RecommendationsPage = () => {
           Refresh
         </button>
       </div>
-
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Filters Sidebar */}
         <div className="lg:w-80 flex-shrink-0">
@@ -282,7 +251,6 @@ const RecommendationsPage = () => {
             onClearFilters={clearAllFilters}
           />
         </div>
-
         {/* Recommendations List */}
         <div className="flex-1">
           {recommendations.length === 0 && !isInitialLoading ? (
@@ -319,7 +287,6 @@ const RecommendationsPage = () => {
                   />
                 ))}
               </div>
-
               {/* Loading More */}
               {isLoadingMore && (
                 <div className="flex items-center justify-center py-8">
@@ -327,7 +294,6 @@ const RecommendationsPage = () => {
                   <span className="text-gray-600">Loading more recommendations...</span>
                 </div>
               )}
-
               {/* Load More Error */}
               {scrollError && (
                 <div className="flex items-center justify-center py-8">
@@ -343,7 +309,6 @@ const RecommendationsPage = () => {
                   </div>
                 </div>
               )}
-
               {/* End of Results */}
               {!hasNextPage && !isLoadingMore && recommendations.length > 0 && (
                 <div className="text-center py-8">
@@ -362,7 +327,6 @@ const RecommendationsPage = () => {
           )}
         </div>
       </div>
-
       {/* Footer Stats */}
       {recommendations.length > 0 && (
         <div className="mt-8 pt-6 border-t border-gray-200">
@@ -379,5 +343,4 @@ const RecommendationsPage = () => {
     </div>
   );
 };
-
 export default RecommendationsPage;

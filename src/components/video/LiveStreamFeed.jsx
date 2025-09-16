@@ -13,29 +13,23 @@ import {
 import useVideoStreamStore from '../../stores/videoStreamStore';
 import GlassCard from '../ui/GlassCard';
 import GlassButton from '../ui/GlassButton';
-
 const LiveStreamFeed = ({ maxStreams = 4, showHeader = true, className = "" }) => {
   const [selectedStream, setSelectedStream] = useState(null);
   const [hoveredStream, setHoveredStream] = useState(null);
-
   const {
     activeStreams,
     fetchActiveStreams,
     isLoading
   } = useVideoStreamStore();
-
   // Fetch active streams on component mount
   useEffect(() => {
     fetchActiveStreams();
-
     // Set up periodic refresh
     const interval = setInterval(() => {
       fetchActiveStreams();
     }, 30000); // Refresh every 30 seconds
-
     return () => clearInterval(interval);
   }, [fetchActiveStreams]);
-
   // Mock live streams for demonstration
   const mockLiveStreams = [
     {
@@ -91,21 +85,17 @@ const LiveStreamFeed = ({ maxStreams = 4, showHeader = true, className = "" }) =
       url: '/stream/stream_4'
     }
   ];
-
   // Use mock data if no active streams
   const displayStreams = activeStreams.length > 0 ? activeStreams.slice(0, maxStreams) : mockLiveStreams.slice(0, maxStreams);
-
   // Handle stream interaction
   const handleStreamClick = (stream) => {
     setSelectedStream(stream);
   };
-
   // Handle like stream
   const handleLikeStream = (streamId) => {
     // In a real implementation, this would make an API call
     console.log('Liked stream:', streamId);
   };
-
   // Handle share stream
   const handleShareStream = (stream) => {
     if (navigator.share) {
@@ -126,7 +116,6 @@ const LiveStreamFeed = ({ maxStreams = 4, showHeader = true, className = "" }) =
       window.dispatchEvent(event);
     }
   };
-
   if (isLoading) {
     return (
       <div className={`${className}`}>
@@ -136,7 +125,6 @@ const LiveStreamFeed = ({ maxStreams = 4, showHeader = true, className = "" }) =
       </div>
     );
   }
-
   return (
     <div className={`${className}`}>
       {showHeader && (
@@ -149,7 +137,6 @@ const LiveStreamFeed = ({ maxStreams = 4, showHeader = true, className = "" }) =
               Join fellow adventurers experiencing the world in real-time
             </p>
           </div>
-
           <Link to="/streams">
             <GlassButton variant="ghost" className="flex items-center space-x-2">
               <span>View All</span>
@@ -158,7 +145,6 @@ const LiveStreamFeed = ({ maxStreams = 4, showHeader = true, className = "" }) =
           </Link>
         </div>
       )}
-
       {displayStreams.length === 0 ? (
         <GlassCard className="p-8 text-center">
           <div className="text-gray-400 mb-4">
@@ -191,7 +177,6 @@ const LiveStreamFeed = ({ maxStreams = 4, showHeader = true, className = "" }) =
                       alt={stream.title}
                       className="w-full h-full object-cover"
                     />
-
                     {/* Live Badge */}
                     <div className="absolute top-3 left-3">
                       <div className="flex items-center space-x-2 bg-red-500 text-white px-2 py-1 rounded-lg text-sm font-medium">
@@ -199,7 +184,6 @@ const LiveStreamFeed = ({ maxStreams = 4, showHeader = true, className = "" }) =
                         <span>LIVE</span>
                       </div>
                     </div>
-
                     {/* Viewer Count */}
                     <div className="absolute top-3 right-3">
                       <div className="flex items-center space-x-1 bg-black/50 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-sm">
@@ -207,14 +191,12 @@ const LiveStreamFeed = ({ maxStreams = 4, showHeader = true, className = "" }) =
                         <span>{stream.viewerCount}</span>
                       </div>
                     </div>
-
                     {/* Duration */}
                     <div className="absolute bottom-3 right-3">
                       <div className="bg-black/50 backdrop-blur-sm text-white px-2 py-1 rounded text-sm">
                         {stream.duration}
                       </div>
                     </div>
-
                     {/* Play Overlay */}
                     <div className={`absolute inset-0 bg-black/30 flex items-center justify-center transition-opacity duration-300 ${
                       hoveredStream === stream.id ? 'opacity-100' : 'opacity-0'
@@ -233,7 +215,6 @@ const LiveStreamFeed = ({ maxStreams = 4, showHeader = true, className = "" }) =
                       </motion.div>
                     </div>
                   </div>
-
                   {/* Stream Info */}
                   <div className="p-4">
                     <div className="flex items-start space-x-3 mb-3">
@@ -251,7 +232,6 @@ const LiveStreamFeed = ({ maxStreams = 4, showHeader = true, className = "" }) =
                         </p>
                       </div>
                     </div>
-
                     {/* Location and Category */}
                     <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
                       <div className="flex items-center space-x-1">
@@ -262,7 +242,6 @@ const LiveStreamFeed = ({ maxStreams = 4, showHeader = true, className = "" }) =
                         {stream.category}
                       </span>
                     </div>
-
                     {/* Action Buttons */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
@@ -276,7 +255,6 @@ const LiveStreamFeed = ({ maxStreams = 4, showHeader = true, className = "" }) =
                           <HeartIcon className="h-4 w-4" />
                           <span className="text-xs">Like</span>
                         </button>
-
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -288,7 +266,6 @@ const LiveStreamFeed = ({ maxStreams = 4, showHeader = true, className = "" }) =
                           <span className="text-xs">Share</span>
                         </button>
                       </div>
-
                       <Link
                         to={stream.url}
                         className="text-blue-500 hover:text-blue-600 text-xs font-medium"
@@ -303,7 +280,6 @@ const LiveStreamFeed = ({ maxStreams = 4, showHeader = true, className = "" }) =
           ))}
         </div>
       )}
-
       {/* Featured Stream Modal (if selected) */}
       {selectedStream && (
         <motion.div
@@ -348,5 +324,4 @@ const LiveStreamFeed = ({ maxStreams = 4, showHeader = true, className = "" }) =
     </div>
   );
 };
-
 export default LiveStreamFeed;

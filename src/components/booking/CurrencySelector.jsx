@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '../ui/card';
 import CurrencyService from '../../services/currency-service';
-
 const CurrencySelector = ({
   value,
   onChange,
@@ -15,12 +14,10 @@ const CurrencySelector = ({
   const [conversions, setConversions] = useState({});
   const [loading, setLoading] = useState(false);
   const [userCurrency, setUserCurrency] = useState(null);
-
   useEffect(() => {
     // Load supported currencies
     const supportedCurrencies = CurrencyService.getSupportedCurrencies();
     setCurrencies(supportedCurrencies);
-
     // Detect user's preferred currency
     const detectCurrency = async () => {
       try {
@@ -33,33 +30,27 @@ const CurrencySelector = ({
         console.warn('Failed to detect user currency:', error);
       }
     };
-
     detectCurrency();
   }, [value, onChange]);
-
   useEffect(() => {
     // Generate currency conversion preview when amount or currency changes
     if (amount > 0 && value && showConversion) {
       generateConversions();
     }
   }, [amount, value, showConversion]);
-
   const generateConversions = async () => {
     if (!value || amount <= 0) return;
-
     setLoading(true);
     try {
       const targetCurrencies = currencies
         .map(c => c.code)
         .filter(code => code !== value)
         .slice(0, 3); // Show top 3 conversions
-
       const conversionResults = await CurrencyService.createConversionPreview(
         amount,
         value,
         targetCurrencies
       );
-
       setConversions(conversionResults);
     } catch (error) {
       console.warn('Failed to load currency conversions:', error);
@@ -68,13 +59,11 @@ const CurrencySelector = ({
       setLoading(false);
     }
   };
-
   const handleCurrencyChange = (newCurrency) => {
     if (!disabled) {
       onChange?.(newCurrency);
     }
   };
-
   const formatCurrencyOption = (currency) => {
     return (
       <div className="flex items-center justify-between w-full">
@@ -86,9 +75,7 @@ const CurrencySelector = ({
       </div>
     );
   };
-
   const selectedCurrency = currencies.find(c => c.code === value);
-
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Currency Selector */}
@@ -105,7 +92,6 @@ const CurrencySelector = ({
             </button>
           )}
         </label>
-
         <select
           value={value || ''}
           onChange={(e) => handleCurrencyChange(e.target.value)}
@@ -122,7 +108,6 @@ const CurrencySelector = ({
           ))}
         </select>
       </div>
-
       {/* Amount Preview */}
       {showPreview && selectedCurrency && amount > 0 && (
         <Card className="border-l-4 border-l-blue-500">
@@ -141,7 +126,6 @@ const CurrencySelector = ({
           </CardContent>
         </Card>
       )}
-
       {/* Currency Conversions */}
       {showConversion && Object.keys(conversions).length > 0 && (
         <Card>
@@ -155,7 +139,6 @@ const CurrencySelector = ({
             <div className="space-y-2">
               {Object.entries(conversions).map(([currency, conversion]) => {
                 if (!conversion) return null;
-
                 return (
                   <div
                     key={currency}
@@ -173,7 +156,6 @@ const CurrencySelector = ({
           </CardContent>
         </Card>
       )}
-
       {/* Currency Information */}
       {selectedCurrency && (
         <div className="text-xs text-gray-500 space-y-1">
@@ -187,5 +169,4 @@ const CurrencySelector = ({
     </div>
   );
 };
-
 export default CurrencySelector;

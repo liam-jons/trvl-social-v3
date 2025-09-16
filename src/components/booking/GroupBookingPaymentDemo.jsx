@@ -2,17 +2,14 @@
  * GroupBookingPaymentDemo - Demo component showcasing group payment splitting
  * This component demonstrates the complete payment splitting workflow
  */
-
 import React, { useState } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { GlassCard } from '../ui/GlassCard';
 import SplitPaymentContainer from './SplitPaymentContainer';
 import { MapPin, Users, Calendar, DollarSign, Clock } from 'lucide-react';
-
 const GroupBookingPaymentDemo = () => {
   const [showPaymentSplit, setShowPaymentSplit] = useState(false);
-
   // Demo booking data
   const demoBooking = {
     id: 'demo-booking-123',
@@ -31,17 +28,14 @@ const GroupBookingPaymentDemo = () => {
       email: 'sarah@example.com'
     }
   };
-
   const handlePaymentComplete = (paymentData) => {
     console.log('Payment completed:', paymentData);
     // Handle payment completion - update booking status, send confirmations, etc.
   };
-
   const handlePaymentError = (error) => {
     console.error('Payment error:', error);
     // Handle payment errors - show user-friendly error messages
   };
-
   if (showPaymentSplit) {
     return (
       <div className="max-w-6xl mx-auto p-6">
@@ -53,7 +47,6 @@ const GroupBookingPaymentDemo = () => {
           >
             ← Back to Booking Details
           </Button>
-
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Booking Summary */}
             <div className="lg:col-span-1">
@@ -67,19 +60,16 @@ const GroupBookingPaymentDemo = () => {
                       <p className="text-xs text-muted-foreground">{demoBooking.location}</p>
                     </div>
                   </div>
-
                   <div className="flex items-center space-x-2">
                     <Calendar className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm">{demoBooking.duration}</span>
                   </div>
-
                   <div className="flex items-center space-x-2">
                     <DollarSign className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm font-medium">
                       ${(demoBooking.totalAmount / 100).toFixed(2)} total
                     </span>
                   </div>
-
                   <div className="pt-3 border-t">
                     <p className="text-xs text-muted-foreground">
                       {demoBooking.description}
@@ -88,7 +78,6 @@ const GroupBookingPaymentDemo = () => {
                 </div>
               </Card>
             </div>
-
             {/* Payment Split Interface */}
             <div className="lg:col-span-2">
               <SplitPaymentContainer
@@ -107,7 +96,6 @@ const GroupBookingPaymentDemo = () => {
       </div>
     );
   }
-
   return (
     <div className="max-w-4xl mx-auto p-6">
       {/* Demo Booking Card */}
@@ -130,7 +118,6 @@ const GroupBookingPaymentDemo = () => {
               </div>
             </div>
           </div>
-
           <div className="text-right">
             <p className="text-3xl font-bold text-primary">
               ${(demoBooking.totalAmount / 100).toFixed(2)}
@@ -138,7 +125,6 @@ const GroupBookingPaymentDemo = () => {
             <p className="text-sm text-muted-foreground">per group</p>
           </div>
         </div>
-
         <div className="mb-6">
           <h3 className="font-semibold mb-2">What's Included</h3>
           <ul className="text-sm text-muted-foreground space-y-1">
@@ -150,7 +136,6 @@ const GroupBookingPaymentDemo = () => {
             <li>• Photography service</li>
           </ul>
         </div>
-
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
           <Button
             onClick={() => setShowPaymentSplit(true)}
@@ -160,7 +145,6 @@ const GroupBookingPaymentDemo = () => {
             <Users className="w-4 h-4 mr-2" />
             Split Payment with Group
           </Button>
-
           <Button
             variant="outline"
             className="flex-1"
@@ -171,7 +155,6 @@ const GroupBookingPaymentDemo = () => {
           </Button>
         </div>
       </GlassCard>
-
       {/* Features Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="p-4">
@@ -185,7 +168,6 @@ const GroupBookingPaymentDemo = () => {
             Add participants by email, set custom amounts, and track who's paid
           </p>
         </Card>
-
         <Card className="p-4">
           <div className="flex items-center space-x-3 mb-3">
             <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -197,7 +179,6 @@ const GroupBookingPaymentDemo = () => {
             Equal splits, custom amounts, or percentage-based divisions
           </p>
         </Card>
-
         <Card className="p-4">
           <div className="flex items-center space-x-3 mb-3">
             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -210,7 +191,6 @@ const GroupBookingPaymentDemo = () => {
           </p>
         </Card>
       </div>
-
       {/* Demo Instructions */}
       <Card className="p-4 mt-6 bg-blue-50 border-blue-200">
         <h3 className="font-semibold mb-2 text-blue-700">Try the Demo</h3>
@@ -225,5 +205,4 @@ const GroupBookingPaymentDemo = () => {
     </div>
   );
 };
-
 export default GroupBookingPaymentDemo;

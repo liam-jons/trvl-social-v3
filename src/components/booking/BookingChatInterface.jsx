@@ -10,11 +10,9 @@ import {
   LanguageIcon,
   MicrophoneIcon,
 } from '@heroicons/react/24/outline';
-
 import BookingChatMessage from './BookingChatMessage';
 import GlassInput from '../ui/GlassInput';
 import { sendChatMessage, getChatHistory, getUserChatSessions, clearChatSession } from '../../services/booking-chat-service';
-
 const BookingChatInterface = ({
   isOpen = false,
   onClose,
@@ -35,20 +33,16 @@ const BookingChatInterface = ({
   const [error, setError] = useState(null);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('en');
-
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
-
   // Scroll to bottom when new messages arrive
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
-
   useEffect(() => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
-
   // Load existing session on mount
   useEffect(() => {
     if (isOpen && userId) {
@@ -56,17 +50,14 @@ const BookingChatInterface = ({
       loadUserSessions();
     }
   }, [isOpen, userId, currentSessionId]);
-
   // Send initial message if provided
   useEffect(() => {
     if (isOpen && initialMessage && !messages.length) {
       handleSendMessage(initialMessage);
     }
   }, [isOpen, initialMessage, messages.length]);
-
   const loadChatHistory = async () => {
     if (!currentSessionId) return;
-
     try {
       const history = getChatHistory(userId, currentSessionId);
       if (history) {
@@ -78,7 +69,6 @@ const BookingChatInterface = ({
       setError('Failed to load chat history');
     }
   };
-
   const loadUserSessions = async () => {
     try {
       const sessions = getUserChatSessions(userId);
@@ -87,36 +77,29 @@ const BookingChatInterface = ({
       console.error('Failed to load user sessions:', error);
     }
   };
-
   const handleSendMessage = async (message = inputMessage) => {
     const messageText = message.trim();
     if (!messageText || isLoading) return;
-
     setInputMessage('');
     setIsLoading(true);
     setError(null);
     setIsTyping(true);
-
     // Clear typing timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
-
     try {
       const response = await sendChatMessage(messageText, userId, currentSessionId);
-
       if (response.error) {
         setError(response.error);
       } else {
         // Update messages with both user message and assistant response
         setMessages(prev => {
           const newMessages = [...prev];
-
           // Find and update user message if it exists, otherwise add it
           const userMessageIndex = newMessages.findIndex(
             msg => msg.role === 'user' && msg.content === messageText && !msg.id
           );
-
           if (userMessageIndex === -1) {
             // Add user message if not found
             newMessages.push({
@@ -126,17 +109,13 @@ const BookingChatInterface = ({
               timestamp: new Date().toISOString(),
             });
           }
-
           // Add assistant message
           newMessages.push(response.message);
-
           return newMessages;
         });
-
         setCurrentSessionId(response.session.sessionId);
         setQuickActions(response.quickActions || []);
         setCurrentLanguage(response.session.language || 'en');
-
         // Update sessions list
         loadUserSessions();
       }
@@ -145,18 +124,15 @@ const BookingChatInterface = ({
       setError('Failed to send message. Please try again.');
     } finally {
       setIsLoading(false);
-
       // Set typing timeout
       typingTimeoutRef.current = setTimeout(() => {
         setIsTyping(false);
       }, 1000);
     }
   };
-
   const handleQuickAction = (action) => {
     handleSendMessage(action.prompt);
   };
-
   const handleNewChat = () => {
     setCurrentSessionId(null);
     setMessages([]);
@@ -165,32 +141,26 @@ const BookingChatInterface = ({
     setShowSessionsList(false);
     inputRef.current?.focus();
   };
-
   const handleLoadSession = (sessionId) => {
     setCurrentSessionId(sessionId);
     setShowSessionsList(false);
     loadChatHistory();
   };
-
   const handleDeleteSession = async (sessionId, event) => {
     event.stopPropagation();
-
     if (clearChatSession(userId, sessionId)) {
       setChatSessions(prev => prev.filter(s => s.sessionId !== sessionId));
-
       if (sessionId === currentSessionId) {
         handleNewChat();
       }
     }
   };
-
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
-
   const supportedLanguages = [
     { code: 'en', name: 'English' },
     { code: 'es', name: 'Español' },
@@ -202,9 +172,7 @@ const BookingChatInterface = ({
     { code: 'ko', name: '한국어' },
     { code: 'zh', name: '中文' },
   ];
-
   if (!isOpen) return null;
-
   return (
     <div className={`fixed bottom-4 right-4 z-50 ${className}`}>
       <div className={`
@@ -243,7 +211,6 @@ const BookingChatInterface = ({
               </div>
             </div>
           </div>
-
           <div className="flex items-center space-x-2">
             {/* Language Selector */}
             <div className="relative group">
@@ -268,7 +235,6 @@ const BookingChatInterface = ({
                 </div>
               </div>
             </div>
-
             {/* Sessions Menu */}
             <div className="relative">
               <button
@@ -277,7 +243,6 @@ const BookingChatInterface = ({
               >
                 <ChatBubbleLeftRightIcon className="w-4 h-4" />
               </button>
-
               {showSessionsList && (
                 <div className="absolute top-full right-0 mt-1 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
                   <div className="p-3 border-b border-gray-200 dark:border-gray-700">
@@ -331,7 +296,6 @@ const BookingChatInterface = ({
                 </div>
               )}
             </div>
-
             {/* Minimize/Maximize */}
             <button
               onClick={() => setIsMinimized(!isMinimized)}
@@ -339,7 +303,6 @@ const BookingChatInterface = ({
             >
               <ArrowPathIcon className={`w-4 h-4 transition-transform ${isMinimized ? 'rotate-180' : ''}`} />
             </button>
-
             {/* Close */}
             <button
               onClick={onClose}
@@ -349,7 +312,6 @@ const BookingChatInterface = ({
             </button>
           </div>
         </div>
-
         {!isMinimized && (
           <>
             {/* Messages Area */}
@@ -368,7 +330,6 @@ const BookingChatInterface = ({
                   </p>
                 </div>
               )}
-
               {/* Messages */}
               {messages.map((message) => (
                 <BookingChatMessage
@@ -377,7 +338,6 @@ const BookingChatInterface = ({
                   isOwn={message.role === 'user'}
                 />
               ))}
-
               {/* Typing Indicator */}
               {isTyping && (
                 <div className="flex items-center space-x-2 text-gray-500 dark:text-gray-400">
@@ -389,10 +349,8 @@ const BookingChatInterface = ({
                   <span className="text-sm">Assistant is typing...</span>
                 </div>
               )}
-
               <div ref={messagesEndRef} />
             </div>
-
             {/* Error Message */}
             {error && (
               <div className="mx-4 mb-2 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
@@ -402,7 +360,6 @@ const BookingChatInterface = ({
                 </div>
               </div>
             )}
-
             {/* Quick Actions */}
             {quickActions.length > 0 && (
               <div className="px-4 pb-2">
@@ -427,7 +384,6 @@ const BookingChatInterface = ({
                 </div>
               </div>
             )}
-
             {/* Input Area */}
             <div className="p-4 border-t border-white/10">
               <div className="flex items-end space-x-2">
@@ -443,7 +399,6 @@ const BookingChatInterface = ({
                     disabled={isLoading}
                   />
                 </div>
-
                 {/* Voice Mode Toggle */}
                 <button
                   onClick={() => setIsVoiceMode(!isVoiceMode)}
@@ -458,7 +413,6 @@ const BookingChatInterface = ({
                 >
                   <MicrophoneIcon className="w-5 h-5" />
                 </button>
-
                 {/* Send Button */}
                 <button
                   onClick={() => handleSendMessage()}
@@ -479,5 +433,4 @@ const BookingChatInterface = ({
     </div>
   );
 };
-
 export default BookingChatInterface;

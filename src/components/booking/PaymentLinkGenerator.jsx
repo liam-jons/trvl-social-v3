@@ -2,7 +2,6 @@
  * PaymentLinkGenerator - Component for generating and sharing payment links
  * Handles link generation, sharing options, and communication with participants
  */
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
@@ -21,7 +20,6 @@ import {
   QrCode,
   Download
 } from 'lucide-react';
-
 const PaymentLinkGenerator = ({
   splitPaymentId,
   individualPayments = [],
@@ -35,14 +33,12 @@ const PaymentLinkGenerator = ({
   const [sendingEmails, setSendingEmails] = useState({});
   const [customMessage, setCustomMessage] = useState('');
   const [showQRCodes, setShowQRCodes] = useState({});
-
   // Generate payment links for all participants
   useEffect(() => {
     if (individualPayments.length > 0) {
       generateAllPaymentLinks();
     }
   }, [individualPayments]);
-
   const generateAllPaymentLinks = async () => {
     setGeneratingLinks(true);
     try {
@@ -58,11 +54,9 @@ const PaymentLinkGenerator = ({
       setGeneratingLinks(false);
     }
   };
-
   const generatePaymentLink = async (payment) => {
     const baseUrl = window.location.origin;
     const paymentToken = generateSecureToken(payment.id, payment.user_id);
-
     // Store payment token in database for verification
     try {
       await supabase
@@ -75,17 +69,14 @@ const PaymentLinkGenerator = ({
     } catch (err) {
       console.error('Failed to store payment token:', err);
     }
-
     return `${baseUrl}/pay/${paymentToken}`;
   };
-
   const generateSecureToken = (paymentId, userId) => {
     // Generate a secure token combining payment ID, user ID, and timestamp
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(2, 15);
     return btoa(`${paymentId}-${userId}-${timestamp}-${randomString}`).replace(/[+=\/]/g, '');
   };
-
   const handleCopyLink = async (paymentId, link) => {
     try {
       await navigator.clipboard.writeText(link);
@@ -97,38 +88,28 @@ const PaymentLinkGenerator = ({
       console.error('Failed to copy link:', err);
     }
   };
-
   const handleSendEmail = async (payment) => {
     setSendingEmails({ ...sendingEmails, [payment.id]: true });
-
     try {
       const link = paymentLinks[payment.id];
       const participantName = payment.metadata?.participantName || 'there';
       const amount = formatCurrency(payment.amount_due);
       const deadline = formatDate(payment.payment_deadline);
-
       const emailData = {
         to: payment.metadata?.participantEmail,
         subject: `Payment Required: ${splitPaymentDetails?.description || 'Group Booking'}`,
         body: `Hi ${participantName},
-
 You've been included in a group booking payment split. Here are the details:
-
 • Amount Due: ${amount}
 • Payment Deadline: ${deadline}
 • Description: ${splitPaymentDetails?.description || 'Group Booking'}
-
 ${customMessage ? `\nPersonal message:\n${customMessage}\n` : ''}
-
 Click the link below to complete your payment:
 ${link}
-
 This link is secure and specific to your portion of the payment. If you have any questions, please reply to this email.
-
 Best regards,
 The TRVL Social Team`,
       };
-
       // Send email via API
       const response = await fetch('/api/send-payment-email', {
         method: 'POST',
@@ -137,11 +118,9 @@ The TRVL Social Team`,
         },
         body: JSON.stringify(emailData),
       });
-
       if (!response.ok) {
         throw new Error('Failed to send email');
       }
-
       // Update reminder count
       await supabase
         .from('individual_payments')
@@ -150,30 +129,24 @@ The TRVL Social Team`,
           last_reminder_sent: new Date().toISOString(),
         })
         .eq('id', payment.id);
-
       onPaymentUpdate?.();
-
     } catch (err) {
       console.error('Failed to send email:', err);
     } finally {
       setSendingEmails({ ...sendingEmails, [payment.id]: false });
     }
   };
-
   const handleSendAllEmails = async () => {
     const pendingPayments = individualPayments.filter(p => p.status === 'pending');
-
     for (const payment of pendingPayments) {
       await handleSendEmail(payment);
       // Small delay between emails to avoid rate limiting
       await new Promise(resolve => setTimeout(resolve, 500));
     }
   };
-
   const handleShareLink = async (payment) => {
     const link = paymentLinks[payment.id];
     const amount = formatCurrency(payment.amount_due);
-
     if (navigator.share) {
       try {
         await navigator.share({
@@ -189,20 +162,17 @@ The TRVL Social Team`,
       handleCopyLink(payment.id, link);
     }
   };
-
   const generateQRCode = (link) => {
     // Generate QR code URL using a QR code service
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}`;
     return qrCodeUrl;
   };
-
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: splitPaymentDetails?.currency?.toUpperCase() || 'USD',
     }).format(amount / 100);
   };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       weekday: 'long',
@@ -213,7 +183,6 @@ The TRVL Social Team`,
       minute: '2-digit',
     });
   };
-
   const getStatusColor = (status) => {
     switch (status) {
       case 'paid':
@@ -226,9 +195,7 @@ The TRVL Social Team`,
         return 'text-amber-600 bg-amber-50';
     }
   };
-
   const pendingPayments = individualPayments.filter(p => p.status === 'pending');
-
   return (
     <div className="space-y-6">
       {/* Quick Actions */}
@@ -259,7 +226,6 @@ The TRVL Social Team`,
             )}
           </div>
         </div>
-
         {/* Custom Message */}
         <div className="mb-4">
           <label className="text-sm font-medium mb-2 block">
@@ -275,7 +241,6 @@ The TRVL Social Team`,
           />
         </div>
       </Card>
-
       {/* Individual Payment Links */}
       <div className="space-y-4">
         {individualPayments.map((payment) => (
@@ -300,7 +265,6 @@ The TRVL Social Team`,
                 </Badge>
               </div>
             </div>
-
             {payment.status === 'pending' && paymentLinks[payment.id] && (
               <div className="space-y-3">
                 {/* Payment Link */}
@@ -322,7 +286,6 @@ The TRVL Social Team`,
                     )}
                   </Button>
                 </div>
-
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-2">
                   <Button
@@ -334,7 +297,6 @@ The TRVL Social Team`,
                     <Mail className="w-3 h-3 mr-1" />
                     {sendingEmails[payment.id] ? 'Sending...' : 'Send Email'}
                   </Button>
-
                   <Button
                     variant="outline"
                     size="sm"
@@ -344,7 +306,6 @@ The TRVL Social Team`,
                     <Share2 className="w-3 h-3 mr-1" />
                     Share
                   </Button>
-
                   <Button
                     variant="outline"
                     size="sm"
@@ -353,7 +314,6 @@ The TRVL Social Team`,
                     <ExternalLink className="w-3 h-3 mr-1" />
                     Test Link
                   </Button>
-
                   <Button
                     variant="outline"
                     size="sm"
@@ -366,7 +326,6 @@ The TRVL Social Team`,
                     QR Code
                   </Button>
                 </div>
-
                 {/* QR Code */}
                 {showQRCodes[payment.id] && (
                   <div className="flex justify-center p-4 bg-white rounded-lg">
@@ -382,7 +341,6 @@ The TRVL Social Team`,
                     </div>
                   </div>
                 )}
-
                 {/* Reminder History */}
                 {payment.reminder_count > 0 && (
                   <div className="text-xs text-muted-foreground bg-background/50 p-2 rounded">
@@ -398,7 +356,6 @@ The TRVL Social Team`,
                 )}
               </div>
             )}
-
             {payment.status === 'paid' && (
               <div className="flex items-center justify-center p-3 bg-green-100 rounded-lg">
                 <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
@@ -410,7 +367,6 @@ The TRVL Social Team`,
           </Card>
         ))}
       </div>
-
       {/* Instructions */}
       <Card className="p-4 bg-muted/30">
         <h5 className="text-sm font-medium mb-2">How to Use Payment Links</h5>
@@ -425,5 +381,4 @@ The TRVL Social Team`,
     </div>
   );
 };
-
 export default PaymentLinkGenerator;

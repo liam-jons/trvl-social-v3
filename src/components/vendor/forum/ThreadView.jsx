@@ -19,7 +19,6 @@ import {
   Eye
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-
 const ThreadView = () => {
   const { threadId } = useParams();
   const navigate = useNavigate();
@@ -29,22 +28,18 @@ const ThreadView = () => {
   const [replyContent, setReplyContent] = useState('');
   const [replyToId, setReplyToId] = useState(null);
   const [showReplyForm, setShowReplyForm] = useState(false);
-
   // Mock current user (vendor)
   const currentVendor = {
     id: '1',
     business_name: 'My Adventure Co',
     reputation: { reputation_level: 'contributor', total_points: 567 }
   };
-
   // Mock thread data
   const mockThread = {
     id: threadId,
     title: 'Best practices for adventure photography marketing',
     content: `I've been struggling with getting good engagement on my adventure photos on social media. Despite having amazing shots from our hiking tours, the posts aren't getting the reach I expect.
-
 I've tried posting at different times, using various hashtags, and even collaborating with local influencers, but the results have been inconsistent.
-
 What strategies have worked best for you when marketing adventure photography? Are there specific platforms that work better than others? Any tips on hashtag strategies or content scheduling would be greatly appreciated!`,
     vendor: {
       id: '2',
@@ -63,7 +58,6 @@ What strategies have worked best for you when marketing adventure photography? A
     has_solution: true,
     user_vote: null // 'upvote', 'downvote', or null
   };
-
   const mockReplies = [
     {
       id: '1',
@@ -74,11 +68,9 @@ What strategies have worked best for you when marketing adventure photography? A
         reputation: { reputation_level: 'helpful', total_points: 890 }
       },
       content: `Great question! I've found that timing is crucial for adventure photography posts. Here's what works for me:
-
 1. **Golden hour posts**: Share photos taken during sunrise/sunset around 7-9 AM and 5-7 PM
 2. **Story-driven captions**: Don't just post the photo, tell the story behind it
 3. **Platform-specific strategies**: Instagram for visual impact, Facebook for community building, LinkedIn for B2B connections
-
 For hashtags, I use a mix of location-specific tags (#ColoradoHiking), activity tags (#AdventurePhotography), and broad reach tags (#NatureLovers).`,
       upvotes: 15,
       downvotes: 0,
@@ -96,7 +88,6 @@ For hashtags, I use a mix of location-specific tags (#ColoradoHiking), activity 
         reputation: { reputation_level: 'contributor', total_points: 456 }
       },
       content: `Adding to what Mountain Adventures said - engagement pods have been a game changer for me. I'm part of a group of 20 adventure companies where we all engage with each other's posts within the first hour of posting. This boosts the algorithm significantly.
-
 Also, user-generated content works amazingly well. I encourage my clients to tag us in their photos and stories, then I repost the best ones (with permission). It creates authentic content and makes customers feel valued.`,
       upvotes: 8,
       downvotes: 1,
@@ -114,7 +105,6 @@ Also, user-generated content works amazingly well. I encourage my clients to tag
         reputation: { reputation_level: 'expert', total_points: 1100 }
       },
       content: `Both excellent points above! I'd like to add that video content is becoming increasingly important. Even simple time-lapse videos of your adventures or behind-the-scenes content of setting up shots can dramatically increase engagement.
-
 Instagram Reels and TikTok have been particularly effective for reaching younger demographics. A 15-second clip of a waterfall or mountain vista often performs better than static photos.`,
       upvotes: 12,
       downvotes: 0,
@@ -124,7 +114,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
       parent_reply_id: null
     }
   ];
-
   useEffect(() => {
     // Simulate API call
     setLoading(true);
@@ -134,15 +123,12 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
       setLoading(false);
     }, 500);
   }, [threadId]);
-
   const handleVote = async (type, targetId, targetType = 'thread') => {
     // Implementation for voting
     console.log(`Vote ${type} on ${targetType} ${targetId}`);
   };
-
   const handleReply = async () => {
     if (!replyContent.trim()) return;
-
     const newReply = {
       id: Date.now().toString(),
       thread_id: threadId,
@@ -155,18 +141,15 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
       user_vote: null,
       parent_reply_id: replyToId
     };
-
     setReplies([...replies, newReply]);
     setReplyContent('');
     setShowReplyForm(false);
     setReplyToId(null);
   };
-
   const markAsSolution = async (replyId) => {
     // Implementation for marking as solution
     console.log(`Mark reply ${replyId} as solution`);
   };
-
   const getReputationBadge = (level) => {
     const badges = {
       newcomer: 'bg-gray-100 text-gray-800',
@@ -177,7 +160,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
     };
     return badges[level] || badges.newcomer;
   };
-
   const getCategoryColor = (category) => {
     const colors = {
       marketing: 'bg-pink-100 text-pink-800',
@@ -193,7 +175,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
     };
     return colors[category] || colors.general_discussion;
   };
-
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto">
@@ -211,7 +192,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
       </div>
     );
   }
-
   if (!thread) {
     return (
       <div className="max-w-4xl mx-auto text-center py-12">
@@ -227,7 +207,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
       </div>
     );
   }
-
   return (
     <div className="max-w-4xl mx-auto">
       {/* Breadcrumb */}
@@ -236,7 +215,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
         <span className="mx-2">/</span>
         <span className="text-gray-900">{thread.title}</span>
       </nav>
-
       {/* Thread */}
       <div className="bg-white rounded-lg shadow mb-6">
         <div className="p-6">
@@ -267,7 +245,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
                 <ChevronDown className="h-6 w-6" />
               </button>
             </div>
-
             {/* Content */}
             <div className="flex-1">
               <div className="flex items-start justify-between mb-4">
@@ -282,7 +259,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
                     {thread.vendor.reputation.reputation_level}
                   </span>
                 </div>
-
                 <div className="flex items-center space-x-2">
                   <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
                     <Share2 className="h-5 w-5" />
@@ -298,9 +274,7 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
                   </button>
                 </div>
               </div>
-
               <h1 className="text-2xl font-bold text-gray-900 mb-4">{thread.title}</h1>
-
               <div className="prose max-w-none mb-6">
                 {thread.content.split('\n').map((paragraph, index) => (
                   <p key={index} className="mb-4 text-gray-700 leading-relaxed">
@@ -308,7 +282,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
                   </p>
                 ))}
               </div>
-
               <div className="flex flex-wrap gap-2 mb-6">
                 {thread.tags.map((tag) => (
                   <span
@@ -319,7 +292,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
                   </span>
                 ))}
               </div>
-
               <div className="flex items-center justify-between text-sm text-gray-500 border-t pt-4">
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center">
@@ -331,7 +303,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
                     {formatDistanceToNow(new Date(thread.created_at), { addSuffix: true })}
                   </div>
                 </div>
-
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center">
                     <Eye className="h-4 w-4 mr-1" />
@@ -347,7 +318,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
           </div>
         </div>
       </div>
-
       {/* Replies */}
       <div className="bg-white rounded-lg shadow">
         <div className="p-6 border-b border-gray-200">
@@ -355,7 +325,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
             {replies.length} {replies.length === 1 ? 'Reply' : 'Replies'}
           </h2>
         </div>
-
         <div className="divide-y divide-gray-200">
           {replies.map((reply) => (
             <div key={reply.id} className="p-6">
@@ -386,7 +355,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
                     <ChevronDown className="h-5 w-5" />
                   </button>
                 </div>
-
                 {/* Reply Content */}
                 <div className="flex-1">
                   <div className="flex items-start justify-between mb-3">
@@ -404,7 +372,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
                         </span>
                       )}
                     </div>
-
                     <div className="flex items-center space-x-2">
                       {thread.vendor.id === currentVendor.id && !reply.is_solution && (
                         <button
@@ -419,7 +386,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
                       </span>
                     </div>
                   </div>
-
                   <div className="prose max-w-none mb-4">
                     {reply.content.split('\n').map((paragraph, index) => (
                       <p key={index} className="mb-3 text-gray-700 leading-relaxed">
@@ -427,7 +393,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
                       </p>
                     ))}
                   </div>
-
                   <div className="flex items-center space-x-4 text-sm text-gray-500">
                     <button
                       onClick={() => {
@@ -457,7 +422,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
             </div>
           ))}
         </div>
-
         {/* Reply Form */}
         <div className="p-6 border-t border-gray-200">
           {!showReplyForm ? (
@@ -482,7 +446,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
                   placeholder="Share your thoughts, experiences, or ask follow-up questions..."
                 />
               </div>
-
               <div className="flex items-center justify-between">
                 <button
                   onClick={() => {
@@ -509,5 +472,4 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
     </div>
   );
 };
-
 export default ThreadView;

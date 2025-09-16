@@ -2,13 +2,11 @@
  * Payment Deadline Enforcement Service
  * Automated system for enforcing payment deadlines and taking appropriate actions
  */
-
 import { supabase } from '../lib/supabase.js';
 import { groupPaymentManager, getSplitPaymentConfig } from './split-payment-service.js';
 import { automaticRefundManager } from './payment-refund-service.js';
 import { paymentCollectionWorkflow } from './payment-collection-service.js';
 import { notificationService } from './notification-service.js';
-
 // Deadline enforcement configuration
 const DEADLINE_CONFIG = {
   enforcement: {
@@ -27,7 +25,6 @@ const DEADLINE_CONFIG = {
     partialAcceptanceThreshold: 0.6, // 60% minimum to consider partial acceptance
   },
 };
-
 /**
  * Deadline enforcement engine
  */
@@ -37,12 +34,10 @@ export const deadlineEnforcement = {
    */
   async enforcePaymentDeadlines() {
     console.log('Starting payment deadline enforcement...');
-
     try {
       // Find overdue payments
       const overduePayments = await this.findOverduePayments();
       console.log(`Found ${overduePayments.length} overdue payments`);
-
       const results = {
         processed: 0,
         actions: {
@@ -53,13 +48,11 @@ export const deadlineEnforcement = {
         },
         errors: [],
       };
-
       // Process each overdue payment
       for (const payment of overduePayments) {
         try {
           const actionResult = await this.processOverduePayment(payment);
           results.processed++;
-
           // Update action counts
           switch (actionResult.action) {
             case DEADLINE_CONFIG.actions.SEND_OVERDUE_NOTICE:
@@ -75,7 +68,6 @@ export const deadlineEnforcement = {
               results.actions.cancellations++;
               break;
           }
-
         } catch (error) {
           results.errors.push({
             paymentId: payment.id,
@@ -84,16 +76,13 @@ export const deadlineEnforcement = {
           console.error(`Failed to process overdue payment ${payment.id}:`, error);
         }
       }
-
       console.log('Payment deadline enforcement completed:', results);
       return results;
-
     } catch (error) {
       console.error('Error in payment deadline enforcement:', error);
       throw error;
     }
   },
-
   /**
    * Find payments that are overdue and need action
    */
@@ -101,7 +90,6 @@ export const deadlineEnforcement = {
     try {
       const now = new Date();
       const graceDeadline = new Date(now.getTime() - DEADLINE_CONFIG.enforcement.gracePeridMinutes * 60 * 1000);
-
       const { data: payments, error } = await supabase
         .from('split_payments')
         .select(`
@@ -112,19 +100,15 @@ export const deadlineEnforcement = {
         .in('status', ['pending', 'partially_paid'])
         .lt('payment_deadline', graceDeadline.toISOString())
         .order('payment_deadline', { ascending: true });
-
       if (error) throw error;
-
       return payments.filter(payment => {
         // Don't process if already in refund process
         return !payment.status.includes('refund') && !payment.status.includes('cancelled');
       });
-
     } catch (error) {
       throw new Error(`Failed to find overdue payments: ${error.message}`);
     }
   },
-
   /**
    * Process a single overdue payment
    */
@@ -133,33 +117,25 @@ export const deadlineEnforcement = {
       const now = new Date();
       const deadline = new Date(splitPayment.payment_deadline);
       const overdueMinutes = Math.floor((now - deadline) / (1000 * 60));
-
       // Calculate payment statistics
       const stats = groupPaymentManager.calculatePaymentStats(splitPayment.individual_payments);
-
       // Determine appropriate action based on overdue time and payment status
       const action = this.determineEnforcementAction(overdueMinutes, stats, splitPayment);
-
       console.log(`Processing overdue payment ${splitPayment.id}: ${overdueMinutes}min overdue, action: ${action.type}`);
-
       // Execute the determined action
       const result = await this.executeEnforcementAction(action, splitPayment, stats);
-
       // Log the action taken
       await this.logEnforcementAction(splitPayment.id, action, result);
-
       return {
         action: action.type,
         result,
         overdueMinutes,
         paymentStats: stats,
       };
-
     } catch (error) {
       throw new Error(`Failed to process overdue payment: ${error.message}`);
     }
   },
-
   /**
    * Determine what action to take based on overdue time and payment status
    */
@@ -168,13 +144,10 @@ export const deadlineEnforcement = {
     const graceMinutes = config.enforcement.gracePeridMinutes;
     const escalationIntervals = config.enforcement.escalationIntervals;
     const finalActionDelayMinutes = config.enforcement.finalActionDelayHours * 60;
-
     // Calculate time since grace period ended
     const postGraceMinutes = Math.max(0, overdueMinutes - graceMinutes);
-
     // Check if we're in final action window
     const isInFinalActionWindow = overdueMinutes >= finalActionDelayMinutes;
-
     // Determine action based on completion percentage and time
     if (stats.meetsMinimumThreshold) {
       // If minimum threshold is met, proceed with booking
@@ -184,7 +157,6 @@ export const deadlineEnforcement = {
         completionRate: stats.completionPercentage,
       };
     }
-
     if (isInFinalActionWindow) {
       // Time for final action - refund or cancel
       if (stats.totalPaid > 0) {
@@ -201,7 +173,6 @@ export const deadlineEnforcement = {
         };
       }
     }
-
     // Check escalation intervals
     for (let i = escalationIntervals.length - 1; i >= 0; i--) {
       const intervalMinutes = escalationIntervals[i];
@@ -225,7 +196,6 @@ export const deadlineEnforcement = {
         }
       }
     }
-
     // First overdue notice
     return {
       type: config.actions.SEND_OVERDUE_NOTICE,
@@ -234,7 +204,6 @@ export const deadlineEnforcement = {
       completionRate: stats.completionPercentage,
     };
   },
-
   /**
    * Execute the determined enforcement action
    */
@@ -242,48 +211,37 @@ export const deadlineEnforcement = {
     switch (action.type) {
       case DEADLINE_CONFIG.actions.SEND_OVERDUE_NOTICE:
         return await this.sendOverdueNotice(splitPayment, stats, action);
-
       case DEADLINE_CONFIG.actions.ESCALATE_TO_ORGANIZER:
         return await this.escalateToOrganizer(splitPayment, stats, action);
-
       case DEADLINE_CONFIG.actions.INITIATE_REFUND_PROCESS:
         return await this.initiateRefundProcess(splitPayment, stats, action);
-
       case DEADLINE_CONFIG.actions.CANCEL_BOOKING:
         return await this.cancelBooking(splitPayment, action);
-
       case 'proceed_partial':
         return await this.proceedWithPartialPayment(splitPayment, stats, action);
-
       default:
         throw new Error(`Unknown enforcement action: ${action.type}`);
     }
   },
-
   /**
    * Send overdue payment notices to pending participants
    */
   async sendOverdueNotice(splitPayment, stats, action) {
     try {
       const pendingPayments = splitPayment.individual_payments.filter(p => p.status === 'pending');
-
       const notificationPromises = pendingPayments.map(payment =>
         this.sendOverdueNotificationToParticipant(payment, splitPayment, action)
       );
-
       await Promise.all(notificationPromises);
-
       return {
         success: true,
         notificationsSent: pendingPayments.length,
         escalationLevel: action.escalationLevel,
       };
-
     } catch (error) {
       throw new Error(`Failed to send overdue notices: ${error.message}`);
     }
   },
-
   /**
    * Escalate to organizer - notify them of the situation
    */
@@ -306,23 +264,18 @@ export const deadlineEnforcement = {
         channels: ['push', 'email'],
         priority: 'high',
       };
-
       await notificationService.sendNotification(notification);
-
       // Also send summary to all pending participants
       await this.sendFinalNoticeToParticipants(splitPayment, stats);
-
       return {
         success: true,
         organizerNotified: true,
         participantsNotified: stats.pendingCount,
       };
-
     } catch (error) {
       throw new Error(`Failed to escalate to organizer: ${error.message}`);
     }
   },
-
   /**
    * Initiate automatic refund process
    */
@@ -330,7 +283,6 @@ export const deadlineEnforcement = {
     try {
       // Use the automatic refund manager
       const refundResult = await automaticRefundManager.processPaymentRefund(splitPayment);
-
       return {
         success: true,
         refundProcessed: true,
@@ -340,12 +292,10 @@ export const deadlineEnforcement = {
           0
         ),
       };
-
     } catch (error) {
       throw new Error(`Failed to initiate refund process: ${error.message}`);
     }
   },
-
   /**
    * Cancel booking (when no payments received)
    */
@@ -359,7 +309,6 @@ export const deadlineEnforcement = {
           updated_at: new Date().toISOString(),
         })
         .eq('id', splitPayment.id);
-
       // Update booking status
       await supabase
         .from('bookings')
@@ -369,21 +318,17 @@ export const deadlineEnforcement = {
           updated_at: new Date().toISOString(),
         })
         .eq('id', splitPayment.booking_id);
-
       // Notify organizer
       await this.notifyBookingCancellation(splitPayment, 'no_payments');
-
       return {
         success: true,
         bookingCancelled: true,
         reason: action.reason,
       };
-
     } catch (error) {
       throw new Error(`Failed to cancel booking: ${error.message}`);
     }
   },
-
   /**
    * Proceed with partial payment (when minimum threshold met)
    */
@@ -397,7 +342,6 @@ export const deadlineEnforcement = {
           updated_at: new Date().toISOString(),
         })
         .eq('id', splitPayment.id);
-
       // Update booking status to confirmed
       await supabase
         .from('bookings')
@@ -406,7 +350,6 @@ export const deadlineEnforcement = {
           updated_at: new Date().toISOString(),
         })
         .eq('id', splitPayment.booking_id);
-
       // Notify organizer of success
       const notification = {
         userId: splitPayment.organizer_id,
@@ -423,9 +366,7 @@ export const deadlineEnforcement = {
         channels: ['push', 'email'],
         priority: 'normal',
       };
-
       await notificationService.sendNotification(notification);
-
       // Cancel remaining payment reminders
       const pendingPayments = splitPayment.individual_payments.filter(p => p.status === 'pending');
       for (const payment of pendingPayments) {
@@ -434,19 +375,16 @@ export const deadlineEnforcement = {
           'booking_confirmed_partial'
         );
       }
-
       return {
         success: true,
         bookingConfirmed: true,
         completionRate: stats.completionPercentage,
         cancelledReminders: pendingPayments.length,
       };
-
     } catch (error) {
       throw new Error(`Failed to proceed with partial payment: ${error.message}`);
     }
   },
-
   /**
    * Send overdue notification to individual participant
    */
@@ -454,7 +392,6 @@ export const deadlineEnforcement = {
     try {
       const urgencyLevel = action.escalationLevel >= 2 ? 'CRITICAL' : 'URGENT';
       const timeframe = action.escalationLevel >= 2 ? '24 hours' : 'soon';
-
       const notification = {
         userId: individualPayment.user_id,
         type: 'payment_overdue',
@@ -476,9 +413,7 @@ export const deadlineEnforcement = {
         channels: action.escalationLevel >= 2 ? ['push', 'email', 'sms'] : ['push', 'email'],
         priority: 'high',
       };
-
       await notificationService.sendNotification(notification);
-
       // Update reminder count
       await supabase
         .from('individual_payments')
@@ -487,20 +422,17 @@ export const deadlineEnforcement = {
           last_reminder_sent: new Date().toISOString(),
         })
         .eq('id', individualPayment.id);
-
       return true;
     } catch (error) {
       console.error(`Failed to send overdue notification to ${individualPayment.user_id}:`, error);
       return false;
     }
   },
-
   /**
    * Send final notice to all pending participants
    */
   async sendFinalNoticeToParticipants(splitPayment, stats) {
     const pendingPayments = splitPayment.individual_payments.filter(p => p.status === 'pending');
-
     const finalNoticePromises = pendingPayments.map(payment => {
       return notificationService.sendNotification({
         userId: payment.user_id,
@@ -519,10 +451,8 @@ export const deadlineEnforcement = {
         priority: 'critical',
       });
     });
-
     await Promise.allSettled(finalNoticePromises);
   },
-
   /**
    * Notify organizer of booking cancellation
    */
@@ -541,10 +471,8 @@ export const deadlineEnforcement = {
       channels: ['push', 'email'],
       priority: 'high',
     };
-
     await notificationService.sendNotification(notification);
   },
-
   /**
    * Log enforcement action for audit trail
    */
@@ -559,19 +487,16 @@ export const deadlineEnforcement = {
         result_data: result,
         processed_at: new Date().toISOString(),
       };
-
       // Insert into enforcement log (you might need to create this table)
       await supabase
         .from('payment_enforcement_log')
         .insert(logEntry);
-
     } catch (error) {
       console.error('Failed to log enforcement action:', error);
       // Don't throw here as this is just logging
     }
   },
 };
-
 /**
  * Deadline monitoring and reporting
  */
@@ -583,7 +508,6 @@ export const deadlineMonitoring = {
     try {
       const cutoffTime = new Date();
       cutoffTime.setHours(cutoffTime.getHours() + hoursAhead);
-
       const { data: payments, error } = await supabase
         .from('split_payments')
         .select(`
@@ -595,15 +519,12 @@ export const deadlineMonitoring = {
         .in('status', ['pending', 'partially_paid'])
         .lte('payment_deadline', cutoffTime.toISOString())
         .order('payment_deadline', { ascending: true });
-
       if (error) throw error;
-
       return payments.map(payment => {
         const stats = groupPaymentManager.calculatePaymentStats(payment.individual_payments);
         const hoursUntilDeadline = Math.max(0,
           Math.floor((new Date(payment.payment_deadline) - new Date()) / (1000 * 60 * 60))
         );
-
         return {
           ...payment,
           stats,
@@ -611,12 +532,10 @@ export const deadlineMonitoring = {
           riskLevel: this.calculateRiskLevel(stats, hoursUntilDeadline),
         };
       });
-
     } catch (error) {
       throw new Error(`Failed to get upcoming deadlines: ${error.message}`);
     }
   },
-
   /**
    * Calculate risk level for a payment
    */
@@ -624,18 +543,14 @@ export const deadlineMonitoring = {
     if (hoursUntilDeadline <= 0) {
       return stats.meetsMinimumThreshold ? 'medium' : 'critical';
     }
-
     if (hoursUntilDeadline <= 6) {
       return stats.completionPercentage < 50 ? 'high' : 'medium';
     }
-
     if (hoursUntilDeadline <= 24) {
       return stats.completionPercentage < 25 ? 'medium' : 'low';
     }
-
     return 'low';
   },
-
   /**
    * Get enforcement statistics
    */
@@ -655,10 +570,8 @@ export const deadlineMonitoring = {
     }
   },
 };
-
 // Export configuration
 export const getDeadlineConfig = () => DEADLINE_CONFIG;
-
 // Main export
 export default {
   deadlineEnforcement,

@@ -9,7 +9,6 @@ import QuizContainer from '../quiz/QuizContainer';
 import QuizResults from '../quiz/QuizResults';
 import GlassCard from '../ui/GlassCard';
 import PersonalizedWelcome from './PersonalizedWelcome';
-
 const OnboardingFlow = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -19,9 +18,7 @@ const OnboardingFlow = () => {
   const [error, setError] = useState(null);
   const [quizResults, setQuizResults] = useState(null);
   const [personalizedData, setPersonalizedData] = useState(null);
-
   const { handleSubmit } = useForm();
-
   // Initialize onboarding
   useEffect(() => {
     const initializeOnboarding = async () => {
@@ -29,28 +26,23 @@ const OnboardingFlow = () => {
         navigate('/login');
         return;
       }
-
       try {
         setLoading(true);
-
         // Check if user is first-time user
         const isFirstTime = await onboardingService.isFirstTimeUser(user);
         if (!isFirstTime) {
           navigate('/dashboard');
           return;
         }
-
         // Initialize onboarding
         const initialProgress = await onboardingService.initializeOnboarding(user);
         setProgress(initialProgress);
         setCurrentStep(initialProgress.currentStep);
-
         // Load personalized data if available
         const personalizedData = await onboardingService.getPersonalizedData();
         if (personalizedData) {
           setPersonalizedData(personalizedData);
         }
-
       } catch (err) {
         console.error('Error initializing onboarding:', err);
         setError(err.message);
@@ -58,17 +50,14 @@ const OnboardingFlow = () => {
         setLoading(false);
       }
     };
-
     initializeOnboarding();
   }, [user, navigate]);
-
   // Handle step completion
   const completeStep = useCallback(async (stepData = {}) => {
     try {
       const updatedProgress = await onboardingService.completeStep(currentStep, stepData);
       setProgress(updatedProgress);
       setCurrentStep(updatedProgress.currentStep);
-
       // If completed, redirect to dashboard
       if (updatedProgress.isComplete) {
         navigate('/dashboard', { replace: true });
@@ -78,15 +67,12 @@ const OnboardingFlow = () => {
       setError(err.message);
     }
   }, [currentStep, navigate]);
-
   // Handle quiz completion
   const handleQuizComplete = useCallback(async (answers) => {
     try {
       setLoading(true);
-
       // Calculate personality profile (simplified - actual calculation would be in assessment service)
       const calculatedProfile = await calculatePersonalityProfile(answers);
-
       // Save assessment
       const assessmentData = {
         userId: user.id,
@@ -94,16 +80,12 @@ const OnboardingFlow = () => {
         ...calculatedProfile,
         completedAt: new Date().toISOString()
       };
-
       const savedAssessment = await assessmentService.saveAssessment(assessmentData);
       setQuizResults(savedAssessment.calculatorProfile);
-
       // Complete quiz step in onboarding
       await onboardingService.completeQuiz(savedAssessment);
-
       // Update current step
       setCurrentStep(ONBOARDING_STEPS.QUIZ_RESULTS);
-
     } catch (err) {
       console.error('Error completing quiz:', err);
       setError(err.message);
@@ -111,20 +93,17 @@ const OnboardingFlow = () => {
       setLoading(false);
     }
   }, [user]);
-
   // Handle quiz skip
   const handleSkipQuiz = useCallback(async () => {
     try {
       const updatedProgress = await onboardingService.skipQuiz();
       setProgress(updatedProgress);
       setCurrentStep(updatedProgress.currentStep);
-
       // Load personalized data if user has existing assessment
       const personalizedData = await onboardingService.getPersonalizedData();
       if (personalizedData) {
         setPersonalizedData(personalizedData);
       }
-
       // If completed, redirect to dashboard
       if (updatedProgress.isComplete) {
         navigate('/dashboard', { replace: true });
@@ -134,32 +113,26 @@ const OnboardingFlow = () => {
       setError(err.message);
     }
   }, [navigate]);
-
   // Handle viewing results
   const handleViewResults = useCallback(() => {
     setCurrentStep(ONBOARDING_STEPS.WELCOME_PERSONALIZED);
   }, []);
-
   // Handle retaking quiz
   const handleRetakeQuiz = useCallback(() => {
     setCurrentStep(ONBOARDING_STEPS.PERSONALITY_QUIZ);
     setQuizResults(null);
   }, []);
-
   if (loading) {
     return <LoadingScreen />;
   }
-
   if (error) {
     return <ErrorScreen error={error} onRetry={() => window.location.reload()} />;
   }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="container mx-auto px-4 py-8">
         {/* Progress indicator */}
         <OnboardingProgressBar currentStep={currentStep} />
-
         {/* Step content */}
         <AnimatePresence mode="wait">
           {renderCurrentStep()}
@@ -167,7 +140,6 @@ const OnboardingFlow = () => {
       </div>
     </div>
   );
-
   function renderCurrentStep() {
     switch (currentStep) {
       case ONBOARDING_STEPS.WELCOME:
@@ -178,7 +150,6 @@ const OnboardingFlow = () => {
             user={user}
           />
         );
-
       case ONBOARDING_STEPS.PERSONALITY_QUIZ:
         return (
           <QuizStep
@@ -188,7 +159,6 @@ const OnboardingFlow = () => {
             isLoading={loading}
           />
         );
-
       case ONBOARDING_STEPS.QUIZ_RESULTS:
         return (
           <ResultsStep
@@ -198,7 +168,6 @@ const OnboardingFlow = () => {
             onRetake={handleRetakeQuiz}
           />
         );
-
       case ONBOARDING_STEPS.WELCOME_PERSONALIZED:
         return (
           <PersonalizedWelcomeStep
@@ -208,15 +177,12 @@ const OnboardingFlow = () => {
             user={user}
           />
         );
-
       default:
         return null;
     }
   }
 };
-
 // Step Components
-
 const WelcomeStep = ({ onContinue, user }) => {
   return (
     <motion.div
@@ -234,15 +200,12 @@ const WelcomeStep = ({ onContinue, user }) => {
         >
           <span className="text-4xl">🌍</span>
         </motion.div>
-
         <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
           Welcome to TRVL Social!
         </h1>
-
         <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">
           Hi {user?.email?.split('@')[0] || 'there'}! We're excited to help you discover amazing travel experiences.
         </p>
-
         <div className="space-y-4 text-gray-600 dark:text-gray-300 mb-8">
           <p className="flex items-center justify-center gap-3">
             <span className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400 font-semibold">1</span>
@@ -257,7 +220,6 @@ const WelcomeStep = ({ onContinue, user }) => {
             Connect with like-minded travelers and plan amazing trips
           </p>
         </div>
-
         <button
           onClick={onContinue}
           className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
@@ -268,7 +230,6 @@ const WelcomeStep = ({ onContinue, user }) => {
     </motion.div>
   );
 };
-
 const QuizStep = ({ onComplete, onSkip, isLoading }) => {
   return (
     <motion.div
@@ -295,7 +256,6 @@ const QuizStep = ({ onComplete, onSkip, isLoading }) => {
             </button>
           </div>
         </GlassCard>
-
         {/* Quiz component */}
         {!isLoading && (
           <QuizContainer onComplete={onComplete} />
@@ -304,7 +264,6 @@ const QuizStep = ({ onComplete, onSkip, isLoading }) => {
     </motion.div>
   );
 };
-
 const ResultsStep = ({ results, onContinue, onRetake }) => {
   return (
     <motion.div
@@ -319,7 +278,6 @@ const ResultsStep = ({ results, onContinue, onRetake }) => {
           onRetake={onRetake}
           className="mb-8"
         />
-
         <div className="text-center">
           <button
             onClick={onContinue}
@@ -332,7 +290,6 @@ const ResultsStep = ({ results, onContinue, onRetake }) => {
     </motion.div>
   );
 };
-
 const PersonalizedWelcomeStep = ({ personalizedData, onComplete, user }) => {
   return (
     <motion.div
@@ -349,14 +306,11 @@ const PersonalizedWelcomeStep = ({ personalizedData, onComplete, user }) => {
     </motion.div>
   );
 };
-
 // Helper Components
-
 const OnboardingProgressBar = ({ currentStep }) => {
   const steps = Object.values(ONBOARDING_STEPS);
   const currentIndex = steps.indexOf(currentStep);
   const progressPercent = ((currentIndex + 1) / (steps.length - 1)) * 100; // -1 to exclude COMPLETE step
-
   return (
     <div className="max-w-2xl mx-auto mb-8">
       <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -374,7 +328,6 @@ const OnboardingProgressBar = ({ currentStep }) => {
     </div>
   );
 };
-
 const LoadingScreen = () => (
   <div className="min-h-screen flex items-center justify-center">
     <GlassCard className="max-w-md w-full text-center p-8">
@@ -394,7 +347,6 @@ const LoadingScreen = () => (
     </GlassCard>
   </div>
 );
-
 const ErrorScreen = ({ error, onRetry }) => (
   <div className="min-h-screen flex items-center justify-center">
     <GlassCard className="max-w-md w-full text-center p-8">
@@ -416,20 +368,16 @@ const ErrorScreen = ({ error, onRetry }) => (
     </GlassCard>
   </div>
 );
-
 // Utility functions
-
 const calculatePersonalityProfile = async (answers) => {
   // This is a simplified calculation - the actual logic would be more complex
   // and likely moved to the assessment service
-
   const traitScores = {
     energyLevel: 0,
     socialPreference: 0,
     adventureStyle: 0,
     riskTolerance: 0
   };
-
   // Calculate scores based on answers
   answers.forEach(answer => {
     Object.keys(answer.traitScores).forEach(trait => {
@@ -438,27 +386,22 @@ const calculatePersonalityProfile = async (answers) => {
       }
     });
   });
-
   // Normalize scores to 0-100
   const maxPossibleScore = answers.length * 5; // Assuming max 5 points per question per trait
   Object.keys(traitScores).forEach(trait => {
     traitScores[trait] = Math.round((traitScores[trait] / maxPossibleScore) * 100);
   });
-
   // Determine personality type (simplified logic)
   const personalityType = determinePersonalityType(traitScores);
-
   return {
     ...traitScores,
     personalityType,
     completedAt: new Date().toISOString()
   };
 };
-
 const determinePersonalityType = (scores) => {
   // Simplified personality type determination
   // In reality, this would use more sophisticated logic
-
   if (scores.adventureStyle > 70 && scores.riskTolerance > 70) {
     return 'The Thrill Seeker';
   }
@@ -471,8 +414,6 @@ const determinePersonalityType = (scores) => {
   if (scores.riskTolerance < 40 && scores.socialPreference > 60) {
     return 'The Comfort Traveler';
   }
-
   return 'The Balanced Wanderer';
 };
-
 export default OnboardingFlow;

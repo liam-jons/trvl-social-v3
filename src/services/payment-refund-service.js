@@ -2,12 +2,10 @@
  * Payment Refund Service - Handle automatic refunds for failed collections
  * Integrates with Stripe for processing refunds and manages refund workflows
  */
-
 import { supabase } from '../lib/supabase.js';
 import { payments } from './stripe-service.js';
 import { groupPaymentManager, getSplitPaymentConfig } from './split-payment-service.js';
 import { notificationService } from './notification-service.js';
-
 // Refund configuration
 const REFUND_CONFIG = {
   reasons: {
@@ -30,7 +28,6 @@ const REFUND_CONFIG = {
     refundFailed: true,
   },
 };
-
 /**
  * Automatic refund management
  */
@@ -40,19 +37,16 @@ export const automaticRefundManager = {
    */
   async processAutomaticRefunds() {
     console.log('Starting automatic refund processing...');
-
     try {
       // Find split payments that need refund processing
       const candidatePayments = await this.findRefundCandidates();
       console.log(`Found ${candidatePayments.length} payments requiring refund processing`);
-
       const results = {
         processed: 0,
         successful: 0,
         failed: 0,
         errors: [],
       };
-
       for (const payment of candidatePayments) {
         try {
           const refundResult = await this.processPaymentRefund(payment);
@@ -71,7 +65,6 @@ export const automaticRefundManager = {
           console.error(`Failed to process refund for payment ${payment.id}:`, error);
         }
       }
-
       console.log('Automatic refund processing completed:', results);
       return results;
     } catch (error) {
@@ -79,7 +72,6 @@ export const automaticRefundManager = {
       throw error;
     }
   },
-
   /**
    * Find split payments that are candidates for automatic refunding
    */
@@ -88,7 +80,6 @@ export const automaticRefundManager = {
       const config = getSplitPaymentConfig();
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - config.refundProcessingDays);
-
       // Find payments that are past deadline and haven't met minimum threshold
       const { data: payments, error } = await supabase
         .from('split_payments')
@@ -99,38 +90,30 @@ export const automaticRefundManager = {
         .in('status', ['pending', 'partially_paid'])
         .lt('payment_deadline', new Date().toISOString())
         .gt('created_at', cutoffDate.toISOString()); // Don't process very old payments
-
       if (error) throw error;
-
       // Filter payments that don't meet minimum threshold
       const candidates = payments.filter(payment => {
         const stats = groupPaymentManager.calculatePaymentStats(payment.individual_payments);
         return !stats.meetsMinimumThreshold;
       });
-
       return candidates;
     } catch (error) {
       throw new Error(`Failed to find refund candidates: ${error.message}`);
     }
   },
-
   /**
    * Process refund for a specific split payment
    */
   async processPaymentRefund(splitPayment) {
     try {
       console.log(`Processing refund for split payment ${splitPayment.id}`);
-
       // Get current payment statistics
       const stats = groupPaymentManager.calculatePaymentStats(splitPayment.individual_payments);
-
       // Determine refund strategy
       const refundStrategy = this.determineRefundStrategy(stats, splitPayment);
-
       if (refundStrategy.action === 'no_action') {
         return { success: true, action: 'no_action', reason: refundStrategy.reason };
       }
-
       // Update split payment status first
       await supabase
         .from('split_payments')
@@ -139,18 +122,15 @@ export const automaticRefundManager = {
           updated_at: new Date().toISOString(),
         })
         .eq('id', splitPayment.id);
-
       // Process refunds for paid participants
       const refundResults = await this.processIndividualRefunds(
         splitPayment,
         refundStrategy
       );
-
       // Update final status based on refund results
       const finalStatus = refundResults.allSuccessful
         ? 'cancelled_refunded'
         : 'cancelled_partial_refund';
-
       await supabase
         .from('split_payments')
         .update({
@@ -158,20 +138,16 @@ export const automaticRefundManager = {
           updated_at: new Date().toISOString(),
         })
         .eq('id', splitPayment.id);
-
       // Update booking status if applicable
       await this.updateBookingStatus(splitPayment.booking_id, finalStatus);
-
       // Send notifications
       await this.sendRefundNotifications(splitPayment, refundResults);
-
       return {
         success: true,
         action: refundStrategy.action,
         refundResults,
         finalStatus,
       };
-
     } catch (error) {
       // Mark as failed
       await supabase
@@ -181,17 +157,14 @@ export const automaticRefundManager = {
           updated_at: new Date().toISOString(),
         })
         .eq('id', splitPayment.id);
-
       throw new Error(`Failed to process refund for payment ${splitPayment.id}: ${error.message}`);
     }
   },
-
   /**
    * Determine the appropriate refund strategy
    */
   determineRefundStrategy(stats, splitPayment) {
     const config = getSplitPaymentConfig();
-
     // If no payments have been made, no refunds needed
     if (stats.totalPaid === 0) {
       return {
@@ -199,7 +172,6 @@ export const automaticRefundManager = {
         reason: 'no_payments_to_refund',
       };
     }
-
     // If minimum threshold is met, shouldn't refund (this shouldn't happen in auto processing)
     if (stats.meetsMinimumThreshold) {
       return {
@@ -207,11 +179,9 @@ export const automaticRefundManager = {
         reason: 'minimum_threshold_met',
       };
     }
-
     // Determine refund amount based on policy
     let refundType = 'full';
     let refundAmount = stats.totalPaid;
-
     // Apply cancellation fee if configured
     if (REFUND_CONFIG.policies.cancellationFeePercent > 0) {
       const cancellationFee = Math.round(
@@ -220,7 +190,6 @@ export const automaticRefundManager = {
       refundAmount = stats.totalPaid - cancellationFee;
       refundType = 'partial_with_fee';
     }
-
     return {
       action: 'refund',
       refundType,
@@ -229,7 +198,6 @@ export const automaticRefundManager = {
       reason: REFUND_CONFIG.reasons.INSUFFICIENT_PAYMENTS,
     };
   },
-
   /**
    * Process refunds for individual participants
    */
@@ -241,14 +209,11 @@ export const automaticRefundManager = {
       refundDetails: [],
       allSuccessful: false,
     };
-
     // Get all paid individual payments
     const paidPayments = splitPayment.individual_payments.filter(
       p => p.status === 'paid' && p.stripe_payment_intent_id
     );
-
     results.attempted = paidPayments.length;
-
     for (const individualPayment of paidPayments) {
       try {
         const refundResult = await this.processIndividualRefund(
@@ -256,13 +221,11 @@ export const automaticRefundManager = {
           refundStrategy,
           splitPayment.id
         );
-
         if (refundResult.success) {
           results.successful++;
         } else {
           results.failed++;
         }
-
         results.refundDetails.push({
           individualPaymentId: individualPayment.id,
           userId: individualPayment.user_id,
@@ -272,7 +235,6 @@ export const automaticRefundManager = {
           stripeRefundId: refundResult.stripeRefundId,
           error: refundResult.error,
         });
-
       } catch (error) {
         results.failed++;
         results.refundDetails.push({
@@ -285,33 +247,27 @@ export const automaticRefundManager = {
         });
       }
     }
-
     results.allSuccessful = results.successful === results.attempted && results.failed === 0;
-
     return results;
   },
-
   /**
    * Process refund for an individual payment
    */
   async processIndividualRefund(individualPayment, refundStrategy, splitPaymentId) {
     try {
       const originalAmount = individualPayment.amount_paid || individualPayment.amount_due;
-
       // Calculate refund amount based on strategy
       let refundAmount = originalAmount;
       if (refundStrategy.refundType === 'partial_with_fee') {
         const feeAmount = Math.round(originalAmount * REFUND_CONFIG.policies.cancellationFeePercent);
         refundAmount = originalAmount - feeAmount;
       }
-
       // Process Stripe refund
       const stripeRefund = await payments.processRefund({
         paymentIntentId: individualPayment.stripe_payment_intent_id,
         amount: refundAmount,
         reason: refundStrategy.reason,
       });
-
       // Create refund record
       const { data: refundRecord, error: refundError } = await supabase
         .from('payment_refunds')
@@ -331,11 +287,9 @@ export const automaticRefundManager = {
         })
         .select()
         .single();
-
       if (refundError) {
         console.error('Failed to create refund record:', refundError);
       }
-
       // Update individual payment status
       await supabase
         .from('individual_payments')
@@ -345,17 +299,14 @@ export const automaticRefundManager = {
           updated_at: new Date().toISOString(),
         })
         .eq('id', individualPayment.id);
-
       return {
         success: true,
         refundAmount,
         stripeRefundId: stripeRefund.refundId,
         refundRecordId: refundRecord?.id,
       };
-
     } catch (error) {
       console.error(`Failed to process individual refund for payment ${individualPayment.id}:`, error);
-
       // Create failed refund record
       try {
         await supabase
@@ -375,7 +326,6 @@ export const automaticRefundManager = {
       } catch (recordError) {
         console.error('Failed to create failed refund record:', recordError);
       }
-
       return {
         success: false,
         refundAmount: 0,
@@ -383,7 +333,6 @@ export const automaticRefundManager = {
       };
     }
   },
-
   /**
    * Update booking status based on refund results
    */
@@ -391,11 +340,9 @@ export const automaticRefundManager = {
     try {
       let bookingStatus = 'cancelled';
       let paymentStatus = 'refunded';
-
       if (refundStatus === 'cancelled_partial_refund') {
         paymentStatus = 'partially_refunded';
       }
-
       await supabase
         .from('bookings')
         .update({
@@ -404,12 +351,10 @@ export const automaticRefundManager = {
           updated_at: new Date().toISOString(),
         })
         .eq('id', bookingId);
-
     } catch (error) {
       console.error(`Failed to update booking ${bookingId} status:`, error);
     }
   },
-
   /**
    * Send refund notifications to participants
    */
@@ -417,17 +362,14 @@ export const automaticRefundManager = {
     try {
       // Notify organizer
       await this.notifyOrganizer(splitPayment, refundResults);
-
       // Notify participants
       for (const refundDetail of refundResults.refundDetails) {
         await this.notifyParticipant(refundDetail, splitPayment);
       }
-
     } catch (error) {
       console.error('Failed to send refund notifications:', error);
     }
   },
-
   /**
    * Notify organizer about refund processing
    */
@@ -448,13 +390,11 @@ export const automaticRefundManager = {
         channels: ['push', 'email'],
         priority: 'high',
       };
-
       await notificationService.sendNotification(notification);
     } catch (error) {
       console.error('Failed to notify organizer:', error);
     }
   },
-
   /**
    * Notify participant about their refund
    */
@@ -463,7 +403,6 @@ export const automaticRefundManager = {
       if (!refundDetail.success) {
         return; // Don't notify about failed refunds automatically
       }
-
       const notification = {
         userId: refundDetail.userId,
         type: 'refund_issued',
@@ -479,14 +418,12 @@ export const automaticRefundManager = {
         channels: ['push', 'email'],
         priority: 'normal',
       };
-
       await notificationService.sendNotification(notification);
     } catch (error) {
       console.error('Failed to notify participant:', error);
     }
   },
 };
-
 /**
  * Manual refund management for organizers
  */
@@ -502,7 +439,6 @@ export const manualRefundManager = {
       refundType = 'full', // 'full', 'partial', 'custom'
       customAmounts = null, // For custom refund amounts
     } = refundRequest;
-
     try {
       // Verify organizer permissions
       const { data: splitPayment, error: paymentError } = await supabase
@@ -511,16 +447,13 @@ export const manualRefundManager = {
         .eq('id', splitPaymentId)
         .eq('organizer_id', organizerId)
         .single();
-
       if (paymentError || !splitPayment) {
         throw new Error('Split payment not found or access denied');
       }
-
       // Check if refunds can be processed
       if (!['completed', 'partially_paid', 'pending'].includes(splitPayment.status)) {
         throw new Error('Refunds cannot be processed for payments in this status');
       }
-
       // Create refund strategy
       const stats = groupPaymentManager.calculatePaymentStats(splitPayment.individual_payments);
       const refundStrategy = this.createManualRefundStrategy(
@@ -529,18 +462,15 @@ export const manualRefundManager = {
         refundType,
         customAmounts
       );
-
       // Process refunds
       const refundResults = await automaticRefundManager.processIndividualRefunds(
         splitPayment,
         refundStrategy
       );
-
       // Update split payment status
       const finalStatus = refundResults.allSuccessful
         ? 'cancelled_refunded'
         : 'cancelled_partial_refund';
-
       await supabase
         .from('split_payments')
         .update({
@@ -548,33 +478,27 @@ export const manualRefundManager = {
           updated_at: new Date().toISOString(),
         })
         .eq('id', splitPaymentId);
-
       // Update booking status
       await automaticRefundManager.updateBookingStatus(
         splitPayment.booking_id,
         finalStatus
       );
-
       // Send notifications
       await automaticRefundManager.sendRefundNotifications(splitPayment, refundResults);
-
       return {
         success: true,
         refundResults,
         finalStatus,
       };
-
     } catch (error) {
       throw new Error(`Manual refund failed: ${error.message}`);
     }
   },
-
   /**
    * Create manual refund strategy
    */
   createManualRefundStrategy(stats, reason, refundType, customAmounts) {
     let refundAmount = stats.totalPaid;
-
     if (refundType === 'partial') {
       // Apply standard cancellation fee
       const fee = Math.round(stats.totalPaid * REFUND_CONFIG.policies.cancellationFeePercent);
@@ -583,7 +507,6 @@ export const manualRefundManager = {
       // Use custom amounts (this would need more complex logic)
       refundAmount = Object.values(customAmounts).reduce((sum, amount) => sum + amount, 0);
     }
-
     return {
       action: 'refund',
       refundType,
@@ -592,7 +515,6 @@ export const manualRefundManager = {
       reason,
     };
   },
-
   /**
    * Get refund options for a split payment
    */
@@ -604,12 +526,9 @@ export const manualRefundManager = {
         .eq('id', splitPaymentId)
         .eq('organizer_id', organizerId)
         .single();
-
       if (error) throw error;
-
       const stats = groupPaymentManager.calculatePaymentStats(splitPayment.individual_payments);
       const paidPayments = splitPayment.individual_payments.filter(p => p.status === 'paid');
-
       return {
         canRefund: paidPayments.length > 0,
         totalPaid: stats.totalPaid,
@@ -633,13 +552,11 @@ export const manualRefundManager = {
           refundableAmount: payment.amount_paid || payment.amount_due,
         })),
       };
-
     } catch (error) {
       throw new Error(`Failed to get refund options: ${error.message}`);
     }
   },
 };
-
 /**
  * Refund monitoring and reporting
  */
@@ -659,9 +576,7 @@ export const refundMonitoring = {
         .eq('split_payments.organizer_id', organizerId)
         .gte('created_at', startDate)
         .lte('created_at', endDate);
-
       if (error) throw error;
-
       const stats = {
         totalRefunds: refunds.length,
         totalRefundAmount: refunds.reduce((sum, refund) => sum + refund.refund_amount, 0),
@@ -670,19 +585,16 @@ export const refundMonitoring = {
         pendingRefunds: refunds.filter(r => r.status === 'processing').length,
         refundsByReason: {},
       };
-
       // Group by reason
       refunds.forEach(refund => {
         const reason = refund.refund_reason || 'unknown';
         stats.refundsByReason[reason] = (stats.refundsByReason[reason] || 0) + 1;
       });
-
       return stats;
     } catch (error) {
       throw new Error(`Failed to get refund stats: ${error.message}`);
     }
   },
-
   /**
    * Get pending refunds that need attention
    */
@@ -698,16 +610,13 @@ export const refundMonitoring = {
         .eq('split_payments.organizer_id', organizerId)
         .in('status', ['processing', 'failed'])
         .order('created_at', { ascending: false });
-
       if (error) throw error;
-
       return refunds;
     } catch (error) {
       throw new Error(`Failed to get pending refunds: ${error.message}`);
     }
   },
 };
-
 /**
  * Dispute management for chargebacks and payment disputes
  */
@@ -727,14 +636,12 @@ export const disputeManager = {
         charge,
         metadata = {},
       } = disputeData;
-
       // Get payment intent from charge to find related booking
       const { data: existingDispute } = await supabase
         .from('payment_disputes')
         .select('id')
         .eq('stripe_dispute_id', stripeDisputeId)
         .single();
-
       if (existingDispute) {
         // Update existing dispute
         return await this.updateDispute(existingDispute.id, {
@@ -744,7 +651,6 @@ export const disputeManager = {
           updated_at: new Date().toISOString(),
         });
       }
-
       // Create new dispute record
       const { data: dispute, error } = await supabase
         .from('payment_disputes')
@@ -767,18 +673,14 @@ export const disputeManager = {
         })
         .select()
         .single();
-
       if (error) throw error;
-
       // Send urgent notification to admin
       await this.notifyAdminOfDispute(dispute);
-
       return dispute;
     } catch (error) {
       throw new Error(`Failed to process dispute webhook: ${error.message}`);
     }
   },
-
   /**
    * Update dispute status
    */
@@ -790,20 +692,16 @@ export const disputeManager = {
         .eq('id', disputeId)
         .select()
         .single();
-
       if (error) throw error;
-
       // Handle status changes
       if (updates.status) {
         await this.handleDisputeStatusChange(dispute, updates.status);
       }
-
       return dispute;
     } catch (error) {
       throw new Error(`Failed to update dispute: ${error.message}`);
     }
   },
-
   /**
    * Handle dispute status changes
    */
@@ -821,7 +719,6 @@ export const disputeManager = {
           await this.notifyDisputeWarningClosed(dispute);
           break;
       }
-
       // Update booking status if applicable
       if (dispute.booking_id && ['lost', 'charge_refunded'].includes(newStatus)) {
         await supabase
@@ -832,12 +729,10 @@ export const disputeManager = {
           })
           .eq('id', dispute.booking_id);
       }
-
     } catch (error) {
       console.error('Failed to handle dispute status change:', error);
     }
   },
-
   /**
    * Get dispute evidence requirements
    */
@@ -888,10 +783,8 @@ export const disputeManager = {
         'uncategorized_file',
       ],
     };
-
     return requirements[reason] || requirements.general;
   },
-
   /**
    * Send admin notification for new dispute
    */
@@ -902,9 +795,7 @@ export const disputeManager = {
         .from('users')
         .select('id')
         .eq('role', 'admin');
-
       if (!admins?.length) return;
-
       // Create urgent notifications
       const notifications = admins.map(admin => ({
         user_id: admin.id,
@@ -922,14 +813,11 @@ export const disputeManager = {
         priority: 'urgent',
         created_at: new Date().toISOString(),
       }));
-
       await supabase.from('notifications').insert(notifications);
-
     } catch (error) {
       console.error('Failed to notify admin of dispute:', error);
     }
   },
-
   /**
    * Notify dispute won
    */
@@ -937,7 +825,6 @@ export const disputeManager = {
     // Implementation for won dispute notifications
     console.log('Dispute won:', dispute.stripe_dispute_id);
   },
-
   /**
    * Notify dispute lost
    */
@@ -945,7 +832,6 @@ export const disputeManager = {
     // Implementation for lost dispute notifications
     console.log('Dispute lost:', dispute.stripe_dispute_id);
   },
-
   /**
    * Notify dispute warning closed
    */
@@ -954,7 +840,6 @@ export const disputeManager = {
     console.log('Dispute warning closed:', dispute.stripe_dispute_id);
   },
 };
-
 /**
  * Refund policy enforcement engine
  */
@@ -978,16 +863,12 @@ export const refundPolicyEngine = {
         `)
         .eq('id', bookingId)
         .single();
-
       if (error) throw error;
-
       const adventure = booking.adventures;
       const policy = adventure.vendors?.refund_policy || adventure.cancellation_policy || {};
-
       // Calculate time until adventure starts
       const adventureStart = new Date(adventure.start_date);
       const hoursUntilStart = (adventureStart - requestedAt) / (1000 * 60 * 60);
-
       // Default policy rules
       const defaultPolicy = {
         fullRefundHours: 48, // Full refund if cancelled 48+ hours before
@@ -996,9 +877,7 @@ export const refundPolicyEngine = {
         emergencyRefundAllowed: true,
         weatherRefundAllowed: true,
       };
-
       const effectivePolicy = { ...defaultPolicy, ...policy };
-
       let eligibility = {
         eligible: false,
         refundType: 'none',
@@ -1006,13 +885,11 @@ export const refundPolicyEngine = {
         reason: '',
         policyApplied: effectivePolicy,
       };
-
       // Check booking status
       if (!['confirmed', 'paid'].includes(booking.status)) {
         eligibility.reason = 'Booking is not in a refundable state';
         return eligibility;
       }
-
       // Apply time-based policy
       if (hoursUntilStart >= effectivePolicy.fullRefundHours) {
         eligibility = {
@@ -1039,14 +916,11 @@ export const refundPolicyEngine = {
           policyApplied: effectivePolicy,
         };
       }
-
       return eligibility;
-
     } catch (error) {
       throw new Error(`Failed to evaluate refund eligibility: ${error.message}`);
     }
   },
-
   /**
    * Check if special circumstances apply
    */
@@ -1077,10 +951,8 @@ export const refundPolicyEngine = {
         evidenceTypes: ['photos', 'witness_statements'],
       },
     };
-
     return specialRules[reason] || null;
   },
-
   /**
    * Calculate final refund amount based on policies
    */
@@ -1093,15 +965,11 @@ export const refundPolicyEngine = {
         netRefund: 0,
       };
     }
-
     const baseRefund = Math.round(originalAmount * (eligibility.refundPercentage / 100));
-
     // Calculate fees
     const platformFee = fees.platformFee || 0;
     const processingFee = fees.processingFee || Math.round(baseRefund * 0.029); // 2.9% processing fee
-
     const netRefund = Math.max(0, baseRefund - platformFee - processingFee);
-
     return {
       refundAmount: baseRefund,
       platformFee,
@@ -1117,10 +985,8 @@ export const refundPolicyEngine = {
     };
   },
 };
-
 // Export configuration
 export const getRefundConfig = () => REFUND_CONFIG;
-
 // Main export
 export default {
   automaticRefundManager,

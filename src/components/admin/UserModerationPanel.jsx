@@ -2,7 +2,6 @@
  * UserModerationPanel Component
  * Handles user warnings, bans, and account restrictions
  */
-
 import React, { useState, useEffect } from 'react';
 import {
   User,
@@ -26,7 +25,6 @@ import {
   Mail
 } from 'lucide-react';
 import ContentModerationService from '../../services/content-moderation-service';
-
 const UserModerationPanel = ({ userId, onClose }) => {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
@@ -35,7 +33,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
   const [moderationHistory, setModerationHistory] = useState([]);
   const [showWarningForm, setShowWarningForm] = useState(false);
   const [showRestrictionForm, setShowRestrictionForm] = useState(false);
-
   // Mock user data - replace with actual API calls
   useEffect(() => {
     setUser({
@@ -52,7 +49,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
       warningCount: 1,
       lastActive: '2024-09-15T10:30:00Z'
     });
-
     setWarnings([
       {
         id: 1,
@@ -65,9 +61,7 @@ const UserModerationPanel = ({ userId, onClose }) => {
         contentId: 'post_123'
       }
     ]);
-
     setRestrictions([]);
-
     setModerationHistory([
       {
         id: 1,
@@ -87,7 +81,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
       }
     ]);
   }, [userId]);
-
   const WarningForm = ({ onSave, onCancel }) => {
     const [formData, setFormData] = useState({
       reason: '',
@@ -96,10 +89,8 @@ const UserModerationPanel = ({ userId, onClose }) => {
       customMessage: '',
       expiryDays: 7
     });
-
     const handleSubmit = async (e) => {
       e.preventDefault();
-
       try {
         await ContentModerationService.issueUserWarning(userId, {
           reason: formData.reason,
@@ -108,14 +99,12 @@ const UserModerationPanel = ({ userId, onClose }) => {
           customMessage: formData.customMessage,
           expiryDays: formData.expiryDays
         });
-
         onSave();
         onCancel();
       } catch (error) {
         console.error('Failed to issue warning:', error);
       }
     };
-
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full">
@@ -128,7 +117,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
               <ChevronUp className="w-5 h-5 text-gray-500" />
             </button>
           </div>
-
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -150,7 +138,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
                 <option value="other">Other</option>
               </select>
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -166,7 +153,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
                   <option value="high">High</option>
                 </select>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Expires In (Days)
@@ -181,7 +167,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
                 />
               </div>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Content ID (optional)
@@ -194,7 +179,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Custom Message (optional)
@@ -207,7 +191,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
                 rows={3}
               />
             </div>
-
             <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
               <button
                 type="button"
@@ -228,7 +211,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
       </div>
     );
   };
-
   const RestrictionForm = ({ onSave, onCancel }) => {
     const [formData, setFormData] = useState({
       type: 'limited',
@@ -236,10 +218,8 @@ const UserModerationPanel = ({ userId, onClose }) => {
       duration: 3,
       customReason: ''
     });
-
     const handleSubmit = async (e) => {
       e.preventDefault();
-
       try {
         await ContentModerationService.restrictUser(userId, formData.type, formData.duration);
         onSave();
@@ -248,7 +228,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
         console.error('Failed to restrict user:', error);
       }
     };
-
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full">
@@ -261,7 +240,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
               <ChevronUp className="w-5 h-5 text-gray-500" />
             </button>
           </div>
-
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -278,7 +256,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
                 <option value="banned">Banned (permanent)</option>
               </select>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Reason *
@@ -299,7 +276,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
                 <option value="other">Other</option>
               </select>
             </div>
-
             {formData.type !== 'banned' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -315,7 +291,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
                 />
               </div>
             )}
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Additional Details
@@ -328,7 +303,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
                 rows={3}
               />
             </div>
-
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
               <div className="flex items-center space-x-2">
                 <AlertTriangle className="w-5 h-5 text-red-600" />
@@ -339,7 +313,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
                 Make sure you have sufficient evidence for this action.
               </p>
             </div>
-
             <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
               <button
                 type="button"
@@ -360,7 +333,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
       </div>
     );
   };
-
   if (!user) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -368,7 +340,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
       </div>
     );
   }
-
   return (
     <div className="bg-white rounded-xl shadow-lg max-w-4xl mx-auto">
       {/* Header */}
@@ -416,7 +387,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
           )}
         </div>
       </div>
-
       {/* User Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-6 bg-gray-50">
         <div className="text-center">
@@ -440,7 +410,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
           <div className="text-sm text-gray-600">Warnings</div>
         </div>
       </div>
-
       {/* Tabs */}
       <div className="border-b border-gray-200">
         <nav className="flex space-x-8 px-6">
@@ -465,7 +434,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
           ))}
         </nav>
       </div>
-
       {/* Tab Content */}
       <div className="p-6">
         {activeTab === 'overview' && (
@@ -492,7 +460,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
                   </div>
                 </div>
               </div>
-
               <div>
                 <h3 className="font-semibold text-gray-900 mb-3">Activity Summary</h3>
                 <div className="space-y-2 text-sm">
@@ -511,7 +478,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
                 </div>
               </div>
             </div>
-
             {/* Recent Activity */}
             <div>
               <h3 className="font-semibold text-gray-900 mb-3">Recent Moderation Actions</h3>
@@ -543,7 +509,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
             </div>
           </div>
         )}
-
         {activeTab === 'warnings' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -556,7 +521,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
                 <span>Add Warning</span>
               </button>
             </div>
-
             {warnings.length > 0 ? (
               <div className="space-y-3">
                 {warnings.map((warning) => (
@@ -604,7 +568,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
             )}
           </div>
         )}
-
         {activeTab === 'restrictions' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -617,7 +580,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
                 <span>Add Restriction</span>
               </button>
             </div>
-
             {restrictions.length > 0 ? (
               <div className="space-y-3">
                 {restrictions.map((restriction) => (
@@ -649,7 +611,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
             )}
           </div>
         )}
-
         {activeTab === 'history' && (
           <div className="space-y-4">
             <h3 className="font-semibold text-gray-900">Moderation History</h3>
@@ -694,7 +655,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
           </div>
         )}
       </div>
-
       {/* Forms */}
       {showWarningForm && (
         <WarningForm
@@ -704,7 +664,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
           onCancel={() => setShowWarningForm(false)}
         />
       )}
-
       {showRestrictionForm && (
         <RestrictionForm
           onSave={() => {
@@ -716,5 +675,4 @@ const UserModerationPanel = ({ userId, onClose }) => {
     </div>
   );
 };
-
 export default UserModerationPanel;

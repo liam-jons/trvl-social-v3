@@ -2,7 +2,6 @@
  * PaymentPage - Handles individual payment processing from payment links
  * Processes secure payment tokens and integrates with Stripe for payment completion
  */
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { Card } from '../ui/card';
@@ -21,27 +20,20 @@ import {
   Clock,
   Users
 } from 'lucide-react';
-
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-
 const PaymentForm = ({ paymentData, onSuccess, onError }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(null);
-
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     if (!stripe || !elements) {
       return;
     }
-
     const cardElement = elements.getElement(CardElement);
-
     setProcessing(true);
     setError(null);
-
     try {
       // Confirm payment with Stripe
       const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
@@ -56,11 +48,9 @@ const PaymentForm = ({ paymentData, onSuccess, onError }) => {
           },
         }
       );
-
       if (stripeError) {
         throw new Error(stripeError.message);
       }
-
       if (paymentIntent.status === 'succeeded') {
         // Update payment status in database
         await groupPaymentManager.updatePaymentStatus(
@@ -68,7 +58,6 @@ const PaymentForm = ({ paymentData, onSuccess, onError }) => {
           'paid',
           paymentIntent.id
         );
-
         onSuccess(paymentIntent);
       }
     } catch (err) {
@@ -78,7 +67,6 @@ const PaymentForm = ({ paymentData, onSuccess, onError }) => {
       setProcessing(false);
     }
   };
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="p-4 border rounded-lg">
@@ -96,7 +84,6 @@ const PaymentForm = ({ paymentData, onSuccess, onError }) => {
           }}
         />
       </div>
-
       {error && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-sm text-red-700 flex items-center">
@@ -105,7 +92,6 @@ const PaymentForm = ({ paymentData, onSuccess, onError }) => {
           </p>
         </div>
       )}
-
       <Button
         type="submit"
         disabled={!stripe || processing}
@@ -124,7 +110,6 @@ const PaymentForm = ({ paymentData, onSuccess, onError }) => {
           </>
         )}
       </Button>
-
       <div className="text-center">
         <p className="text-xs text-muted-foreground flex items-center justify-center">
           <Shield className="w-3 h-3 mr-1" />
@@ -134,7 +119,6 @@ const PaymentForm = ({ paymentData, onSuccess, onError }) => {
     </form>
   );
 };
-
 const PaymentPage = () => {
   const { token } = useParams();
   const [searchParams] = useSearchParams();
@@ -143,60 +127,49 @@ const PaymentPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
-
   useEffect(() => {
     loadPaymentData();
   }, [token]);
-
   const loadPaymentData = async () => {
     try {
       setLoading(true);
-
       // Verify payment token and get payment details
       const { data: tokenData, error: tokenError } = await supabase
         .from('payment_tokens')
         .select('individual_payment_id, expires_at')
         .eq('token', token)
         .single();
-
       if (tokenError || !tokenData) {
         throw new Error('Invalid or expired payment link');
       }
-
       // Check if token is expired
       if (new Date() > new Date(tokenData.expires_at)) {
         throw new Error('Payment link has expired');
       }
-
       // Get individual payment details
       const { data: payment, error: paymentError } = await supabase
         .from('individual_payments')
         .select('*, split_payments(*)')
         .eq('id', tokenData.individual_payment_id)
         .single();
-
       if (paymentError || !payment) {
         throw new Error('Payment not found');
       }
-
       // Check if already paid
       if (payment.status === 'paid') {
         setPaymentCompleted(true);
         setPaymentData(payment);
         return;
       }
-
       // Check if deadline has passed
       if (new Date() > new Date(payment.payment_deadline)) {
         throw new Error('Payment deadline has passed');
       }
-
       // Process payment with Stripe (create payment intent)
       const result = await groupPaymentManager.processIndividualPayment(
         tokenData.individual_payment_id,
         payment.user_id || 'guest'
       );
-
       setPaymentData({
         ...result,
         individualPaymentId: tokenData.individual_payment_id,
@@ -204,29 +177,24 @@ const PaymentPage = () => {
         participantEmail: payment.metadata?.participantEmail,
         paymentDeadline: payment.payment_deadline,
       });
-
       setSplitDetails({
         description: payment.split_payments.description,
         totalAmount: payment.split_payments.total_amount,
         participantCount: payment.split_payments.participant_count,
       });
-
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
-
   const handlePaymentSuccess = (paymentIntent) => {
     setPaymentCompleted(true);
     console.log('Payment successful:', paymentIntent);
   };
-
   const handlePaymentError = (error) => {
     console.error('Payment failed:', error);
   };
-
   const formatDateTime = (dateString) => {
     return new Date(dateString).toLocaleString('en-US', {
       weekday: 'long',
@@ -237,7 +205,6 @@ const PaymentPage = () => {
       minute: '2-digit',
     });
   };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -248,7 +215,6 @@ const PaymentPage = () => {
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -269,7 +235,6 @@ const PaymentPage = () => {
       </div>
     );
   }
-
   if (paymentCompleted) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -291,7 +256,6 @@ const PaymentPage = () => {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-2xl mx-auto p-4">
@@ -302,49 +266,41 @@ const PaymentPage = () => {
             You're paying for your share of the group booking
           </p>
         </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Payment Summary */}
           <div className="lg:col-span-1">
             <Card className="p-4">
               <h3 className="font-semibold mb-3">Payment Summary</h3>
-
               {splitDetails && (
                 <div className="space-y-3">
                   <div>
                     <p className="text-sm font-medium">{splitDetails.description}</p>
                   </div>
-
                   <div className="flex items-center space-x-2">
                     <Users className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm">
                       {splitDetails.participantCount} participants
                     </span>
                   </div>
-
                   <div className="flex items-center space-x-2">
                     <Clock className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm">
                       Due: {formatDateTime(paymentData.paymentDeadline)}
                     </span>
                   </div>
-
                   <hr className="my-3" />
-
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Your share:</span>
                     <span className="text-lg font-bold">
                       ${(paymentData.amount / 100).toFixed(2)}
                     </span>
                   </div>
-
                   <div className="flex justify-between items-center text-sm text-muted-foreground">
                     <span>Total booking:</span>
                     <span>${(splitDetails.totalAmount / 100).toFixed(2)}</span>
                   </div>
                 </div>
               )}
-
               <div className="mt-4 p-3 bg-green-50 rounded-lg">
                 <p className="text-xs text-green-700 font-medium">
                   Secure Payment
@@ -355,7 +311,6 @@ const PaymentPage = () => {
               </div>
             </Card>
           </div>
-
           {/* Payment Form */}
           <div className="lg:col-span-2">
             <Card className="p-6">
@@ -363,7 +318,6 @@ const PaymentPage = () => {
                 <CreditCard className="w-5 h-5" />
                 <h3 className="font-semibold">Payment Details</h3>
               </div>
-
               <Elements stripe={stripePromise}>
                 <PaymentForm
                   paymentData={paymentData}
@@ -371,7 +325,6 @@ const PaymentPage = () => {
                   onError={handlePaymentError}
                 />
               </Elements>
-
               <div className="mt-6 p-4 bg-blue-50 rounded-lg">
                 <h4 className="text-sm font-medium text-blue-700 mb-2">
                   What happens after payment?
@@ -389,5 +342,4 @@ const PaymentPage = () => {
     </div>
   );
 };
-
 export default PaymentPage;

@@ -10,6 +10,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import CookieConsentBanner from './components/common/CookieConsentBanner';
+import PWAInstallPrompt from './components/common/PWAInstallPrompt';
 
 // Lazy load route components for better performance
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -46,6 +47,7 @@ const ConnectionsPage = lazy(() => import('./pages/ConnectionsPage'));
 const OfferManagementPage = lazy(() => import('./pages/OfferManagementPage'));
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
 const CompatibilityDemoPage = lazy(() => import('./pages/CompatibilityDemoPage'));
+const TestCompatibilityPage = lazy(() => import('./pages/TestCompatibilityPage'));
 const PayoutManagementPage = lazy(() => import('./pages/vendor/PayoutManagementPage'));
 const BidRequestsPage = lazy(() => import('./pages/vendor/BidRequestsPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
@@ -153,6 +155,7 @@ function App() {
                   {/* Demo Pages */}
                   <Route path="booking-chat" element={<BookingChatDemo />} />
                   <Route path="compatibility-demo" element={<CompatibilityDemoPage />} />
+                  <Route path="test-compatibility" element={<TestCompatibilityPage />} />
 
                   {/* Admin Routes */}
                   <Route element={<ProtectedRoute requireAuth={true} requiredRole="admin" />}>
@@ -201,6 +204,7 @@ function App() {
               </Routes>
             </Suspense>
                 <CookieConsentBanner />
+                <PWAInstallPrompt />
               </Router>
             </ABTestingProvider>
           </AnalyticsProvider>

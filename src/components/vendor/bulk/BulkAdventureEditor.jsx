@@ -13,7 +13,6 @@ import GlassCard from '../../ui/GlassCard';
 import { bulkOperationsService } from '../../../services/bulk-operations-service';
 import { vendorService } from '../../../services/vendor-service';
 import useVendorDashboardStore from '../../../stores/vendorDashboardStore';
-
 const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
   const [selectedAdventures, setSelectedAdventures] = useState([]);
   const [allAdventures, setAllAdventures] = useState([]);
@@ -22,14 +21,11 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
   const [operationData, setOperationData] = useState({});
   const [results, setResults] = useState(null);
   const [showResults, setShowResults] = useState(false);
-
   const { adventures, loadAdventures } = useVendorDashboardStore();
-
   useEffect(() => {
     loadAdventures();
     setAllAdventures(adventures || []);
   }, [loadAdventures, adventures]);
-
   const operationTypes = [
     {
       id: 'pricing',
@@ -56,7 +52,6 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
       description: 'Bulk update availability settings'
     }
   ];
-
   const handleSelectAll = () => {
     if (selectedAdventures.length === allAdventures.length) {
       setSelectedAdventures([]);
@@ -64,7 +59,6 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
       setSelectedAdventures(allAdventures.map(a => a.id));
     }
   };
-
   const handleSelectAdventure = (adventureId) => {
     setSelectedAdventures(prev =>
       prev.includes(adventureId)
@@ -72,13 +66,10 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
         : [...prev, adventureId]
     );
   };
-
   const handleExecuteBulkOperation = async () => {
     if (!bulkOperation || selectedAdventures.length === 0) return;
-
     setIsLoading(true);
     let result;
-
     try {
       switch (bulkOperation) {
         case 'pricing':
@@ -88,7 +79,6 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
             operationData.pricing
           );
           break;
-
         case 'status':
           result = await bulkOperationsService.bulkUpdateStatus(
             vendorId,
@@ -96,7 +86,6 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
             operationData.status
           );
           break;
-
         case 'details':
           result = await bulkOperationsService.bulkUpdateAdventures(
             vendorId,
@@ -104,14 +93,11 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
             operationData.details
           );
           break;
-
         default:
           throw new Error('Invalid operation type');
       }
-
       setResults(result.data);
       setShowResults(true);
-
       // Log the action
       await bulkOperationsService.logBulkAction(vendorId, {
         type: `bulk_${bulkOperation}`,
@@ -120,11 +106,9 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
         details: operationData,
         results: result.data
       });
-
       // Refresh adventures list
       loadAdventures();
       onActionComplete?.();
-
     } catch (error) {
       console.error('Bulk operation failed:', error);
       setResults({
@@ -137,7 +121,6 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
       setIsLoading(false);
     }
   };
-
   const renderOperationForm = () => {
     switch (bulkOperation) {
       case 'pricing':
@@ -165,7 +148,6 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
                   <option value="set_price">Set Fixed Price</option>
                 </select>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Value
@@ -186,7 +168,6 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
                   }
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Minimum Price (optional)
@@ -206,7 +187,6 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
             </div>
           </GlassCard>
         );
-
       case 'status':
         return (
           <GlassCard variant="light" padding="md" className="mt-4">
@@ -234,7 +214,6 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
             </div>
           </GlassCard>
         );
-
       case 'details':
         return (
           <GlassCard variant="light" padding="md" className="mt-4">
@@ -258,7 +237,6 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
                   placeholder="Leave empty to keep current"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Max Capacity
@@ -274,7 +252,6 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
                   placeholder="Leave empty to keep current"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Difficulty Level
@@ -294,7 +271,6 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
                   <option value="expert">Expert</option>
                 </select>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Category
@@ -313,15 +289,12 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
             </div>
           </GlassCard>
         );
-
       default:
         return null;
     }
   };
-
   const renderResults = () => {
     if (!results) return null;
-
     return (
       <GlassCard variant="light" padding="md" className="mt-6">
         <div className="flex items-center justify-between mb-4">
@@ -335,7 +308,6 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">
@@ -356,7 +328,6 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
             <div className="text-sm text-gray-600 dark:text-gray-400">Total</div>
           </div>
         </div>
-
         {results.failed && results.failed.length > 0 && (
           <div className="mt-4">
             <h4 className="font-medium text-red-600 dark:text-red-400 mb-2">
@@ -374,7 +345,6 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
       </GlassCard>
     );
   };
-
   return (
     <div className="space-y-6">
       {/* Operation Type Selection */}
@@ -386,7 +356,6 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
           {operationTypes.map((operation) => {
             const Icon = operation.icon;
             const isSelected = bulkOperation === operation.id;
-
             return (
               <button
                 key={operation.id}
@@ -411,7 +380,6 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
           })}
         </div>
       </GlassCard>
-
       {/* Adventure Selection */}
       <GlassCard variant="light" padding="md">
         <div className="flex items-center justify-between mb-4">
@@ -425,7 +393,6 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
             {selectedAdventures.length === allAdventures.length ? 'Deselect All' : 'Select All'}
           </button>
         </div>
-
         <div className="max-h-64 overflow-y-auto space-y-2">
           {allAdventures.map((adventure) => (
             <div
@@ -449,17 +416,14 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
             </div>
           ))}
         </div>
-
         {allAdventures.length === 0 && (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             No adventures found. Create your first adventure to use bulk operations.
           </div>
         )}
       </GlassCard>
-
       {/* Operation Configuration */}
       {bulkOperation && renderOperationForm()}
-
       {/* Execute Button */}
       {bulkOperation && selectedAdventures.length > 0 && (
         <div className="flex justify-end">
@@ -482,11 +446,9 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
           </button>
         </div>
       )}
-
       {/* Results */}
       {showResults && renderResults()}
     </div>
   );
 };
-
 export default BulkAdventureEditor;

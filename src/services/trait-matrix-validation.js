@@ -2,7 +2,6 @@
  * Standalone validation of trait compatibility matrices
  * Tests the core logic without TypeScript dependencies
  */
-
 // Extracted TraitCompatibilityMatrix logic for validation
 class TraitCompatibilityMatrix {
   // Social compatibility matrix
@@ -14,7 +13,6 @@ class TraitCompatibilityMatrix {
     if (diff <= 60) return 0.4;        // Challenging match - significant differences
     return 0.2;                        // Poor match - extreme differences
   }
-
   // Adventure compatibility matrix
   static calculateAdventureCompatibility(style1, style2) {
     const diff = Math.abs(style1 - style2);
@@ -24,7 +22,6 @@ class TraitCompatibilityMatrix {
     if (diff <= 50) return 0.5;        // Significant difference - requires compromise
     return 0.25;                       // Extreme difference - potential conflicts
   }
-
   // Planning compatibility matrix
   static calculatePlanningCompatibility(planning1, planning2) {
     const diff = Math.abs(planning1 - planning2);
@@ -34,11 +31,9 @@ class TraitCompatibilityMatrix {
     if (diff <= 55) return 0.45;       // Major differences require communication
     return 0.2;                        // Extreme differences - high conflict potential
   }
-
   // Adventure type weights
   static getAdventureTypeWeight(adventureType, dimension) {
     if (!adventureType) return 1.0;
-
     const weights = {
       'extreme-sports': { risk: 1.3, adventure: 1.2, planning: 0.9, social: 1.0 },
       'cultural-immersion': { risk: 0.8, adventure: 0.9, planning: 1.2, social: 1.1 },
@@ -47,26 +42,21 @@ class TraitCompatibilityMatrix {
       'family-friendly': { risk: 0.6, adventure: 0.7, planning: 1.4, social: 1.0 },
       'wellness-retreat': { risk: 0.5, adventure: 0.6, planning: 1.1, social: 0.9 }
     };
-
     return weights[adventureType]?.[dimension] || 1.0;
   }
-
   // Risk compatibility with adventure type weighting
   static calculateRiskCompatibility(risk1, risk2, adventureType) {
     const diff = Math.abs(risk1 - risk2);
     let baseScore;
-
     if (diff <= 10) baseScore = 0.95;       // Excellent alignment
     else if (diff <= 25) baseScore = 0.8;   // Good alignment
     else if (diff <= 40) baseScore = 0.6;   // Fair alignment
     else if (diff <= 60) baseScore = 0.35;  // Poor alignment
     else baseScore = 0.15;                  // Very poor alignment
-
     // Apply adventure type weighting
     const adventureWeight = this.getAdventureTypeWeight(adventureType, 'risk');
     return baseScore * adventureWeight;
   }
-
   static calculateTraitCompatibility(trait, value1, value2, adventureType) {
     switch (trait) {
       case 'social':
@@ -82,9 +72,7 @@ class TraitCompatibilityMatrix {
     }
   }
 }
-
 console.log('🧪 Testing Trait Compatibility Matrices...');
-
 // Test social compatibility
 console.log('\n📊 Social Compatibility Tests:');
 const tests = [
@@ -93,12 +81,10 @@ const tests = [
   { name: 'Introvert vs extrovert', input: [20, 80], expected: 0.4 },
   { name: 'Extreme mismatch', input: [10, 90], expected: 0.2 }
 ];
-
 tests.forEach(test => {
   const result = TraitCompatibilityMatrix.calculateTraitCompatibility('social', test.input[0], test.input[1]);
   console.log(`${result === test.expected ? '✅' : '❌'} ${test.name} (${test.input[0]}, ${test.input[1]}): ${result} (expected: ${test.expected})`);
 });
-
 // Test adventure compatibility
 console.log('\n🏔️ Adventure Compatibility Tests:');
 const adventureTests = [
@@ -107,12 +93,10 @@ const adventureTests = [
   { name: 'Moderate difference', input: [40, 65], expected: 0.75 },
   { name: 'Extreme difference', input: [10, 80], expected: 0.25 }
 ];
-
 adventureTests.forEach(test => {
   const result = TraitCompatibilityMatrix.calculateTraitCompatibility('adventure', test.input[0], test.input[1]);
   console.log(`${result === test.expected ? '✅' : '❌'} ${test.name} (${test.input[0]}, ${test.input[1]}): ${result} (expected: ${test.expected})`);
 });
-
 // Test planning compatibility
 console.log('\n📋 Planning Compatibility Tests:');
 const planningTests = [
@@ -121,22 +105,18 @@ const planningTests = [
   { name: 'Moderate difference', input: [30, 60], expected: 0.7 },
   { name: 'Extreme difference', input: [5, 95], expected: 0.2 }
 ];
-
 planningTests.forEach(test => {
   const result = TraitCompatibilityMatrix.calculateTraitCompatibility('planning', test.input[0], test.input[1]);
   console.log(`${result === test.expected ? '✅' : '❌'} ${test.name} (${test.input[0]}, ${test.input[1]}): ${result} (expected: ${test.expected})`);
 });
-
 // Test risk compatibility with adventure types
 console.log('\n⚡ Risk Compatibility with Adventure Types:');
 const baseRisk = TraitCompatibilityMatrix.calculateTraitCompatibility('risk', 80, 85);
 const extremeSportsRisk = TraitCompatibilityMatrix.calculateTraitCompatibility('risk', 80, 85, 'extreme-sports');
 const wellnessRisk = TraitCompatibilityMatrix.calculateTraitCompatibility('risk', 80, 85, 'wellness-retreat');
-
 console.log(`Base risk (80, 85): ${baseRisk.toFixed(3)}`);
 console.log(`${extremeSportsRisk > baseRisk ? '✅' : '❌'} Extreme sports risk (80, 85): ${extremeSportsRisk.toFixed(3)} (should be > ${baseRisk.toFixed(3)})`);
 console.log(`${wellnessRisk < baseRisk ? '✅' : '❌'} Wellness retreat risk (80, 85): ${wellnessRisk.toFixed(3)} (should be < ${baseRisk.toFixed(3)})`);
-
 // Test adventure type weights
 console.log('\n⚖️ Adventure Type Weighting Tests:');
 const weightTests = [
@@ -145,25 +125,20 @@ const weightTests = [
   { type: 'family-friendly', dimension: 'risk', expected: 0.6 },
   { type: 'unknown-type', dimension: 'risk', expected: 1.0 }
 ];
-
 weightTests.forEach(test => {
   const result = TraitCompatibilityMatrix.getAdventureTypeWeight(test.type, test.dimension);
   console.log(`${result === test.expected ? '✅' : '❌'} ${test.type} ${test.dimension} weight: ${result} (expected: ${test.expected})`);
 });
-
 // Test key behavioral patterns
 console.log('\n🎯 Key Behavioral Pattern Tests:');
-
 // 1. Adventure complementarity should beat identical matches
 const adventureIdentical = TraitCompatibilityMatrix.calculateTraitCompatibility('adventure', 50, 50);
 const adventureComplementary = TraitCompatibilityMatrix.calculateTraitCompatibility('adventure', 45, 55);
 console.log(`${adventureComplementary > adventureIdentical ? '✅' : '❌'} Adventure complementarity (${adventureComplementary}) > identical (${adventureIdentical})`);
-
 // 2. Planning complementarity should beat identical matches
 const planningIdentical = TraitCompatibilityMatrix.calculateTraitCompatibility('planning', 50, 50);
 const planningComplementary = TraitCompatibilityMatrix.calculateTraitCompatibility('planning', 42, 58);
 console.log(`${planningComplementary > planningIdentical ? '✅' : '❌'} Planning complementarity (${planningComplementary}) > identical (${planningIdentical})`);
-
 // 3. Extreme differences should be heavily penalized
 const extremeTests = [
   TraitCompatibilityMatrix.calculateTraitCompatibility('social', 10, 90),
@@ -171,14 +146,11 @@ const extremeTests = [
   TraitCompatibilityMatrix.calculateTraitCompatibility('planning', 0, 100),
   TraitCompatibilityMatrix.calculateTraitCompatibility('risk', 10, 90)
 ];
-
 const allExtremesLow = extremeTests.every(score => score < 0.3);
 console.log(`${allExtremesLow ? '✅' : '❌'} All extreme differences penalized (<0.3): [${extremeTests.map(s => s.toFixed(2)).join(', ')}]`);
-
 // 4. Adventure type weighting works correctly
 const riskWeightingWorks = extremeSportsRisk > baseRisk && wellnessRisk < baseRisk;
 console.log(`${riskWeightingWorks ? '✅' : '❌'} Adventure type weighting works for risk compatibility`);
-
 console.log('\n🎉 Trait Compatibility Matrix validation complete!');
 console.log('\n📋 Summary:');
 console.log('- Social compatibility matrix: Penalizes extreme introvert/extrovert mismatches');

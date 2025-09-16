@@ -3,37 +3,30 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import GlassCard from '../ui/GlassCard';
 import GlassButton from '../ui/GlassButton';
-
 const ResetPasswordForm = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { updatePassword, verifyOTP, loading, error } = useAuth();
-  
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: '',
   });
-  
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [success, setSuccess] = useState(false);
   const [tokenError, setTokenError] = useState(false);
-
   // Get token from URL params
   const token = searchParams.get('token');
   const email = searchParams.get('email');
   const type = searchParams.get('type') || 'recovery';
-
   useEffect(() => {
     // Verify token is present
     if (!token || !email) {
       setTokenError(true);
     }
   }, [token, email]);
-
   const validateForm = () => {
     const newErrors = {};
-    
     // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
@@ -42,50 +35,40 @@ const ResetPasswordForm = () => {
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
       newErrors.password = 'Password must contain uppercase, lowercase, and numbers';
     }
-    
     // Confirm password
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
-    
     // Clear error for this field
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!validateForm()) {
       return;
     }
-
     try {
       // First verify the OTP token
       if (type === 'recovery' && token && email) {
         const verifyResult = await verifyOTP({ email, token, type: 'recovery' });
-        
         if (!verifyResult.success) {
           setTokenError(true);
           return;
         }
       }
-      
       // Then update the password
       const result = await updatePassword(formData.password);
-      
       if (result.success) {
         setSuccess(true);
         setTimeout(() => {
@@ -96,7 +79,6 @@ const ResetPasswordForm = () => {
       console.error('Password reset error:', err);
     }
   };
-
   if (tokenError) {
     return (
       <GlassCard className="max-w-md mx-auto mt-20 p-8 text-center">
@@ -111,7 +93,6 @@ const ResetPasswordForm = () => {
             This password reset link is invalid or has expired.
           </p>
         </div>
-        
         <div className="space-y-3">
           <GlassButton
             variant="primary"
@@ -120,7 +101,6 @@ const ResetPasswordForm = () => {
           >
             Request New Reset Link
           </GlassButton>
-          
           <GlassButton
             variant="ghost"
             className="w-full"
@@ -132,7 +112,6 @@ const ResetPasswordForm = () => {
       </GlassCard>
     );
   }
-
   if (success) {
     return (
       <GlassCard className="max-w-md mx-auto mt-20 p-8 text-center">
@@ -150,7 +129,6 @@ const ResetPasswordForm = () => {
             Redirecting to login page...
           </p>
         </div>
-        
         <div className="mt-6">
           <GlassButton
             variant="primary"
@@ -163,7 +141,6 @@ const ResetPasswordForm = () => {
       </GlassCard>
     );
   }
-
   return (
     <GlassCard className="max-w-md mx-auto mt-20 p-8">
       <div className="mb-6">
@@ -172,7 +149,6 @@ const ResetPasswordForm = () => {
           Enter your new password below
         </p>
       </div>
-
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* New Password */}
         <div>
@@ -214,7 +190,6 @@ const ResetPasswordForm = () => {
             Must be at least 8 characters with uppercase, lowercase, and numbers
           </p>
         </div>
-
         {/* Confirm Password */}
         <div>
           <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1">
@@ -233,14 +208,12 @@ const ResetPasswordForm = () => {
             <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
           )}
         </div>
-
         {/* Error Message */}
         {error && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
             {error}
           </div>
         )}
-
         {/* Submit Button */}
         <GlassButton
           type="submit"
@@ -250,7 +223,6 @@ const ResetPasswordForm = () => {
         >
           {loading ? 'Resetting Password...' : 'Reset Password'}
         </GlassButton>
-
         {/* Cancel Link */}
         <div className="text-center mt-6">
           <button
@@ -265,5 +237,4 @@ const ResetPasswordForm = () => {
     </GlassCard>
   );
 };
-
 export default ResetPasswordForm;

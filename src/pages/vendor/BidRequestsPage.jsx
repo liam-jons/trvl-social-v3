@@ -7,7 +7,6 @@ import ErrorMessage from '../../components/common/ErrorMessage';
 import TripRequestCard from '../../components/vendor/TripRequestCard';
 import BidSubmissionModal from '../../components/vendor/BidSubmissionModal';
 import BidFilters from '../../components/vendor/BidFilters';
-
 const BidRequestsPage = () => {
   const { user } = useAuth();
   const { vendor } = useVendorDashboardStore();
@@ -25,24 +24,19 @@ const BidRequestsPage = () => {
     minGroupSize: '',
     maxGroupSize: ''
   });
-
   // Load trip requests
   const loadTripRequests = async (appliedFilters = {}) => {
     if (!vendor) return;
-
     try {
       setLoading(true);
       setError(null);
-
       const { data, error: requestError } = await vendorService.getTripRequestsForVendor(
         vendor.id,
         appliedFilters
       );
-
       if (requestError) {
         throw new Error(requestError);
       }
-
       setTripRequests(data || []);
     } catch (err) {
       console.error('Load trip requests error:', err);
@@ -51,44 +45,36 @@ const BidRequestsPage = () => {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     if (vendor) {
       loadTripRequests();
     }
   }, [vendor]);
-
   // Handle filter changes
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
     const filterOptions = {};
-
     if (newFilters.minBudget) filterOptions.minBudget = parseInt(newFilters.minBudget);
     if (newFilters.maxBudget) filterOptions.maxBudget = parseInt(newFilters.maxBudget);
     if (newFilters.startDate) filterOptions.startDate = newFilters.startDate;
     if (newFilters.endDate) filterOptions.endDate = newFilters.endDate;
-
     loadTripRequests(filterOptions);
   };
-
   // Handle bid submission
   const handleBidRequest = (request) => {
     setSelectedRequest(request);
     setShowBidModal(true);
   };
-
   const handleBidSubmitted = () => {
     setShowBidModal(false);
     setSelectedRequest(null);
     // Refresh the requests to show updated bid status
     loadTripRequests();
   };
-
   // Handle refresh
   const handleRefresh = () => {
     loadTripRequests();
   };
-
   if (!vendor) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
@@ -99,7 +85,6 @@ const BidRequestsPage = () => {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="container mx-auto px-4 py-8">
@@ -121,7 +106,6 @@ const BidRequestsPage = () => {
             {loading ? 'Refreshing...' : 'Refresh'}
           </button>
         </div>
-
         {/* Filters */}
         <div className="mb-8">
           <BidFilters
@@ -130,7 +114,6 @@ const BidRequestsPage = () => {
             vendor={vendor}
           />
         </div>
-
         {/* Content */}
         {loading ? (
           <LoadingSpinner fullScreen={false} message="Loading trip requests..." />
@@ -178,7 +161,6 @@ const BidRequestsPage = () => {
                 </div>
               </div>
             </div>
-
             {/* Trip Requests Grid */}
             {tripRequests.length === 0 ? (
               <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-12 text-center border border-white/20 dark:border-gray-700/30">
@@ -210,7 +192,6 @@ const BidRequestsPage = () => {
             )}
           </>
         )}
-
         {/* Bid Submission Modal */}
         {showBidModal && selectedRequest && (
           <BidSubmissionModal
@@ -224,5 +205,4 @@ const BidRequestsPage = () => {
     </div>
   );
 };
-
 export default BidRequestsPage;

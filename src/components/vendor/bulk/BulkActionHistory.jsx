@@ -11,7 +11,6 @@ import {
 } from '@heroicons/react/24/outline';
 import GlassCard from '../../ui/GlassCard';
 import { bulkOperationsService } from '../../../services/bulk-operations-service';
-
 const BulkActionHistory = ({ vendorId }) => {
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,11 +21,9 @@ const BulkActionHistory = ({ vendorId }) => {
   });
   const [selectedAction, setSelectedAction] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
-
   useEffect(() => {
     loadHistory();
   }, [vendorId, filters]);
-
   const loadHistory = async () => {
     setIsLoading(true);
     try {
@@ -36,7 +33,6 @@ const BulkActionHistory = ({ vendorId }) => {
         dateRange: filters.dateRange.start && filters.dateRange.end ? filters.dateRange : undefined,
         limit: 100
       });
-
       if (!error && data) {
         setHistory(data);
       }
@@ -46,7 +42,6 @@ const BulkActionHistory = ({ vendorId }) => {
       setIsLoading(false);
     }
   };
-
   const actionTypeLabels = {
     'bulk_pricing': 'Price Adjustment',
     'bulk_status': 'Status Update',
@@ -58,7 +53,6 @@ const BulkActionHistory = ({ vendorId }) => {
     'bulk_booking_notifications': 'Booking Notifications',
     'bulk_booking_refunds': 'Refund Processing'
   };
-
   const getActionIcon = (actionType) => {
     switch (actionType) {
       case 'bulk_pricing':
@@ -75,34 +69,26 @@ const BulkActionHistory = ({ vendorId }) => {
         return ClockIcon;
     }
   };
-
   const getActionColor = (actionType, results) => {
     const hasErrors = results?.failed?.length > 0;
-
     if (hasErrors) {
       return 'text-amber-500';
     }
-
     return 'text-green-500';
   };
-
   const formatActionSummary = (action) => {
     const { action_type, target_count, target_type, results } = action;
     const successful = results?.successful?.length || 0;
     const failed = results?.failed?.length || 0;
     const total = target_count || 0;
-
     return `${actionTypeLabels[action_type] || action_type} on ${total} ${target_type} (${successful} successful${failed > 0 ? `, ${failed} failed` : ''})`;
   };
-
   const handleViewDetails = (action) => {
     setSelectedAction(action);
     setShowDetails(true);
   };
-
   const renderDetailsModal = () => {
     if (!selectedAction) return null;
-
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
         <motion.div
@@ -126,7 +112,6 @@ const BulkActionHistory = ({ vendorId }) => {
               </button>
             </div>
           </div>
-
           <div className="p-6 overflow-y-auto max-h-[60vh]">
             <div className="space-y-6">
               {/* Basic Info */}
@@ -163,7 +148,6 @@ const BulkActionHistory = ({ vendorId }) => {
                   </div>
                 </div>
               </div>
-
               {/* Results Summary */}
               {selectedAction.results && (
                 <div>
@@ -192,7 +176,6 @@ const BulkActionHistory = ({ vendorId }) => {
                   </div>
                 </div>
               )}
-
               {/* Action Details */}
               {selectedAction.details && Object.keys(selectedAction.details).length > 0 && (
                 <div>
@@ -206,7 +189,6 @@ const BulkActionHistory = ({ vendorId }) => {
                   </div>
                 </div>
               )}
-
               {/* Failed Items */}
               {selectedAction.results?.failed && selectedAction.results.failed.length > 0 && (
                 <div>
@@ -236,7 +218,6 @@ const BulkActionHistory = ({ vendorId }) => {
       </div>
     );
   };
-
   return (
     <div className="space-y-6">
       {/* Filters */}
@@ -247,7 +228,6 @@ const BulkActionHistory = ({ vendorId }) => {
             Filter History
           </h3>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -264,7 +244,6 @@ const BulkActionHistory = ({ vendorId }) => {
               ))}
             </select>
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Target Type
@@ -280,7 +259,6 @@ const BulkActionHistory = ({ vendorId }) => {
               <option value="customers">Customers</option>
             </select>
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Start Date
@@ -295,7 +273,6 @@ const BulkActionHistory = ({ vendorId }) => {
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/50 dark:bg-gray-800/50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               End Date
@@ -312,13 +289,11 @@ const BulkActionHistory = ({ vendorId }) => {
           </div>
         </div>
       </GlassCard>
-
       {/* History List */}
       <GlassCard variant="light" padding="md">
         <h3 className="font-medium text-gray-900 dark:text-white mb-4">
           Action History ({history.length} items)
         </h3>
-
         {isLoading ? (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto" />
@@ -334,14 +309,12 @@ const BulkActionHistory = ({ vendorId }) => {
               const Icon = getActionIcon(action.action_type);
               const iconColor = getActionColor(action.action_type, action.results);
               const hasErrors = action.results?.failed?.length > 0;
-
               return (
                 <div
                   key={action.id}
                   className="flex items-center gap-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                 >
                   <Icon className={`h-6 w-6 ${iconColor} flex-shrink-0`} />
-
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-gray-900 dark:text-white">
                       {formatActionSummary(action)}
@@ -350,11 +323,9 @@ const BulkActionHistory = ({ vendorId }) => {
                       {new Date(action.performed_at).toLocaleString()}
                     </div>
                   </div>
-
                   {hasErrors && (
                     <ExclamationTriangleIcon className="h-5 w-5 text-amber-500 flex-shrink-0" />
                   )}
-
                   <button
                     onClick={() => handleViewDetails(action)}
                     className="flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 border border-blue-200 dark:border-blue-700 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
@@ -368,11 +339,9 @@ const BulkActionHistory = ({ vendorId }) => {
           </div>
         )}
       </GlassCard>
-
       {/* Details Modal */}
       {showDetails && renderDetailsModal()}
     </div>
   );
 };
-
 export default BulkActionHistory;

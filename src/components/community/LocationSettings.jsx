@@ -5,7 +5,6 @@ import { useGeolocation } from '../../hooks/useGeolocation';
 import GlassCard from '../ui/GlassCard';
 import GlassButton from '../ui/GlassButton';
 import LocationSearch from './LocationSearch';
-
 const LocationSettings = ({ onClose }) => {
   const { user } = useAuth();
   const { location, requestLocation, clearLocation } = useGeolocation();
@@ -13,16 +12,13 @@ const LocationSettings = ({ onClose }) => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [customLocation, setCustomLocation] = useState(null);
-
   // Load user preferences
   useEffect(() => {
     const loadPreferences = async () => {
       if (!user) return;
-
       try {
         const userPrefs = await locationService.getLocationPreferences(user.id);
         setPreferences(userPrefs);
-
         if (userPrefs.custom_location) {
           setCustomLocation(userPrefs.custom_location);
         }
@@ -39,25 +35,20 @@ const LocationSettings = ({ onClose }) => {
         setLoading(false);
       }
     };
-
     loadPreferences();
   }, [user]);
-
   const handlePreferenceChange = (key, value) => {
     setPreferences(prev => ({
       ...prev,
       [key]: value
     }));
   };
-
   const handleCustomLocationSelect = (location) => {
     setCustomLocation(location);
     handlePreferenceChange('custom_location', location);
   };
-
   const handleSave = async () => {
     if (!user || !preferences) return;
-
     setSaving(true);
     try {
       await locationService.updateLocationPreferences(user.id, preferences);
@@ -68,7 +59,6 @@ const LocationSettings = ({ onClose }) => {
       setSaving(false);
     }
   };
-
   const privacyOptions = [
     {
       value: 'public',
@@ -86,7 +76,6 @@ const LocationSettings = ({ onClose }) => {
       description: 'Never share location data'
     }
   ];
-
   const defaultFilterOptions = [
     {
       value: 'local',
@@ -104,7 +93,6 @@ const LocationSettings = ({ onClose }) => {
       description: 'Default to showing all posts worldwide'
     }
   ];
-
   if (loading) {
     return (
       <GlassCard className="p-6">
@@ -118,7 +106,6 @@ const LocationSettings = ({ onClose }) => {
       </GlassCard>
     );
   }
-
   return (
     <GlassCard className="max-w-md mx-auto">
       <div className="flex items-center justify-between mb-6">
@@ -136,7 +123,6 @@ const LocationSettings = ({ onClose }) => {
           </button>
         )}
       </div>
-
       <div className="space-y-6">
         {/* Auto-detect Location */}
         <div>
@@ -156,7 +142,6 @@ const LocationSettings = ({ onClose }) => {
               </div>
             </div>
           </label>
-
           {preferences?.auto_detect && (
             <div className="mt-3 pl-7">
               <div className="flex items-center gap-2 text-sm">
@@ -190,7 +175,6 @@ const LocationSettings = ({ onClose }) => {
             </div>
           )}
         </div>
-
         {/* Custom Location */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -218,7 +202,6 @@ const LocationSettings = ({ onClose }) => {
             Override auto-detection with a specific location
           </p>
         </div>
-
         {/* Default Filter */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
@@ -247,7 +230,6 @@ const LocationSettings = ({ onClose }) => {
             ))}
           </div>
         </div>
-
         {/* Privacy Settings */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
@@ -276,7 +258,6 @@ const LocationSettings = ({ onClose }) => {
             ))}
           </div>
         </div>
-
         {/* Action Buttons */}
         <div className="flex gap-3 pt-4 border-t border-gray-200/20">
           {onClose && (
@@ -300,5 +281,4 @@ const LocationSettings = ({ onClose }) => {
     </GlassCard>
   );
 };
-
 export default LocationSettings;

@@ -2,7 +2,6 @@
  * PaymentMethodSelector Component
  * Displays and manages saved payment methods for customers
  */
-
 import React, { useState, useEffect } from 'react';
 import { GlassCard } from '../ui/GlassCard.jsx';
 import { GlassButton } from '../ui/GlassButton.jsx';
@@ -12,7 +11,6 @@ import {
   PlusIcon,
   CheckCircleIcon
 } from '@heroicons/react/24/outline';
-
 const PaymentMethodSelector = ({
   customerId,
   selectedMethodId,
@@ -26,7 +24,6 @@ const PaymentMethodSelector = ({
   const [loadingMethods, setLoadingMethods] = useState(true);
   const [deletingMethod, setDeletingMethod] = useState(null);
   const [error, setError] = useState(null);
-
   // Fetch customer's saved payment methods
   useEffect(() => {
     const fetchPaymentMethods = async () => {
@@ -34,11 +31,9 @@ const PaymentMethodSelector = ({
         setLoadingMethods(false);
         return;
       }
-
       try {
         setLoadingMethods(true);
         setError(null);
-
         // Call API to fetch payment methods
         const response = await fetch(`/api/stripe/payment-methods?customer=${customerId}`, {
           method: 'GET',
@@ -46,11 +41,9 @@ const PaymentMethodSelector = ({
             'Content-Type': 'application/json',
           },
         });
-
         if (!response.ok) {
           throw new Error(`Failed to fetch payment methods: ${response.statusText}`);
         }
-
         const data = await response.json();
         setPaymentMethods(data.paymentMethods || []);
       } catch (error) {
@@ -60,41 +53,32 @@ const PaymentMethodSelector = ({
         setLoadingMethods(false);
       }
     };
-
     fetchPaymentMethods();
   }, [customerId]);
-
   const handleMethodSelect = (methodId) => {
     onMethodSelect?.(methodId);
   };
-
   const handleMethodDelete = async (methodId) => {
     if (!window.confirm('Are you sure you want to delete this payment method?')) {
       return;
     }
-
     try {
       setDeletingMethod(methodId);
-
       const response = await fetch(`/api/stripe/payment-methods/${methodId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-
       if (!response.ok) {
         throw new Error('Failed to delete payment method');
       }
-
       // Remove from local state
       setPaymentMethods(prev => prev.filter(method => method.id !== methodId));
-
       // If deleted method was selected, clear selection
       if (selectedMethodId === methodId) {
         onMethodSelect?.(null);
       }
-
       onMethodDelete?.(methodId);
     } catch (error) {
       console.error('Error deleting payment method:', error);
@@ -103,10 +87,8 @@ const PaymentMethodSelector = ({
       setDeletingMethod(null);
     }
   };
-
   const getCardIcon = (brand) => {
     const iconClasses = "h-8 w-12 text-gray-400";
-
     switch (brand?.toLowerCase()) {
       case 'visa':
         return <div className={`${iconClasses} bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold`}>VISA</div>;
@@ -121,11 +103,9 @@ const PaymentMethodSelector = ({
         return <CreditCardIcon className={iconClasses} />;
     }
   };
-
   const formatExpiryDate = (month, year) => {
     return `${String(month).padStart(2, '0')}/${String(year).slice(-2)}`;
   };
-
   if (loadingMethods) {
     return (
       <GlassCard className="p-6">
@@ -140,7 +120,6 @@ const PaymentMethodSelector = ({
       </GlassCard>
     );
   }
-
   if (error) {
     return (
       <GlassCard className="p-6">
@@ -156,14 +135,12 @@ const PaymentMethodSelector = ({
       </GlassCard>
     );
   }
-
   return (
     <GlassCard className="p-6">
       <div className="space-y-4">
         <h3 className="text-lg font-medium text-white">
           Saved Payment Methods
         </h3>
-
         {paymentMethods.length === 0 ? (
           <div className="text-center py-8">
             <CreditCardIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -196,7 +173,6 @@ const PaymentMethodSelector = ({
                       <div className="flex-shrink-0">
                         {getCardIcon(method.card?.brand)}
                       </div>
-
                       {/* Card Details */}
                       <div className="flex-1">
                         <div className="flex items-center space-x-2">
@@ -211,13 +187,11 @@ const PaymentMethodSelector = ({
                           Expires {formatExpiryDate(method.card?.exp_month, method.card?.exp_year)}
                         </p>
                       </div>
-
                       {/* Selection Indicator */}
                       {selectedMethodId === method.id && (
                         <CheckCircleIcon className="h-6 w-6 text-blue-500" />
                       )}
                     </div>
-
                     {/* Delete Button */}
                     <div className="flex items-center space-x-2">
                       <button
@@ -240,7 +214,6 @@ const PaymentMethodSelector = ({
                 </div>
               ))}
             </div>
-
             {showAddButton && (
               <div className="pt-4 border-t border-gray-600">
                 <GlassButton
@@ -259,5 +232,4 @@ const PaymentMethodSelector = ({
     </GlassCard>
   );
 };
-
 export default PaymentMethodSelector;

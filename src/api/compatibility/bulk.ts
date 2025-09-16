@@ -2,13 +2,11 @@
  * API endpoint for bulk compatibility calculations
  * POST /api/compatibility/bulk
  */
-
 import { compatibilityService } from '../../services/compatibility-service';
 import {
   BulkCalculateRequest,
   BulkCalculateResponse
 } from '../../types/compatibility';
-
 export async function calculateBulkCompatibility(
   request: BulkCalculateRequest
 ): Promise<BulkCalculateResponse> {
@@ -28,7 +26,6 @@ export async function calculateBulkCompatibility(
       }
     };
   }
-
   if (!request.userIds || !Array.isArray(request.userIds) || request.userIds.length < 2) {
     return {
       success: false,
@@ -44,7 +41,6 @@ export async function calculateBulkCompatibility(
       }
     };
   }
-
   if (request.userIds.length > 50) {
     return {
       success: false,
@@ -60,7 +56,6 @@ export async function calculateBulkCompatibility(
       }
     };
   }
-
   // Check for duplicate user IDs
   const uniqueUserIds = [...new Set(request.userIds)];
   if (uniqueUserIds.length !== request.userIds.length) {
@@ -78,7 +73,6 @@ export async function calculateBulkCompatibility(
       }
     };
   }
-
   try {
     const response = await compatibilityService.calculateBulkCompatibility(request);
     return response;
@@ -99,7 +93,6 @@ export async function calculateBulkCompatibility(
     };
   }
 }
-
 // Express.js handler
 export const bulkCalculateCompatibilityHandler = async (req: any, res: any) => {
   try {
@@ -113,9 +106,7 @@ export const bulkCalculateCompatibilityHandler = async (req: any, res: any) => {
         cacheResults: req.body.cacheResults ?? true
       }
     };
-
     const response = await calculateBulkCompatibility(request);
-
     res.status(response.success ? 200 : 400).json(response);
   } catch (error) {
     console.error('Express handler error:', error);
@@ -134,12 +125,10 @@ export const bulkCalculateCompatibilityHandler = async (req: any, res: any) => {
     });
   }
 };
-
 // Supabase Edge Function handler
 export const supabaseBulkEdgeFunctionHandler = async (req: Request): Promise<Response> => {
   try {
     const body = await req.json();
-
     const request: BulkCalculateRequest = {
       groupId: body.groupId,
       userIds: body.userIds,
@@ -150,9 +139,7 @@ export const supabaseBulkEdgeFunctionHandler = async (req: Request): Promise<Res
         cacheResults: body.cacheResults ?? true
       }
     };
-
     const response = await calculateBulkCompatibility(request);
-
     return new Response(JSON.stringify(response), {
       status: response.success ? 200 : 400,
       headers: {

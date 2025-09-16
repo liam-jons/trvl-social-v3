@@ -12,7 +12,6 @@ import {
 import GlassCard from '../../ui/GlassCard';
 import { bulkOperationsService } from '../../../services/bulk-operations-service';
 import { vendorService } from '../../../services/vendor-service';
-
 const BulkBookingManager = ({ vendorId, onActionComplete }) => {
   const [bookings, setBookings] = useState([]);
   const [selectedBookings, setSelectedBookings] = useState([]);
@@ -29,11 +28,9 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
   const [operationData, setOperationData] = useState({});
   const [results, setResults] = useState(null);
   const [showResults, setShowResults] = useState(false);
-
   useEffect(() => {
     loadBookings();
   }, [vendorId, filters]);
-
   const loadBookings = async () => {
     setIsLoading(true);
     try {
@@ -43,7 +40,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
         adventureIds: filters.adventureIds.length > 0 ? filters.adventureIds : undefined,
         limit: 500 // Reasonable limit for bulk operations
       });
-
       if (!error && data) {
         setBookings(data);
       }
@@ -53,7 +49,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
       setIsLoading(false);
     }
   };
-
   const operationTypes = [
     {
       id: 'status',
@@ -74,7 +69,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
       description: 'Initiate refunds for cancelled bookings'
     }
   ];
-
   const bookingStatuses = [
     { value: 'pending', label: 'Pending', color: 'yellow' },
     { value: 'confirmed', label: 'Confirmed', color: 'green' },
@@ -82,7 +76,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
     { value: 'completed', label: 'Completed', color: 'blue' },
     { value: 'no_show', label: 'No Show', color: 'gray' }
   ];
-
   const handleSelectAll = () => {
     if (selectedBookings.length === bookings.length) {
       setSelectedBookings([]);
@@ -90,7 +83,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
       setSelectedBookings(bookings.map(b => b.id));
     }
   };
-
   const handleSelectBooking = (bookingId) => {
     setSelectedBookings(prev =>
       prev.includes(bookingId)
@@ -98,13 +90,10 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
         : [...prev, bookingId]
     );
   };
-
   const handleExecuteBulkOperation = async () => {
     if (!bulkOperation || selectedBookings.length === 0) return;
-
     setIsLoading(true);
     let result;
-
     try {
       switch (bulkOperation) {
         case 'status':
@@ -114,7 +103,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
             operationData.status
           );
           break;
-
         case 'notifications':
           result = await bulkOperationsService.sendBulkNotifications(vendorId, {
             recipientType: 'booking_participants',
@@ -125,20 +113,16 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
             includeWhatsApp: operationData.includeWhatsApp
           });
           break;
-
         case 'refunds':
           // This would integrate with the refund processing system
           result = { data: { successful: [], failed: [], total: selectedBookings.length }, error: null };
           console.log('Processing refunds for bookings:', selectedBookings);
           break;
-
         default:
           throw new Error('Invalid operation type');
       }
-
       setResults(result.data);
       setShowResults(true);
-
       // Log the action
       await bulkOperationsService.logBulkAction(vendorId, {
         type: `bulk_booking_${bulkOperation}`,
@@ -147,11 +131,9 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
         details: operationData,
         results: result.data
       });
-
       // Refresh bookings list
       loadBookings();
       onActionComplete?.();
-
     } catch (error) {
       console.error('Bulk operation failed:', error);
       setResults({
@@ -164,7 +146,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
       setIsLoading(false);
     }
   };
-
   const renderOperationForm = () => {
     switch (bulkOperation) {
       case 'status':
@@ -195,7 +176,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
             </div>
           </GlassCard>
         );
-
       case 'notifications':
         return (
           <GlassCard variant="light" padding="md" className="mt-4">
@@ -218,7 +198,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
                   placeholder="Enter your message to customers..."
                 />
               </div>
-
               <div className="flex items-center gap-4">
                 <label className="flex items-center gap-2">
                   <input
@@ -234,7 +213,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
                     Send Email
                   </span>
                 </label>
-
                 <label className="flex items-center gap-2">
                   <input
                     type="checkbox"
@@ -253,7 +231,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
             </div>
           </GlassCard>
         );
-
       case 'refunds':
         return (
           <GlassCard variant="warning" padding="md" className="mt-4">
@@ -267,7 +244,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
                   This will initiate refund processing for the selected bookings.
                   Only cancelled bookings are eligible for refunds.
                 </p>
-
                 <div>
                   <label className="block text-sm font-medium text-amber-800 dark:text-amber-200 mb-2">
                     Refund Reason
@@ -292,15 +268,12 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
             </div>
           </GlassCard>
         );
-
       default:
         return null;
     }
   };
-
   const renderResults = () => {
     if (!results) return null;
-
     return (
       <GlassCard variant="light" padding="md" className="mt-6">
         <div className="flex items-center justify-between mb-4">
@@ -314,7 +287,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">
@@ -335,7 +307,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
             <div className="text-sm text-gray-600 dark:text-gray-400">Total</div>
           </div>
         </div>
-
         {results.failed && results.failed.length > 0 && (
           <div className="mt-4">
             <h4 className="font-medium text-red-600 dark:text-red-400 mb-2">
@@ -353,7 +324,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
       </GlassCard>
     );
   };
-
   return (
     <div className="space-y-6">
       {/* Filters */}
@@ -383,7 +353,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
               ))}
             </select>
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Start Date
@@ -398,7 +367,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/50 dark:bg-gray-800/50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               End Date
@@ -415,7 +383,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
           </div>
         </div>
       </GlassCard>
-
       {/* Operation Type Selection */}
       <GlassCard variant="light" padding="md">
         <h3 className="font-medium text-gray-900 dark:text-white mb-4">
@@ -425,7 +392,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
           {operationTypes.map((operation) => {
             const Icon = operation.icon;
             const isSelected = bulkOperation === operation.id;
-
             return (
               <button
                 key={operation.id}
@@ -450,7 +416,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
           })}
         </div>
       </GlassCard>
-
       {/* Booking Selection */}
       <GlassCard variant="light" padding="md">
         <div className="flex items-center justify-between mb-4">
@@ -464,11 +429,9 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
             {selectedBookings.length === bookings.length ? 'Deselect All' : 'Select All'}
           </button>
         </div>
-
         <div className="max-h-64 overflow-y-auto space-y-2">
           {bookings.map((booking) => {
             const statusConfig = bookingStatuses.find(s => s.value === booking.status);
-
             return (
               <div
                 key={booking.id}
@@ -499,17 +462,14 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
             );
           })}
         </div>
-
         {bookings.length === 0 && (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             No bookings found matching current filters.
           </div>
         )}
       </GlassCard>
-
       {/* Operation Configuration */}
       {bulkOperation && renderOperationForm()}
-
       {/* Execute Button */}
       {bulkOperation && selectedBookings.length > 0 && (
         <div className="flex justify-end">
@@ -532,11 +492,9 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
           </button>
         </div>
       )}
-
       {/* Results */}
       {showResults && renderResults()}
     </div>
   );
 };
-
 export default BulkBookingManager;

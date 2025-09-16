@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useMapbox } from '../../contexts/MapboxContext';
 import GlassCard from '../ui/GlassCard';
-
 const LocationSearch = ({
   onResultSelect,
   onError,
@@ -19,62 +18,47 @@ const LocationSearch = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-
   const inputRef = useRef();
   const resultsRef = useRef();
   const abortControllerRef = useRef();
-
   // Debounce search
   const searchTimeoutRef = useRef();
-
   const performSearch = useCallback(async (searchQuery) => {
     if (!searchQuery.trim() || !isConfigured) {
       setResults([]);
       setIsOpen(false);
       return;
     }
-
     // Cancel previous request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-
     abortControllerRef.current = new AbortController();
     setIsLoading(true);
-
     try {
       const url = new URL(`${geocodingEndpoint}/${encodeURIComponent(searchQuery)}.json`);
-
       // Add parameters
       url.searchParams.set('access_token', accessToken);
       url.searchParams.set('limit', limit.toString());
-
       if (types.length > 0) {
         url.searchParams.set('types', types.join(','));
       }
-
       if (countries.length > 0) {
         url.searchParams.set('country', countries.join(','));
       }
-
       if (bbox && Array.isArray(bbox) && bbox.length === 4) {
         url.searchParams.set('bbox', bbox.join(','));
       }
-
       if (proximity && Array.isArray(proximity) && proximity.length === 2) {
         url.searchParams.set('proximity', proximity.join(','));
       }
-
       const response = await fetch(url.toString(), {
         signal: abortControllerRef.current.signal,
       });
-
       if (!response.ok) {
         throw new Error(`Geocoding API error: ${response.status}`);
       }
-
       const data = await response.json();
-
       // Process results
       const processedResults = data.features.map(feature => ({
         id: feature.id,
@@ -92,11 +76,9 @@ const LocationSearch = ({
         longitude: feature.center[0],
         latitude: feature.center[1],
       }));
-
       setResults(processedResults);
       setIsOpen(processedResults.length > 0);
       setSelectedIndex(-1);
-
     } catch (error) {
       if (error.name !== 'AbortError') {
         console.error('Location search error:', error);
@@ -108,23 +90,19 @@ const LocationSearch = ({
       setIsLoading(false);
     }
   }, [accessToken, geocodingEndpoint, isConfigured, limit, types, countries, bbox, proximity, onError]);
-
   // Handle input change with debouncing
   const handleInputChange = useCallback((e) => {
     const newQuery = e.target.value;
     setQuery(newQuery);
-
     // Clear previous timeout
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
-
     // Debounce search
     searchTimeoutRef.current = setTimeout(() => {
       performSearch(newQuery);
     }, 300);
   }, [performSearch]);
-
   // Handle result selection
   const handleResultSelect = useCallback((result) => {
     setQuery(result.placeName);
@@ -133,11 +111,9 @@ const LocationSearch = ({
     setSelectedIndex(-1);
     onResultSelect?.(result);
   }, [onResultSelect]);
-
   // Handle keyboard navigation
   const handleKeyDown = useCallback((e) => {
     if (!isOpen || results.length === 0) return;
-
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
@@ -145,19 +121,16 @@ const LocationSearch = ({
           prev < results.length - 1 ? prev + 1 : prev
         );
         break;
-
       case 'ArrowUp':
         e.preventDefault();
         setSelectedIndex(prev => prev > 0 ? prev - 1 : prev);
         break;
-
       case 'Enter':
         e.preventDefault();
         if (selectedIndex >= 0) {
           handleResultSelect(results[selectedIndex]);
         }
         break;
-
       case 'Escape':
         e.preventDefault();
         setIsOpen(false);
@@ -166,14 +139,12 @@ const LocationSearch = ({
         break;
     }
   }, [isOpen, results, selectedIndex, handleResultSelect]);
-
   // Handle input focus
   const handleInputFocus = useCallback(() => {
     if (results.length > 0) {
       setIsOpen(true);
     }
   }, [results.length]);
-
   // Handle click outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -185,13 +156,11 @@ const LocationSearch = ({
         setSelectedIndex(-1);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -203,7 +172,6 @@ const LocationSearch = ({
       }
     };
   }, []);
-
   if (!isConfigured) {
     return (
       <GlassCard className="p-3">
@@ -213,7 +181,6 @@ const LocationSearch = ({
       </GlassCard>
     );
   }
-
   return (
     <div className={`relative ${className}`}>
       {/* Search input */}
@@ -232,7 +199,6 @@ const LocationSearch = ({
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
             />
           </svg>
-
           <input
             ref={inputRef}
             type="text"
@@ -243,7 +209,6 @@ const LocationSearch = ({
             placeholder={placeholder}
             className="flex-1 bg-transparent border-none outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
           />
-
           {isLoading && (
             <div className="ml-2">
               <svg className="w-4 h-4 animate-spin text-primary-600" fill="none" viewBox="0 0 24 24">
@@ -265,7 +230,6 @@ const LocationSearch = ({
           )}
         </div>
       </GlassCard>
-
       {/* Search results */}
       {isOpen && results.length > 0 && (
         <div
@@ -306,7 +270,6 @@ const LocationSearch = ({
                       d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                     />
                   </svg>
-
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-gray-900 dark:text-white text-sm">
                       {result.text}
@@ -315,7 +278,6 @@ const LocationSearch = ({
                       {result.placeName}
                     </div>
                   </div>
-
                   {result.placeType && result.placeType[0] && (
                     <span className="ml-2 text-xs bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-full flex-shrink-0">
                       {result.placeType[0]}
@@ -327,7 +289,6 @@ const LocationSearch = ({
           </GlassCard>
         </div>
       )}
-
       {/* No results message */}
       {isOpen && !isLoading && query.trim() && results.length === 0 && (
         <div className="absolute top-full left-0 right-0 mt-2 z-50">
@@ -339,5 +300,4 @@ const LocationSearch = ({
     </div>
   );
 };
-
 export default LocationSearch;

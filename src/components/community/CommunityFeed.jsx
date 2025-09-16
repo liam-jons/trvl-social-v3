@@ -1,5 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  Target,
+  TrendingUp,
+  ThumbsUp,
+  Heart,
+  Lightbulb,
+  Surprised,
+  Frown,
+  Flame
+} from 'lucide-react';
 import { useGeolocation } from '../../hooks/useGeolocation';
 import { locationService } from '../../services/location-service';
 import { contentRankingService } from '../../services/content-ranking-service';
@@ -13,12 +23,10 @@ import PostCreator from './posts/PostCreator';
 import TrendingContent from './TrendingContent';
 import EngagementAnalyticsDashboard from './EngagementAnalyticsDashboard';
 import GlassModal from '../ui/GlassModal';
-
 const CommunityFeed = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { location: userLocation } = useGeolocation();
-
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeFilter, setActiveFilter] = useState('global');
@@ -28,12 +36,10 @@ const CommunityFeed = () => {
   const [showTrending, setShowTrending] = useState(false);
   const [selectedPostAnalytics, setSelectedPostAnalytics] = useState(null);
   const [userPreferences, setUserPreferences] = useState(null);
-
   // Load user preferences on component mount
   useEffect(() => {
     const loadUserPreferences = async () => {
       if (!user) return;
-
       try {
         const prefs = await locationService.getLocationPreferences(user.id);
         setUserPreferences(prefs);
@@ -43,15 +49,12 @@ const CommunityFeed = () => {
         setActiveFilter('global');
       }
     };
-
     loadUserPreferences();
   }, [user]);
-
   // Load posts when filter or sort changes
   useEffect(() => {
     loadPosts();
   }, [activeFilter, sortBy, userLocation]);
-
   const loadPosts = async () => {
     setLoading(true);
     try {
@@ -62,12 +65,10 @@ const CommunityFeed = () => {
           userLocation: userLocation,
           radius: activeFilter === 'local' ? 50 : activeFilter === 'regional' ? 500 : null
         };
-
         const { posts: fetchedPosts } = await locationService.getLocationFilteredPosts(
           filterConfig,
           { limit: 20, offset: 0 }
         );
-
         setPosts(fetchedPosts);
       } else {
         // For authenticated users, use intelligent content ranking
@@ -80,7 +81,6 @@ const CommunityFeed = () => {
           includeConnections: true,
           diversityWeight: 0.3
         });
-
         if (result.success) {
           setPosts(result.data);
         } else {
@@ -91,12 +91,10 @@ const CommunityFeed = () => {
             userLocation: userLocation,
             radius: activeFilter === 'local' ? 50 : activeFilter === 'regional' ? 500 : null
           };
-
           const { posts: fetchedPosts } = await locationService.getLocationFilteredPosts(
             filterConfig,
             { limit: 20, offset: 0 }
           );
-
           setPosts(fetchedPosts);
         }
       }
@@ -107,65 +105,52 @@ const CommunityFeed = () => {
       setLoading(false);
     }
   };
-
   const handleFilterChange = (filter) => {
     setActiveFilter(filter.type);
   };
-
   const handleSortChange = (newSortBy) => {
     setSortBy(newSortBy);
   };
-
   const handlePostReaction = async (postId, reactionType) => {
     if (!user) return;
-
     try {
       // Track reaction and update engagement scores
       await engagementScoringService.trackPostInteraction(postId, user.id, 'reaction', {
         reactionType
       });
-
       // Refresh posts to show updated engagement
       loadPosts();
     } catch (error) {
       console.error('Failed to track reaction:', error);
     }
   };
-
   const handlePostSave = async (postId) => {
     if (!user) return;
-
     try {
       // Track save action
       await engagementScoringService.trackPostInteraction(postId, user.id, 'save');
-
       // Refresh posts
       loadPosts();
     } catch (error) {
       console.error('Failed to save post:', error);
     }
   };
-
   const handlePostShare = async (postId) => {
     if (!user) return;
-
     try {
       // Track share action
       await engagementScoringService.trackPostInteraction(postId, user.id, 'share');
-
       // Refresh posts
       loadPosts();
     } catch (error) {
       console.error('Failed to share post:', error);
     }
   };
-
   const sortOptions = [
-    { value: 'relevance', label: 'Most Relevant', icon: '🎯' },
+    { value: 'relevance', label: 'Most Relevant', icon: Target },
     { value: 'recent', label: 'Most Recent', icon: '⏰' },
-    { value: 'trending', label: 'Trending', icon: '🔥' }
+    { value: 'trending', label: 'Trending', icon: Flame }
   ];
-
   const handleCreatePost = async (postData) => {
     try {
       // Add user location to post if available and sharing is enabled
@@ -174,10 +159,8 @@ const CommunityFeed = () => {
         user_id: user.id,
         location: userPreferences?.location_sharing !== 'private' ? userLocation : null
       };
-
       await locationService.createPostWithLocation(locationData);
       setShowPostCreator(false);
-
       // Reload posts to show the new post
       loadPosts();
     } catch (error) {
@@ -185,7 +168,6 @@ const CommunityFeed = () => {
       throw error; // Re-throw to let PostCreator handle the error display
     }
   };
-
   const PostCard = ({ post }) => (
     <GlassCard className="mb-4">
       {/* Post Header */}
@@ -213,14 +195,12 @@ const CommunityFeed = () => {
             </div>
           </div>
         </div>
-
         {post.category && (
           <span className="px-2 py-1 bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-full text-xs font-medium">
             {post.category}
           </span>
         )}
       </div>
-
       {/* Post Content */}
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
@@ -231,7 +211,6 @@ const CommunityFeed = () => {
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
       </div>
-
       {/* Post Tags */}
       {post.tags && post.tags.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
@@ -245,7 +224,6 @@ const CommunityFeed = () => {
           ))}
         </div>
       )}
-
       {/* Post Interactions - Meaningful engagement actions */}
       <div className="pt-4 border-t border-white/10">
         {/* Engagement Score Display */}
@@ -270,31 +248,28 @@ const CommunityFeed = () => {
             )}
           </div>
         )}
-
         {/* Main Interaction Buttons */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {/* Reaction Dropdown */}
             <div className="relative group">
               <button className="flex items-center gap-2 text-gray-500 hover:text-blue-500 transition-colors">
-                <span className="text-lg">👍</span>
+                <ThumbsUp className="w-5 h-5" />
                 <span className="text-sm">{post.reactions?.length || 0}</span>
               </button>
-
               {/* Reaction Options (simplified for now) */}
               <div className="absolute bottom-full left-0 mb-2 hidden group-hover:flex bg-white dark:bg-gray-800 rounded-lg shadow-lg p-2 space-x-1">
-                {['👍', '❤️', '💡', '😮', '😢'].map((emoji, idx) => (
+                {[ThumbsUp, Heart, Lightbulb, Surprised, Frown].map((IconComponent, idx) => (
                   <button
                     key={idx}
                     onClick={() => handlePostReaction(post.id, ['like', 'love', 'helpful', 'wow', 'sad'][idx])}
                     className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-lg"
                   >
-                    {emoji}
+                    <IconComponent className="w-5 h-5" />
                   </button>
                 ))}
               </div>
             </div>
-
             {/* Comments */}
             <button className="flex items-center gap-2 text-gray-500 hover:text-blue-500 transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -303,7 +278,6 @@ const CommunityFeed = () => {
               <span className="text-sm">{post.comments?.length || 0}</span>
             </button>
           </div>
-
           <div className="flex items-center gap-2">
             {/* Save Button */}
             {user && (
@@ -317,7 +291,6 @@ const CommunityFeed = () => {
                 <span className="text-sm">Save</span>
               </button>
             )}
-
             {/* Share Button */}
             <button
               onClick={() => handlePostShare(post.id)}
@@ -333,7 +306,6 @@ const CommunityFeed = () => {
       </div>
     </GlassCard>
   );
-
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header with Actions */}
@@ -351,17 +323,15 @@ const CommunityFeed = () => {
             }
           </p>
         </div>
-
         <div className="flex gap-2">
           <GlassButton
             onClick={() => setShowTrending(true)}
             variant="secondary"
             size="sm"
           >
-            <span className="text-sm mr-1">🔥</span>
+            <Flame className="w-4 h-4 mr-1" />
             Trending
           </GlassButton>
-
           <GlassButton
             onClick={() => setShowLocationSettings(true)}
             variant="secondary"
@@ -372,7 +342,6 @@ const CommunityFeed = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </GlassButton>
-
           {user && (
             <GlassButton
               onClick={() => setShowPostCreator(true)}
@@ -384,13 +353,11 @@ const CommunityFeed = () => {
           )}
         </div>
       </div>
-
       {/* Location Filter */}
       <LocationFilter
         activeFilter={activeFilter}
         onFilterChange={handleFilterChange}
       />
-
       {/* Sort Controls (only for authenticated users with personalized feed) */}
       {user && (
         <GlassCard className="p-4">
@@ -409,7 +376,7 @@ const CommunityFeed = () => {
                       : 'bg-gray-200/50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300 hover:bg-blue-500/20'
                   }`}
                 >
-                  <span className="mr-1">{option.icon}</span>
+                  <option.icon className="w-4 h-4 mr-1" />
                   {option.label}
                 </button>
               ))}
@@ -417,7 +384,6 @@ const CommunityFeed = () => {
           </div>
         </GlassCard>
       )}
-
       {/* Posts Feed */}
       <div>
         {loading ? (
@@ -472,7 +438,6 @@ const CommunityFeed = () => {
           </GlassCard>
         )}
       </div>
-
       {/* Post Creator Modal */}
       <GlassModal
         isOpen={showPostCreator}
@@ -484,7 +449,6 @@ const CommunityFeed = () => {
           onCancel={() => setShowPostCreator(false)}
         />
       </GlassModal>
-
       {/* Location Settings Modal */}
       <GlassModal
         isOpen={showLocationSettings}
@@ -495,7 +459,6 @@ const CommunityFeed = () => {
           onClose={() => setShowLocationSettings(false)}
         />
       </GlassModal>
-
       {/* Trending Content Modal */}
       <GlassModal
         isOpen={showTrending}
@@ -509,7 +472,6 @@ const CommunityFeed = () => {
           showControls={true}
         />
       </GlassModal>
-
       {/* Post Analytics Modal */}
       {selectedPostAnalytics && (
         <GlassModal
@@ -527,5 +489,4 @@ const CommunityFeed = () => {
     </div>
   );
 };
-
 export default CommunityFeed;

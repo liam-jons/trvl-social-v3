@@ -1,5 +1,4 @@
 import { supabase } from '../lib/supabase';
-
 // Wishlist service for managing user's saved adventures
 export class WishlistService {
   // Get all wishlist items for a user
@@ -14,13 +13,10 @@ export class WishlistService {
         `)
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
-
       if (options.collectionId) {
         query = query.eq('collection_id', options.collectionId);
       }
-
       const { data, error } = await query;
-
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
@@ -28,7 +24,6 @@ export class WishlistService {
       return { data: null, error };
     }
   }
-
   // Add adventure to wishlist
   static async addToWishlist(userId, adventureId, collectionId = null) {
     try {
@@ -39,11 +34,9 @@ export class WishlistService {
         .eq('user_id', userId)
         .eq('adventure_id', adventureId)
         .single();
-
       if (existing) {
         return { data: existing, error: new Error('Adventure already in wishlist') };
       }
-
       const { data, error } = await supabase
         .from('wishlists')
         .insert([{
@@ -58,19 +51,15 @@ export class WishlistService {
           collection:wishlist_collections(*)
         `)
         .single();
-
       if (error) throw error;
-
       // Update user's activity log
       await this.logActivity(userId, 'wishlist_add', { adventure_id: adventureId });
-
       return { data, error: null };
     } catch (error) {
       console.error('Error adding to wishlist:', error);
       return { data: null, error };
     }
   }
-
   // Remove adventure from wishlist
   static async removeFromWishlist(userId, adventureId) {
     try {
@@ -79,19 +68,15 @@ export class WishlistService {
         .delete()
         .eq('user_id', userId)
         .eq('adventure_id', adventureId);
-
       if (error) throw error;
-
       // Update user's activity log
       await this.logActivity(userId, 'wishlist_remove', { adventure_id: adventureId });
-
       return { error: null };
     } catch (error) {
       console.error('Error removing from wishlist:', error);
       return { error };
     }
   }
-
   // Check if adventure is in user's wishlist
   static async isInWishlist(userId, adventureId) {
     try {
@@ -101,7 +86,6 @@ export class WishlistService {
         .eq('user_id', userId)
         .eq('adventure_id', adventureId)
         .single();
-
       if (error && error.code !== 'PGRST116') throw error;
       return { isInWishlist: !!data, error: null };
     } catch (error) {
@@ -109,7 +93,6 @@ export class WishlistService {
       return { isInWishlist: false, error };
     }
   }
-
   // Move adventure to different collection
   static async moveToCollection(userId, adventureId, collectionId) {
     try {
@@ -124,21 +107,17 @@ export class WishlistService {
           collection:wishlist_collections(*)
         `)
         .single();
-
       if (error) throw error;
-
       await this.logActivity(userId, 'wishlist_move', {
         adventure_id: adventureId,
         collection_id: collectionId
       });
-
       return { data, error: null };
     } catch (error) {
       console.error('Error moving to collection:', error);
       return { data: null, error };
     }
   }
-
   // Get user's wishlist collections
   static async getUserCollections(userId) {
     try {
@@ -150,7 +129,6 @@ export class WishlistService {
         `)
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
-
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
@@ -158,7 +136,6 @@ export class WishlistService {
       return { data: null, error };
     }
   }
-
   // Create new wishlist collection
   static async createCollection(userId, name, description = '', isPrivate = false) {
     try {
@@ -173,18 +150,14 @@ export class WishlistService {
         }])
         .select()
         .single();
-
       if (error) throw error;
-
       await this.logActivity(userId, 'collection_create', { collection_id: data.id });
-
       return { data, error: null };
     } catch (error) {
       console.error('Error creating collection:', error);
       return { data: null, error };
     }
   }
-
   // Update wishlist collection
   static async updateCollection(userId, collectionId, updates) {
     try {
@@ -195,7 +168,6 @@ export class WishlistService {
         .eq('user_id', userId)
         .select()
         .single();
-
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
@@ -203,7 +175,6 @@ export class WishlistService {
       return { data: null, error };
     }
   }
-
   // Delete wishlist collection
   static async deleteCollection(userId, collectionId) {
     try {
@@ -213,25 +184,20 @@ export class WishlistService {
         .update({ collection_id: null })
         .eq('user_id', userId)
         .eq('collection_id', collectionId);
-
       // Then delete the collection
       const { error } = await supabase
         .from('wishlist_collections')
         .delete()
         .eq('id', collectionId)
         .eq('user_id', userId);
-
       if (error) throw error;
-
       await this.logActivity(userId, 'collection_delete', { collection_id: collectionId });
-
       return { error: null };
     } catch (error) {
       console.error('Error deleting collection:', error);
       return { error };
     }
   }
-
   // Get public wishlist for sharing
   static async getPublicWishlist(shareId) {
     try {
@@ -247,7 +213,6 @@ export class WishlistService {
         .eq('share_id', shareId)
         .eq('is_private', false)
         .single();
-
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
@@ -255,12 +220,10 @@ export class WishlistService {
       return { data: null, error };
     }
   }
-
   // Generate share link for collection
   static async generateShareLink(userId, collectionId) {
     try {
       const shareId = `${collectionId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
       const { data, error } = await supabase
         .from('wishlist_collections')
         .update({
@@ -271,9 +234,7 @@ export class WishlistService {
         .eq('user_id', userId)
         .select()
         .single();
-
       if (error) throw error;
-
       const shareUrl = `${window.location.origin}/wishlist/shared/${shareId}`;
       return { data: { ...data, shareUrl }, error: null };
     } catch (error) {
@@ -281,7 +242,6 @@ export class WishlistService {
       return { data: null, error };
     }
   }
-
   // Get wishlist statistics for user
   static async getWishlistStats(userId) {
     try {
@@ -289,19 +249,16 @@ export class WishlistService {
         .from('wishlists')
         .select('id', { count: 'exact' })
         .eq('user_id', userId);
-
       const { data: collectionsCount } = await supabase
         .from('wishlist_collections')
         .select('id', { count: 'exact' })
         .eq('user_id', userId);
-
       const { data: recentActivity } = await supabase
         .from('wishlists')
         .select('created_at')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(5);
-
       return {
         data: {
           totalItems: totalCount?.length || 0,
@@ -315,7 +272,6 @@ export class WishlistService {
       return { data: null, error };
     }
   }
-
   // Export wishlist to different formats
   static async exportWishlist(userId, format = 'json', collectionId = null) {
     try {
@@ -327,14 +283,11 @@ export class WishlistService {
           collection:wishlist_collections(name)
         `)
         .eq('user_id', userId);
-
       if (collectionId) {
         query = query.eq('collection_id', collectionId);
       }
-
       const { data, error } = await query;
       if (error) throw error;
-
       switch (format) {
         case 'json':
           return {
@@ -343,7 +296,6 @@ export class WishlistService {
             mimeType: 'application/json',
             error: null
           };
-
         case 'csv':
           const csvData = this.convertToCSV(data);
           return {
@@ -352,7 +304,6 @@ export class WishlistService {
             mimeType: 'text/csv',
             error: null
           };
-
         default:
           throw new Error('Unsupported export format');
       }
@@ -361,11 +312,9 @@ export class WishlistService {
       return { data: null, error };
     }
   }
-
   // Helper method to convert data to CSV
   static convertToCSV(data) {
     if (!data || data.length === 0) return '';
-
     const headers = ['Adventure Name', 'Location', 'Price', 'Duration', 'Added Date', 'Collection'];
     const rows = data.map(item => [
       item.adventure?.title || '',
@@ -375,10 +324,8 @@ export class WishlistService {
       new Date(item.created_at).toLocaleDateString(),
       item.collection?.name || 'Uncategorized'
     ]);
-
     return [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
   }
-
   // Log user activity
   static async logActivity(userId, action, metadata = {}) {
     try {
@@ -394,7 +341,6 @@ export class WishlistService {
       console.error('Error logging activity:', error);
     }
   }
-
   // Price alert functionality
   static async setPriceAlert(userId, adventureId, targetPrice) {
     try {
@@ -409,7 +355,6 @@ export class WishlistService {
         }])
         .select()
         .single();
-
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
@@ -417,7 +362,6 @@ export class WishlistService {
       return { data: null, error };
     }
   }
-
   // Get user's price alerts
   static async getPriceAlerts(userId) {
     try {
@@ -430,7 +374,6 @@ export class WishlistService {
         .eq('user_id', userId)
         .eq('is_active', true)
         .order('created_at', { ascending: false });
-
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
@@ -439,5 +382,4 @@ export class WishlistService {
     }
   }
 }
-
 export default WishlistService;

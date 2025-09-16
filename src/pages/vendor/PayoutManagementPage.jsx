@@ -2,7 +2,6 @@
  * Vendor Payout Management Page
  * Complete payout management interface for vendors
  */
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
@@ -23,7 +22,6 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-
 const PayoutManagementPage = () => {
   const { user } = useAuth();
   const [vendorAccount, setVendorAccount] = useState(null);
@@ -31,17 +29,14 @@ const PayoutManagementPage = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [payoutStatus, setPayoutStatus] = useState(null);
   const [holds, setHolds] = useState([]);
-
   useEffect(() => {
     if (user) {
       loadVendorAccount();
     }
   }, [user]);
-
   const loadVendorAccount = async () => {
     try {
       setLoading(true);
-
       // Get vendor Stripe account
       const { data: account, error: accountError } = await supabase
         .from('vendor_stripe_accounts')
@@ -49,27 +44,22 @@ const PayoutManagementPage = () => {
         .eq('user_id', user.id)
         .eq('status', 'active')
         .single();
-
       if (accountError) {
         console.error('Failed to load vendor account:', accountError);
         return;
       }
-
       setVendorAccount(account);
-
       // Load payout status and holds
       await Promise.all([
         loadPayoutStatus(account.id),
         loadActiveHolds(account.id),
       ]);
-
     } catch (error) {
       console.error('Failed to load vendor data:', error);
     } finally {
       setLoading(false);
     }
   };
-
   const loadPayoutStatus = async (vendorAccountId) => {
     try {
       // Get pending amount
@@ -79,11 +69,8 @@ const PayoutManagementPage = () => {
         .eq('vendor_stripe_account_id', vendorAccountId)
         .eq('status', 'completed')
         .in('payout_status', ['pending', 'eligible']);
-
       if (paymentsError) throw paymentsError;
-
       const pendingAmount = pendingPayments?.reduce((sum, p) => sum + p.net_amount, 0) || 0;
-
       // Get last payout
       const { data: lastPayout, error: payoutError } = await supabase
         .from('vendor_payouts')
@@ -92,7 +79,6 @@ const PayoutManagementPage = () => {
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
-
       // Get next scheduled payout
       const { data: scheduledJob, error: jobError } = await supabase
         .from('payout_schedule_jobs')
@@ -100,19 +86,16 @@ const PayoutManagementPage = () => {
         .eq('vendor_stripe_account_id', vendorAccountId)
         .eq('status', 'scheduled')
         .single();
-
       setPayoutStatus({
         pendingAmount,
         pendingCount: pendingPayments?.length || 0,
         lastPayout: payoutError ? null : lastPayout,
         nextScheduled: jobError ? null : scheduledJob,
       });
-
     } catch (error) {
       console.error('Failed to load payout status:', error);
     }
   };
-
   const loadActiveHolds = async (vendorAccountId) => {
     try {
       const { data: activeHolds, error } = await supabase
@@ -121,22 +104,18 @@ const PayoutManagementPage = () => {
         .eq('vendor_stripe_account_id', vendorAccountId)
         .eq('status', 'active')
         .order('placed_at', { ascending: false });
-
       if (error) throw error;
-
       setHolds(activeHolds || []);
     } catch (error) {
       console.error('Failed to load active holds:', error);
     }
   };
-
   const formatAmount = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
     }).format(amount / 100);
   };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -146,10 +125,8 @@ const PayoutManagementPage = () => {
       minute: '2-digit',
     });
   };
-
   const getAccountStatusInfo = () => {
     if (!vendorAccount) return null;
-
     if (!vendorAccount.payouts_enabled) {
       return {
         status: 'setup_required',
@@ -159,7 +136,6 @@ const PayoutManagementPage = () => {
         message: 'Complete account setup to enable payouts',
       };
     }
-
     if (holds.length > 0) {
       return {
         status: 'on_hold',
@@ -169,7 +145,6 @@ const PayoutManagementPage = () => {
         message: `Payouts on hold: ${holds[0].reason}`,
       };
     }
-
     return {
       status: 'active',
       icon: CheckCircle,
@@ -178,7 +153,6 @@ const PayoutManagementPage = () => {
       message: 'Payouts active and processing normally',
     };
   };
-
   if (loading) {
     return (
       <VendorDashboardLayout>
@@ -189,7 +163,6 @@ const PayoutManagementPage = () => {
       </VendorDashboardLayout>
     );
   }
-
   if (!vendorAccount) {
     return (
       <VendorDashboardLayout>
@@ -208,9 +181,7 @@ const PayoutManagementPage = () => {
       </VendorDashboardLayout>
     );
   }
-
   const statusInfo = getAccountStatusInfo();
-
   return (
     <VendorDashboardLayout>
       <div className="space-y-6">
@@ -219,7 +190,6 @@ const PayoutManagementPage = () => {
           <h1 className="text-3xl font-bold text-gray-900">Payout Management</h1>
           <p className="text-gray-600">Manage your earnings and payout preferences</p>
         </div>
-
         {/* Account Status Card */}
         <Card>
           <CardContent className="p-6">
@@ -240,7 +210,6 @@ const PayoutManagementPage = () => {
             </div>
           </CardContent>
         </Card>
-
         {/* Quick Stats */}
         {payoutStatus && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -260,7 +229,6 @@ const PayoutManagementPage = () => {
                 </div>
               </CardContent>
             </Card>
-
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center">
@@ -280,7 +248,6 @@ const PayoutManagementPage = () => {
                 </div>
               </CardContent>
             </Card>
-
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center">
@@ -303,7 +270,6 @@ const PayoutManagementPage = () => {
                 </div>
               </CardContent>
             </Card>
-
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center">
@@ -322,7 +288,6 @@ const PayoutManagementPage = () => {
             </Card>
           </div>
         )}
-
         {/* Active Holds Warning */}
         {holds.length > 0 && (
           <Card className="border-amber-200 bg-amber-50">
@@ -348,7 +313,6 @@ const PayoutManagementPage = () => {
             </CardContent>
           </Card>
         )}
-
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
@@ -361,11 +325,9 @@ const PayoutManagementPage = () => {
               Preferences
             </TabsTrigger>
           </TabsList>
-
           <TabsContent value="dashboard">
             <PayoutDashboard vendorStripeAccountId={vendorAccount.id} />
           </TabsContent>
-
           <TabsContent value="preferences">
             <PayoutPreferences
               vendorStripeAccountId={vendorAccount.id}
@@ -380,5 +342,4 @@ const PayoutManagementPage = () => {
     </VendorDashboardLayout>
   );
 };
-
 export default PayoutManagementPage;

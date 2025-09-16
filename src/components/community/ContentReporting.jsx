@@ -2,11 +2,9 @@
  * ContentReporting Component
  * Handles user reporting of inappropriate content
  */
-
 import React, { useState } from 'react';
 import { AlertTriangle, Flag, X, Send } from 'lucide-react';
 import ContentModerationService from '../../services/content-moderation-service';
-
 const ContentReporting = ({
   isOpen,
   onClose,
@@ -22,7 +20,6 @@ const ContentReporting = ({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-
   const reportCategories = [
     {
       id: 'spam',
@@ -75,17 +72,13 @@ const ContentReporting = ({
       description: 'Other violations not listed above'
     }
   ];
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!reportData.category || !reportData.reason) {
       alert('Please select a category and provide a reason for reporting.');
       return;
     }
-
     setIsSubmitting(true);
-
     try {
       const result = await ContentModerationService.submitReport({
         contentId,
@@ -101,7 +94,6 @@ const ContentReporting = ({
           timestamp: new Date().toISOString()
         }
       });
-
       if (result.success) {
         setSubmitted(true);
         setTimeout(() => {
@@ -124,7 +116,6 @@ const ContentReporting = ({
       setIsSubmitting(false);
     }
   };
-
   const handleCategorySelect = (categoryId) => {
     setReportData(prev => ({
       ...prev,
@@ -132,9 +123,7 @@ const ContentReporting = ({
       reason: reportCategories.find(cat => cat.id === categoryId)?.label || ''
     }));
   };
-
   if (!isOpen) return null;
-
   if (submitted) {
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -155,7 +144,6 @@ const ContentReporting = ({
       </div>
     );
   }
-
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -177,7 +165,6 @@ const ContentReporting = ({
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
-
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Content Preview */}
           {contentPreview && (
@@ -188,7 +175,6 @@ const ContentReporting = ({
               </p>
             </div>
           )}
-
           {/* Report Categories */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -216,7 +202,6 @@ const ContentReporting = ({
               ))}
             </div>
           </div>
-
           {/* Additional Details */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -230,7 +215,6 @@ const ContentReporting = ({
               rows={4}
             />
           </div>
-
           {/* Severity Level */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -257,7 +241,6 @@ const ContentReporting = ({
               ))}
             </div>
           </div>
-
           {/* Guidelines */}
           <div className="bg-blue-50 rounded-lg p-4">
             <h4 className="font-medium text-blue-900 mb-2">Reporting Guidelines</h4>
@@ -268,7 +251,6 @@ const ContentReporting = ({
               <li>• We review all reports carefully and take appropriate action</li>
             </ul>
           </div>
-
           {/* Submit Button */}
           <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
             <button
@@ -301,5 +283,4 @@ const ContentReporting = ({
     </div>
   );
 };
-
 export default ContentReporting;

@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import GlassCard from '../ui/GlassCard';
 import { PERSONALITY_DIMENSIONS } from '../../types/personality';
-
 const PERSONALITY_TYPE_COLORS = {
   'The Thrill Seeker': { primary: '#ef4444', secondary: '#dc2626', gradient: 'from-red-500 to-orange-500' },
   'The Comfort Traveler': { primary: '#10b981', secondary: '#059669', gradient: 'from-emerald-500 to-green-500' },
@@ -16,18 +15,15 @@ const PERSONALITY_TYPE_COLORS = {
   'The Leisure Socializer': { primary: '#3b82f6', secondary: '#2563eb', gradient: 'from-blue-500 to-indigo-500' },
   'The Curious Traveler': { primary: '#6b7280', secondary: '#4b5563', gradient: 'from-gray-500 to-slate-500' },
 };
-
 const TRAIT_LABELS = {
   energyLevel: 'Energy Level',
   socialPreference: 'Social Preference',
   adventureStyle: 'Adventure Style',
   riskTolerance: 'Risk Tolerance'
 };
-
 export default function QuizResults({ profile, onShare, onRetake, onViewHistory, isHistorical = false, className = '' }) {
   const [selectedView, setSelectedView] = useState('radar');
   const resultCardRef = useRef(null);
-
   if (!profile) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
@@ -42,9 +38,7 @@ export default function QuizResults({ profile, onShare, onRetake, onViewHistory,
       </div>
     );
   }
-
   const typeColors = PERSONALITY_TYPE_COLORS[profile.personalityType] || PERSONALITY_TYPE_COLORS['The Curious Traveler'];
-
   // Prepare data for radar chart
   const radarData = [
     {
@@ -68,13 +62,11 @@ export default function QuizResults({ profile, onShare, onRetake, onViewHistory,
       fullName: 'Risk Tolerance'
     }
   ];
-
   // Prepare data for bar chart
   const barData = radarData.map(item => ({
     ...item,
     trait: item.fullName
   }));
-
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -84,7 +76,6 @@ export default function QuizResults({ profile, onShare, onRetake, onViewHistory,
       }
     }
   };
-
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
@@ -96,16 +87,13 @@ export default function QuizResults({ profile, onShare, onRetake, onViewHistory,
       }
     }
   };
-
   const handleShare = async () => {
     if (onShare) {
       onShare(profile);
       return;
     }
-
     // Default share behavior - copy to clipboard
     const shareText = `I just discovered my travel personality: ${profile.personalityType}! 🌍✈️`;
-
     if (navigator.share) {
       try {
         await navigator.share({
@@ -122,7 +110,6 @@ export default function QuizResults({ profile, onShare, onRetake, onViewHistory,
       copyToClipboard(shareText);
     }
   };
-
   const copyToClipboard = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -131,17 +118,14 @@ export default function QuizResults({ profile, onShare, onRetake, onViewHistory,
       console.error('Failed to copy to clipboard:', err);
     }
   };
-
   const downloadResultCard = async () => {
     if (!resultCardRef.current) return;
-
     try {
       const html2canvas = await import('html2canvas');
       const canvas = await html2canvas.default(resultCardRef.current, {
         backgroundColor: null,
         scale: 2
       });
-
       const link = document.createElement('a');
       link.download = `travel-personality-${profile.personalityType.toLowerCase().replace(/\s+/g, '-')}.png`;
       link.href = canvas.toDataURL();
@@ -150,7 +134,6 @@ export default function QuizResults({ profile, onShare, onRetake, onViewHistory,
       console.error('Failed to download result card:', err);
     }
   };
-
   return (
     <motion.div
       variants={containerVariants}
@@ -170,12 +153,10 @@ export default function QuizResults({ profile, onShare, onRetake, onViewHistory,
             Discover what makes you unique as a traveler
           </p>
         </motion.div>
-
         {/* Personality Type Card */}
         <motion.div variants={itemVariants}>
           <PersonalityTypeCard profile={profile} colors={typeColors} ref={resultCardRef} />
         </motion.div>
-
         {/* Chart Toggle */}
         <motion.div variants={itemVariants} className="flex justify-center">
           <div className="bg-white/10 dark:bg-black/10 backdrop-blur-md rounded-lg p-2 border border-white/20">
@@ -201,14 +182,12 @@ export default function QuizResults({ profile, onShare, onRetake, onViewHistory,
             </button>
           </div>
         </motion.div>
-
         {/* Charts */}
         <motion.div variants={itemVariants}>
           <GlassCard className="p-8">
             <h3 className="text-2xl font-semibold text-center mb-8 text-gray-800 dark:text-gray-200">
               Your Personality Dimensions
             </h3>
-
             <div className="h-96">
               {selectedView === 'radar' ? (
                 <RadarChartView data={radarData} colors={typeColors} />
@@ -218,12 +197,10 @@ export default function QuizResults({ profile, onShare, onRetake, onViewHistory,
             </div>
           </GlassCard>
         </motion.div>
-
         {/* Trait Descriptions */}
         <motion.div variants={itemVariants}>
           <TraitDescriptions profile={profile} />
         </motion.div>
-
         {/* Historical Assessment Banner */}
         {isHistorical && (
           <motion.div variants={itemVariants}>
@@ -240,7 +217,6 @@ export default function QuizResults({ profile, onShare, onRetake, onViewHistory,
             </GlassCard>
           </motion.div>
         )}
-
         {/* Actions */}
         <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
@@ -276,7 +252,6 @@ export default function QuizResults({ profile, onShare, onRetake, onViewHistory,
     </motion.div>
   );
 }
-
 // Personality Type Card Component
 const PersonalityTypeCard = motion.forwardRef(({ profile, colors }, ref) => (
   <GlassCard ref={ref} className="max-w-2xl mx-auto text-center p-8" variant="light">
@@ -290,11 +265,9 @@ const PersonalityTypeCard = motion.forwardRef(({ profile, colors }, ref) => (
       >
         <span className="text-3xl">🌍</span>
       </div>
-
       <h2 className={`text-3xl font-bold mb-4 bg-gradient-to-r ${colors.gradient} bg-clip-text text-transparent`}>
         {profile.personalityType}
       </h2>
-
       <div className="grid grid-cols-2 gap-4 mt-8">
         {Object.entries(TRAIT_LABELS).map(([key, label]) => (
           <div key={key} className="text-center">
@@ -310,9 +283,7 @@ const PersonalityTypeCard = motion.forwardRef(({ profile, colors }, ref) => (
     </motion.div>
   </GlassCard>
 ));
-
 PersonalityTypeCard.displayName = 'PersonalityTypeCard';
-
 // Radar Chart Component
 function RadarChartView({ data, colors }) {
   return (
@@ -343,7 +314,6 @@ function RadarChartView({ data, colors }) {
     </ResponsiveContainer>
   );
 }
-
 // Bar Chart Component
 function BarChartView({ data, colors }) {
   return (
@@ -381,13 +351,11 @@ function BarChartView({ data, colors }) {
     </ResponsiveContainer>
   );
 }
-
 // Trait Descriptions Component
 function TraitDescriptions({ profile }) {
   if (!profile.traitDescriptions) {
     return null;
   }
-
   return (
     <div className="grid md:grid-cols-2 gap-6">
       {Object.entries(TRAIT_LABELS).map(([key, label]) => (

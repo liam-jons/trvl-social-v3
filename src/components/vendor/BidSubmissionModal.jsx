@@ -3,13 +3,11 @@ import { X, Plus, Minus, Upload, FileText, Image, DollarSign, Calendar, MapPin, 
 import { vendorService } from '../../services/vendor-service';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorMessage from '../common/ErrorMessage';
-
 const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
-
   // Bid form data
   const [bidData, setBidData] = useState({
     proposedPrice: '',
@@ -37,7 +35,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
     attachments: [],
     templateId: null
   });
-
   // Load bid templates
   useEffect(() => {
     const loadTemplates = async () => {
@@ -46,10 +43,8 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
         setTemplates(data);
       }
     };
-
     loadTemplates();
   }, [vendor.id]);
-
   // Set default expiration (72 hours from now)
   useEffect(() => {
     const defaultExpiration = new Date();
@@ -59,7 +54,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
       validUntil: defaultExpiration.toISOString().slice(0, 16)
     }));
   }, []);
-
   // Handle template selection
   const handleTemplateSelect = (template) => {
     if (template) {
@@ -73,7 +67,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
     }
     setSelectedTemplate(template);
   };
-
   // Handle price breakdown updates
   const updatePriceBreakdown = (index, field, value) => {
     setBidData(prev => ({
@@ -83,7 +76,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
       )
     }));
   };
-
   const addPriceBreakdownItem = () => {
     setBidData(prev => ({
       ...prev,
@@ -93,7 +85,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
       ]
     }));
   };
-
   const removePriceBreakdownItem = (index) => {
     if (bidData.priceBreakdown.length > 1) {
       setBidData(prev => ({
@@ -102,7 +93,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
       }));
     }
   };
-
   // Handle itinerary updates
   const updateItinerary = (field, value) => {
     setBidData(prev => ({
@@ -110,7 +100,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
       customItinerary: { ...prev.customItinerary, [field]: value }
     }));
   };
-
   const updateItineraryDay = (dayIndex, field, value) => {
     setBidData(prev => ({
       ...prev,
@@ -122,7 +111,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
       }
     }));
   };
-
   const addItineraryDay = () => {
     const nextDay = bidData.customItinerary.days.length + 1;
     setBidData(prev => ({
@@ -143,7 +131,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
       }
     }));
   };
-
   const removeItineraryDay = (dayIndex) => {
     if (bidData.customItinerary.days.length > 1) {
       setBidData(prev => ({
@@ -155,7 +142,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
       }));
     }
   };
-
   // Handle file attachments
   const handleFileUpload = (files) => {
     const fileList = Array.from(files);
@@ -163,51 +149,41 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
       // Validate file type and size (max 10MB)
       const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
       const maxSize = 10 * 1024 * 1024; // 10MB
-
       return validTypes.includes(file.type) && file.size <= maxSize;
     });
-
     setBidData(prev => ({
       ...prev,
       attachments: [...prev.attachments, ...validFiles]
     }));
   };
-
   const removeAttachment = (index) => {
     setBidData(prev => ({
       ...prev,
       attachments: prev.attachments.filter((_, i) => i !== index)
     }));
   };
-
   // Calculate total price
   const calculateTotal = () => {
     return bidData.priceBreakdown.reduce((total, item) => {
       return total + (parseFloat(item.amount) || 0);
     }, 0);
   };
-
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!bidData.proposedPrice || bidData.proposedPrice <= 0) {
       setError('Please enter a valid proposed price');
       return;
     }
-
     if (!bidData.message.trim()) {
       setError('Please include a message to the client');
       return;
     }
-
     try {
       setLoading(true);
       setError(null);
-
       const total = calculateTotal();
       const proposedPrice = parseFloat(bidData.proposedPrice) || total;
-
       const submissionData = {
         tripRequestId: request.id,
         vendorId: vendor.id,
@@ -219,13 +195,10 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
         validUntil: bidData.validUntil,
         attachments: bidData.attachments
       };
-
       const { data, error: submitError } = await vendorService.submitBid(submissionData);
-
       if (submitError) {
         throw new Error(submitError);
       }
-
       // Success
       onBidSubmitted();
     } catch (err) {
@@ -235,7 +208,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
       setLoading(false);
     }
   };
-
   // Format currency
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -244,14 +216,11 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
       minimumFractionDigits: 0
     }).format(amount || 0);
   };
-
   const totalPrice = calculateTotal();
-
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="fixed inset-0 bg-black/25 backdrop-blur-sm" onClick={onClose}></div>
-
         <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
@@ -270,7 +239,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
               <X className="h-6 w-6" />
             </button>
           </div>
-
           <div className="overflow-y-auto max-h-[calc(90vh-80px)]">
             {/* Trip Summary */}
             <div className="p-6 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
@@ -297,12 +265,10 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
                 </div>
               </div>
             </div>
-
             <form onSubmit={handleSubmit} className="p-6 space-y-8">
               {error && (
                 <ErrorMessage message={error} onClose={() => setError(null)} />
               )}
-
               {/* Template Selection */}
               {templates.length > 0 && (
                 <div>
@@ -326,7 +292,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
                   </select>
                 </div>
               )}
-
               {/* Proposed Price */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -343,7 +308,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-
               {/* Price Breakdown */}
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -359,7 +323,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
                     Add Item
                   </button>
                 </div>
-
                 <div className="space-y-3">
                   {bidData.priceBreakdown.map((item, index) => (
                     <div key={index} className="flex gap-3 items-start">
@@ -400,7 +363,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
                     </div>
                   ))}
                 </div>
-
                 {totalPrice > 0 && (
                   <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <div className="flex justify-between items-center">
@@ -414,13 +376,11 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
                   </div>
                 )}
               </div>
-
               {/* Custom Itinerary */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
                   Proposed Itinerary
                 </label>
-
                 <div className="space-y-4">
                   <input
                     type="text"
@@ -429,7 +389,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
                     placeholder="Itinerary title"
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-
                   <textarea
                     value={bidData.customItinerary.description}
                     onChange={(e) => updateItinerary('description', e.target.value)}
@@ -437,7 +396,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-
                   {/* Days */}
                   {bidData.customItinerary.days.map((day, dayIndex) => (
                     <div key={dayIndex} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
@@ -458,7 +416,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
                           </button>
                         )}
                       </div>
-
                       <div className="space-y-3">
                         <textarea
                           value={day.activities.join('\n')}
@@ -467,7 +424,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
                           rows={3}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
-
                         <input
                           type="text"
                           value={day.accommodation}
@@ -475,7 +431,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
                           placeholder="Accommodation"
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
-
                         <textarea
                           value={day.notes}
                           onChange={(e) => updateItineraryDay(dayIndex, 'notes', e.target.value)}
@@ -486,7 +441,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
                       </div>
                     </div>
                   ))}
-
                   <button
                     type="button"
                     onClick={addItineraryDay}
@@ -497,7 +451,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
                   </button>
                 </div>
               </div>
-
               {/* Message to Client */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -512,7 +465,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-
               {/* File Attachments */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -536,7 +488,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
                       Click to upload images, documents, or certificates
                     </span>
                   </label>
-
                   {bidData.attachments.length > 0 && (
                     <div className="space-y-2">
                       {bidData.attachments.map((file, index) => (
@@ -567,7 +518,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
                   )}
                 </div>
               </div>
-
               {/* Bid Expiration */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -584,7 +534,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
                   Default: 72 hours from now
                 </p>
               </div>
-
               {/* Submit Buttons */}
               <div className="flex gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <button
@@ -610,5 +559,4 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
     </div>
   );
 };
-
 export default BidSubmissionModal;

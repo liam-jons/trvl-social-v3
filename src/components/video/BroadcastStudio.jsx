@@ -16,7 +16,6 @@ import useVideoStreamStore from '../../stores/videoStreamStore';
 import GlassCard from '../ui/GlassCard';
 import GlassButton from '../ui/GlassButton';
 import LoadingSpinner from '../common/LoadingSpinner';
-
 const BroadcastStudio = ({
   onStreamStart,
   onStreamEnd,
@@ -33,7 +32,6 @@ const BroadcastStudio = ({
     maxViewers: 100,
     quality: 'high'
   });
-
   const {
     currentStream,
     isBroadcasting,
@@ -49,7 +47,6 @@ const BroadcastStudio = ({
     toggleMicrophone,
     clearError
   } = useVideoStreamStore();
-
   // Initialize studio
   useEffect(() => {
     if (studioContainerRef.current) {
@@ -79,18 +76,15 @@ const BroadcastStudio = ({
           console.error('Failed to initialize broadcast studio:', error);
         }
       };
-
       initStudio();
     }
   }, []);
-
   // Handle stream creation and start
   const handleStartStream = async () => {
     if (!streamTitle.trim()) {
       alert('Please enter a stream title');
       return;
     }
-
     try {
       // Create room if not exists
       if (!currentStream) {
@@ -109,20 +103,17 @@ const BroadcastStudio = ({
           }
         });
       }
-
       // Start broadcasting
       await startBroadcast({
         enableRecording: streamSettings.enableRecording,
         quality: streamSettings.quality
       });
-
       setIsPreviewMode(false);
       onStreamStart?.(currentStream);
     } catch (error) {
       console.error('Failed to start stream:', error);
     }
   };
-
   // Handle stream stop
   const handleStopStream = async () => {
     try {
@@ -133,17 +124,14 @@ const BroadcastStudio = ({
       console.error('Failed to stop stream:', error);
     }
   };
-
   // Handle camera toggle
   const handleCameraToggle = async () => {
     await toggleCamera();
   };
-
   // Handle microphone toggle
   const handleMicrophoneToggle = async () => {
     await toggleMicrophone();
   };
-
   // Handle share stream
   const handleShareStream = () => {
     if (currentStream?.url) {
@@ -158,7 +146,6 @@ const BroadcastStudio = ({
       window.dispatchEvent(event);
     }
   };
-
   if (error) {
     return (
       <GlassCard className={`p-6 ${className}`}>
@@ -182,7 +169,6 @@ const BroadcastStudio = ({
       </GlassCard>
     );
   }
-
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Stream Setup Panel */}
@@ -194,7 +180,6 @@ const BroadcastStudio = ({
         >
           <GlassCard className="p-6">
             <h3 className="text-xl font-semibold mb-4">Stream Setup</h3>
-
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">
@@ -208,7 +193,6 @@ const BroadcastStudio = ({
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium mb-2">
                   Description
@@ -221,7 +205,6 @@ const BroadcastStudio = ({
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">
@@ -241,7 +224,6 @@ const BroadcastStudio = ({
                     <option value={1000}>1000</option>
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Quality
@@ -261,7 +243,6 @@ const BroadcastStudio = ({
                   </select>
                 </div>
               </div>
-
               <div className="flex items-center space-x-4">
                 <label className="flex items-center space-x-2">
                   <input
@@ -275,7 +256,6 @@ const BroadcastStudio = ({
                   />
                   <span className="text-sm">Enable Recording</span>
                 </label>
-
                 <label className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -293,7 +273,6 @@ const BroadcastStudio = ({
           </GlassCard>
         </motion.div>
       )}
-
       {/* Video Preview/Broadcasting Area */}
       <GlassCard className="relative overflow-hidden">
         {/* Stream Status Header */}
@@ -314,7 +293,6 @@ const BroadcastStudio = ({
               <span className="text-white text-sm">{streamTitle}</span>
             )}
           </div>
-
           {isBroadcasting && (
             <div className="flex items-center space-x-2">
               <div className="flex items-center space-x-2 bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2">
@@ -330,7 +308,6 @@ const BroadcastStudio = ({
             </div>
           )}
         </div>
-
         {/* Video Container */}
         <div
           ref={studioContainerRef}
@@ -343,7 +320,6 @@ const BroadcastStudio = ({
             </div>
           )}
         </div>
-
         {/* Broadcasting Controls */}
         <div className="absolute bottom-4 left-4 right-4 z-10">
           <div className="flex items-center justify-between bg-black/50 backdrop-blur-sm rounded-lg px-4 py-3">
@@ -363,7 +339,6 @@ const BroadcastStudio = ({
                   <VideoCameraSlashIcon className="h-6 w-6" />
                 )}
               </button>
-
               <button
                 onClick={handleMicrophoneToggle}
                 className={`p-2 rounded-lg transition-colors ${
@@ -375,7 +350,6 @@ const BroadcastStudio = ({
                 <MicrophoneIcon className="h-6 w-6" />
               </button>
             </div>
-
             {/* Center Controls */}
             <div className="flex items-center space-x-3">
               {!isBroadcasting ? (
@@ -398,7 +372,6 @@ const BroadcastStudio = ({
                 </GlassButton>
               )}
             </div>
-
             {/* Right Controls */}
             <div className="flex items-center space-x-3">
               {isBroadcasting && (
@@ -409,7 +382,6 @@ const BroadcastStudio = ({
                   <ShareIcon className="h-6 w-6" />
                 </button>
               )}
-
               <button className="text-white hover:bg-white/10 p-2 rounded-lg transition-colors">
                 <Cog6ToothIcon className="h-6 w-6" />
               </button>
@@ -417,7 +389,6 @@ const BroadcastStudio = ({
           </div>
         </div>
       </GlassCard>
-
       {/* Stream Statistics */}
       {isBroadcasting && (
         <motion.div
@@ -433,7 +404,6 @@ const BroadcastStudio = ({
               Current Viewers
             </div>
           </GlassCard>
-
           <GlassCard className="p-4 text-center">
             <div className="text-2xl font-bold text-green-500">
               {streamMetrics.totalViews}
@@ -442,7 +412,6 @@ const BroadcastStudio = ({
               Total Views
             </div>
           </GlassCard>
-
           <GlassCard className="p-4 text-center">
             <div className="text-2xl font-bold text-purple-500">
               {Math.round(streamMetrics.averageWatchTime)}m
@@ -451,7 +420,6 @@ const BroadcastStudio = ({
               Avg. Watch Time
             </div>
           </GlassCard>
-
           <GlassCard className="p-4 text-center">
             <div className="text-2xl font-bold text-orange-500">
               {Math.round(streamMetrics.engagement)}%
@@ -465,5 +433,4 @@ const BroadcastStudio = ({
     </div>
   );
 };
-
 export default BroadcastStudio;

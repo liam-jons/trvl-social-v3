@@ -2,7 +2,6 @@
  * Connection Recommendations Component
  * Smart recommendations based on compatibility and shared adventures
  */
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
@@ -18,29 +17,23 @@ import {
   Sparkles,
   RefreshCw
 } from 'lucide-react';
-
 const ConnectionRecommendations = ({ onUpdate }) => {
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sendingRequest, setSendingRequest] = useState(null);
-
   useEffect(() => {
     loadRecommendations();
   }, []);
-
   const loadRecommendations = async () => {
     try {
       setLoading(true);
-
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-
       const result = await connectionService.getConnectionRecommendations(user.id, {
         limit: 15,
         includeCompatibility: true,
         filterConnected: true
       });
-
       if (result.success) {
         setRecommendations(result.data);
       }
@@ -50,13 +43,10 @@ const ConnectionRecommendations = ({ onUpdate }) => {
       setLoading(false);
     }
   };
-
   const handleSendRequest = async (recipientId, message = '') => {
     try {
       setSendingRequest(recipientId);
-
       const result = await connectionService.sendConnectionRequest(recipientId, message);
-
       if (result.success) {
         // Remove from recommendations
         setRecommendations(prev => prev.filter(rec => rec.user_id !== recipientId));
@@ -70,7 +60,6 @@ const ConnectionRecommendations = ({ onUpdate }) => {
       setSendingRequest(null);
     }
   };
-
   const getCompatibilityColor = (score) => {
     if (!score) return 'text-gray-500';
     if (score >= 80) return 'text-green-600';
@@ -78,7 +67,6 @@ const ConnectionRecommendations = ({ onUpdate }) => {
     if (score >= 40) return 'text-yellow-600';
     return 'text-red-500';
   };
-
   const getCompatibilityLabel = (score) => {
     if (!score) return 'Unknown';
     if (score >= 80) return 'Excellent';
@@ -86,17 +74,14 @@ const ConnectionRecommendations = ({ onUpdate }) => {
     if (score >= 40) return 'Fair';
     return 'Low';
   };
-
   const getRecommendationIcon = (score) => {
     if (score >= 80) return <Sparkles className="h-4 w-4 text-purple-500" />;
     if (score >= 60) return <Star className="h-4 w-4 text-yellow-500" />;
     if (score >= 40) return <Heart className="h-4 w-4 text-pink-500" />;
     return <Users className="h-4 w-4 text-blue-500" />;
   };
-
   const RecommendationCard = ({ recommendation }) => {
     const compatibilityScore = recommendation.compatibilityScore?.overallScore;
-
     return (
       <Card className="p-4 hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
         <div className="flex items-start gap-4">
@@ -111,7 +96,6 @@ const ConnectionRecommendations = ({ onUpdate }) => {
               {getRecommendationIcon(recommendation.recommendationScore)}
             </div>
           </div>
-
           {/* Content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
@@ -122,14 +106,12 @@ const ConnectionRecommendations = ({ onUpdate }) => {
                 {Math.round(recommendation.recommendationScore)}% match
               </span>
             </div>
-
             {recommendation.profile?.location && (
               <div className="flex items-center gap-1 text-sm text-gray-600 mb-3">
                 <MapPin className="h-4 w-4" />
                 <span>{recommendation.profile.location}</span>
               </div>
             )}
-
             {/* Recommendation reasons */}
             <div className="space-y-2 mb-4">
               <div className="flex items-center gap-2 text-sm">
@@ -138,7 +120,6 @@ const ConnectionRecommendations = ({ onUpdate }) => {
                   {recommendation.sharedAdventures} shared adventure{recommendation.sharedAdventures !== 1 ? 's' : ''}
                 </span>
               </div>
-
               {compatibilityScore && (
                 <div className="flex items-center gap-2 text-sm">
                   <Zap className="h-4 w-4 text-yellow-500" />
@@ -150,7 +131,6 @@ const ConnectionRecommendations = ({ onUpdate }) => {
                 </div>
               )}
             </div>
-
             {/* Compatibility breakdown */}
             {recommendation.compatibilityScore?.dimensions && (
               <div className="mb-4">
@@ -168,7 +148,6 @@ const ConnectionRecommendations = ({ onUpdate }) => {
                 </div>
               </div>
             )}
-
             {/* Actions */}
             <div className="flex items-center gap-2">
               <Button
@@ -180,7 +159,6 @@ const ConnectionRecommendations = ({ onUpdate }) => {
                 <UserPlus className="h-4 w-4" />
                 {sendingRequest === recommendation.user_id ? 'Sending...' : 'Connect'}
               </Button>
-
               <Button
                 variant="outline"
                 size="sm"
@@ -195,7 +173,6 @@ const ConnectionRecommendations = ({ onUpdate }) => {
       </Card>
     );
   };
-
   if (loading) {
     return (
       <div className="space-y-4">
@@ -216,7 +193,6 @@ const ConnectionRecommendations = ({ onUpdate }) => {
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -235,7 +211,6 @@ const ConnectionRecommendations = ({ onUpdate }) => {
           Refresh
         </Button>
       </div>
-
       {/* Recommendations */}
       {recommendations.length === 0 ? (
         <Card className="p-8 text-center">
@@ -264,5 +239,4 @@ const ConnectionRecommendations = ({ onUpdate }) => {
     </div>
   );
 };
-
 export default ConnectionRecommendations;

@@ -3,7 +3,6 @@ import useOfferManagementStore from '../../stores/offerManagementStore';
 import { formatCurrency, formatDate, formatRelativeTime } from '../../utils/formatters';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorMessage from '../common/ErrorMessage';
-
 const SavedOffers = ({ userId, onAction }) => {
   const {
     savedOffers,
@@ -11,19 +10,15 @@ const SavedOffers = ({ userId, onAction }) => {
     error,
     loadSavedOffers
   } = useOfferManagementStore();
-
   const [sortBy, setSortBy] = useState('saved_at'); // saved_at, price, expiry
   const [filterStatus, setFilterStatus] = useState('all'); // all, active, expired
-
   useEffect(() => {
     if (userId) {
       loadSavedOffers(userId);
     }
   }, [userId, loadSavedOffers]);
-
   const getFilteredAndSortedOffers = () => {
     let filtered = [...savedOffers];
-
     // Apply status filter
     if (filterStatus === 'active') {
       filtered = filtered.filter(saved =>
@@ -35,7 +30,6 @@ const SavedOffers = ({ userId, onAction }) => {
         new Date(saved.vendor_bids?.valid_until) <= new Date()
       );
     }
-
     // Apply sorting
     filtered.sort((a, b) => {
       switch (sortBy) {
@@ -48,21 +42,16 @@ const SavedOffers = ({ userId, onAction }) => {
           return new Date(b.saved_at) - new Date(a.saved_at);
       }
     });
-
     return filtered;
   };
-
   const filteredOffers = getFilteredAndSortedOffers();
-
   const handleRemoveFromSaved = async (savedOfferId) => {
     // TODO: Implement remove from saved functionality
     console.log('Remove from saved:', savedOfferId);
   };
-
   if (loading.offers) {
     return <LoadingSpinner fullScreen={false} message="Loading saved offers..." />;
   }
-
   if (error) {
     return (
       <ErrorMessage
@@ -71,7 +60,6 @@ const SavedOffers = ({ userId, onAction }) => {
       />
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Header with controls */}
@@ -84,7 +72,6 @@ const SavedOffers = ({ userId, onAction }) => {
             Offers you've saved for later review
           </p>
         </div>
-
         <div className="flex flex-col sm:flex-row gap-3">
           {/* Status Filter */}
           <select
@@ -96,7 +83,6 @@ const SavedOffers = ({ userId, onAction }) => {
             <option value="active">Active Only</option>
             <option value="expired">Expired Only</option>
           </select>
-
           {/* Sort By */}
           <select
             value={sortBy}
@@ -109,7 +95,6 @@ const SavedOffers = ({ userId, onAction }) => {
           </select>
         </div>
       </div>
-
       {/* Offers List */}
       {filteredOffers.length === 0 ? (
         <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-12 text-center border border-white/20 dark:border-gray-700/30">
@@ -129,7 +114,6 @@ const SavedOffers = ({ userId, onAction }) => {
             const offer = savedOffer.vendor_bids;
             const isExpired = new Date(offer?.valid_until) <= new Date();
             const daysUntilExpiry = Math.ceil((new Date(offer?.valid_until) - new Date()) / (1000 * 60 * 60 * 24));
-
             return (
               <div
                 key={savedOffer.id}
@@ -161,7 +145,6 @@ const SavedOffers = ({ userId, onAction }) => {
                       </div>
                     </div>
                   </div>
-
                   <div className="text-right">
                     <div className="text-lg font-bold text-green-600 dark:text-green-400">
                       {formatCurrency(offer?.proposed_price || 0)}
@@ -171,7 +154,6 @@ const SavedOffers = ({ userId, onAction }) => {
                     </div>
                   </div>
                 </div>
-
                 {/* Trip Details */}
                 <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                   <h5 className="font-medium text-gray-900 dark:text-white mb-2">
@@ -192,7 +174,6 @@ const SavedOffers = ({ userId, onAction }) => {
                     </div>
                   </div>
                 </div>
-
                 {/* Status Badge */}
                 <div className="mb-4">
                   <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
@@ -204,14 +185,12 @@ const SavedOffers = ({ userId, onAction }) => {
                   }`}>
                     {(offer?.status || 'unknown').replace('_', ' ').toUpperCase()}
                   </span>
-
                   {isExpired && (
                     <span className="ml-2 inline-flex px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
                       EXPIRED
                     </span>
                   )}
                 </div>
-
                 {/* Vendor Message Preview */}
                 {offer?.message && (
                   <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
@@ -220,7 +199,6 @@ const SavedOffers = ({ userId, onAction }) => {
                     </p>
                   </div>
                 )}
-
                 {/* Actions */}
                 <div className="flex flex-wrap gap-2">
                   <button
@@ -229,7 +207,6 @@ const SavedOffers = ({ userId, onAction }) => {
                   >
                     View Details
                   </button>
-
                   {offer?.status === 'pending' && !isExpired && (
                     <>
                       <button
@@ -246,14 +223,12 @@ const SavedOffers = ({ userId, onAction }) => {
                       </button>
                     </>
                   )}
-
                   <button
                     onClick={() => handleRemoveFromSaved(savedOffer.id)}
                     className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors text-sm"
                   >
                     Remove
                   </button>
-
                   {offer?.trip_requests && (
                     <button
                       onClick={() => onAction('share', offer)}
@@ -263,7 +238,6 @@ const SavedOffers = ({ userId, onAction }) => {
                     </button>
                   )}
                 </div>
-
                 {/* Expiry Warning */}
                 {!isExpired && daysUntilExpiry <= 3 && offer?.status === 'pending' && (
                   <div className="mt-4 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
@@ -280,7 +254,6 @@ const SavedOffers = ({ userId, onAction }) => {
           })}
         </div>
       )}
-
       {/* Summary Stats */}
       {savedOffers.length > 0 && (
         <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-6 border border-white/20 dark:border-gray-700/30">
@@ -326,5 +299,4 @@ const SavedOffers = ({ userId, onAction }) => {
     </div>
   );
 };
-
 export default SavedOffers;

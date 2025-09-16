@@ -16,11 +16,9 @@ import {
   EyeSlashIcon,
   ArrowRightIcon
 } from '@heroicons/react/24/outline';
-
 const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className = '' }) => {
   const { user } = useAuth();
   const { addNotification } = useNotification();
-
   const [collections, setCollections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -28,20 +26,16 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
   const [editingCollection, setEditingCollection] = useState(null);
   const [selectedShareCollection, setSelectedShareCollection] = useState(null);
   const [expandedCollections, setExpandedCollections] = useState(new Set());
-
   // Load collections
   useEffect(() => {
     const loadCollections = async () => {
       if (!user) return;
-
       try {
         const { data, error } = await WishlistService.getUserCollections(user.id);
-
         if (error) {
           console.error('Error loading collections:', error);
           return;
         }
-
         setCollections(data || []);
       } catch (error) {
         console.error('Error loading collections:', error);
@@ -49,14 +43,11 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
         setLoading(false);
       }
     };
-
     loadCollections();
   }, [user]);
-
   const handleCreateCollection = async (name, description, isPrivate) => {
     try {
       const { data, error } = await WishlistService.createCollection(user.id, name, description, isPrivate);
-
       if (error) {
         addNotification({
           type: 'error',
@@ -65,10 +56,8 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
         });
         return;
       }
-
       setCollections(prev => [data, ...prev]);
       setShowCreateModal(false);
-
       addNotification({
         type: 'success',
         title: 'Collection Created',
@@ -78,11 +67,9 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
       console.error('Error creating collection:', error);
     }
   };
-
   const handleUpdateCollection = async (collectionId, updates) => {
     try {
       const { data, error } = await WishlistService.updateCollection(user.id, collectionId, updates);
-
       if (error) {
         addNotification({
           type: 'error',
@@ -91,10 +78,8 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
         });
         return;
       }
-
       setCollections(prev => prev.map(c => c.id === collectionId ? data : c));
       setEditingCollection(null);
-
       addNotification({
         type: 'success',
         title: 'Collection Updated',
@@ -104,15 +89,12 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
       console.error('Error updating collection:', error);
     }
   };
-
   const handleDeleteCollection = async (collectionId) => {
     if (!confirm('Are you sure you want to delete this collection? Adventures will be moved to uncategorized.')) {
       return;
     }
-
     try {
       const { error } = await WishlistService.deleteCollection(user.id, collectionId);
-
       if (error) {
         addNotification({
           type: 'error',
@@ -121,14 +103,11 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
         });
         return;
       }
-
       setCollections(prev => prev.filter(c => c.id !== collectionId));
-
       // If currently selected collection was deleted, switch to all
       if (selectedCollectionId === collectionId) {
         onCollectionSelect('all');
       }
-
       addNotification({
         type: 'success',
         title: 'Collection Deleted',
@@ -138,12 +117,10 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
       console.error('Error deleting collection:', error);
     }
   };
-
   const handleShareCollection = (collection) => {
     setSelectedShareCollection(collection);
     setShowShareModal(true);
   };
-
   const toggleCollectionExpand = (collectionId) => {
     setExpandedCollections(prev => {
       const newSet = new Set(prev);
@@ -155,7 +132,6 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
       return newSet;
     });
   };
-
   if (loading) {
     return (
       <div className={className}>
@@ -170,7 +146,6 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
       </div>
     );
   }
-
   return (
     <div className={className}>
       <GlassCard variant="light">
@@ -188,7 +163,6 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
             <FolderPlusIcon className="w-5 h-5" />
           </button>
         </div>
-
         {/* All Items */}
         <div className="space-y-2 mb-4">
           <button
@@ -206,7 +180,6 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
             <ArrowRightIcon className="w-4 h-4" />
           </button>
         </div>
-
         {/* Collections List */}
         <div className="space-y-2">
           <AnimatePresence>
@@ -255,7 +228,6 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
                     </div>
                   </div>
                 </button>
-
                 {/* Collection Actions */}
                 {selectedCollectionId === collection.id && (
                   <motion.div
@@ -275,7 +247,6 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
                       >
                         <PencilIcon className="w-4 h-4" />
                       </button>
-
                       {!collection.is_private && (
                         <button
                           onClick={(e) => {
@@ -288,7 +259,6 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
                           <ShareIcon className="w-4 h-4" />
                         </button>
                       )}
-
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -305,7 +275,6 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
               </motion.div>
             ))}
           </AnimatePresence>
-
           {collections.length === 0 && (
             <div className="text-center py-8">
               <FolderIcon className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
@@ -322,7 +291,6 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
           )}
         </div>
       </GlassCard>
-
       {/* Create/Edit Collection Modal */}
       <CollectionModal
         isOpen={showCreateModal || !!editingCollection}
@@ -341,7 +309,6 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
         } : undefined}
         isEdit={!!editingCollection}
       />
-
       {/* Share Modal */}
       <ShareModal
         isOpen={showShareModal}
@@ -354,5 +321,4 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
     </div>
   );
 };
-
 export default CollectionManager;

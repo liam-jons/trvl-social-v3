@@ -3,7 +3,6 @@ import sentryService from './sentry-service.js';
  * Natural Language Processing Service for Trip Request Parsing
  * Uses OpenAI API with fallback to Anthropic Claude and regex patterns
  */
-
 // Configuration
 const API_CONFIG = {
   openai: {
@@ -25,7 +24,6 @@ const API_CONFIG = {
   retryDelay: 1000,
   cacheTimeout: 7 * 24 * 60 * 60 * 1000, // 7 days for parsed trips
 };
-
 // Generate cache key based on trip description
 function generateCacheKey(description) {
   // Create a hash-like key from the description
@@ -35,29 +33,24 @@ function generateCacheKey(description) {
   }, 0);
   return `nlp_parse_${Math.abs(hash)}`;
 }
-
 // Cache management with localStorage
 const cache = {
   get(key) {
     try {
       const cached = localStorage.getItem(key);
       if (!cached) return null;
-
       const { data, timestamp } = JSON.parse(cached);
       const isExpired = Date.now() - timestamp > API_CONFIG.cacheTimeout;
-
       if (isExpired) {
         localStorage.removeItem(key);
         return null;
       }
-
       return data;
     } catch (error) {
       // console.warn('NLP cache retrieval error:', error);
       return null;
     }
   },
-
   set(key, data) {
     try {
       const cacheEntry = {
@@ -69,7 +62,6 @@ const cache = {
       // console.warn('NLP cache storage error:', error);
     }
   },
-
   clear() {
     try {
       const keys = Object.keys(localStorage);
@@ -83,16 +75,12 @@ const cache = {
     }
   }
 };
-
 // Prompt template for trip parsing
 function createParsingPrompt(description) {
   return `You are an expert travel agent. Parse the following trip description and extract structured information. Be as accurate as possible and indicate confidence levels.
-
 Trip Description:
 "${description}"
-
 Extract the following information and return as valid JSON:
-
 {
   "destinations": {
     "primary": "Main destination (city, region, or country)",
@@ -151,7 +139,6 @@ Extract the following information and return as valid JSON:
   },
   "overallConfidence": 0.8
 }
-
 Important:
 - Set confidence scores (0.0-1.0) based on how clearly each aspect is mentioned
 - Use null for values that cannot be determined
@@ -159,7 +146,6 @@ Important:
 - Include alternative interpretations in secondary fields where applicable
 - Focus on extracting actual information mentioned, don't infer too much`;
 }
-
 // Fallback regex patterns for common trip elements
 const FALLBACK_PATTERNS = {
   destinations: {
@@ -187,20 +173,16 @@ const FALLBACK_PATTERNS = {
     relaxation: /\b(spa|wellness|massage|yoga|meditation|retreat|relaxation|peaceful|tranquil|serene|calm|quiet|rest|unwind|recharge|rejuvenate|pamper|luxury|comfort|resort|hotel|beach|pool|jacuzzi|sauna|steam|thermal|hot spring|mineral spring|detox|cleanse|mindfulness|spiritual|zen|holistic|natural|organic|healthy|fitness|gym|pilates|tai chi|qigong|acupuncture|aromatherapy|reflexology|facial|manicure|pedicure|beauty|treatment|therapy)\b/gi
   }
 };
-
 // Sleep utility for retry delays
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-
 // Make API call to OpenAI
 async function callOpenAI(prompt, retryCount = 0) {
   const { apiKey, baseUrl, model, maxTokens, temperature } = API_CONFIG.openai;
-
   if (!apiKey) {
     throw new Error('OpenAI API key not configured');
   }
-
   const requestBody = {
     model,
     messages: [
@@ -216,11 +198,9 @@ async function callOpenAI(prompt, retryCount = 0) {
     max_tokens: maxTokens,
     temperature,
   };
-
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
-
     const response = await fetch(baseUrl, {
       method: 'POST',
       headers: {
@@ -230,47 +210,36 @@ async function callOpenAI(prompt, retryCount = 0) {
       body: JSON.stringify(requestBody),
       signal: controller.signal,
     });
-
     clearTimeout(timeoutId);
-
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(`OpenAI API request failed: ${response.status} - ${errorData.error?.message || response.statusText}`);
     }
-
     const data = await response.json();
-
     if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
       throw new Error('Invalid OpenAI API response format');
     }
-
     return data.choices[0].message.content;
   } catch (error) {
     if (error.name === 'AbortError') {
       throw new Error('OpenAI API request timeout');
     }
-
     // Retry logic
     if (retryCount < API_CONFIG.maxRetries) {
       const delay = API_CONFIG.retryDelay * Math.pow(2, retryCount);
       // console.warn(`OpenAI API call failed, retrying in ${delay}ms (attempt ${retryCount + 1}/${API_CONFIG.maxRetries}):`, error.message);
-
       await sleep(delay);
       return callOpenAI(prompt, retryCount + 1);
     }
-
     throw error;
   }
 }
-
 // Make API call to Anthropic Claude (fallback)
 async function callAnthropic(prompt, retryCount = 0) {
   const { apiKey, baseUrl, model, maxTokens, temperature } = API_CONFIG.anthropic;
-
   if (!apiKey) {
     throw new Error('Anthropic API key not configured');
   }
-
   const requestBody = {
     model,
     max_tokens: maxTokens,
@@ -282,11 +251,9 @@ async function callAnthropic(prompt, retryCount = 0) {
       }
     ]
   };
-
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
-
     const response = await fetch(baseUrl, {
       method: 'POST',
       headers: {
@@ -297,48 +264,37 @@ async function callAnthropic(prompt, retryCount = 0) {
       body: JSON.stringify(requestBody),
       signal: controller.signal,
     });
-
     clearTimeout(timeoutId);
-
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(`Anthropic API request failed: ${response.status} - ${errorData.error?.message || response.statusText}`);
     }
-
     const data = await response.json();
-
     if (!data.content || !data.content[0] || !data.content[0].text) {
       throw new Error('Invalid Anthropic API response format');
     }
-
     return data.content[0].text;
   } catch (error) {
     if (error.name === 'AbortError') {
       throw new Error('Anthropic API request timeout');
     }
-
     // Retry logic
     if (retryCount < API_CONFIG.maxRetries) {
       const delay = API_CONFIG.retryDelay * Math.pow(2, retryCount);
       // console.warn(`Anthropic API call failed, retrying in ${delay}ms (attempt ${retryCount + 1}/${API_CONFIG.maxRetries}):`, error.message);
-
       await sleep(delay);
       return callAnthropic(prompt, retryCount + 1);
     }
-
     throw error;
   }
 }
-
 // Parse AI response and validate
 function parseAIResponse(responseText) {
   try {
     // Try to extract JSON from response
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     const jsonText = jsonMatch ? jsonMatch[0] : responseText;
-
     const parsed = JSON.parse(jsonText);
-
     // Validate structure and add defaults for missing fields
     const defaultStructure = {
       destinations: {
@@ -395,7 +351,6 @@ function parseAIResponse(responseText) {
       },
       overallConfidence: 0.1
     };
-
     // Merge parsed with defaults
     function deepMerge(target, source) {
       for (const key in source) {
@@ -408,9 +363,7 @@ function parseAIResponse(responseText) {
       }
       return target;
     }
-
     const result = deepMerge(defaultStructure, parsed);
-
     // Validate confidence scores
     function validateConfidence(obj) {
       if (obj && typeof obj === 'object') {
@@ -424,16 +377,13 @@ function parseAIResponse(responseText) {
         }
       }
     }
-
     validateConfidence(result);
     result.overallConfidence = Math.max(0, Math.min(1, result.overallConfidence || 0.1));
-
     return result;
   } catch (error) {
     throw new Error(`Failed to parse AI response: ${error.message}`);
   }
 }
-
 // Fallback parsing using regex patterns
 function fallbackParse(description) {
   const result = {
@@ -448,13 +398,10 @@ function fallbackParse(description) {
     tripStyle: { pace: 'moderate', planning: 'flexible', socialLevel: 'social', confidence: 0.2 },
     overallConfidence: 0.2
   };
-
   const text = description.toLowerCase();
-
   // Extract destinations
   const countries = text.match(FALLBACK_PATTERNS.destinations.countries) || [];
   const cities = text.match(FALLBACK_PATTERNS.destinations.cities) || [];
-
   if (countries.length > 0) {
     result.destinations.primary = countries[0];
     result.destinations.secondary = countries.slice(1, 3);
@@ -464,7 +411,6 @@ function fallbackParse(description) {
     result.destinations.secondary = cities.slice(1, 3);
     result.destinations.confidence = 0.8;
   }
-
   // Extract budget information
   const budgetMatches = text.match(FALLBACK_PATTERNS.budget.amounts) || [];
   if (budgetMatches.length > 0) {
@@ -475,7 +421,6 @@ function fallbackParse(description) {
       result.budget.confidence = 0.6;
     }
   }
-
   // Extract group size
   const groupMatches = text.match(FALLBACK_PATTERNS.groupSize.numbers) || [];
   if (groupMatches.length > 0) {
@@ -485,24 +430,20 @@ function fallbackParse(description) {
       result.groupSize.confidence = 0.8;
     }
   }
-
   const typeMatches = text.match(FALLBACK_PATTERNS.groupSize.types) || [];
   if (typeMatches.length > 0) {
     result.groupSize.type = typeMatches[0];
     result.groupSize.confidence = Math.max(result.groupSize.confidence, 0.7);
   }
-
   // Extract activities
   const outdoorActivities = text.match(FALLBACK_PATTERNS.activities.outdoor) || [];
   const culturalActivities = text.match(FALLBACK_PATTERNS.activities.cultural) || [];
   const relaxationActivities = text.match(FALLBACK_PATTERNS.activities.relaxation) || [];
-
   result.activities.interests = [
     ...outdoorActivities.slice(0, 3),
     ...culturalActivities.slice(0, 3),
     ...relaxationActivities.slice(0, 2)
   ];
-
   if (outdoorActivities.length > culturalActivities.length) {
     result.activities.categories.push('outdoor');
     result.activities.adventureLevel = 'adventurous';
@@ -513,11 +454,9 @@ function fallbackParse(description) {
   if (relaxationActivities.length > 0) {
     result.activities.categories.push('wellness');
   }
-
   if (result.activities.interests.length > 0) {
     result.activities.confidence = 0.6;
   }
-
   // Calculate overall confidence
   const confidences = [
     result.destinations.confidence,
@@ -527,25 +466,20 @@ function fallbackParse(description) {
     result.activities.confidence
   ];
   result.overallConfidence = confidences.reduce((a, b) => a + b) / confidences.length;
-
   return result;
 }
-
 // Main parsing function
 export async function parseTripDescription(description, options = {}) {
   if (!description || typeof description !== 'string') {
     throw new Error('Invalid trip description provided');
   }
-
   const trimmedDescription = description.trim();
   if (trimmedDescription.length < 10) {
     throw new Error('Trip description too short (minimum 10 characters)');
   }
-
   // Check cache first
   const cacheKey = generateCacheKey(trimmedDescription);
   const cachedResult = cache.get(cacheKey);
-
   if (cachedResult && !options.skipCache) {
     // console.log('Returning cached NLP parsing result');
     return {
@@ -553,12 +487,10 @@ export async function parseTripDescription(description, options = {}) {
       source: 'cache'
     };
   }
-
   const prompt = createParsingPrompt(trimmedDescription);
   let result = null;
   let source = 'fallback';
   let error = null;
-
   // Try OpenAI first
   try {
     // console.log('Parsing trip description with OpenAI');
@@ -568,7 +500,6 @@ export async function parseTripDescription(description, options = {}) {
   } catch (openaiError) {
     // console.warn('OpenAI parsing failed:', openaiError.message);
     error = openaiError.message;
-
     // Try Anthropic as fallback
     try {
       // console.log('Falling back to Anthropic Claude');
@@ -581,14 +512,12 @@ export async function parseTripDescription(description, options = {}) {
       error = `Both APIs failed - OpenAI: ${openaiError.message}, Anthropic: ${anthropicError.message}`;
     }
   }
-
   // Use regex fallback if AI failed
   if (!result) {
     // console.warn('AI parsing failed, using regex fallback');
     result = fallbackParse(trimmedDescription);
     source = 'fallback';
   }
-
   // Add metadata
   const finalResult = {
     ...result,
@@ -597,52 +526,42 @@ export async function parseTripDescription(description, options = {}) {
     originalDescription: trimmedDescription,
     parsedAt: new Date().toISOString()
   };
-
   // Cache successful results (even fallback ones)
   if (result.overallConfidence > 0.1) {
     cache.set(cacheKey, finalResult);
   }
-
   return finalResult;
 }
-
 // Utility function to get parsing confidence explanation
 export function getConfidenceExplanation(parsedResult) {
   const explanations = [];
-
   if (parsedResult.destinations.confidence > 0.7) {
     explanations.push('Destinations clearly identified');
   } else if (parsedResult.destinations.confidence > 0.3) {
     explanations.push('Some destination information found');
   }
-
   if (parsedResult.dates.confidence > 0.7) {
     explanations.push('Travel dates well specified');
   } else if (parsedResult.dates.confidence > 0.3) {
     explanations.push('Some date information available');
   }
-
   if (parsedResult.budget.confidence > 0.7) {
     explanations.push('Budget clearly stated');
   } else if (parsedResult.budget.confidence > 0.3) {
     explanations.push('Budget range indicated');
   }
-
   if (parsedResult.activities.confidence > 0.7) {
     explanations.push('Activities and interests well defined');
   } else if (parsedResult.activities.confidence > 0.3) {
     explanations.push('Some activity preferences mentioned');
   }
-
   return explanations;
 }
-
 // Clear NLP cache
 export function clearNLPCache() {
   cache.clear();
   // console.log('NLP parsing cache cleared');
 }
-
 // Get service configuration for debugging
 export function getNLPServiceConfig() {
   return {
@@ -654,7 +573,6 @@ export function getNLPServiceConfig() {
     maxRetries: API_CONFIG.maxRetries,
   };
 }
-
 export default {
   parseTripDescription,
   getConfidenceExplanation,

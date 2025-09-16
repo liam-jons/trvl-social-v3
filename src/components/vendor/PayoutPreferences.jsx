@@ -2,7 +2,6 @@
  * Vendor Payout Preferences Component
  * Allows vendors to configure their payout settings and preferences
  */
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -10,7 +9,6 @@ import { Badge } from '../ui/badge';
 import { AlertCircle, Calendar, DollarSign, Settings, Save, Clock } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { PAYOUT_SCHEDULES } from '../../services/payout-scheduler-service';
-
 const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
   const [preferences, setPreferences] = useState({
     schedule_interval: 'weekly',
@@ -22,12 +20,10 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [payoutStatus, setPayoutStatus] = useState(null);
-
   useEffect(() => {
     loadPreferences();
     loadPayoutStatus();
   }, [vendorStripeAccountId]);
-
   const loadPreferences = async () => {
     try {
       const { data, error } = await supabase
@@ -41,9 +37,7 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
         `)
         .eq('id', vendorStripeAccountId)
         .single();
-
       if (error) throw error;
-
       if (data) {
         setPreferences({
           schedule_interval: data.payout_schedule_interval || 'weekly',
@@ -59,7 +53,6 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
       setLoading(false);
     }
   };
-
   const loadPayoutStatus = async () => {
     try {
       // Get pending payout amount
@@ -69,11 +62,8 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
         .eq('vendor_stripe_account_id', vendorStripeAccountId)
         .eq('status', 'completed')
         .in('payout_status', ['pending', 'eligible']);
-
       if (paymentsError) throw paymentsError;
-
       const pendingAmount = pendingPayments?.reduce((sum, p) => sum + p.net_amount, 0) || 0;
-
       // Get last payout
       const { data: lastPayout, error: payoutError } = await supabase
         .from('vendor_payouts')
@@ -82,7 +72,6 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
-
       setPayoutStatus({
         pendingAmount,
         lastPayout: payoutError ? null : lastPayout,
@@ -91,11 +80,9 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
       console.error('Failed to load payout status:', error);
     }
   };
-
   const savePreferences = async () => {
     setSaving(true);
     setError(null);
-
     try {
       const { error } = await supabase
         .from('vendor_stripe_accounts')
@@ -107,18 +94,14 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
           updated_at: new Date().toISOString(),
         })
         .eq('id', vendorStripeAccountId);
-
       if (error) throw error;
-
       // Notify parent component
       if (onUpdate) {
         onUpdate(preferences);
       }
-
       // Show success message briefly
       setError('Preferences saved successfully!');
       setTimeout(() => setError(null), 3000);
-
     } catch (error) {
       console.error('Failed to save preferences:', error);
       setError('Failed to save preferences. Please try again.');
@@ -126,14 +109,12 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
       setSaving(false);
     }
   };
-
   const formatAmount = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
     }).format(amount / 100);
   };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -141,12 +122,10 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
       day: 'numeric',
     });
   };
-
   const getScheduleDescription = (interval) => {
     const schedule = PAYOUT_SCHEDULES[interval?.toUpperCase()];
     return schedule ? schedule.description : 'Unknown schedule';
   };
-
   if (loading) {
     return (
       <Card>
@@ -159,7 +138,6 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
       </Card>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Current Status Card */}
@@ -205,7 +183,6 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
           </div>
         </CardContent>
       </Card>
-
       {/* Preferences Card */}
       <Card>
         <CardHeader>
@@ -242,7 +219,6 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
               />
             </button>
           </div>
-
           {preferences.auto_payout_enabled && (
             <>
               {/* Payout Schedule */}
@@ -268,7 +244,6 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
                   {getScheduleDescription(preferences.schedule_interval)}
                 </p>
               </div>
-
               {/* Minimum Payout Amount */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -295,7 +270,6 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
                   Payouts will only be processed when your pending balance reaches this amount
                 </p>
               </div>
-
               {/* Hold Period */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -323,7 +297,6 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
               </div>
             </>
           )}
-
           {/* Error/Success Message */}
           {error && (
             <div className={`flex items-center p-3 rounded-md ${
@@ -333,7 +306,6 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
               {error}
             </div>
           )}
-
           {/* Save Button */}
           <div className="flex justify-end">
             <Button
@@ -356,7 +328,6 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
           </div>
         </CardContent>
       </Card>
-
       {/* Information Card */}
       <Card>
         <CardContent className="p-4">
@@ -378,5 +349,4 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
     </div>
   );
 };
-
 export default PayoutPreferences;

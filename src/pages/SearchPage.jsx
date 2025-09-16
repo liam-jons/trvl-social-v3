@@ -6,11 +6,9 @@ import FilterPanel from '../components/adventure/FilterPanel';
 import MapView from '../components/adventure/MapView';
 import searchService from '../services/searchService';
 import { mockAdventures } from '../data/mock-adventures';
-
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState(searchParams.get('q') || '');
@@ -26,12 +24,10 @@ const SearchPage = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [showTrendingSection, setShowTrendingSection] = useState(true);
-
   // Initialize search service
   useEffect(() => {
     searchService.initialize(mockAdventures);
   }, []);
-
   // Handle initial search from URL params
   useEffect(() => {
     const urlQuery = searchParams.get('q');
@@ -40,7 +36,6 @@ const SearchPage = () => {
       performSearch(urlQuery);
     }
   }, [searchParams]);
-
   // Perform search
   const performSearch = async (searchQuery) => {
     if (!searchQuery.trim()) {
@@ -48,10 +43,8 @@ const SearchPage = () => {
       setShowTrendingSection(true);
       return;
     }
-
     setIsLoading(true);
     setShowTrendingSection(false);
-
     try {
       const results = searchService.search(searchQuery, { limit: 50 });
       const filteredResults = applyFilters(results);
@@ -63,7 +56,6 @@ const SearchPage = () => {
       setIsLoading(false);
     }
   };
-
   // Apply filters to search results
   const applyFilters = (results) => {
     return results.filter(adventure => {
@@ -71,43 +63,35 @@ const SearchPage = () => {
       if (adventure.price < filters.priceRange[0] || adventure.price > filters.priceRange[1]) {
         return false;
       }
-
       // Duration filter
       if (filters.duration && !adventure.duration.toLowerCase().includes(filters.duration.toLowerCase())) {
         return false;
       }
-
       // Difficulty filter
       if (filters.difficulty && adventure.difficulty !== filters.difficulty) {
         return false;
       }
-
       // Tags filter
       if (filters.tags.length > 0 && !filters.tags.some(tag => adventure.tags?.includes(tag))) {
         return false;
       }
-
       // Rating filter
       if (filters.rating > 0 && adventure.rating < filters.rating) {
         return false;
       }
-
       return true;
     });
   };
-
   // Handle search from search bar
   const handleSearch = (results, searchQuery) => {
     setQuery(searchQuery);
     setSearchParams(searchQuery ? { q: searchQuery } : {});
     setSearchResults(results);
   };
-
   // Handle adventure selection
   const handleAdventureSelect = (adventure) => {
     navigate(`/adventures/${adventure.id}`);
   };
-
   // Handle filter changes
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
@@ -117,11 +101,9 @@ const SearchPage = () => {
       setSearchResults(filteredResults);
     }
   };
-
   // Get trending searches for empty state
   const trendingSearches = searchService.getTrendingSearches();
   const popularSearches = searchService.popularSearches.slice(0, 8);
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header with Search */}
@@ -152,7 +134,6 @@ const SearchPage = () => {
           </div>
         </div>
       </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-8">
           {/* Filters Sidebar */}
@@ -167,7 +148,6 @@ const SearchPage = () => {
               </div>
             </div>
           )}
-
           {/* Main Content */}
           <div className="flex-1">
             {showMap && searchResults.length > 0 && (
@@ -178,7 +158,6 @@ const SearchPage = () => {
                 />
               </div>
             )}
-
             {/* Trending Section (shown when no search) */}
             {showTrendingSection && !query.trim() && (
               <div className="space-y-8">
@@ -197,7 +176,6 @@ const SearchPage = () => {
                 />
               </div>
             )}
-
             {/* Search Results */}
             {(query.trim() || !showTrendingSection) && (
               <SearchResults
@@ -218,13 +196,11 @@ const SearchPage = () => {
     </div>
   );
 };
-
 const TrendingSection = ({ trendingSearches, popularSearches, onSearchSelect }) => {
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Discover Adventures</h2>
-
         {/* Trending Searches */}
         <div className="mb-8">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -253,7 +229,6 @@ const TrendingSection = ({ trendingSearches, popularSearches, onSearchSelect }) 
             ))}
           </div>
         </div>
-
         {/* Popular Searches */}
         <div>
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Popular Searches</h3>
@@ -273,7 +248,6 @@ const TrendingSection = ({ trendingSearches, popularSearches, onSearchSelect }) 
     </div>
   );
 };
-
 const PopularAdventures = ({ adventures, onAdventureClick }) => {
   return (
     <div>
@@ -307,5 +281,4 @@ const PopularAdventures = ({ adventures, onAdventureClick }) => {
     </div>
   );
 };
-
 export default SearchPage;

@@ -11,16 +11,13 @@ import GlassCard from '../components/ui/GlassCard';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import notificationService from '../services/notification-service';
-
 const NotificationsPage = () => {
   const [notifications, setNotifications] = useState([]);
   const [filter, setFilter] = useState('all'); // all, unread, read
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     loadNotifications();
   }, []);
-
   const loadNotifications = async () => {
     setLoading(true);
     try {
@@ -70,13 +67,11 @@ const NotificationsPage = () => {
       setLoading(false);
     }
   };
-
   const filteredNotifications = notifications.filter(notif => {
     if (filter === 'unread') return !notif.read;
     if (filter === 'read') return notif.read;
     return true;
   });
-
   const markAsRead = (id) => {
     setNotifications(prev =>
       prev.map(notif =>
@@ -84,21 +79,17 @@ const NotificationsPage = () => {
       )
     );
   };
-
   const markAllAsRead = () => {
     setNotifications(prev =>
       prev.map(notif => ({ ...notif, read: true }))
     );
   };
-
   const deleteNotification = (id) => {
     setNotifications(prev => prev.filter(notif => notif.id !== id));
   };
-
   const clearAll = () => {
     setNotifications([]);
   };
-
   const getRelativeTime = (timestamp) => {
     const now = new Date();
     const then = new Date(timestamp);
@@ -106,13 +97,11 @@ const NotificationsPage = () => {
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
-
     if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
     if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
     if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
     return 'Just now';
   };
-
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'booking':
@@ -127,7 +116,6 @@ const NotificationsPage = () => {
         return '📬';
     }
   };
-
   return (
     <div className="min-h-screen py-12 px-4">
       <div className="max-w-4xl mx-auto">
@@ -141,7 +129,6 @@ const NotificationsPage = () => {
             Stay updated with your travel activities
           </p>
         </motion.div>
-
         {/* Actions Bar */}
         <GlassCard className="mb-6 p-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -195,7 +182,6 @@ const NotificationsPage = () => {
             </div>
           </div>
         </GlassCard>
-
         {/* Notifications List */}
         {loading ? (
           <div className="text-center py-12">
@@ -280,5 +266,4 @@ const NotificationsPage = () => {
     </div>
   );
 };
-
 export default NotificationsPage;

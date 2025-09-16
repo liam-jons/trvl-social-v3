@@ -2,7 +2,6 @@
  * Currency Service for multi-currency support
  * Handles currency conversion, exchange rates, and international formatting
  */
-
 // Configuration
 const CURRENCY_CONFIG = {
   baseCurrency: 'USD',
@@ -13,7 +12,6 @@ const CURRENCY_CONFIG = {
   retries: 3,
   timeout: 5000,
 };
-
 // Supported currencies with regional information
 export const SUPPORTED_CURRENCIES = {
   USD: {
@@ -117,13 +115,11 @@ export const SUPPORTED_CURRENCIES = {
     taxRate: 0.25, // Norwegian VAT
   },
 };
-
 // Exchange rate cache
 let exchangeRateCache = {
   data: {},
   timestamp: 0,
 };
-
 /**
  * Currency Service
  */
@@ -133,17 +129,14 @@ export class CurrencyService {
    */
   static async getExchangeRates(baseCurrency = CURRENCY_CONFIG.baseCurrency) {
     const now = Date.now();
-
     // Check cache first
     if (exchangeRateCache.timestamp &&
         (now - exchangeRateCache.timestamp) < CURRENCY_CONFIG.cacheTime &&
         exchangeRateCache.data[baseCurrency]) {
       return exchangeRateCache.data[baseCurrency];
     }
-
     try {
       let rates;
-
       // Try primary API first
       if (CURRENCY_CONFIG.apiKey) {
         rates = await this.fetchFromExchangeRateAPI(baseCurrency);
@@ -151,29 +144,24 @@ export class CurrencyService {
         // Fallback to free API
         rates = await this.fetchFromFallbackAPI(baseCurrency);
       }
-
       // Update cache
       if (!exchangeRateCache.data) {
         exchangeRateCache.data = {};
       }
       exchangeRateCache.data[baseCurrency] = rates;
       exchangeRateCache.timestamp = now;
-
       return rates;
     } catch (error) {
       console.error('Failed to fetch exchange rates:', error);
-
       // Return cached data if available
       if (exchangeRateCache.data[baseCurrency]) {
         console.warn('Using cached exchange rates due to API failure');
         return exchangeRateCache.data[baseCurrency];
       }
-
       // Return 1:1 rates as last resort
       return this.getDefaultRates();
     }
   }
-
   /**
    * Fetch rates from primary API (ExchangeRate-API)
    */
@@ -182,15 +170,12 @@ export class CurrencyService {
       `${CURRENCY_CONFIG.apiUrl}/${CURRENCY_CONFIG.apiKey}/latest/${baseCurrency}`,
       { timeout: CURRENCY_CONFIG.timeout }
     );
-
     if (!response.ok) {
       throw new Error(`Exchange rate API error: ${response.status}`);
     }
-
     const data = await response.json();
     return data.conversion_rates;
   }
-
   /**
    * Fetch rates from fallback API (free service)
    */
@@ -199,15 +184,12 @@ export class CurrencyService {
       `${CURRENCY_CONFIG.fallbackApiUrl}/latest?base=${baseCurrency}`,
       { timeout: CURRENCY_CONFIG.timeout }
     );
-
     if (!response.ok) {
       throw new Error(`Fallback API error: ${response.status}`);
     }
-
     const data = await response.json();
     return data.rates;
   }
-
   /**
    * Get default 1:1 rates for supported currencies
    */
@@ -218,7 +200,6 @@ export class CurrencyService {
     });
     return rates;
   }
-
   /**
    * Convert amount between currencies
    */
@@ -226,17 +207,13 @@ export class CurrencyService {
     if (fromCurrency === toCurrency) {
       return amount;
     }
-
     const rates = await this.getExchangeRates(fromCurrency);
     const rate = rates[toCurrency];
-
     if (!rate) {
       throw new Error(`Exchange rate not available for ${toCurrency}`);
     }
-
     return amount * rate;
   }
-
   /**
    * Format currency amount for display
    */
@@ -245,7 +222,6 @@ export class CurrencyService {
     if (!currencyInfo) {
       throw new Error(`Unsupported currency: ${currency}`);
     }
-
     const {
       showSymbol = true,
       showCode = false,
@@ -253,7 +229,6 @@ export class CurrencyService {
       minimumFractionDigits = currencyInfo.decimals,
       maximumFractionDigits = currencyInfo.decimals,
     } = options;
-
     try {
       // Use Intl.NumberFormat for proper localization
       const formatter = new Intl.NumberFormat(locale, {
@@ -262,21 +237,17 @@ export class CurrencyService {
         minimumFractionDigits,
         maximumFractionDigits,
       });
-
       let formatted = formatter.format(amount);
-
       // Add currency code if requested
       if (showCode && !showSymbol) {
         formatted += ` ${currency}`;
       }
-
       return formatted;
     } catch (error) {
       // Fallback to manual formatting
       const symbol = showSymbol ? currencyInfo.symbol : '';
       const decimals = currencyInfo.decimals;
       const fixed = amount.toFixed(decimals);
-
       if (currencyInfo.symbolPosition === 'before') {
         return `${symbol}${fixed}${showCode ? ` ${currency}` : ''}`;
       } else {
@@ -284,7 +255,6 @@ export class CurrencyService {
       }
     }
   }
-
   /**
    * Calculate tax for currency/region
    */
@@ -293,11 +263,9 @@ export class CurrencyService {
     if (!currencyInfo || !currencyInfo.taxable) {
       return 0;
     }
-
     const rate = customRate !== null ? customRate : currencyInfo.taxRate;
     return amount * rate;
   }
-
   /**
    * Get tax rate for currency/region
    */
@@ -305,7 +273,6 @@ export class CurrencyService {
     const currencyInfo = SUPPORTED_CURRENCIES[currency];
     return currencyInfo?.taxRate || 0;
   }
-
   /**
    * Detect user's currency from location
    */
@@ -315,11 +282,9 @@ export class CurrencyService {
       const response = await fetch('https://ipapi.co/json/', {
         timeout: 3000,
       });
-
       if (response.ok) {
         const data = await response.json();
         const countryCode = data.country_code;
-
         // Map country to currency
         const currencyMap = {
           US: 'USD',
@@ -339,13 +304,11 @@ export class CurrencyService {
           CY: 'EUR', MT: 'EUR', SI: 'EUR', SK: 'EUR',
           EE: 'EUR', LV: 'EUR', LT: 'EUR',
         };
-
         return currencyMap[countryCode] || 'USD';
       }
     } catch (error) {
       console.warn('Failed to detect user currency:', error);
     }
-
     // Fallback to browser locale
     try {
       const locale = navigator.language || navigator.languages[0];
@@ -360,24 +323,20 @@ export class CurrencyService {
     } catch (error) {
       console.warn('Failed to detect locale:', error);
     }
-
     return 'USD'; // Default fallback
   }
-
   /**
    * Get all supported currencies
    */
   static getSupportedCurrencies() {
     return Object.values(SUPPORTED_CURRENCIES);
   }
-
   /**
    * Validate currency code
    */
   static isValidCurrency(currency) {
     return currency && SUPPORTED_CURRENCIES.hasOwnProperty(currency.toUpperCase());
   }
-
   /**
    * Convert Stripe amount (cents) to display amount
    */
@@ -386,15 +345,12 @@ export class CurrencyService {
     if (!currencyInfo) {
       throw new Error(`Unsupported currency: ${currency}`);
     }
-
     if (currencyInfo.decimals === 0) {
       // For currencies like JPY that don't use decimal places
       return amountInCents;
     }
-
     return amountInCents / 100;
   }
-
   /**
    * Convert display amount to Stripe amount (cents)
    */
@@ -403,21 +359,17 @@ export class CurrencyService {
     if (!currencyInfo) {
       throw new Error(`Unsupported currency: ${currency}`);
     }
-
     if (currencyInfo.decimals === 0) {
       // For currencies like JPY that don't use decimal places
       return Math.round(amount);
     }
-
     return Math.round(amount * 100);
   }
-
   /**
    * Create currency conversion preview
    */
   static async createConversionPreview(amount, fromCurrency, targetCurrencies = ['USD', 'EUR', 'GBP']) {
     const conversions = {};
-
     for (const toCurrency of targetCurrencies) {
       if (toCurrency !== fromCurrency) {
         try {
@@ -432,10 +384,8 @@ export class CurrencyService {
         }
       }
     }
-
     return conversions;
   }
 }
-
 // Export default service instance
 export default CurrencyService;

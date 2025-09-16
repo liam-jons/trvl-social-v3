@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { locationService } from '../../services/location-service';
 import GlassInput from '../ui/GlassInput';
 import GlassCard from '../ui/GlassCard';
-
 const LocationSearch = ({ onLocationSelect, placeholder = "Search locations..." }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
@@ -10,7 +9,6 @@ const LocationSearch = ({ onLocationSelect, placeholder = "Search locations..." 
   const [showResults, setShowResults] = useState(false);
   const searchTimeout = useRef(null);
   const resultsRef = useRef(null);
-
   // Debounced search function
   const performSearch = async (searchQuery) => {
     if (!searchQuery.trim() || searchQuery.length < 3) {
@@ -18,7 +16,6 @@ const LocationSearch = ({ onLocationSelect, placeholder = "Search locations..." 
       setShowResults(false);
       return;
     }
-
     setLoading(true);
     try {
       const locations = await locationService.geocodeAddress(searchQuery);
@@ -31,28 +28,23 @@ const LocationSearch = ({ onLocationSelect, placeholder = "Search locations..." 
       setLoading(false);
     }
   };
-
   // Handle input change with debouncing
   const handleInputChange = (e) => {
     const value = e.target.value;
     setQuery(value);
-
     // Clear previous timeout
     if (searchTimeout.current) {
       clearTimeout(searchTimeout.current);
     }
-
     // Set new timeout for search
     searchTimeout.current = setTimeout(() => {
       performSearch(value);
     }, 300);
   };
-
   // Handle location selection
   const handleLocationSelect = (location) => {
     setQuery(location.place_name);
     setShowResults(false);
-
     onLocationSelect({
       name: location.place_name,
       latitude: location.center.latitude,
@@ -60,7 +52,6 @@ const LocationSearch = ({ onLocationSelect, placeholder = "Search locations..." 
       context: location.context
     });
   };
-
   // Handle click outside to close results
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -68,13 +59,11 @@ const LocationSearch = ({ onLocationSelect, placeholder = "Search locations..." 
         setShowResults(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -83,7 +72,6 @@ const LocationSearch = ({ onLocationSelect, placeholder = "Search locations..." 
       }
     };
   }, []);
-
   return (
     <div className="relative" ref={resultsRef}>
       <div className="relative">
@@ -93,7 +81,6 @@ const LocationSearch = ({ onLocationSelect, placeholder = "Search locations..." 
           placeholder={placeholder}
           className="pr-10"
         />
-
         {/* Search/Loading Icon */}
         <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
           {loading ? (
@@ -105,7 +92,6 @@ const LocationSearch = ({ onLocationSelect, placeholder = "Search locations..." 
           )}
         </div>
       </div>
-
       {/* Search Results */}
       {showResults && results.length > 0 && (
         <GlassCard className="absolute top-full left-0 right-0 z-50 mt-1 max-h-64 overflow-y-auto" padding="none">
@@ -141,7 +127,6 @@ const LocationSearch = ({ onLocationSelect, placeholder = "Search locations..." 
           ))}
         </GlassCard>
       )}
-
       {/* No Results */}
       {showResults && results.length === 0 && !loading && query.length >= 3 && (
         <GlassCard className="absolute top-full left-0 right-0 z-50 mt-1" padding="sm">
@@ -156,5 +141,4 @@ const LocationSearch = ({ onLocationSelect, placeholder = "Search locations..." 
     </div>
   );
 };
-
 export default LocationSearch;

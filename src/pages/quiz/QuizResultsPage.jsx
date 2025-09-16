@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import QuizResults from '../../components/quiz/QuizResults';
 import { calculatePersonalityProfile } from '../../utils/personality-calculator';
-
 export default function QuizResultsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -11,7 +10,6 @@ export default function QuizResultsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isHistorical, setIsHistorical] = useState(false);
-
   useEffect(() => {
     const loadResults = async () => {
       try {
@@ -21,11 +19,9 @@ export default function QuizResultsPage() {
           const assessment = JSON.parse(selectedAssessment);
           setIsHistorical(assessment.isHistorical || false);
         }
-
         // Check for existing profile in session storage
         const savedProfile = sessionStorage.getItem('personalityProfile');
         const savedAnswers = sessionStorage.getItem('quizAnswers');
-
         if (savedProfile) {
           // Parse existing profile
           const parsedProfile = JSON.parse(savedProfile);
@@ -35,7 +31,6 @@ export default function QuizResultsPage() {
           const answers = JSON.parse(savedAnswers);
           const calculatedProfile = await calculatePersonalityProfile(answers);
           setProfile(calculatedProfile);
-
           // Save the calculated profile
           sessionStorage.setItem('personalityProfile', JSON.stringify(calculatedProfile));
         } else {
@@ -50,10 +45,8 @@ export default function QuizResultsPage() {
         setIsLoading(false);
       }
     };
-
     loadResults();
   }, [navigate]);
-
   const handleRetakeQuiz = () => {
     // Clear existing data and navigate to quiz
     sessionStorage.removeItem('personalityProfile');
@@ -61,18 +54,15 @@ export default function QuizResultsPage() {
     sessionStorage.removeItem('selectedAssessment');
     navigate('/quiz');
   };
-
   const handleViewHistory = () => {
     navigate('/quiz/history');
   };
-
   const handleShare = async (personalityProfile) => {
     const shareData = {
       title: `My Travel Personality: ${personalityProfile.personalityType}`,
       text: `I just discovered my travel personality! I'm ${personalityProfile.personalityType}. 🌍✈️\n\nFind out yours at ${window.location.origin}/quiz`,
       url: `${window.location.origin}/quiz`
     };
-
     try {
       if (navigator.share && navigator.canShare(shareData)) {
         await navigator.share(shareData);
@@ -80,7 +70,6 @@ export default function QuizResultsPage() {
         // Fallback to clipboard
         const shareText = `${shareData.text}\n\n${shareData.url}`;
         await navigator.clipboard.writeText(shareText);
-
         // You could show a toast notification here
         console.log('Results copied to clipboard!');
       }
@@ -90,7 +79,6 @@ export default function QuizResultsPage() {
       }
     }
   };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
@@ -101,7 +89,6 @@ export default function QuizResultsPage() {
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
@@ -127,7 +114,6 @@ export default function QuizResultsPage() {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
       <QuizResults

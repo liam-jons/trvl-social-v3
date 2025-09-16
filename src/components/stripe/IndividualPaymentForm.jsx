@@ -2,7 +2,6 @@
  * Individual Payment Form Component
  * Allows participants to pay their share in a group payment
  */
-
 import React, { useState, useEffect } from 'react';
 import { GlassCard } from '../ui/GlassCard.jsx';
 import { GlassButton } from '../ui/GlassButton.jsx';
@@ -17,7 +16,6 @@ import {
   InformationCircleIcon,
 } from '@heroicons/react/24/outline';
 import { groupPaymentManager } from '../../services/split-payment-service.js';
-
 const IndividualPaymentForm = ({
   individualPaymentId,
   userId,
@@ -30,16 +28,13 @@ const IndividualPaymentForm = ({
   const [error, setError] = useState(null);
   const [paymentIntent, setPaymentIntent] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
-
   useEffect(() => {
     fetchPaymentData();
   }, [individualPaymentId]);
-
   const fetchPaymentData = async () => {
     try {
       setLoading(true);
       setError(null);
-
       // Get individual payment details
       const { data: payment, error: paymentError } = await supabase
         .from('individual_payments')
@@ -52,50 +47,39 @@ const IndividualPaymentForm = ({
         `)
         .eq('id', individualPaymentId)
         .single();
-
       if (paymentError) throw paymentError;
-
       if (payment.user_id !== userId) {
         throw new Error('Unauthorized: You can only pay for your own share');
       }
-
       if (payment.status === 'paid') {
         throw new Error('Payment has already been completed');
       }
-
       if (payment.status === 'refunded') {
         throw new Error('This payment has been refunded');
       }
-
       // Check if deadline has passed
       const now = new Date();
       const deadline = new Date(payment.payment_deadline);
       if (now > deadline) {
         console.warn('Payment deadline has passed, but allowing payment attempt');
       }
-
       setPaymentData(payment);
-
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
-
   const initializePayment = async () => {
     try {
       setIsProcessing(true);
       setError(null);
-
       // Create payment intent through the group payment manager
       const result = await groupPaymentManager.processIndividualPayment(
         individualPaymentId,
         userId
       );
-
       setPaymentIntent(result);
-
     } catch (err) {
       setError(err.message);
       onError?.(err.message);
@@ -103,7 +87,6 @@ const IndividualPaymentForm = ({
       setIsProcessing(false);
     }
   };
-
   const handlePaymentSuccess = async (result) => {
     try {
       // Update payment status
@@ -112,16 +95,13 @@ const IndividualPaymentForm = ({
         'paid',
         result.paymentIntent?.id
       );
-
       // Cancel any remaining reminders for this payment
       // This would be handled by the collection service
-
       onSuccess?.({
         individualPaymentId,
         paymentIntentId: result.paymentIntent?.id,
         amount: paymentData.amount_due,
       });
-
     } catch (error) {
       console.error('Failed to update payment status:', error);
       // Payment succeeded with Stripe but status update failed
@@ -129,47 +109,37 @@ const IndividualPaymentForm = ({
       onError?.('Payment processed successfully, but there was an issue updating the status. Please contact support if you see this payment as incomplete.');
     }
   };
-
   const handlePaymentError = (error) => {
     console.error('Payment failed:', error);
     onError?.(error);
   };
-
   const formatAmount = (amountInCents) => {
     return `$${(amountInCents / 100).toFixed(2)}`;
   };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString();
   };
-
   const getTimeUntilDeadline = (deadline) => {
     const now = new Date();
     const deadlineDate = new Date(deadline);
     const timeDiff = deadlineDate.getTime() - now.getTime();
-
     if (timeDiff <= 0) return 'Overdue';
-
     const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-
     if (days > 0) return `${days}d ${hours}h remaining`;
     if (hours > 0) return `${hours}h ${minutes}m remaining`;
     return `${minutes}m remaining`;
   };
-
   const isDeadlinePassed = (deadline) => {
     return new Date() > new Date(deadline);
   };
-
   const isDeadlineUrgent = (deadline) => {
     const now = new Date();
     const deadlineDate = new Date(deadline);
     const timeDiff = deadlineDate.getTime() - now.getTime();
     return timeDiff > 0 && timeDiff < 24 * 60 * 60 * 1000; // Less than 24 hours
   };
-
   if (loading) {
     return (
       <GlassCard className="p-6">
@@ -180,7 +150,6 @@ const IndividualPaymentForm = ({
       </GlassCard>
     );
   }
-
   if (error) {
     return (
       <GlassCard className="p-6">
@@ -196,12 +165,10 @@ const IndividualPaymentForm = ({
       </GlassCard>
     );
   }
-
   const { split_payments: splitPayment } = paymentData;
   const booking = splitPayment.bookings;
   const deadlinePassed = isDeadlinePassed(paymentData.payment_deadline);
   const deadlineUrgent = isDeadlineUrgent(paymentData.payment_deadline);
-
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       {/* Payment Header */}
@@ -215,13 +182,11 @@ const IndividualPaymentForm = ({
             Your share of the group booking payment
           </p>
         </div>
-
         {/* Booking Information */}
         <div className="bg-white/5 border border-white/10 rounded-lg p-4 mb-6">
           <h3 className="text-lg font-medium text-white mb-3">
             {booking?.title || 'Group Booking'}
           </h3>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-gray-400">Your Amount:</span>
@@ -236,7 +201,6 @@ const IndividualPaymentForm = ({
               </div>
             </div>
           </div>
-
           {booking?.description && (
             <div className="mt-4 pt-4 border-t border-white/10">
               <span className="text-gray-400 text-sm">Description:</span>
@@ -244,7 +208,6 @@ const IndividualPaymentForm = ({
             </div>
           )}
         </div>
-
         {/* Payment Deadline */}
         <div className={`rounded-lg border p-4 ${
           deadlinePassed
@@ -281,7 +244,6 @@ const IndividualPaymentForm = ({
             </div>
           </div>
         </div>
-
         {/* Warning Messages */}
         {deadlinePassed && (
           <div className="mt-4 p-4 bg-red-500/20 border border-red-500/30 rounded-lg">
@@ -297,7 +259,6 @@ const IndividualPaymentForm = ({
             </div>
           </div>
         )}
-
         {deadlineUrgent && !deadlinePassed && (
           <div className="mt-4 p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
             <div className="flex items-start">
@@ -311,7 +272,6 @@ const IndividualPaymentForm = ({
             </div>
           </div>
         )}
-
         {/* Group Status Information */}
         <div className="mt-6 p-4 bg-white/5 border border-white/10 rounded-lg">
           <div className="flex items-center mb-2">
@@ -324,7 +284,6 @@ const IndividualPaymentForm = ({
           </p>
         </div>
       </GlassCard>
-
       {/* Payment Form */}
       {!paymentIntent ? (
         <GlassCard className="p-6">
@@ -366,7 +325,6 @@ const IndividualPaymentForm = ({
           mode="payment"
         />
       )}
-
       {/* Information Card */}
       <GlassCard className="p-4">
         <div className="flex items-start">
@@ -382,7 +340,6 @@ const IndividualPaymentForm = ({
           </div>
         </div>
       </GlassCard>
-
       {/* Cancel Option */}
       {onCancel && (
         <div className="text-center">
@@ -398,5 +355,4 @@ const IndividualPaymentForm = ({
     </div>
   );
 };
-
 export default IndividualPaymentForm;

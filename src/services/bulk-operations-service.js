@@ -1,12 +1,10 @@
 import { supabase } from '../lib/supabase';
 import { vendorService } from './vendor-service';
-
 /**
  * Bulk Operations Service - Handles large-scale operations for adventures and bookings
  */
 export const bulkOperationsService = {
   // BULK ADVENTURE OPERATIONS
-
   /**
    * Update multiple adventures with batch processing
    */
@@ -18,11 +16,9 @@ export const bulkOperationsService = {
         failed: [],
         total: adventureIds.length
       };
-
       // Process in batches
       for (let i = 0; i < adventureIds.length; i += batchSize) {
         const batch = adventureIds.slice(i, i + batchSize);
-
         const { data, error } = await supabase
           .from('adventures')
           .update({
@@ -32,21 +28,18 @@ export const bulkOperationsService = {
           .eq('vendor_id', vendorId)
           .in('id', batch)
           .select('id, title');
-
         if (error) {
           results.failed.push(...batch.map(id => ({ id, error: error.message })));
         } else {
           results.successful.push(...(data || []));
         }
       }
-
       return { data: results, error: null };
     } catch (error) {
       console.error('Bulk update adventures error:', error);
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Bulk pricing adjustments
    */
@@ -57,7 +50,6 @@ export const bulkOperationsService = {
         failed: [],
         total: adventureIds.length
       };
-
       for (const adventureId of adventureIds) {
         try {
           // Get current pricing
@@ -67,14 +59,11 @@ export const bulkOperationsService = {
             .eq('id', adventureId)
             .eq('vendor_id', vendorId)
             .single();
-
           if (fetchError) {
             results.failed.push({ id: adventureId, error: fetchError.message });
             continue;
           }
-
           let newPrice = adventure.price_per_person;
-
           // Apply pricing adjustment
           switch (pricingAdjustment.type) {
             case 'percentage':
@@ -89,10 +78,8 @@ export const bulkOperationsService = {
             default:
               throw new Error('Invalid pricing adjustment type');
           }
-
           // Ensure minimum price
           newPrice = Math.max(newPrice, pricingAdjustment.minimumPrice || 0);
-
           // Update adventure pricing
           const { data: updatedAdventure, error: updateError } = await supabase
             .from('adventures')
@@ -104,7 +91,6 @@ export const bulkOperationsService = {
             .eq('vendor_id', vendorId)
             .select('id, title, price_per_person')
             .single();
-
           if (updateError) {
             results.failed.push({ id: adventureId, error: updateError.message });
           } else {
@@ -118,14 +104,12 @@ export const bulkOperationsService = {
           results.failed.push({ id: adventureId, error: error.message });
         }
       }
-
       return { data: results, error: null };
     } catch (error) {
       console.error('Bulk pricing update error:', error);
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Bulk status updates (publish, unpublish, archive)
    */
@@ -135,7 +119,6 @@ export const bulkOperationsService = {
       if (!validStatuses.includes(newStatus)) {
         throw new Error('Invalid status. Must be one of: ' + validStatuses.join(', '));
       }
-
       const { data, error } = await supabase
         .from('adventures')
         .update({
@@ -145,11 +128,9 @@ export const bulkOperationsService = {
         .eq('vendor_id', vendorId)
         .in('id', adventureIds)
         .select('id, title, status');
-
       if (error) {
         return { data: null, error };
       }
-
       return {
         data: {
           successful: data || [],
@@ -164,9 +145,7 @@ export const bulkOperationsService = {
       return { data: null, error: error.message };
     }
   },
-
   // BULK BOOKING OPERATIONS
-
   /**
    * Get bookings for bulk operations
    */
@@ -189,30 +168,24 @@ export const bulkOperationsService = {
           )
         `)
         .eq('adventures.vendor_id', vendorId);
-
       // Apply filters
       if (filters.status) {
         query = query.in('status', Array.isArray(filters.status) ? filters.status : [filters.status]);
       }
-
       if (filters.dateRange) {
         query = query
           .gte('booking_date', filters.dateRange.start)
           .lte('booking_date', filters.dateRange.end);
       }
-
       if (filters.adventureIds) {
         query = query.in('adventure_id', filters.adventureIds);
       }
-
       // Apply sorting
       query = query.order('booking_date', { ascending: false });
-
       // Apply pagination if specified
       if (filters.limit) {
         query = query.limit(filters.limit);
       }
-
       const { data, error } = await query;
       return { data, error };
     } catch (error) {
@@ -220,7 +193,6 @@ export const bulkOperationsService = {
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Bulk booking status updates
    */
@@ -230,22 +202,18 @@ export const bulkOperationsService = {
       if (!validStatuses.includes(newStatus)) {
         throw new Error('Invalid booking status');
       }
-
       // First verify all bookings belong to vendor
       const { data: bookings, error: verifyError } = await supabase
         .from('bookings')
         .select('id, adventures!inner(vendor_id)')
         .in('id', bookingIds)
         .eq('adventures.vendor_id', vendorId);
-
       if (verifyError) {
         return { data: null, error: verifyError };
       }
-
       if (bookings.length !== bookingIds.length) {
         return { data: null, error: 'Some bookings not found or access denied' };
       }
-
       // Update booking statuses
       const { data, error } = await supabase
         .from('bookings')
@@ -255,16 +223,13 @@ export const bulkOperationsService = {
         })
         .in('id', bookingIds)
         .select('id, status');
-
       return { data, error };
     } catch (error) {
       console.error('Bulk booking status update error:', error);
       return { data: null, error: error.message };
     }
   },
-
   // BULK NOTIFICATION SYSTEM
-
   /**
    * Send bulk notifications to customers
    */
@@ -279,16 +244,13 @@ export const bulkOperationsService = {
         includeEmail = false,
         includeWhatsApp = false
       } = notificationData;
-
       let recipients = [];
-
       // Get recipients based on type
       switch (recipientType) {
         case 'booking_participants':
           const { data: bookingParticipants } = await this.getBulkBookingsData(vendorId, {
             ...(bookingIds.length > 0 && { bookingIds })
           });
-
           recipients = bookingParticipants?.flatMap(booking =>
             booking.booking_participants?.map(participant => ({
               userId: participant.user_id,
@@ -299,13 +261,11 @@ export const bulkOperationsService = {
             }))
           ) || [];
           break;
-
         case 'adventure_followers':
           // Get users who have bookings for these adventures
           const { data: adventureBookings } = await this.getBulkBookingsData(vendorId, {
             adventureIds
           });
-
           recipients = adventureBookings?.flatMap(booking =>
             booking.booking_participants?.map(participant => ({
               userId: participant.user_id,
@@ -315,23 +275,19 @@ export const bulkOperationsService = {
             }))
           ) || [];
           break;
-
         default:
           throw new Error('Invalid recipient type');
       }
-
       // Remove duplicates
       const uniqueRecipients = recipients.filter((recipient, index, self) =>
         index === self.findIndex(r => r.userId === recipient.userId)
       );
-
       // Send notifications
       const results = {
         successful: [],
         failed: [],
         total: uniqueRecipients.length
       };
-
       for (const recipient of uniqueRecipients) {
         try {
           // Create in-app notification
@@ -351,7 +307,6 @@ export const bulkOperationsService = {
             }])
             .select()
             .single();
-
           if (notificationError) {
             results.failed.push({
               recipient: recipient.fullName,
@@ -359,25 +314,21 @@ export const bulkOperationsService = {
             });
             continue;
           }
-
           // Send email if requested
           if (includeEmail && recipient.email) {
             // Integration point for email service
             console.log(`Would send email to ${recipient.email}: ${message}`);
           }
-
           // Send WhatsApp if requested
           if (includeWhatsApp) {
             // Integration point for WhatsApp service
             console.log(`Would send WhatsApp to ${recipient.fullName}: ${message}`);
           }
-
           results.successful.push({
             recipient: recipient.fullName,
             userId: recipient.userId,
             notificationId: notification.id
           });
-
         } catch (error) {
           results.failed.push({
             recipient: recipient.fullName,
@@ -385,16 +336,13 @@ export const bulkOperationsService = {
           });
         }
       }
-
       return { data: results, error: null };
     } catch (error) {
       console.error('Bulk notifications error:', error);
       return { data: null, error: error.message };
     }
   },
-
   // CSV IMPORT/EXPORT FUNCTIONALITY
-
   /**
    * Export adventures to CSV format
    */
@@ -404,11 +352,9 @@ export const bulkOperationsService = {
         limit: 10000, // Export all
         ...filters
       });
-
       if (error) {
         return { data: null, error };
       }
-
       // Convert to CSV format
       const csvHeaders = [
         'ID',
@@ -423,7 +369,6 @@ export const bulkOperationsService = {
         'Created At',
         'Updated At'
       ];
-
       const csvRows = adventures.map(adventure => [
         adventure.id,
         `"${adventure.title || ''}"`,
@@ -437,12 +382,10 @@ export const bulkOperationsService = {
         adventure.created_at || '',
         adventure.updated_at || ''
       ]);
-
       const csvContent = [
         csvHeaders.join(','),
         ...csvRows.map(row => row.join(','))
       ].join('\n');
-
       return {
         data: {
           csvContent,
@@ -456,18 +399,15 @@ export const bulkOperationsService = {
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Export bookings to CSV format
    */
   async exportBookingsToCSV(vendorId, filters = {}) {
     try {
       const { data: bookings, error } = await this.getBulkBookingsData(vendorId, filters);
-
       if (error) {
         return { data: null, error };
       }
-
       // Convert to CSV format
       const csvHeaders = [
         'Booking ID',
@@ -480,7 +420,6 @@ export const bulkOperationsService = {
         'Status',
         'Created At'
       ];
-
       const csvRows = bookings.flatMap(booking =>
         booking.booking_participants.map(participant => [
           booking.id,
@@ -494,12 +433,10 @@ export const bulkOperationsService = {
           booking.created_at || ''
         ])
       );
-
       const csvContent = [
         csvHeaders.join(','),
         ...csvRows.map(row => row.join(','))
       ].join('\n');
-
       return {
         data: {
           csvContent,
@@ -513,7 +450,6 @@ export const bulkOperationsService = {
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Import adventures from CSV data
    */
@@ -524,34 +460,28 @@ export const bulkOperationsService = {
         failed: [],
         total: 0
       };
-
       // Parse CSV data
       const lines = csvData.trim().split('\n');
       const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
-
       // Validate required headers
       const requiredHeaders = ['title', 'description', 'location', 'price_per_person'];
       const missingHeaders = requiredHeaders.filter(h =>
         !headers.some(header => header.toLowerCase().includes(h))
       );
-
       if (missingHeaders.length > 0) {
         return {
           data: null,
           error: `Missing required headers: ${missingHeaders.join(', ')}`
         };
       }
-
       // Process each row
       for (let i = 1; i < lines.length; i++) {
         try {
           const values = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
           const row = {};
-
           headers.forEach((header, index) => {
             row[header.toLowerCase().replace(/ /g, '_')] = values[index] || '';
           });
-
           // Create adventure data
           const adventureData = {
             vendor_id: vendorId,
@@ -566,7 +496,6 @@ export const bulkOperationsService = {
             difficulty_level: row.difficulty_level || 'beginner',
             is_active: options.autoActivate || false
           };
-
           // Validate required fields
           if (!adventureData.title || !adventureData.description || !adventureData.location) {
             results.failed.push({
@@ -576,13 +505,11 @@ export const bulkOperationsService = {
             });
             continue;
           }
-
           // Create adventure
           const { data: adventure, error: createError } = await vendorService.createAdventure(
             vendorId,
             adventureData
           );
-
           if (createError) {
             results.failed.push({
               row: i + 1,
@@ -595,7 +522,6 @@ export const bulkOperationsService = {
               adventure
             });
           }
-
         } catch (error) {
           results.failed.push({
             row: i + 1,
@@ -603,18 +529,14 @@ export const bulkOperationsService = {
           });
         }
       }
-
       results.total = lines.length - 1; // Exclude header row
-
       return { data: results, error: null };
     } catch (error) {
       console.error('Import adventures CSV error:', error);
       return { data: null, error: error.message };
     }
   },
-
   // BULK ACTION HISTORY
-
   /**
    * Log bulk action for history tracking
    */
@@ -633,14 +555,12 @@ export const bulkOperationsService = {
         }])
         .select()
         .single();
-
       return { data, error };
     } catch (error) {
       console.error('Log bulk action error:', error);
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Get bulk action history
    */
@@ -650,26 +570,21 @@ export const bulkOperationsService = {
         .from('bulk_action_history')
         .select('*')
         .eq('vendor_id', vendorId);
-
       if (options.actionType) {
         query = query.eq('action_type', options.actionType);
       }
-
       if (options.targetType) {
         query = query.eq('target_type', options.targetType);
       }
-
       if (options.dateRange) {
         query = query
           .gte('performed_at', options.dateRange.start)
           .lte('performed_at', options.dateRange.end);
       }
-
       // Apply sorting and pagination
       query = query
         .order('performed_at', { ascending: false })
         .limit(options.limit || 50);
-
       const { data, error } = await query;
       return { data, error };
     } catch (error) {
@@ -677,9 +592,7 @@ export const bulkOperationsService = {
       return { data: null, error: error.message };
     }
   },
-
   // BATCH PROCESSING QUEUE
-
   /**
    * Create a batch job for large operations
    */
@@ -698,14 +611,12 @@ export const bulkOperationsService = {
         }])
         .select()
         .single();
-
       return { data, error };
     } catch (error) {
       console.error('Create batch job error:', error);
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Update batch job progress
    */
@@ -723,14 +634,12 @@ export const bulkOperationsService = {
         .eq('id', jobId)
         .select()
         .single();
-
       return { data, error };
     } catch (error) {
       console.error('Update batch job progress error:', error);
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Get batch job status
    */
@@ -741,7 +650,6 @@ export const bulkOperationsService = {
         .select('*')
         .eq('id', jobId)
         .single();
-
       return { data, error };
     } catch (error) {
       console.error('Get batch job status error:', error);
@@ -749,5 +657,4 @@ export const bulkOperationsService = {
     }
   }
 };
-
 export default bulkOperationsService;

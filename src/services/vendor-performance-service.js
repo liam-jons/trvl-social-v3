@@ -1,12 +1,10 @@
 import { supabase } from '../lib/supabase';
-
 /**
  * Vendor Performance Service - Comprehensive tracking and management system
  * Handles KPIs, ratings, benchmarking, and performance reporting
  */
 export const vendorPerformanceService = {
   // CORE PERFORMANCE METRICS CALCULATION
-
   /**
    * Calculate comprehensive vendor performance metrics
    */
@@ -14,7 +12,6 @@ export const vendorPerformanceService = {
     try {
       const endDate = new Date();
       const startDate = new Date(endDate.getTime() - timeRange * 24 * 60 * 60 * 1000);
-
       // Get all relevant data in parallel
       const [
         bookingsResult,
@@ -29,7 +26,6 @@ export const vendorPerformanceService = {
         this.getCancellationMetrics(vendorId, startDate, endDate),
         this.getRevenueMetrics(vendorId, startDate, endDate)
       ]);
-
       // Calculate composite performance score
       const performanceScore = this.calculateCompositeScore({
         bookingCompletion: bookingsResult.data?.completionRate || 0,
@@ -38,7 +34,6 @@ export const vendorPerformanceService = {
         cancellationRate: cancellationResult.data?.cancellationRate || 0,
         revenueGrowth: revenueResult.data?.growthRate || 0
       });
-
       return {
         data: {
           performanceScore,
@@ -59,7 +54,6 @@ export const vendorPerformanceService = {
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Get booking completion and fulfillment metrics
    */
@@ -78,21 +72,16 @@ export const vendorPerformanceService = {
         .eq('adventures.vendor_id', vendorId)
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString());
-
       if (error) throw error;
-
       const totalBookings = bookings.length;
       const completedBookings = bookings.filter(b => b.status === 'completed').length;
       const confirmedBookings = bookings.filter(b => b.status === 'confirmed').length;
       const cancelledBookings = bookings.filter(b => b.status === 'cancelled').length;
-
       const completionRate = totalBookings > 0 ? (completedBookings / totalBookings) * 100 : 0;
       const confirmationRate = totalBookings > 0 ? (confirmedBookings / totalBookings) * 100 : 0;
-
       // Calculate booking velocity (bookings per day)
       const daysDiff = Math.max(1, (endDate - startDate) / (1000 * 60 * 60 * 24));
       const bookingVelocity = totalBookings / daysDiff;
-
       return {
         data: {
           totalBookings,
@@ -111,7 +100,6 @@ export const vendorPerformanceService = {
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Get customer review and satisfaction metrics
    */
@@ -129,13 +117,10 @@ export const vendorPerformanceService = {
         .eq('adventures.vendor_id', vendorId)
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString());
-
       if (error) throw error;
-
       const totalReviews = reviews.length;
       const averageRating = totalReviews > 0 ?
         reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews : 0;
-
       // Rating distribution
       const ratingDistribution = [1, 2, 3, 4, 5].map(rating => ({
         rating,
@@ -143,19 +128,15 @@ export const vendorPerformanceService = {
         percentage: totalReviews > 0 ?
           (reviews.filter(r => r.rating === rating).length / totalReviews) * 100 : 0
       }));
-
       // Customer satisfaction categories
       const excellentReviews = reviews.filter(r => r.rating >= 4.5).length;
       const goodReviews = reviews.filter(r => r.rating >= 3.5 && r.rating < 4.5).length;
       const poorReviews = reviews.filter(r => r.rating < 3.5).length;
-
       const satisfactionRate = totalReviews > 0 ?
         ((excellentReviews + goodReviews) / totalReviews) * 100 : 0;
-
       // Review velocity
       const daysDiff = Math.max(1, (endDate - startDate) / (1000 * 60 * 60 * 24));
       const reviewVelocity = totalReviews / daysDiff;
-
       return {
         data: {
           totalReviews,
@@ -173,7 +154,6 @@ export const vendorPerformanceService = {
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Get response time metrics for communications
    */
@@ -193,29 +173,22 @@ export const vendorPerformanceService = {
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString())
         .not('confirmed_at', 'is', null);
-
       if (error) throw error;
-
       const responseTimes = bookings.map(booking => {
         const createdTime = new Date(booking.created_at);
         const confirmedTime = new Date(booking.confirmed_at);
         return (confirmedTime - createdTime) / (1000 * 60 * 60); // hours
       });
-
       const averageResponseTime = responseTimes.length > 0 ?
         responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length : 0;
-
       const medianResponseTime = responseTimes.length > 0 ?
         this.calculateMedian(responseTimes) : 0;
-
       // Response time categories
       const quickResponses = responseTimes.filter(time => time <= 2).length; // 2 hours
       const moderateResponses = responseTimes.filter(time => time > 2 && time <= 24).length; // 24 hours
       const slowResponses = responseTimes.filter(time => time > 24).length;
-
       const quickResponseRate = responseTimes.length > 0 ?
         (quickResponses / responseTimes.length) * 100 : 0;
-
       return {
         data: {
           totalResponses: responseTimes.length,
@@ -232,7 +205,6 @@ export const vendorPerformanceService = {
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Get cancellation and reliability metrics
    */
@@ -250,9 +222,7 @@ export const vendorPerformanceService = {
         .eq('adventures.vendor_id', vendorId)
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString());
-
       if (error) throw error;
-
       const totalBookings = bookings.length;
       const cancelledBookings = bookings.filter(b => b.status === 'cancelled');
       const vendorCancellations = cancelledBookings.filter(b =>
@@ -262,16 +232,13 @@ export const vendorPerformanceService = {
       const customerCancellations = cancelledBookings.filter(b =>
         b.cancellation_reason === 'customer_initiated'
       );
-
       const cancellationRate = totalBookings > 0 ?
         (cancelledBookings.length / totalBookings) * 100 : 0;
       const vendorCancellationRate = totalBookings > 0 ?
         (vendorCancellations.length / totalBookings) * 100 : 0;
       const customerCancellationRate = totalBookings > 0 ?
         (customerCancellations.length / totalBookings) * 100 : 0;
-
       const reliabilityScore = 100 - vendorCancellationRate;
-
       return {
         data: {
           totalBookings,
@@ -289,7 +256,6 @@ export const vendorPerformanceService = {
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Get revenue and financial performance metrics
    */
@@ -308,12 +274,9 @@ export const vendorPerformanceService = {
         .eq('status', 'completed')
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString());
-
       if (error) throw error;
-
       const totalRevenue = bookings.reduce((sum, b) => sum + (b.total_amount || 0), 0);
       const averageBookingValue = bookings.length > 0 ? totalRevenue / bookings.length : 0;
-
       // Calculate growth rate (compare with previous period)
       const previousStartDate = new Date(startDate.getTime() - (endDate - startDate));
       const { data: previousBookings } = await supabase
@@ -323,14 +286,11 @@ export const vendorPerformanceService = {
         .eq('status', 'completed')
         .gte('created_at', previousStartDate.toISOString())
         .lte('created_at', startDate.toISOString());
-
       const previousRevenue = previousBookings?.reduce((sum, b) => sum + (b.total_amount || 0), 0) || 0;
       const growthRate = previousRevenue > 0 ?
         ((totalRevenue - previousRevenue) / previousRevenue) * 100 : 0;
-
       // Revenue by day for trending
       const revenueByDay = this.groupRevenueByDay(bookings, startDate, endDate);
-
       return {
         data: {
           totalRevenue,
@@ -346,9 +306,7 @@ export const vendorPerformanceService = {
       return { data: null, error: error.message };
     }
   },
-
   // PERFORMANCE SCORING AND BENCHMARKING
-
   /**
    * Calculate composite performance score (0-100)
    */
@@ -360,7 +318,6 @@ export const vendorPerformanceService = {
       cancellationRate: 0.15,
       revenueGrowth: 0.10
     };
-
     // Normalize metrics to 0-100 scale
     const normalizedMetrics = {
       bookingCompletion: Math.min(100, metrics.bookingCompletion),
@@ -369,14 +326,11 @@ export const vendorPerformanceService = {
       cancellationRate: Math.max(0, 100 - metrics.cancellationRate), // Lower is better
       revenueGrowth: Math.min(100, Math.max(0, metrics.revenueGrowth + 50)) // -50 to +50 becomes 0-100
     };
-
     const score = Object.entries(weights).reduce((total, [metric, weight]) => {
       return total + (normalizedMetrics[metric] * weight);
     }, 0);
-
     return Math.round(score);
   },
-
   /**
    * Get industry benchmarks for comparison
    */
@@ -400,7 +354,6 @@ export const vendorPerformanceService = {
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Compare vendor performance against benchmarks
    */
@@ -410,14 +363,11 @@ export const vendorPerformanceService = {
         this.calculatePerformanceMetrics(vendorId, timeRange),
         this.getIndustryBenchmarks()
       ]);
-
       if (performanceResult.error || benchmarkResult.error) {
         throw new Error('Failed to get performance or benchmark data');
       }
-
       const performance = performanceResult.data.metrics;
       const benchmarks = benchmarkResult.data;
-
       const comparison = {
         overallScore: performanceResult.data.performanceScore,
         comparisons: {
@@ -447,16 +397,13 @@ export const vendorPerformanceService = {
           }
         }
       };
-
       return { data: comparison, error: null };
     } catch (error) {
       console.error('Benchmark comparison error:', error);
       return { data: null, error: error.message };
     }
   },
-
   // PERFORMANCE TRACKING AND HISTORY
-
   /**
    * Save performance snapshot for historical tracking
    */
@@ -474,14 +421,12 @@ export const vendorPerformanceService = {
         }])
         .select()
         .single();
-
       return { data, error };
     } catch (error) {
       console.error('Save performance snapshot error:', error);
       return { data: null, error: error.message };
     }
   },
-
   /**
    * Get performance history and trends
    */
@@ -489,19 +434,15 @@ export const vendorPerformanceService = {
     try {
       const startDate = new Date();
       startDate.setMonth(startDate.getMonth() - months);
-
       const { data: snapshots, error } = await supabase
         .from('vendor_performance_snapshots')
         .select('*')
         .eq('vendor_id', vendorId)
         .gte('created_at', startDate.toISOString())
         .order('created_at', { ascending: true });
-
       if (error) throw error;
-
       // Calculate trends
       const trends = this.calculateTrends(snapshots);
-
       return {
         data: {
           snapshots,
@@ -521,15 +462,12 @@ export const vendorPerformanceService = {
       return { data: null, error: error.message };
     }
   },
-
   // ALERTS AND NOTIFICATIONS
-
   /**
    * Check for performance alerts and thresholds
    */
   async checkPerformanceAlerts(vendorId, performanceData) {
     const alerts = [];
-
     // Define alert thresholds
     const thresholds = {
       lowRating: 3.5,
@@ -538,9 +476,7 @@ export const vendorPerformanceService = {
       highCancellationRate: 15,
       lowPerformanceScore: 60
     };
-
     const metrics = performanceData.metrics;
-
     // Check various alert conditions
     if (metrics.reviews.averageRating < thresholds.lowRating) {
       alerts.push({
@@ -550,7 +486,6 @@ export const vendorPerformanceService = {
         recommendation: 'Focus on improving customer experience and addressing negative feedback'
       });
     }
-
     if (metrics.bookings.completionRate < thresholds.lowCompletionRate) {
       alerts.push({
         type: 'low_completion',
@@ -559,7 +494,6 @@ export const vendorPerformanceService = {
         recommendation: 'Review booking processes and reduce cancellation factors'
       });
     }
-
     if (metrics.responseTime.averageResponseTime > thresholds.highResponseTime) {
       alerts.push({
         type: 'slow_response',
@@ -568,7 +502,6 @@ export const vendorPerformanceService = {
         recommendation: 'Implement faster communication processes and set up automated responses'
       });
     }
-
     if (metrics.cancellations.cancellationRate > thresholds.highCancellationRate) {
       alerts.push({
         type: 'high_cancellation',
@@ -577,7 +510,6 @@ export const vendorPerformanceService = {
         recommendation: 'Analyze cancellation reasons and improve booking reliability'
       });
     }
-
     if (performanceData.performanceScore < thresholds.lowPerformanceScore) {
       alerts.push({
         type: 'low_performance',
@@ -586,12 +518,9 @@ export const vendorPerformanceService = {
         recommendation: 'Review all performance metrics and create improvement plan'
       });
     }
-
     return alerts;
   },
-
   // IMPROVEMENT RECOMMENDATIONS
-
   /**
    * Generate personalized improvement recommendations
    */
@@ -599,7 +528,6 @@ export const vendorPerformanceService = {
     const recommendations = [];
     const metrics = performanceData.metrics;
     const benchmarks = benchmarkData.comparisons;
-
     // Rating improvement recommendations
     if (benchmarks.averageRating.status === 'below') {
       recommendations.push({
@@ -618,7 +546,6 @@ export const vendorPerformanceService = {
         timeline: '2-3 months'
       });
     }
-
     // Response time recommendations
     if (benchmarks.responseTime.status === 'below') {
       recommendations.push({
@@ -637,7 +564,6 @@ export const vendorPerformanceService = {
         timeline: '1 month'
       });
     }
-
     // Completion rate recommendations
     if (benchmarks.completionRate.status === 'below') {
       recommendations.push({
@@ -656,7 +582,6 @@ export const vendorPerformanceService = {
         timeline: '1-2 months'
       });
     }
-
     // Growth recommendations
     if (metrics.revenue.growthRate < 0) {
       recommendations.push({
@@ -675,12 +600,9 @@ export const vendorPerformanceService = {
         timeline: '3-6 months'
       });
     }
-
     return recommendations;
   },
-
   // HELPER METHODS
-
   calculateMedian(array) {
     const sorted = array.slice().sort((a, b) => a - b);
     const middle = Math.floor(sorted.length / 2);
@@ -688,14 +610,12 @@ export const vendorPerformanceService = {
       ? (sorted[middle - 1] + sorted[middle]) / 2
       : sorted[middle];
   },
-
   calculatePercentile(value, benchmark, reverse = false) {
     if (reverse) {
       return value <= benchmark ? 75 : value <= benchmark * 1.5 ? 50 : 25;
     }
     return value >= benchmark ? 75 : value >= benchmark * 0.8 ? 50 : 25;
   },
-
   getPerformanceStatus(value, benchmark, reverse = false) {
     if (reverse) {
       if (value <= benchmark * 0.8) return 'excellent';
@@ -708,11 +628,9 @@ export const vendorPerformanceService = {
     if (value >= benchmark * 0.8) return 'average';
     return 'below';
   },
-
   groupRevenueByDay(bookings, startDate, endDate) {
     const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
     const revenueByDay = Array(days).fill(0);
-
     bookings.forEach(booking => {
       const bookingDate = new Date(booking.created_at);
       const dayIndex = Math.floor((bookingDate - startDate) / (1000 * 60 * 60 * 24));
@@ -720,19 +638,15 @@ export const vendorPerformanceService = {
         revenueByDay[dayIndex] += booking.total_amount || 0;
       }
     });
-
     return revenueByDay.map((revenue, index) => ({
       date: new Date(startDate.getTime() + index * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       revenue
     }));
   },
-
   calculateTrends(snapshots) {
     if (snapshots.length < 2) return null;
-
     const latest = snapshots[snapshots.length - 1];
     const previous = snapshots[snapshots.length - 2];
-
     return {
       performanceScore: {
         current: latest.performance_score,
@@ -744,5 +658,4 @@ export const vendorPerformanceService = {
     };
   }
 };
-
 export default vendorPerformanceService;
