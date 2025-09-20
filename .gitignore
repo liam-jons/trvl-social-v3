@@ -28,6 +28,8 @@ dev-debug.log
 node_modules/
 # Environment variables
 .env
+.env.local
+.env.*.local
 .vscode
 # OS specific
 
@@ -38,3 +40,4 @@ node_modules/
 *storybook.log
 storybook-static
 .vercel
+.env
