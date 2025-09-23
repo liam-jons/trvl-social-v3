@@ -17,6 +17,14 @@ export default defineConfig({
     'process.env': {},
     'global': 'globalThis',
   },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'framer-motion'],
+  },
   plugins: [
     react(),
     VitePWA({
@@ -34,19 +42,17 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: 'https://vhecnqaejsukulaktjob.supabase.co/storage/v1/object/public/images/5Ccompany_logo_sm.webp',
+            src: '/icon-192.png',
             sizes: '192x192',
-            type: 'image/webp',
-            purpose: 'any'
+            type: 'image/png'
           },
           {
-            src: 'https://vhecnqaejsukulaktjob.supabase.co/storage/v1/object/public/images/5Ccompany_logo_sm.webp',
+            src: '/icon-512.png',
             sizes: '512x512',
-            type: 'image/webp',
-            purpose: 'any'
+            type: 'image/png'
           },
           {
-            src: 'https://vhecnqaejsukulaktjob.supabase.co/storage/v1/object/public/images/5Ccompany_logo_sm.webp',
+            src: '/icon-192-maskable.png',
             sizes: '192x192',
             type: 'image/webp',
             purpose: 'maskable'
