@@ -2386,11 +2386,22 @@
             "testStrategy": "Performance benchmarking, Lighthouse testing, visual regression testing"
           }
         ]
+      },
+      {
+        "id": 42,
+        "title": "Production Deployment - Database Verification and Migration",
+        "description": "Verify production Supabase database schema matches v3 app requirements and perform necessary migrations",
+        "details": "The production database needs verification to ensure all 106 tables are correctly configured for the v3 app. This includes verifying schema compatibility, performing any necessary migrations, and ensuring data integrity.",
+        "testStrategy": "Run automated schema comparison tools, execute migration tests in staging environment, validate data integrity post-migration",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-09-13T20:13:47.735Z",
-      "updated": "2025-09-21T15:57:32.075Z",
+      "updated": "2025-09-23T14:02:39.462Z",
       "description": "Tasks for master context"
     }
   }

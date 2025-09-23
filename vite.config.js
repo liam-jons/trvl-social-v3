@@ -280,8 +280,8 @@ export default defineConfig({
           // Large node_modules dependencies - split by category
           if (id.includes('node_modules')) {
             // Core React ecosystem - keep together for fast initial load
-            // Include framer-motion and @react-spring with React to avoid context issues
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router') || id.includes('framer-motion') || id.includes('@react-spring')) {
+            // Include framer-motion, @react-spring, and recharts with React to avoid context issues
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router') || id.includes('framer-motion') || id.includes('@react-spring') || id.includes('recharts')) {
               return 'react-core';
             }
 
@@ -305,8 +305,11 @@ export default defineConfig({
               return 'editor';
             }
 
-            // Chart and visualization libraries
-            if (id.includes('recharts') || id.includes('chart') || id.includes('d3') || id.includes('vis-') || id.includes('canvas')) {
+            // Chart and visualization libraries - recharts needs React, so include it in react-core
+            if (id.includes('recharts')) {
+              return 'react-core';
+            }
+            if (id.includes('chart') || id.includes('d3') || id.includes('vis-') || id.includes('canvas')) {
               return 'charts';
             }
 
