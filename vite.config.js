@@ -23,7 +23,8 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'framer-motion'],
+    include: ['react', 'react-dom', 'react/jsx-runtime', 'framer-motion'],
+    exclude: ['@tensorflow/tfjs', '@tensorflow/tfjs-backend-webgl', '@tensorflow/tfjs-backend-cpu'],
   },
   plugins: [
     react(),
@@ -279,7 +280,8 @@ export default defineConfig({
           // Large node_modules dependencies - split by category
           if (id.includes('node_modules')) {
             // Core React ecosystem - keep together for fast initial load
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+            // Include framer-motion with React to avoid context issues
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router') || id.includes('framer-motion')) {
               return 'react-core';
             }
 
@@ -318,8 +320,8 @@ export default defineConfig({
               return 'video-streaming';
             }
 
-            // Animation libraries
-            if (id.includes('framer-motion') || id.includes('lottie') || id.includes('@react-spring') || id.includes('spring')) {
+            // Animation libraries (excluding framer-motion which is in react-core)
+            if (id.includes('lottie') || id.includes('@react-spring') || id.includes('spring')) {
               return 'animation';
             }
 
