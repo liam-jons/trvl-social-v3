@@ -356,9 +356,10 @@ export default defineConfig({
           if (id.includes('src/pages/admin/AdminDashboardPage')) {
             return 'admin-dashboard';
           }
-          if (id.includes('src/components/admin/')) {
-            return 'admin-components';
-          }
+          // Admin components moved to vendor-components to prevent initialization order issues
+          // if (id.includes('src/components/admin/')) {
+          //   return 'admin-components';
+          // }
 
           // Vendor features - split by functionality
           if (id.includes('src/pages/vendor/VendorDashboardPage')) {
@@ -370,7 +371,8 @@ export default defineConfig({
           if (id.includes('src/pages/vendor/AdventureManagementPage')) {
             return 'vendor-adventures';
           }
-          if (id.includes('src/components/vendor/')) {
+          // Vendor components and admin components (moved here to prevent initialization order issues)
+          if (id.includes('src/components/vendor/') || id.includes('src/components/admin/')) {
             return 'vendor-components';
           }
 
