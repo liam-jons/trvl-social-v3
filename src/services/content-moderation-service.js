@@ -65,7 +65,6 @@ class ContentModerationService {
       this.determineAutoActions(analysis);
       return analysis;
     } catch (error) {
-      console.error('Content analysis failed:', error);
       return {
         ...analysis,
         error: 'Analysis failed',
@@ -200,7 +199,6 @@ class ContentModerationService {
       );
       return { success: true, reportId: data.id };
     } catch (error) {
-      console.error('Failed to submit report:', error);
       return { success: false, error: error.message };
     }
   }
@@ -224,7 +222,6 @@ class ContentModerationService {
       if (error) throw error;
       return { success: true };
     } catch (error) {
-      console.error('Failed to add to moderation queue:', error);
       return { success: false, error: error.message };
     }
   }
@@ -258,7 +255,6 @@ class ContentModerationService {
       if (error) throw error;
       return { success: true };
     } catch (error) {
-      console.error('Failed to update content status:', error);
       return { success: false, error: error.message };
     }
   }
@@ -305,7 +301,6 @@ class ContentModerationService {
       });
       return { success: true };
     } catch (error) {
-      console.error('Failed to process automated action:', error);
       return { success: false, error: error.message };
     }
   }
@@ -385,7 +380,6 @@ class ContentModerationService {
       await this.checkUserRestrictions(userId);
       return { success: true };
     } catch (error) {
-      console.error('Failed to issue warning:', error);
       return { success: false, error: error.message };
     }
   }
@@ -408,7 +402,6 @@ class ContentModerationService {
         await this.restrictUser(userId, 'limited', 3); // 3 days
       }
     } catch (error) {
-      console.error('Failed to check user restrictions:', error);
     }
   }
   /**
@@ -439,7 +432,6 @@ class ContentModerationService {
         .eq('id', userId);
       return { success: true };
     } catch (error) {
-      console.error('Failed to restrict user:', error);
       return { success: false, error: error.message };
     }
   }
@@ -463,7 +455,6 @@ class ContentModerationService {
       if (error) throw error;
       return { success: true };
     } catch (error) {
-      console.error('Failed to log moderation action:', error);
       return { success: false, error: error.message };
     }
   }
@@ -503,7 +494,6 @@ class ContentModerationService {
       if (error) throw error;
       return { success: true, data };
     } catch (error) {
-      console.error('Failed to get moderation queue:', error);
       return { success: false, error: error.message };
     }
   }
@@ -547,7 +537,6 @@ class ContentModerationService {
         }
       };
     } catch (error) {
-      console.error('Failed to get moderation stats:', error);
       return { success: false, error: error.message };
     }
   }

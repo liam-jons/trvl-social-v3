@@ -20,7 +20,6 @@ export class WishlistService {
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching user wishlist:', error);
       return { data: null, error };
     }
   }
@@ -56,7 +55,6 @@ export class WishlistService {
       await this.logActivity(userId, 'wishlist_add', { adventure_id: adventureId });
       return { data, error: null };
     } catch (error) {
-      console.error('Error adding to wishlist:', error);
       return { data: null, error };
     }
   }
@@ -73,7 +71,6 @@ export class WishlistService {
       await this.logActivity(userId, 'wishlist_remove', { adventure_id: adventureId });
       return { error: null };
     } catch (error) {
-      console.error('Error removing from wishlist:', error);
       return { error };
     }
   }
@@ -89,7 +86,6 @@ export class WishlistService {
       if (error && error.code !== 'PGRST116') throw error;
       return { isInWishlist: !!data, error: null };
     } catch (error) {
-      console.error('Error checking wishlist status:', error);
       return { isInWishlist: false, error };
     }
   }
@@ -114,7 +110,6 @@ export class WishlistService {
       });
       return { data, error: null };
     } catch (error) {
-      console.error('Error moving to collection:', error);
       return { data: null, error };
     }
   }
@@ -132,7 +127,6 @@ export class WishlistService {
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching collections:', error);
       return { data: null, error };
     }
   }
@@ -154,7 +148,6 @@ export class WishlistService {
       await this.logActivity(userId, 'collection_create', { collection_id: data.id });
       return { data, error: null };
     } catch (error) {
-      console.error('Error creating collection:', error);
       return { data: null, error };
     }
   }
@@ -171,7 +164,6 @@ export class WishlistService {
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
-      console.error('Error updating collection:', error);
       return { data: null, error };
     }
   }
@@ -194,7 +186,6 @@ export class WishlistService {
       await this.logActivity(userId, 'collection_delete', { collection_id: collectionId });
       return { error: null };
     } catch (error) {
-      console.error('Error deleting collection:', error);
       return { error };
     }
   }
@@ -216,7 +207,6 @@ export class WishlistService {
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching public wishlist:', error);
       return { data: null, error };
     }
   }
@@ -238,7 +228,6 @@ export class WishlistService {
       const shareUrl = `${window.location.origin}/wishlist/shared/${shareId}`;
       return { data: { ...data, shareUrl }, error: null };
     } catch (error) {
-      console.error('Error generating share link:', error);
       return { data: null, error };
     }
   }
@@ -268,7 +257,6 @@ export class WishlistService {
         error: null
       };
     } catch (error) {
-      console.error('Error fetching wishlist stats:', error);
       return { data: null, error };
     }
   }
@@ -308,7 +296,6 @@ export class WishlistService {
           throw new Error('Unsupported export format');
       }
     } catch (error) {
-      console.error('Error exporting wishlist:', error);
       return { data: null, error };
     }
   }
@@ -338,7 +325,6 @@ export class WishlistService {
           timestamp: new Date().toISOString()
         }]);
     } catch (error) {
-      console.error('Error logging activity:', error);
     }
   }
   // Price alert functionality
@@ -358,7 +344,6 @@ export class WishlistService {
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
-      console.error('Error setting price alert:', error);
       return { data: null, error };
     }
   }
@@ -377,7 +362,6 @@ export class WishlistService {
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching price alerts:', error);
       return { data: null, error };
     }
   }

@@ -58,7 +58,6 @@ const PaymentDashboard = ({ organizerId }) => {
           try {
             collectionStats = await paymentCollectionWorkflow.getCollectionStats(payment.id);
           } catch (err) {
-            console.warn(`Failed to get collection stats for payment ${payment.id}:`, err);
           }
           return {
             ...payment,
@@ -160,7 +159,6 @@ const PaymentDashboard = ({ organizerId }) => {
       // Refresh data to show updated reminder counts
       await fetchPaymentData();
     } catch (error) {
-      console.error('Failed to send bulk reminders:', error);
     }
   };
   const getStatusBadge = (status) => {

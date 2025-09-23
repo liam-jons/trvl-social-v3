@@ -52,7 +52,6 @@ const RealtimeGroupUpdates = ({
         }
         setIsInitializing(false);
       } catch (err) {
-        console.error('Failed to initialize real-time updates:', err);
         setError(err.message);
         setIsInitializing(false);
       }
@@ -67,7 +66,6 @@ const RealtimeGroupUpdates = ({
   useEffect(() => {
     const update = groupUpdates.get(groupId);
     if (!update) return;
-    console.log('Processing group update:', update);
     if (update.type === 'member_change') {
       // Get updated compatibility scores
       const compatibility = getCompatibilityScores(groupId);
@@ -136,12 +134,10 @@ const RealtimeGroupUpdates = ({
       const success = Math.random() > 0.1; // 90% success rate
       if (success) {
         confirmOptimisticUpdate(operationId);
-        console.log('Member joined successfully');
       } else {
         throw new Error('Failed to join group');
       }
     } catch (error) {
-      console.error('Failed to join group:', error);
       // Rollback optimistic update
       rollbackOptimisticUpdate(operationId);
       // Revert UI
@@ -166,12 +162,10 @@ const RealtimeGroupUpdates = ({
       const success = Math.random() > 0.05; // 95% success rate
       if (success) {
         confirmOptimisticUpdate(operationId);
-        console.log('Member left successfully');
       } else {
         throw new Error('Failed to leave group');
       }
     } catch (error) {
-      console.error('Failed to leave group:', error);
       // Rollback optimistic update
       rollbackOptimisticUpdate(operationId);
       // Revert UI
@@ -183,11 +177,9 @@ const RealtimeGroupUpdates = ({
   // Notification helpers
   const showCompatibilityNotification = (type, magnitude) => {
     // This would integrate with your notification system
-    console.log(`Group compatibility ${type} by ${magnitude} points`);
   };
   const showErrorNotification = (message) => {
     // This would integrate with your notification system
-    console.error(message);
     setError(message);
     setTimeout(() => setError(null), 5000);
   };
@@ -252,7 +244,6 @@ const RealtimeGroupUpdates = ({
         <CompatibilityAnimator
           currentScore={getCurrentCompatibility().avgScore}
           previousScore={previousScore}
-          onAnimationComplete={() => console.log('Compatibility animation complete')}
         >
           {({ score, isAnimating, scoreChange }) => (
             <GroupPreviewCard

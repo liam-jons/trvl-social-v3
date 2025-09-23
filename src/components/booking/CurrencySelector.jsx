@@ -27,7 +27,6 @@ const CurrencySelector = ({
           onChange?.(detected);
         }
       } catch (error) {
-        console.warn('Failed to detect user currency:', error);
       }
     };
     detectCurrency();
@@ -53,7 +52,6 @@ const CurrencySelector = ({
       );
       setConversions(conversionResults);
     } catch (error) {
-      console.warn('Failed to load currency conversions:', error);
       setConversions({});
     } finally {
       setLoading(false);

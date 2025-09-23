@@ -97,7 +97,6 @@ const ContentFilterManager = () => {
       const results = await ContentModerationService.analyzeContent(testContent);
       setTestResults(results);
     } catch (error) {
-      console.error('Content analysis failed:', error);
       setTestResults({ error: 'Analysis failed' });
     }
   };

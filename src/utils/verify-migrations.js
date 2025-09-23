@@ -140,12 +140,10 @@ class MigrationVerifier {
         throw error;
       }
       this.results.connection = true;
-      console.log('✅ Database connection successful');
       return true;
     } catch (error) {
       this.results.connection = false;
       this.results.errors.push(`Database connection failed: ${error.message}`);
-      console.error('❌ Database connection failed:', error.message);
       return false;
     }
   }
@@ -153,7 +151,6 @@ class MigrationVerifier {
    * Check if critical tables exist
    */
   async verifyTables() {
-    console.log('\n🔍 Verifying table existence...');
     for (const tableName of CRITICAL_TABLES) {
       try {
         const { data, error } = await this.supabase
@@ -164,20 +161,16 @@ class MigrationVerifier {
           if (error.code === 'PGRST116') {
             this.results.tables[tableName] = false;
             this.results.errors.push(`Table '${tableName}' does not exist`);
-            console.log(`❌ Table '${tableName}' missing`);
           } else {
             this.results.tables[tableName] = 'error';
             this.results.errors.push(`Error querying table '${tableName}': ${error.message}`);
-            console.log(`⚠️ Error querying '${tableName}': ${error.message}`);
           }
         } else {
           this.results.tables[tableName] = true;
-          console.log(`✅ Table '${tableName}' exists`);
         }
       } catch (error) {
         this.results.tables[tableName] = 'error';
         this.results.errors.push(`Unexpected error checking table '${tableName}': ${error.message}`);
-        console.log(`❌ Unexpected error checking '${tableName}': ${error.message}`);
       }
     }
   }
@@ -185,7 +178,6 @@ class MigrationVerifier {
    * Test basic CRUD operations on key tables
    */
   async testCrudOperations() {
-    console.log('\n🔧 Testing basic CRUD operations...');
     const testOperations = [
       {
         table: 'profiles',
@@ -211,13 +203,10 @@ class MigrationVerifier {
           .limit(5);
         if (error) {
           this.results.errors.push(`CRUD test failed for ${test.table}: ${error.message}`);
-          console.log(`❌ ${test.description} failed: ${error.message}`);
         } else {
-          console.log(`✅ ${test.description} working (${data?.length || 0} records)`);
         }
       } catch (error) {
         this.results.errors.push(`CRUD test error for ${test.table}: ${error.message}`);
-        console.log(`❌ ${test.description} error: ${error.message}`);
       }
     }
   }
@@ -225,7 +214,6 @@ class MigrationVerifier {
    * Check RLS policies are enabled
    */
   async verifyRlsPolicies() {
-    console.log('\n🔒 Checking Row Level Security policies...');
     // This is a simplified check - in a real implementation you'd query pg_policies
     const rlsTables = ['profiles', 'adventures', 'bookings', 'vendors'];
     for (const table of rlsTables) {
@@ -238,12 +226,9 @@ class MigrationVerifier {
         // If we get data without auth, RLS might not be properly configured
         if (data && data.length > 0) {
           this.results.warnings.push(`Table '${table}' may have overly permissive RLS policies`);
-          console.log(`⚠️ RLS check: '${table}' returned data without authentication`);
         } else {
-          console.log(`✅ RLS check: '${table}' properly restricted`);
         }
       } catch (error) {
-        console.log(`⚠️ RLS check error for '${table}': ${error.message}`);
       }
     }
   }
@@ -251,28 +236,23 @@ class MigrationVerifier {
    * Verify storage buckets exist
    */
   async verifyStorageBuckets() {
-    console.log('\n📁 Checking storage buckets...');
     try {
       const { data: buckets, error } = await this.supabase.storage.listBuckets();
       if (error) {
         this.results.errors.push(`Failed to list storage buckets: ${error.message}`);
-        console.log(`❌ Storage bucket check failed: ${error.message}`);
         return;
       }
       const existingBuckets = buckets.map(bucket => bucket.name);
       for (const bucketName of EXPECTED_STORAGE_BUCKETS) {
         if (existingBuckets.includes(bucketName)) {
           this.results.storageBuckets[bucketName] = true;
-          console.log(`✅ Storage bucket '${bucketName}' exists`);
         } else {
           this.results.storageBuckets[bucketName] = false;
           this.results.warnings.push(`Storage bucket '${bucketName}' not found`);
-          console.log(`⚠️ Storage bucket '${bucketName}' missing`);
         }
       }
     } catch (error) {
       this.results.errors.push(`Storage verification error: ${error.message}`);
-      console.log(`❌ Storage verification error: ${error.message}`);
     }
   }
   /**
@@ -317,7 +297,6 @@ class MigrationVerifier {
    * Run complete verification process
    */
   async runVerification() {
-    console.log('🚀 Starting database migration verification...\n');
     const connected = await this.initializeClient();
     if (!connected) {
       return this.results;
@@ -327,20 +306,9 @@ class MigrationVerifier {
     await this.verifyRlsPolicies();
     await this.verifyStorageBuckets();
     this.generateSummary();
-    console.log('\n📊 VERIFICATION SUMMARY');
-    console.log('========================');
-    console.log(`Overall Status: ${this.results.summary.overallStatus}`);
-    console.log(`Database Connection: ${this.results.connection ? '✅ Connected' : '❌ Failed'}`);
-    console.log(`Tables: ${this.results.summary.tablesExisting}/${this.results.summary.tablesTotal} (${this.results.summary.tableCompletion}%)`);
-    console.log(`Errors: ${this.results.summary.totalErrors}`);
-    console.log(`Warnings: ${this.results.summary.totalWarnings}`);
     if (this.results.errors.length > 0) {
-      console.log('\n❌ ERRORS:');
-      this.results.errors.forEach(error => console.log(`  • ${error}`));
     }
     if (this.results.warnings.length > 0) {
-      console.log('\n⚠️ WARNINGS:');
-      this.results.warnings.forEach(warning => console.log(`  • ${warning}`));
     }
     return this.results;
   }
@@ -353,7 +321,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   verifier.runVerification().then(() => {
     process.exit(0);
   }).catch(error => {
-    console.error('Verification failed:', error);
     process.exit(1);
   });
 }

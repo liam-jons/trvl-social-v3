@@ -1,11 +1,33 @@
 {
   "name": "trvl-social-v3",
+  "version": "3.0.0",
+  "description": "Social travel platform connecting adventurous travelers through AI-powered compatibility matching",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
+  "author": "TravelSocial Team <dev@trvlsocial.com>",
+  "license": "UNLICENSED",
+  "homepage": "https://trvlsocial.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trvlsocial/trvl-social-v3.git"
+  },
+  "bugs": {
+    "url": "https://github.com/trvlsocial/trvl-social-v3/issues",
+    "email": "support@trvlsocial.com"
+  },
+  "keywords": [
+    "travel",
+    "social",
+    "compatibility",
+    "matching",
+    "adventure",
+    "react",
+    "vite"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:analyze": "ANALYZE=true vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
@@ -15,7 +37,15 @@
     "build-storybook": "storybook build",
     "check-links": "node scripts/check-links.js",
     "check-links:quick": "node scripts/check-links.js --quick",
-    "check-links:report": "node scripts/check-links.js --report"
+    "check-links:report": "node scripts/check-links.js --report",
+    "validate-credentials": "node scripts/validate-credentials.js",
+    "validate-credentials:production": "node scripts/validate-credentials.js production",
+    "validate-credentials:staging": "node scripts/validate-credentials.js staging",
+    "test-email": "node scripts/test-email.js",
+    "test-email:custom": "node scripts/test-email.js",
+    "test:cors": "node scripts/test-cors.js",
+    "test:cors:production": "node scripts/test-cors.js production",
+    "test:cors:simple": "node scripts/test-cors-simple.js"
   },
   "dependencies": {
     "@daily-co/daily-js": "^0.67.0",
@@ -66,9 +96,11 @@
     "react-router-dom": "^7.9.1",
     "react-swipeable": "^7.0.2",
     "recharts": "^3.2.0",
+    "resend": "^6.1.0",
     "supercluster": "^8.0.1",
     "tailwind-merge": "^3.3.1",
     "uuid": "^13.0.0",
+    "web-vitals": "^5.1.0",
     "zod": "^4.1.8",
     "zustand": "^5.0.8"
   },
@@ -99,6 +131,7 @@
     "playwright": "^1.55.0",
     "postcss": "^8.5.6",
     "prop-types": "^15.8.1",
+    "rollup-plugin-visualizer": "^6.0.3",
     "storybook": "^9.1.5",
     "tailwindcss": "^3.4.17",
     "vite": "^7.1.2",

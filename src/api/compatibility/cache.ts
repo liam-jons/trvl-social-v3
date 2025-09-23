@@ -6,6 +6,7 @@ import { compatibilityService } from '../../services/compatibility-service';
 import {
   CompatibilityScore
 } from '../../types/compatibility';
+import { createCorsResponse } from '../../utils/cors-config';
 /**
  * Get cached compatibility score
  * GET /api/compatibility/cache/:groupId/:userId
@@ -38,7 +39,6 @@ export async function getCachedScore(
       };
     }
   } catch (error) {
-    console.error('Error getting cached score:', error);
     return {
       success: false,
       error: {
@@ -77,7 +77,6 @@ export async function invalidateCompatibilityCache(
       message
     };
   } catch (error) {
-    console.error('Error invalidating cache:', error);
     return {
       success: false,
       message: 'Failed to invalidate cache',
@@ -109,7 +108,6 @@ export async function getCacheStats(): Promise<{
       data: stats
     };
   } catch (error) {
-    console.error('Error getting cache stats:', error);
     return {
       success: false,
       error: {
@@ -136,7 +134,6 @@ export const getCachedScoreHandler = async (req: any, res: any) => {
     const response = await getCachedScore(groupId, userId, otherUserId);
     res.status(response.success ? 200 : 400).json(response);
   } catch (error) {
-    console.error('Express handler error:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -153,7 +150,6 @@ export const invalidateCacheHandler = async (req: any, res: any) => {
     const response = await invalidateCompatibilityCache(groupId, userId);
     res.status(response.success ? 200 : 500).json(response);
   } catch (error) {
-    console.error('Express handler error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -169,7 +165,6 @@ export const getCacheStatsHandler = async (req: any, res: any) => {
     const response = await getCacheStats();
     res.status(response.success ? 200 : 500).json(response);
   } catch (error) {
-    console.error('Express handler error:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -200,27 +195,17 @@ export const supabaseGetCachedScoreHandler = async (req: Request): Promise<Respo
       });
     }
     const response = await getCachedScore(groupId, userId, otherUserId);
-    return new Response(JSON.stringify(response), {
-      status: response.success ? 200 : 400,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-      }
+    return createCorsResponse(response, req, {
+      status: response.success ? 200 : 400
     });
   } catch (error) {
-    console.error('Supabase Edge Function error:', error);
-    return new Response(JSON.stringify({
+    return createCorsResponse({
       success: false,
       error: {
         code: 'INTERNAL_ERROR',
         message: 'Internal server error'
       }
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    }, req, { status: 500 });
   }
 };
 export const supabaseInvalidateCacheHandler = async (req: Request): Promise<Response> => {
@@ -230,17 +215,10 @@ export const supabaseInvalidateCacheHandler = async (req: Request): Promise<Resp
     const groupId = pathParts[pathParts.length - 1];
     const userId = url.searchParams.get('userId') || undefined;
     const response = await invalidateCompatibilityCache(groupId, userId);
-    return new Response(JSON.stringify(response), {
-      status: response.success ? 200 : 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-      }
+    return createCorsResponse(response, req, {
+      status: response.success ? 200 : 500
     });
   } catch (error) {
-    console.error('Supabase Edge Function error:', error);
     return new Response(JSON.stringify({
       success: false,
       message: 'Internal server error',
@@ -257,26 +235,16 @@ export const supabaseInvalidateCacheHandler = async (req: Request): Promise<Resp
 export const supabaseGetCacheStatsHandler = async (req: Request): Promise<Response> => {
   try {
     const response = await getCacheStats();
-    return new Response(JSON.stringify(response), {
-      status: response.success ? 200 : 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-      }
+    return createCorsResponse(response, req, {
+      status: response.success ? 200 : 500
     });
   } catch (error) {
-    console.error('Supabase Edge Function error:', error);
-    return new Response(JSON.stringify({
+    return createCorsResponse({
       success: false,
       error: {
         code: 'INTERNAL_ERROR',
         message: 'Internal server error'
       }
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    }, req, { status: 500 });
   }
 };

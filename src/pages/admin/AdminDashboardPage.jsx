@@ -106,9 +106,9 @@ const UserManagementPanel = () => {
         <h3 className="text-lg font-semibold mb-4">User Management</h3>
         <div className="text-center py-8 text-gray-500">
           <Users className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-          <p>User management features coming soon.</p>
+          <p>Advanced user management tools are being refined.</p>
           <p className="text-sm mt-2">
-            This will include user search, role management, and account controls.
+            Full user search, role management, and account controls will be available in the next update.
           </p>
         </div>
       </div>
@@ -124,9 +124,9 @@ const SystemSettingsPanel = () => {
         <h3 className="text-lg font-semibold mb-4">System Settings</h3>
         <div className="text-center py-8 text-gray-500">
           <Settings className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-          <p>System configuration settings coming soon.</p>
+          <p>System configuration panel is in development.</p>
           <p className="text-sm mt-2">
-            This will include API configurations, feature flags, and system parameters.
+            API configurations, feature flags, and system parameters will be configurable here soon.
           </p>
         </div>
       </div>

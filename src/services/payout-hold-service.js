@@ -31,10 +31,8 @@ class PayoutHoldService {
   async initialize() {
     try {
       await this.loadActiveHolds();
-      console.log('Payout hold service initialized successfully');
       return { success: true };
     } catch (error) {
-      console.error('Failed to initialize payout hold service:', error);
       throw error;
     }
   }
@@ -52,9 +50,7 @@ class PayoutHoldService {
       for (const hold of holds) {
         this.activeHolds.set(hold.vendor_stripe_account_id, hold);
       }
-      console.log(`Loaded ${holds.length} active payout holds`);
     } catch (error) {
-      console.error('Failed to load active holds:', error);
       throw error;
     }
   }
@@ -116,14 +112,12 @@ class PayoutHoldService {
         description,
         placed_by: placedBy,
       });
-      console.log(`Placed ${type} payout hold for vendor ${vendorStripeAccountId}: ${reason}`);
       return {
         success: true,
         holdId: data.id,
         holdData: data,
       };
     } catch (error) {
-      console.error('Failed to place payout hold:', error);
       throw error;
     }
   }
@@ -170,13 +164,11 @@ class PayoutHoldService {
       });
       // Check if there are pending payouts to process
       await this.processPendingPayoutsAfterRelease(vendorStripeAccountId);
-      console.log(`Released payout hold for vendor ${vendorStripeAccountId}: ${reason}`);
       return {
         success: true,
         holdId: hold.id,
       };
     } catch (error) {
-      console.error('Failed to release payout hold:', error);
       throw error;
     }
   }
@@ -225,7 +217,6 @@ class PayoutHoldService {
         holdData: updatedHold,
       };
     } catch (error) {
-      console.error('Failed to update payout hold:', error);
       throw error;
     }
   }
@@ -261,10 +252,8 @@ class PayoutHoldService {
           ],
         },
       });
-      console.log(`Extended payout hold for vendor ${vendorStripeAccountId} by ${additionalDays} days`);
       return { success: true };
     } catch (error) {
-      console.error('Failed to extend payout hold:', error);
       throw error;
     }
   }
@@ -283,7 +272,6 @@ class PayoutHoldService {
       if (expiredHolds.length === 0) {
         return { processed: 0 };
       }
-      console.log(`Processing ${expiredHolds.length} expired holds`);
       for (const { vendorId, hold } of expiredHolds) {
         try {
           await this.releaseHold(vendorId, {
@@ -291,12 +279,10 @@ class PayoutHoldService {
             releasedBy: 'system',
           });
         } catch (error) {
-          console.error(`Failed to auto-release expired hold for vendor ${vendorId}:`, error);
         }
       }
       return { processed: expiredHolds.length };
     } catch (error) {
-      console.error('Failed to process expired holds:', error);
       throw error;
     }
   }
@@ -314,7 +300,6 @@ class PayoutHoldService {
           timestamp: new Date().toISOString(),
         });
     } catch (error) {
-      console.error('Failed to log hold action:', error);
     }
   }
   /**
@@ -339,10 +324,8 @@ class PayoutHoldService {
           forceMinimum: false,
         });
       } catch (error) {
-        console.log('No immediate payout needed after hold release:', error.message);
       }
     } catch (error) {
-      console.error('Failed to process pending payouts after hold release:', error);
     }
   }
   /**
@@ -375,7 +358,6 @@ class PayoutHoldService {
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Failed to get hold history:', error);
       throw error;
     }
   }
@@ -412,7 +394,6 @@ class PayoutHoldService {
       }
       return stats;
     } catch (error) {
-      console.error('Failed to get hold statistics:', error);
       throw error;
     }
   }

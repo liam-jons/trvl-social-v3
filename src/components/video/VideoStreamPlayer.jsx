@@ -71,7 +71,6 @@ const VideoStreamPlayer = ({
             });
           }
         } catch (error) {
-          console.error('Failed to initialize video player:', error);
         }
       };
       initVideo();

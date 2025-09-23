@@ -62,7 +62,6 @@ const NotificationsPage = () => {
       ];
       setNotifications(mockNotifications);
     } catch (error) {
-      console.error('Error loading notifications:', error);
     } finally {
       setLoading(false);
     }

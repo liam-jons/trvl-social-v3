@@ -26,7 +26,6 @@ export const MapboxProvider = ({ children }) => {
     distanceUnit: 'miles', // or 'kilometers'
   }), [accessToken]);
   if (!accessToken) {
-    console.warn('Mapbox access token not found. Please add VITE_MAPBOX_ACCESS_TOKEN to your environment variables.');
   }
   const value = {
     ...config,

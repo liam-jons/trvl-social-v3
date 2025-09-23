@@ -48,7 +48,6 @@ const PaymentTracker = ({
           filter: `split_payment_id=eq.${splitPaymentId}`,
         },
         (payload) => {
-          console.log('Payment update received:', payload);
           onPaymentUpdate?.();
         }
       )
@@ -80,7 +79,6 @@ const PaymentTracker = ({
       window.open(paymentUrl, '_blank');
       onPaymentComplete?.(result);
     } catch (err) {
-      console.error('Payment processing failed:', err);
     } finally {
       setProcessingPayment(null);
     }

@@ -73,7 +73,6 @@ const BroadcastStudio = ({
             }
           });
         } catch (error) {
-          console.error('Failed to initialize broadcast studio:', error);
         }
       };
       initStudio();
@@ -111,7 +110,6 @@ const BroadcastStudio = ({
       setIsPreviewMode(false);
       onStreamStart?.(currentStream);
     } catch (error) {
-      console.error('Failed to start stream:', error);
     }
   };
   // Handle stream stop
@@ -121,7 +119,6 @@ const BroadcastStudio = ({
       setIsPreviewMode(true);
       onStreamEnd?.(currentStream);
     } catch (error) {
-      console.error('Failed to stop stream:', error);
     }
   };
   // Handle camera toggle

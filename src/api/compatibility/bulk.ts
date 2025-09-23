@@ -7,6 +7,7 @@ import {
   BulkCalculateRequest,
   BulkCalculateResponse
 } from '../../types/compatibility';
+import { createCorsResponse } from '../../utils/cors-config';
 export async function calculateBulkCompatibility(
   request: BulkCalculateRequest
 ): Promise<BulkCalculateResponse> {
@@ -77,7 +78,6 @@ export async function calculateBulkCompatibility(
     const response = await compatibilityService.calculateBulkCompatibility(request);
     return response;
   } catch (error) {
-    console.error('API: Bulk compatibility calculation error:', error);
     return {
       success: false,
       error: {
@@ -109,7 +109,6 @@ export const bulkCalculateCompatibilityHandler = async (req: any, res: any) => {
     const response = await calculateBulkCompatibility(request);
     res.status(response.success ? 200 : 400).json(response);
   } catch (error) {
-    console.error('Express handler error:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -140,17 +139,10 @@ export const supabaseBulkEdgeFunctionHandler = async (req: Request): Promise<Res
       }
     };
     const response = await calculateBulkCompatibility(request);
-    return new Response(JSON.stringify(response), {
-      status: response.success ? 200 : 400,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-      }
+    return createCorsResponse(response, req, {
+      status: response.success ? 200 : 400
     });
   } catch (error) {
-    console.error('Supabase Edge Function error:', error);
     return new Response(JSON.stringify({
       success: false,
       error: {

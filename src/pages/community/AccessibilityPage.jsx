@@ -412,7 +412,7 @@ const AccessibilityPage = () => {
         <GlassCard className="text-center p-6">
           <h3 className="text-lg font-semibold mb-2">Accessibility Statement</h3>
           <p className="text-sm text-gray-600 dark:text-gray-300">
-            This accessibility statement was last reviewed and updated on March 15, 2024.
+            This accessibility statement was last reviewed and updated on September 20, 2025.
             We review and update our accessibility practices regularly to ensure continued compliance
             and improvement.
           </p>

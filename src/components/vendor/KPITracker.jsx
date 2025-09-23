@@ -44,7 +44,6 @@ const KPITracker = ({ vendorId }) => {
         setGoals(JSON.parse(savedGoals));
       }
     } catch (err) {
-      console.error('Load KPI data error:', err);
       setError(err.message);
     } finally {
       setLoading(false);

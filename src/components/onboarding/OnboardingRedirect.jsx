@@ -20,7 +20,6 @@ const OnboardingRedirect = ({ children }) => {
           navigate('/onboarding', { replace: true });
         }
       } catch (error) {
-        console.error('Error checking onboarding status:', error);
         // On error, don't redirect to avoid infinite loops
       }
     };

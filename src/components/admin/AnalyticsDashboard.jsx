@@ -88,7 +88,6 @@ const AnalyticsDashboard = ({ className = "" }) => {
         metrics_count: Object.keys(combinedData).length
       });
     } catch (error) {
-      console.error('Failed to fetch metrics:', error);
       analyticsService.trackError(error, { context: 'analytics_dashboard_fetch' });
     } finally {
       setLoading(false);

@@ -25,7 +25,6 @@ class WhatsAppService {
         logger.error('WhatsApp phone number validation failed');
         return false;
       }
-      // console.log('WhatsApp Business API service initialized successfully');
       return true;
     } catch (error) {
       logger.error('Error initializing WhatsApp service:', error);
@@ -82,7 +81,6 @@ class WhatsAppService {
         response
       };
     } catch (error) {
-      console.error('Error sending WhatsApp text message:', error);
       return {
         success: false,
         error: error.message
@@ -126,7 +124,6 @@ class WhatsAppService {
         response
       };
     } catch (error) {
-      console.error('Error sending WhatsApp template message:', error);
       return {
         success: false,
         error: error.message
@@ -168,7 +165,6 @@ class WhatsAppService {
         message: 'Group creation flow initiated'
       };
     } catch (error) {
-      console.error('Error creating WhatsApp group:', error);
       return {
         success: false,
         error: error.message
@@ -206,7 +202,6 @@ class WhatsAppService {
         totalFailed: invitationResults.filter(r => !r.success).length
       };
     } catch (error) {
-      console.error('Error sending group invitations:', error);
       return {
         success: false,
         error: error.message
@@ -282,7 +277,6 @@ class WhatsAppService {
         totalProcessed: processedMessages.length
       };
     } catch (error) {
-      console.error('Error processing webhook message:', error);
       return {
         success: false,
         error: error.message
@@ -338,7 +332,6 @@ class WhatsAppService {
         actions: await this.determineMessageActions(messageData)
       };
     } catch (error) {
-      console.error('Error processing incoming message:', error);
       return {
         success: false,
         error: error.message
@@ -428,7 +421,6 @@ class WhatsAppService {
       );
       return { success: true, response };
     } catch (error) {
-      console.error('Error marking message as read:', error);
       return { success: false, error: error.message };
     }
   }
@@ -445,7 +437,6 @@ class WhatsAppService {
         fileSize: response.file_size
       };
     } catch (error) {
-      console.error('Error getting media:', error);
       return {
         success: false,
         error: error.message

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Mountain, Waves, Backpack, PartyPopper, Mountain as MountainPeak, Users, Globe, Bike, Coffee, Search, Sparkles, Lightbulb, Target } from 'lucide-react';
 import GlassCard from '../ui/GlassCard';
 
 // Personality type configurations
 const PERSONALITY_CONFIGS = {
   'The Thrill Seeker': {
-    emoji: '🏔️',
+    icon: Mountain,
     gradient: 'from-red-500 to-orange-500',
     bgGradient: 'from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20',
     welcomeMessage: 'Ready for your next adrenaline rush?',
@@ -24,7 +25,7 @@ const PERSONALITY_CONFIGS = {
     ]
   },
   'The Comfort Traveler': {
-    emoji: '🏖️',
+    icon: Waves,
     gradient: 'from-emerald-500 to-green-500',
     bgGradient: 'from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20',
     welcomeMessage: 'Time to relax and unwind in style!',
@@ -43,7 +44,7 @@ const PERSONALITY_CONFIGS = {
     ]
   },
   'The Solo Explorer': {
-    emoji: '🎒',
+    icon: Backpack,
     gradient: 'from-indigo-500 to-purple-500',
     bgGradient: 'from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20',
     welcomeMessage: 'The world awaits your solo adventures!',
@@ -62,7 +63,7 @@ const PERSONALITY_CONFIGS = {
     ]
   },
   'The Social Butterfly': {
-    emoji: '🎉',
+    icon: PartyPopper,
     gradient: 'from-yellow-500 to-orange-500',
     bgGradient: 'from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20',
     welcomeMessage: 'Let\'s make friends around the world!',
@@ -81,7 +82,7 @@ const PERSONALITY_CONFIGS = {
     ]
   },
   'The Adventurer': {
-    emoji: '⛰️',
+    icon: MountainPeak,
     gradient: 'from-purple-500 to-pink-500',
     bgGradient: 'from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20',
     welcomeMessage: 'Adventure is calling your name!',
@@ -100,7 +101,7 @@ const PERSONALITY_CONFIGS = {
     ]
   },
   'The Group Planner': {
-    emoji: '👥',
+    icon: Users,
     gradient: 'from-cyan-500 to-blue-500',
     bgGradient: 'from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20',
     welcomeMessage: 'Time to organize the perfect group adventure!',
@@ -119,7 +120,7 @@ const PERSONALITY_CONFIGS = {
     ]
   },
   'The Balanced Wanderer': {
-    emoji: '🌎',
+    icon: Globe,
     gradient: 'from-lime-500 to-green-500',
     bgGradient: 'from-lime-50 to-green-50 dark:from-lime-900/20 dark:to-green-900/20',
     welcomeMessage: 'The perfect balance of adventure and relaxation awaits!',
@@ -138,7 +139,7 @@ const PERSONALITY_CONFIGS = {
     ]
   },
   'The Active Soloist': {
-    emoji: '🚴',
+    icon: Bike,
     gradient: 'from-pink-500 to-rose-500',
     bgGradient: 'from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20',
     welcomeMessage: 'Ready to power through your next adventure!',
@@ -157,7 +158,7 @@ const PERSONALITY_CONFIGS = {
     ]
   },
   'The Leisure Socializer': {
-    emoji: '🍹',
+    icon: Coffee,
     gradient: 'from-blue-500 to-indigo-500',
     bgGradient: 'from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20',
     welcomeMessage: 'Let\'s socialize in style and comfort!',
@@ -176,7 +177,7 @@ const PERSONALITY_CONFIGS = {
     ]
   },
   'The Curious Traveler': {
-    emoji: '🔍',
+    icon: Search,
     gradient: 'from-gray-500 to-slate-500',
     bgGradient: 'from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20',
     welcomeMessage: 'The world is full of mysteries to uncover!',
@@ -231,7 +232,7 @@ const PersonalizedWelcome = ({ personalizedData, user, onComplete }) => {
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
               className={`w-32 h-32 mx-auto mb-6 bg-gradient-to-r ${config.gradient} rounded-full flex items-center justify-center shadow-xl`}
             >
-              <span className="text-6xl">{config.emoji}</span>
+              <config.icon className="w-16 h-16 text-white" />
             </motion.div>
 
             <h1 className="text-4xl font-bold mb-4">
@@ -268,7 +269,7 @@ const PersonalizedWelcome = ({ personalizedData, user, onComplete }) => {
           >
             <GlassCard className="p-6 h-full">
               <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200 flex items-center gap-2">
-                <span className="text-2xl">✨</span>
+                <Sparkles className="w-6 h-6" />
                 Perfect Adventures for You
               </h3>
 
@@ -302,7 +303,7 @@ const PersonalizedWelcome = ({ personalizedData, user, onComplete }) => {
           >
             <GlassCard className="p-6 h-full">
               <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200 flex items-center gap-2">
-                <span className="text-2xl">💡</span>
+                <Lightbulb className="w-6 h-6" />
                 Travel Tips for You
               </h3>
 
@@ -340,7 +341,10 @@ const PersonalizedWelcome = ({ personalizedData, user, onComplete }) => {
               onClick={onComplete}
               className={`px-8 py-4 bg-gradient-to-r ${config.gradient} text-white font-medium rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all text-lg`}
             >
-              Enter Your Dashboard 🎯
+              <span className="flex items-center gap-2">
+                Enter Your Dashboard
+                <Target className="w-5 h-5" />
+              </span>
             </button>
           </GlassCard>
         </motion.div>

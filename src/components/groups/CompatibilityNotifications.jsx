@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSpring, animated, useTransition } from '@react-spring/web';
+import { TrendingUp, TrendingDown, Smartphone } from 'lucide-react';
 import GlassButton from '../ui/GlassButton';
 
 const CompatibilityNotifications = ({
@@ -201,7 +202,7 @@ const CompatibilityChangeNotification = ({ data, onClose }) => {
   const { oldScore, newScore, change, groupName } = data;
   const isImprovement = change > 0;
 
-  const icon = isImprovement ? '📈' : '📉';
+  const IconComponent = isImprovement ? TrendingUp : TrendingDown;
   const colorClass = isImprovement
     ? 'border-green-300 bg-green-50 dark:border-green-600 dark:bg-green-900/20'
     : 'border-orange-300 bg-orange-50 dark:border-orange-600 dark:bg-orange-900/20';
@@ -210,7 +211,7 @@ const CompatibilityChangeNotification = ({ data, onClose }) => {
     <div className={`glass-card p-4 border ${colorClass} min-w-80 max-w-sm`}>
       <div className="flex items-start justify-between">
         <div className="flex items-start space-x-3">
-          <div className="text-2xl">{icon}</div>
+          <IconComponent className="w-6 h-6 mt-0.5" />
           <div>
             <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               {isImprovement ? 'Chemistry Improved!' : 'Chemistry Changed'}
@@ -316,7 +317,7 @@ const GroupUpdatedNotification = ({ data, onClose }) => {
     <div className="glass-card p-4 border border-purple-300 bg-purple-50 dark:border-purple-600 dark:bg-purple-900/20 min-w-80 max-w-sm">
       <div className="flex items-start justify-between">
         <div className="flex items-start space-x-3">
-          <div className="text-2xl">📱</div>
+          <Smartphone className="w-6 h-6 mt-0.5" />
           <div>
             <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               Group Updated

@@ -57,12 +57,10 @@ const MediaUpload = ({ data, onChange }) => {
       const file = files[i];
       // Validate file type
       if (!file.type.startsWith('image/')) {
-        console.error('File is not an image:', file.name);
         continue;
       }
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        console.error('File too large:', file.name);
         continue;
       }
       try {
@@ -71,7 +69,6 @@ const MediaUpload = ({ data, onChange }) => {
         newImages.push(uploadedImage);
         setUploadProgress(prev => ({ ...prev, [file.name]: 100 }));
       } catch (error) {
-        console.error('Upload failed:', file.name, error);
         setUploadProgress(prev => ({ ...prev, [file.name]: -1 }));
       }
     }

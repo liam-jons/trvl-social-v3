@@ -173,7 +173,6 @@ export const vendorService = {
         error: null
       };
     } catch (error) {
-      console.error('Dashboard stats error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -207,7 +206,6 @@ export const vendorService = {
       })) || [];
       return { data: activities, error: null };
     } catch (error) {
-      console.error('Recent activities error:', error);
       return { data: [], error: error.message };
     }
   },
@@ -345,7 +343,6 @@ export const vendorService = {
       }) || [];
       return { data: processedRequests, error: null };
     } catch (error) {
-      console.error('Get trip requests error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -428,12 +425,10 @@ export const vendorService = {
       if (attachments.length > 0) {
         const attachmentResults = await this.attachFilesToBid(bid.id, attachments);
         if (attachmentResults.error) {
-          console.warn('Some attachments failed to upload:', attachmentResults.error);
         }
       }
       return { data: bid, error: null };
     } catch (error) {
-      console.error('Submit bid error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -482,7 +477,6 @@ export const vendorService = {
       const { data, error } = await query;
       return { data, error };
     } catch (error) {
-      console.error('Get vendor bids error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -558,7 +552,6 @@ export const vendorService = {
         .single();
       return { data, error };
     } catch (error) {
-      console.error('Withdraw bid error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -640,7 +633,6 @@ export const vendorService = {
         summary: { total: files.length, success: successCount, failed: errorCount }
       };
     } catch (error) {
-      console.error('Attach files error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -666,7 +658,6 @@ export const vendorService = {
       const attachmentsWithUrls = await Promise.all(urlPromises);
       return { data: attachmentsWithUrls, error: null };
     } catch (error) {
-      console.error('Get attachment URLs error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -686,7 +677,6 @@ export const vendorService = {
         .single();
       return { data, error };
     } catch (error) {
-      console.error('Create adventure error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -704,7 +694,6 @@ export const vendorService = {
         .single();
       return { data, error };
     } catch (error) {
-      console.error('Update adventure error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -717,7 +706,6 @@ export const vendorService = {
         .eq('id', adventureId);
       return { error };
     } catch (error) {
-      console.error('Delete adventure error:', error);
       return { error: error.message };
     }
   },
@@ -736,7 +724,6 @@ export const vendorService = {
         .single();
       return { data, error };
     } catch (error) {
-      console.error('Get adventure error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -780,7 +767,6 @@ export const vendorService = {
         error: null
       };
     } catch (error) {
-      console.error('Get performance overview error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -813,7 +799,6 @@ export const vendorService = {
         .order('created_at', { ascending: false });
       return { data, error };
     } catch (error) {
-      console.error('Get vendor reviews error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -834,7 +819,6 @@ export const vendorService = {
         .single();
       return { data, error };
     } catch (error) {
-      console.error('Track performance metrics error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -851,7 +835,6 @@ export const vendorService = {
         .order('created_at', { ascending: false });
       return { data, error };
     } catch (error) {
-      console.error('Get performance alerts error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -876,7 +859,6 @@ export const vendorService = {
         .single();
       return { data, error };
     } catch (error) {
-      console.error('Create performance alert error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -893,7 +875,6 @@ export const vendorService = {
         .order('created_at', { ascending: false });
       return { data, error };
     } catch (error) {
-      console.error('Get performance goals error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -918,7 +899,6 @@ export const vendorService = {
         .single();
       return { data, error };
     } catch (error) {
-      console.error('Set performance goal error:', error);
       return { data: null, error: error.message };
     }
   }

@@ -62,7 +62,6 @@ class ForumService {
       if (error) throw error;
       return { threads: data, error: null };
     } catch (error) {
-      // console.error('Error fetching threads:', error);
       return { threads: [], error: error.message };
     }
   }
@@ -100,7 +99,6 @@ class ForumService {
       await this.incrementViewCount(threadId);
       return { thread: data, error: null };
     } catch (error) {
-      // console.error('Error fetching thread:', error);
       return { thread: null, error: error.message };
     }
   }
@@ -114,7 +112,6 @@ class ForumService {
       if (error) throw error;
       return { thread: data, error: null };
     } catch (error) {
-      // console.error('Error creating thread:', error);
       return { thread: null, error: error.message };
     }
   }
@@ -126,7 +123,6 @@ class ForumService {
         .eq('id', threadId);
       if (error) throw error;
     } catch (error) {
-      // console.error('Error incrementing view count:', error);
     }
   }
   // Reply operations
@@ -157,7 +153,6 @@ class ForumService {
       if (error) throw error;
       return { replies: data, error: null };
     } catch (error) {
-      // console.error('Error fetching replies:', error);
       return { replies: [], error: error.message };
     }
   }
@@ -171,7 +166,6 @@ class ForumService {
       if (error) throw error;
       return { reply: data, error: null };
     } catch (error) {
-      // console.error('Error creating reply:', error);
       return { reply: null, error: error.message };
     }
   }
@@ -190,7 +184,6 @@ class ForumService {
       if (error) throw error;
       return { error: null };
     } catch (error) {
-      // console.error('Error marking solution:', error);
       return { error: error.message };
     }
   }
@@ -233,7 +226,6 @@ class ForumService {
       }
       return { error: null };
     } catch (error) {
-      // console.error('Error voting:', error);
       return { error: error.message };
     }
   }
@@ -250,7 +242,6 @@ class ForumService {
       }
       return { reputation: data, error: null };
     } catch (error) {
-      // console.error('Error fetching reputation:', error);
       return { reputation: null, error: error.message };
     }
   }
@@ -270,7 +261,6 @@ class ForumService {
       if (error) throw error;
       return { leaderboard: data, error: null };
     } catch (error) {
-      // console.error('Error fetching leaderboard:', error);
       return { leaderboard: [], error: error.message };
     }
   }
@@ -294,7 +284,6 @@ class ForumService {
       if (error) throw error;
       return { flaggedContent: data, error: null };
     } catch (error) {
-      // console.error('Error fetching flagged content:', error);
       return { flaggedContent: [], error: error.message };
     }
   }
@@ -346,7 +335,6 @@ class ForumService {
         }]);
       return { error: null };
     } catch (error) {
-      // console.error('Error moderating content:', error);
       return { error: error.message };
     }
   }
@@ -392,7 +380,6 @@ class ForumService {
       if (error) throw error;
       return { results: data, error: null };
     } catch (error) {
-      // console.error('Error searching forum:', error);
       return { results: [], error: error.message };
     }
   }
@@ -422,7 +409,6 @@ class ForumService {
       if (error) throw error;
       return { notifications: data, error: null };
     } catch (error) {
-      // console.error('Error fetching forum notifications:', error);
       return { notifications: [], error: error.message };
     }
   }
@@ -435,7 +421,6 @@ class ForumService {
       if (error) throw error;
       return { error: null };
     } catch (error) {
-      // console.error('Error marking notification as read:', error);
       return { error: error.message };
     }
   }

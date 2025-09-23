@@ -153,8 +153,8 @@ const splitPayment = await groupPaymentManager.createSplitPayment({
   organizerId: 'user-123',
   totalAmount: 89900,
   participants: [
-    { id: 'user-456', name: 'John Doe', email: 'john@example.com' },
-    { id: null, name: 'Jane Smith', email: 'jane@example.com' } // Guest user
+    { id: 'user-456', name: 'John Doe', email: 'john.doe@demo.trvlsocial.com' },
+    { id: null, name: 'Jane Smith', email: 'jane.smith@demo.trvlsocial.com' } // Guest user
   ],
   splitType: 'equal',
   paymentDeadline: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),

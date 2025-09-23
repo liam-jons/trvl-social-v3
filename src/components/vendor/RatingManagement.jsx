@@ -37,7 +37,6 @@ const RatingManagement = ({ vendorId }) => {
       const mockReviews = generateMockReviews(vendorId, filters);
       setReviews(mockReviews);
     } catch (err) {
-      console.error('Load review data error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -134,7 +133,6 @@ const RatingManagement = ({ vendorId }) => {
       ));
       setResponseTexts({ ...responseTexts, [reviewId]: '' });
     } catch (err) {
-      console.error('Submit response error:', err);
       setError(err.message);
     } finally {
       setSubmittingResponse(null);

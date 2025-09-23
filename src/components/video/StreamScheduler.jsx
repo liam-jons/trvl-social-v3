@@ -89,7 +89,6 @@ const StreamScheduler = ({ vendorId, className = "" }) => {
       }
       resetForm();
     } catch (error) {
-      console.error('Failed to schedule stream:', error);
       alert('Failed to schedule stream. Please try again.');
     }
   };

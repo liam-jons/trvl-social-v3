@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Star, Users, MapPin, Calendar, Clock } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 
 const OfferCard = ({
@@ -78,7 +79,10 @@ const OfferCard = ({
                 {offer.vendor?.business_name || 'Unknown Vendor'}
               </h3>
               <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                <span>⭐ {offer.vendor?.rating?.toFixed(1) || 'N/A'}</span>
+                <span className="flex items-center gap-1">
+                  <Star className="w-4 h-4" />
+                  {offer.vendor?.rating?.toFixed(1) || 'N/A'}
+                </span>
                 <span>•</span>
                 <span>{offer.vendor?.total_reviews || 0} reviews</span>
               </div>
@@ -95,10 +99,22 @@ const OfferCard = ({
             {offer.trip_request?.title}
           </h4>
           <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <div>📍 {offer.trip_request?.destination}</div>
-            <div>👥 {offer.trip_request?.group_size} people</div>
-            <div>📅 {new Date(offer.trip_request?.start_date).toLocaleDateString()}</div>
-            <div>⏱️ {offer.trip_request?.duration_days || 1} days</div>
+            <div className="flex items-center gap-1">
+              <MapPin className="w-4 h-4" />
+              {offer.trip_request?.destination}
+            </div>
+            <div className="flex items-center gap-1">
+              <Users className="w-4 h-4" />
+              {offer.trip_request?.group_size} people
+            </div>
+            <div className="flex items-center gap-1">
+              <Calendar className="w-4 h-4" />
+              {new Date(offer.trip_request?.start_date).toLocaleDateString()}
+            </div>
+            <div className="flex items-center gap-1">
+              <Clock className="w-4 h-4" />
+              {offer.trip_request?.duration_days || 1} days
+            </div>
           </div>
         </div>
 

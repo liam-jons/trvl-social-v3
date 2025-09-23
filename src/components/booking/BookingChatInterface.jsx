@@ -65,7 +65,6 @@ const BookingChatInterface = ({
         setCurrentLanguage(history.language || 'en');
       }
     } catch (error) {
-      console.error('Failed to load chat history:', error);
       setError('Failed to load chat history');
     }
   };
@@ -74,7 +73,6 @@ const BookingChatInterface = ({
       const sessions = getUserChatSessions(userId);
       setChatSessions(sessions);
     } catch (error) {
-      console.error('Failed to load user sessions:', error);
     }
   };
   const handleSendMessage = async (message = inputMessage) => {
@@ -120,7 +118,6 @@ const BookingChatInterface = ({
         loadUserSessions();
       }
     } catch (error) {
-      console.error('Failed to send message:', error);
       setError('Failed to send message. Please try again.');
     } finally {
       setIsLoading(false);

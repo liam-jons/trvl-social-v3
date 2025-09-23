@@ -186,11 +186,9 @@ const GroupDetailPage = () => {
   }, [currentUser, group?.members]);
   const canManageGroup = userRole === 'creator' || userRole === 'admin';
   const handleJoinGroup = () => {
-    console.log('Joining group:', group.id);
     // Implement join group logic
   };
   const handleLeaveGroup = () => {
-    console.log('Leaving group:', group.id);
     // Implement leave group logic
   };
   const handleLikeGroup = () => {

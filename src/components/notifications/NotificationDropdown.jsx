@@ -86,7 +86,7 @@ const NotificationDropdown = ({ isOpen, onToggle, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="absolute right-0 mt-2 w-96 z-50" ref={dropdownRef}>
+    <div className="absolute right-0 mt-2 w-96 z-dropdown" ref={dropdownRef}>
       <GlassCard className="max-h-96 overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-white/20">

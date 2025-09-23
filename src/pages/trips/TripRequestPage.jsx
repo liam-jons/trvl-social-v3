@@ -31,7 +31,6 @@ const TripRequestPage = () => {
         setFormData(draft);
         setCharacterCount(draft.description.length);
       } catch (error) {
-        console.error('Error loading draft:', error);
       }
     }
   }, []);
@@ -113,8 +112,6 @@ const TripRequestPage = () => {
       // Clear draft on successful submission
       localStorage.removeItem('tripRequestDraft');
       // Log the parsed data for now (will integrate with backend later)
-      console.log('Trip request submitted:', requestData);
-      console.log('NLP Analysis:', parsedTrip);
       // Store the result for display
       setNlpResult(parsedTrip);
       setShowNLPPreview(true);
@@ -125,7 +122,6 @@ Activities: ${parsedTrip.activities.interests.slice(0, 3).join(', ') || 'Not spe
 Source: ${parsedTrip.source}
 We'll start finding perfect adventures for you!`);
     } catch (error) {
-      console.error('Error parsing trip description:', error);
       setErrors({ submit: `Failed to parse trip description: ${error.message}` });
     } finally {
       setIsParsingNLP(false);
@@ -159,7 +155,6 @@ We'll start finding perfect adventures for you!`);
       setNlpResult(parsedTrip);
       setShowNLPPreview(true);
     } catch (error) {
-      console.error('Error parsing trip description:', error);
       setErrors({ description: `Parsing error: ${error.message}` });
     } finally {
       setIsParsingNLP(false);

@@ -237,7 +237,7 @@ describe('Group Optimization Integration Tests', () => {
           userId: 'user_1',
           profile: {
             full_name: 'John Doe',
-            avatar_url: 'https://example.com/avatar1.png',
+            avatar_url: '/images/placeholders/demo-placeholder.svg',
             age: 28
           },
           personality: {
@@ -257,7 +257,7 @@ describe('Group Optimization Integration Tests', () => {
           userId: 'user_2',
           profile: {
             full_name: 'Jane Smith',
-            avatar_url: 'https://example.com/avatar2.png',
+            avatar_url: '/images/placeholders/demo-placeholder.svg',
             age: 32
           },
           personality: {

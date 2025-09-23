@@ -45,7 +45,6 @@ const PayoutManagementPage = () => {
         .eq('status', 'active')
         .single();
       if (accountError) {
-        console.error('Failed to load vendor account:', accountError);
         return;
       }
       setVendorAccount(account);
@@ -55,7 +54,6 @@ const PayoutManagementPage = () => {
         loadActiveHolds(account.id),
       ]);
     } catch (error) {
-      console.error('Failed to load vendor data:', error);
     } finally {
       setLoading(false);
     }
@@ -93,7 +91,6 @@ const PayoutManagementPage = () => {
         nextScheduled: jobError ? null : scheduledJob,
       });
     } catch (error) {
-      console.error('Failed to load payout status:', error);
     }
   };
   const loadActiveHolds = async (vendorAccountId) => {
@@ -107,7 +104,6 @@ const PayoutManagementPage = () => {
       if (error) throw error;
       setHolds(activeHolds || []);
     } catch (error) {
-      console.error('Failed to load active holds:', error);
     }
   };
   const formatAmount = (amount) => {

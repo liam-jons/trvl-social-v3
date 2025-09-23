@@ -97,11 +97,11 @@ export const LargeSize = {
           This is a large modal with more content space.
         </p>
         <p className="text-gray-600 dark:text-gray-300 mb-4">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
-          tempor incididunt ut labore et dolore magna aliqua.
+          Experience the future of travel planning with our innovative platform.
+          Connect with fellow adventurers and discover personalized journeys.
         </p>
         <p className="text-gray-600 dark:text-gray-300">
-          Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
+          Join our community of travelers and unlock unique experiences worldwide.
         </p>
       </div>
     ),

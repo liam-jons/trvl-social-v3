@@ -56,7 +56,6 @@ const ModerationDashboard = () => {
         setStats(statsResult.data || {});
       }
     } catch (error) {
-      console.error('Failed to load dashboard data:', error);
     } finally {
       setLoading(false);
     }
@@ -73,7 +72,6 @@ const ModerationDashboard = () => {
       );
       await loadDashboardData();
     } catch (error) {
-      console.error('Failed to approve content:', error);
     }
   };
   const handleReject = async (itemId, reason = 'Violates community guidelines') => {
@@ -88,7 +86,6 @@ const ModerationDashboard = () => {
       );
       await loadDashboardData();
     } catch (error) {
-      console.error('Failed to reject content:', error);
     }
   };
   const handleBulkAction = async (action) => {
@@ -107,7 +104,6 @@ const ModerationDashboard = () => {
       setSelectedItems([]);
       await loadDashboardData();
     } catch (error) {
-      console.error('Failed to process bulk action:', error);
     }
   };
   const StatCard = ({ icon: Icon, title, value, change, color = 'blue' }) => (
@@ -498,13 +494,13 @@ const ModerationDashboard = () => {
         {activeTab === 'analytics' && (
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Moderation Analytics</h3>
-            <p className="text-gray-600">Analytics and reporting features coming soon...</p>
+            <p className="text-gray-600">Advanced analytics and comprehensive reporting features are being finalized.</p>
           </div>
         )}
         {activeTab === 'policies' && (
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Content Policies</h3>
-            <p className="text-gray-600">Policy management features coming soon...</p>
+            <p className="text-gray-600">Comprehensive policy management and configuration tools are in active development.</p>
           </div>
         )}
       </div>

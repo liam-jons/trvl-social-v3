@@ -3,6 +3,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
 import { VitePWA } from 'vite-plugin-pwa';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 // https://vite.dev/config/
 import path from 'node:path';
@@ -23,7 +24,7 @@ export default defineConfig({
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
         name: 'TRVL Social',
-        short_name: 'TRVL',
+        short_name: 'TRVL Social',
         description: 'Connect, travel, and explore with like-minded adventurers',
         theme_color: '#3b82f6',
         background_color: '#ffffff',
@@ -33,15 +34,27 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: 'logo.svg',
-            sizes: '192x192 512x512',
-            type: 'image/svg+xml',
+            src: 'https://vhecnqaejsukulaktjob.supabase.co/storage/v1/object/public/images/5Ccompany_logo_sm.webp',
+            sizes: '192x192',
+            type: 'image/webp',
             purpose: 'any'
           },
           {
-            src: 'pwa-maskable.svg',
-            sizes: '192x192 512x512',
-            type: 'image/svg+xml',
+            src: 'https://vhecnqaejsukulaktjob.supabase.co/storage/v1/object/public/images/5Ccompany_logo_sm.webp',
+            sizes: '512x512',
+            type: 'image/webp',
+            purpose: 'any'
+          },
+          {
+            src: 'https://vhecnqaejsukulaktjob.supabase.co/storage/v1/object/public/images/5Ccompany_logo_sm.webp',
+            sizes: '192x192',
+            type: 'image/webp',
+            purpose: 'maskable'
+          },
+          {
+            src: 'https://vhecnqaejsukulaktjob.supabase.co/storage/v1/object/public/images/5Ccompany_logo_sm.webp',
+            sizes: '512x512',
+            type: 'image/webp',
             purpose: 'maskable'
           }
         ],
@@ -64,7 +77,9 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
+        maximumFileSizeToCacheInBytes: 5000000, // 5MB limit for large vendor chunks
         runtimeCaching: [
+          // API caching with network-first strategy
           {
             urlPattern: /^https:\/\/api\.trvl-social\.com\/.*/i,
             handler: 'NetworkFirst',
@@ -72,13 +87,15 @@ export default defineConfig({
               cacheName: 'api-cache',
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 300 // 5 minutes
+                maxAgeSeconds: parseInt(process.env.API_CACHE_TTL || '300') // 5 minutes default
               },
               cacheableResponse: {
                 statuses: [0, 200]
-              }
+              },
+              networkTimeoutSeconds: 10
             }
           },
+          // Supabase API caching
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
             handler: 'NetworkFirst',
@@ -90,29 +107,84 @@ export default defineConfig({
               },
               cacheableResponse: {
                 statuses: [0, 200]
+              },
+              networkTimeoutSeconds: 10
+            }
+          },
+          // CDN assets caching
+          {
+            urlPattern: new RegExp(`^${process.env.CDN_BASE_URL || 'https://cdn.trvlsocial.com'}/.*`),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'cdn-assets',
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: parseInt(process.env.STATIC_CACHE_TTL || '604800') // 7 days default
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
               }
             }
           },
+          // Image caching with longer TTL
           {
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/,
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|avif|ico)$/,
             handler: 'CacheFirst',
             options: {
               cacheName: 'images-cache',
               expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 30 * 24 * 60 * 60 // 30 days
+                maxEntries: 150,
+                maxAgeSeconds: parseInt(process.env.IMAGE_CACHE_TTL || '2592000') // 30 days default
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
               }
             }
           },
+          // Font caching with very long TTL
           {
             urlPattern: /\.(?:woff|woff2|ttf|eot)$/,
             handler: 'CacheFirst',
             options: {
               cacheName: 'fonts-cache',
               expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 24 * 60 * 60 // 60 days
+                maxEntries: 15,
+                maxAgeSeconds: 365 * 24 * 60 * 60 // 1 year
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
               }
+            }
+          },
+          // Static assets (JS, CSS) with stale-while-revalidate
+          {
+            urlPattern: /\.(?:js|css)$/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'static-assets',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: parseInt(process.env.STATIC_CACHE_TTL || '604800') // 7 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          // External APIs (Mapbox, etc.)
+          {
+            urlPattern: /^https:\/\/api\.mapbox\.com\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'mapbox-cache',
+              expiration: {
+                maxEntries: 20,
+                maxAgeSeconds: 3600 // 1 hour
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              },
+              networkTimeoutSeconds: 5
             }
           }
         ]
@@ -121,6 +193,13 @@ export default defineConfig({
         enabled: true,
         type: 'module'
       }
+    }),
+    // Bundle analyzer for optimization
+    process.env.ANALYZE && visualizer({
+      filename: 'dist/bundle-analysis.html',
+      open: true,
+      gzipSize: true,
+      brotliSize: true
     }),
     // Only upload source maps in production builds
     process.env.NODE_ENV === 'production' && sentryVitePlugin({
@@ -145,7 +224,181 @@ export default defineConfig({
   ].filter(Boolean),
   build: {
     // Generate source maps for Sentry
-    sourcemap: true
+    sourcemap: true,
+    // Set chunk size warning limit to 500KB
+    chunkSizeWarningLimit: 500,
+    // Production optimizations
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: process.env.NODE_ENV === 'production',
+        drop_debugger: process.env.NODE_ENV === 'production',
+        pure_funcs: process.env.NODE_ENV === 'production' ? ['console.log', 'console.debug'] : []
+      }
+    },
+    // Asset optimization
+    assetsInlineLimit: 4096, // Inline assets smaller than 4KB
+    cssCodeSplit: true,
+    // Tree shaking optimization
+    target: 'es2020',
+    // Improve tree shaking for libraries
+    treeshaking: {
+      moduleSideEffects: false,
+      propertyReadSideEffects: false
+    },
+    // CDN configuration for production
+    ...(process.env.NODE_ENV === 'production' && process.env.CDN_BASE_URL && {
+      base: `${process.env.CDN_BASE_URL}/static/`
+    }),
+    rollupOptions: {
+      external: (id) => {
+        // Don't bundle development dependencies
+        if (id.includes('storybook') || id.includes('vitest')) {
+          return true;
+        }
+        return false;
+      },
+      output: {
+        manualChunks: (id) => {
+          // TensorFlow.js - separate into its own chunk for lazy loading
+          if (id.includes('@tensorflow/tfjs') || id.includes('tensorflow')) {
+            return 'tensorflow';
+          }
+
+          // Mapbox - keep separate for potential lazy loading
+          if (id.includes('mapbox-gl')) {
+            return 'mapbox';
+          }
+
+          // Large node_modules dependencies - split by category
+          if (id.includes('node_modules')) {
+            // Core React ecosystem - keep together for fast initial load
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'react-core';
+            }
+
+            // Heavy analytics and monitoring libraries
+            if (id.includes('@sentry') || id.includes('@datadog') || id.includes('mixpanel') || id.includes('analytics')) {
+              return 'monitoring';
+            }
+
+            // AI/ML and NLP libraries (large computation libraries)
+            if (id.includes('compromise') || id.includes('natural') || id.includes('sentiment') || id.includes('ml-') || id.includes('brain')) {
+              return 'ai-nlp';
+            }
+
+            // Payment processing libraries
+            if (id.includes('@stripe') || id.includes('stripe') || id.includes('payment')) {
+              return 'payments';
+            }
+
+            // Rich text editor libraries
+            if (id.includes('@tiptap') || id.includes('tiptap') || id.includes('prosemirror') || id.includes('codemirror')) {
+              return 'editor';
+            }
+
+            // Chart and visualization libraries
+            if (id.includes('recharts') || id.includes('chart') || id.includes('d3') || id.includes('vis-') || id.includes('canvas')) {
+              return 'charts';
+            }
+
+            // Media and file processing
+            if (id.includes('html2canvas') || id.includes('jspdf') || id.includes('image-') || id.includes('pdf-') || id.includes('canvas-')) {
+              return 'media-processing';
+            }
+
+            // Video and streaming
+            if (id.includes('@daily-co') || id.includes('webrtc') || id.includes('stream') || id.includes('video')) {
+              return 'video-streaming';
+            }
+
+            // Animation libraries
+            if (id.includes('framer-motion') || id.includes('lottie') || id.includes('@react-spring') || id.includes('spring')) {
+              return 'animation';
+            }
+
+            // Form and validation libraries
+            if (id.includes('react-hook-form') || id.includes('@hookform') || id.includes('yup') || id.includes('zod') || id.includes('formik')) {
+              return 'forms';
+            }
+
+            // UI component libraries
+            if (id.includes('@headlessui') || id.includes('@heroicons') || id.includes('lucide') || id.includes('@radix-ui')) {
+              return 'ui-components';
+            }
+
+            // Utility libraries
+            if (id.includes('lodash') || id.includes('date-fns') || id.includes('uuid') || id.includes('clsx') || id.includes('classnames')) {
+              return 'utils';
+            }
+
+            // Database and API libraries
+            if (id.includes('@supabase') || id.includes('supabase') || id.includes('postgres') || id.includes('graphql')) {
+              return 'database';
+            }
+
+            // Everything else
+            return 'vendor-misc';
+          }
+
+          // Application code chunks - organize by feature for better caching
+
+          // Admin features - split into logical groups
+          if (id.includes('src/pages/admin/AdminDashboardPage')) {
+            return 'admin-dashboard';
+          }
+          if (id.includes('src/components/admin/')) {
+            return 'admin-components';
+          }
+
+          // Vendor features - split by functionality
+          if (id.includes('src/pages/vendor/VendorDashboardPage')) {
+            return 'vendor-dashboard';
+          }
+          if (id.includes('src/pages/vendor/PayoutManagementPage') || id.includes('src/pages/vendor/BidRequestsPage')) {
+            return 'vendor-financial';
+          }
+          if (id.includes('src/pages/vendor/AdventureManagementPage')) {
+            return 'vendor-adventures';
+          }
+          if (id.includes('src/components/vendor/')) {
+            return 'vendor-components';
+          }
+
+          // Quiz and personality assessment - lazy load this heavy feature
+          if (id.includes('src/pages/quiz/') || id.includes('src/components/quiz/') ||
+              id.includes('assessment-service') || id.includes('personality-calculator') ||
+              id.includes('ml/') || id.includes('compatibility-scoring')) {
+            return 'quiz-ml';
+          }
+
+          // Search and filtering
+          if (id.includes('src/pages/SearchPage') || id.includes('FilterPanel') || id.includes('search')) {
+            return 'search';
+          }
+
+          // Groups and recommendations
+          if (id.includes('src/pages/groups/') || id.includes('recommendations') || id.includes('compatibility')) {
+            return 'groups';
+          }
+
+          // Booking and payment flows
+          if (id.includes('booking') || id.includes('payment') || id.includes('stripe')) {
+            return 'booking';
+          }
+
+          // Community features
+          if (id.includes('community') || id.includes('connections') || id.includes('social')) {
+            return 'community';
+          }
+
+          // Adventure browsing
+          if (id.includes('adventure') && !id.includes('vendor')) {
+            return 'adventures';
+          }
+        }
+      }
+    }
   },
   test: {
     projects: [

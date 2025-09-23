@@ -49,7 +49,6 @@ const PaymentLinkGenerator = ({
       }
       setPaymentLinks(links);
     } catch (err) {
-      console.error('Failed to generate payment links:', err);
     } finally {
       setGeneratingLinks(false);
     }
@@ -67,7 +66,6 @@ const PaymentLinkGenerator = ({
           expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
         });
     } catch (err) {
-      console.error('Failed to store payment token:', err);
     }
     return `${baseUrl}/pay/${paymentToken}`;
   };
@@ -85,7 +83,6 @@ const PaymentLinkGenerator = ({
         setCopiedLinks(prev => ({ ...prev, [paymentId]: false }));
       }, 2000);
     } catch (err) {
-      console.error('Failed to copy link:', err);
     }
   };
   const handleSendEmail = async (payment) => {
@@ -131,7 +128,6 @@ The TRVL Social Team`,
         .eq('id', payment.id);
       onPaymentUpdate?.();
     } catch (err) {
-      console.error('Failed to send email:', err);
     } finally {
       setSendingEmails({ ...sendingEmails, [payment.id]: false });
     }

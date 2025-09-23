@@ -106,7 +106,6 @@ const AdventureWizard = ({ adventure, onClose, onSave }) => {
       }
       onSave();
     } catch (error) {
-      console.error('Failed to save adventure:', error);
       // Could add toast notification here
     }
   };

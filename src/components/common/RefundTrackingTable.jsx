@@ -138,7 +138,6 @@ const RefundTrackingTable = ({
         setStats(statsData);
       }
     } catch (error) {
-      console.error('Failed to load refunds:', error);
     } finally {
       setLoading(false);
     }
@@ -198,7 +197,6 @@ const RefundTrackingTable = ({
         downloadJSON(exportData);
       }
     } catch (error) {
-      console.error('Failed to export refunds:', error);
       alert('Failed to export refunds. Please try again.');
     } finally {
       setExportLoading(false);

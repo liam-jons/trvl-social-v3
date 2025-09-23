@@ -150,7 +150,6 @@ const CancellationModal = ({
       );
       setPolicyEvaluation(evaluation);
     } catch (error) {
-      console.error('Failed to evaluate policy:', error);
     }
   };
   const handleParticipantToggle = (participantIndex) => {

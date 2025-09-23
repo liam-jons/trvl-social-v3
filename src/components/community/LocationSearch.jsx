@@ -22,7 +22,6 @@ const LocationSearch = ({ onLocationSelect, placeholder = "Search locations..." 
       setResults(locations);
       setShowResults(true);
     } catch (error) {
-      console.error('Location search failed:', error);
       setResults([]);
     } finally {
       setLoading(false);

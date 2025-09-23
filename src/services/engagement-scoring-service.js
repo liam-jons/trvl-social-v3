@@ -41,7 +41,6 @@ export class EngagementScoringService {
       });
       return score;
     } catch (error) {
-      console.error('Error calculating post engagement score:', error);
       return { totalScore: 0, breakdown: {} };
     }
   }
@@ -271,7 +270,6 @@ export class EngagementScoringService {
         }
       };
     } catch (error) {
-      console.error('Error generating personalized feed:', error);
       return {
         success: false,
         error: error.message,
@@ -415,7 +413,6 @@ export class EngagementScoringService {
       });
       return result;
     } catch (error) {
-      console.error('Error getting trending content:', error);
       return {
         success: false,
         error: error.message,
@@ -477,7 +474,6 @@ export class EngagementScoringService {
         ...profile?.preferences
       };
     } catch (error) {
-      console.error('Error getting user preferences:', error);
       return { interests: [], location: null };
     }
   }
@@ -493,7 +489,6 @@ export class EngagementScoringService {
         .eq('status', 'accepted');
       return connections?.map(c => c.connected_user_id) || [];
     } catch (error) {
-      console.error('Error getting user connections:', error);
       return [];
     }
   }
@@ -532,7 +527,6 @@ export class EngagementScoringService {
         });
       return { success: true, score: engagementScore };
     } catch (error) {
-      console.error('Error updating user engagement score:', error);
       return { success: false, error: error.message };
     }
   }
@@ -605,7 +599,6 @@ export class EngagementScoringService {
       await this.updateUserEngagementScore(userId);
       return { success: true };
     } catch (error) {
-      console.error('Error tracking post interaction:', error);
       return { success: false, error: error.message };
     }
   }
@@ -628,7 +621,6 @@ export class EngagementScoringService {
         });
       return { success: true };
     } catch (error) {
-      console.error('Error tracking interaction session:', error);
       return { success: false, error: error.message };
     }
   }
@@ -648,7 +640,6 @@ export class EngagementScoringService {
         });
       return { success: true };
     } catch (error) {
-      console.error('Error logging content discovery:', error);
       return { success: false, error: error.message };
     }
   }
@@ -705,7 +696,6 @@ export class EngagementScoringService {
         }
       };
     } catch (error) {
-      console.error('Error getting user engagement insights:', error);
       return { success: false, error: error.message };
     }
   }

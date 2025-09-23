@@ -5,16 +5,15 @@
  */
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { corsMiddleware } = require('../../src/utils/cors-config.js');
 
 export default async function handler(req, res) {
-  // Enable CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  // Apply secure CORS headers - handles OPTIONS requests automatically
+  const corsHandler = corsMiddleware(true); // Use secure headers for payment endpoints
+  const corsResult = corsHandler(req, res, () => {});
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+  // If CORS middleware handled the request (OPTIONS), return early
+  if (corsResult === true) return;
 
   try {
     if (req.method === 'GET') {

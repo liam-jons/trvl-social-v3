@@ -60,7 +60,6 @@ const MultiCurrencyPayment = ({
       );
       setCurrencyPreview(preview);
     } catch (error) {
-      console.error('Currency conversion failed:', error);
       setConvertedAmount(baseAmount);
     } finally {
       setLoading(false);
@@ -98,7 +97,6 @@ const MultiCurrencyPayment = ({
       setPaymentIntent(result);
       return result;
     } catch (error) {
-      console.error('Failed to create payment intent:', error);
       onPaymentError?.(error);
       throw error;
     } finally {

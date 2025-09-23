@@ -92,7 +92,6 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
       if (error) throw error;
       setAuditEntries(data || []);
     } catch (error) {
-      console.error('Failed to load audit trail:', error);
     } finally {
       setLoading(false);
     }
@@ -134,7 +133,6 @@ const PaymentAuditTrail = ({ paymentId, vendorStripeAccountId }) => {
         URL.revokeObjectURL(url);
       }
     } catch (error) {
-      console.error('Failed to export audit trail:', error);
       alert('Failed to export audit trail. Please try again.');
     }
   };

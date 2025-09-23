@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
 import { onboardingService, ONBOARDING_STEPS } from '../../services/onboarding-service';
-import { assessmentService } from '../../services/assessment-service';
+import lazyAssessmentService from '../../services/lazy-assessment-service';
 import QuizContainer from '../quiz/QuizContainer';
 import QuizResults from '../quiz/QuizResults';
 import GlassCard from '../ui/GlassCard';
@@ -44,7 +44,6 @@ const OnboardingFlow = () => {
           setPersonalizedData(personalizedData);
         }
       } catch (err) {
-        console.error('Error initializing onboarding:', err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -63,7 +62,6 @@ const OnboardingFlow = () => {
         navigate('/dashboard', { replace: true });
       }
     } catch (err) {
-      console.error('Error completing step:', err);
       setError(err.message);
     }
   }, [currentStep, navigate]);
@@ -80,14 +78,13 @@ const OnboardingFlow = () => {
         ...calculatedProfile,
         completedAt: new Date().toISOString()
       };
-      const savedAssessment = await assessmentService.saveAssessment(assessmentData);
+      const savedAssessment = await lazyAssessmentService.createAssessment(assessmentData);
       setQuizResults(savedAssessment.calculatorProfile);
       // Complete quiz step in onboarding
       await onboardingService.completeQuiz(savedAssessment);
       // Update current step
       setCurrentStep(ONBOARDING_STEPS.QUIZ_RESULTS);
     } catch (err) {
-      console.error('Error completing quiz:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -109,7 +106,6 @@ const OnboardingFlow = () => {
         navigate('/dashboard', { replace: true });
       }
     } catch (err) {
-      console.error('Error skipping quiz:', err);
       setError(err.message);
     }
   }, [navigate]);

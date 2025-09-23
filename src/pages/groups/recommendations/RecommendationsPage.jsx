@@ -43,7 +43,6 @@ const RecommendationsPage = () => {
         data: result.recommendations
       };
     } catch (err) {
-      console.error('Error fetching recommendations:', err);
       throw err;
     }
   }, [userProfile, activeFilters]);
@@ -155,12 +154,10 @@ const RecommendationsPage = () => {
   }, [userProfile, activeFilters, reset]);
   // Handle group actions
   const handleViewDetails = useCallback((group) => {
-    console.log('View details for group:', group.id);
     // Navigate to group details page
     // In a real app: navigate(`/groups/${group.id}`);
   }, []);
   const handleJoinGroup = useCallback((group) => {
-    console.log('Join group:', group.id);
     // Handle join group logic
     // In a real app: show join modal or navigate to join flow
   }, []);

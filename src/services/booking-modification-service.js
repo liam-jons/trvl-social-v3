@@ -436,7 +436,6 @@ export const bookingModificationManager = {
           .eq('id', splitPayment.id);
       }
     } catch (error) {
-      console.error('Failed to update payment records:', error);
     }
   },
   /**
@@ -486,7 +485,6 @@ export const bookingModificationManager = {
         await notificationService.sendNotification(vendorNotification);
       }
     } catch (error) {
-      console.error('Failed to send modification confirmation:', error);
     }
   },
   /**
@@ -510,7 +508,6 @@ export const bookingModificationManager = {
       };
       await notificationService.sendNotification(notification);
     } catch (error) {
-      console.error('Failed to notify vendor:', error);
     }
   },
   /**
@@ -547,7 +544,6 @@ export const bookingModificationManager = {
           created_at: new Date().toISOString(),
         });
     } catch (error) {
-      console.error('Failed to create audit log entry:', error);
     }
   },
 };
@@ -684,7 +680,6 @@ export const vendorModificationManager = {
       };
       await notificationService.sendNotification(notification);
     } catch (error) {
-      console.error('Failed to send decision notification:', error);
     }
   },
   /**
@@ -1028,10 +1023,8 @@ export const cancellationPolicyEngine = {
       } else {
         // Process individual booking refund
         // This would integrate with individual payment processing
-        console.log('Processing individual booking refund');
       }
     } catch (error) {
-      console.error('Failed to process cancellation refund:', error);
     }
   },
   /**
@@ -1080,7 +1073,6 @@ export const cancellationPolicyEngine = {
       };
       await notificationService.sendNotification(vendorNotification);
     } catch (error) {
-      console.error('Failed to send cancellation notifications:', error);
     }
   },
   /**
@@ -1106,7 +1098,6 @@ export const cancellationPolicyEngine = {
         await notificationService.sendNotification(notification);
       }
     } catch (error) {
-      console.error('Failed to send partial cancellation notifications:', error);
     }
   },
 };

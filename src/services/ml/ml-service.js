@@ -24,7 +24,6 @@ export class MLService {
   async initialize() {
     if (this.initialized) return;
     try {
-      console.log('Initializing ML Service...');
       // Start retraining scheduler
       await this.retrainingScheduler.start();
       // Load deployed models into cache
@@ -32,9 +31,7 @@ export class MLService {
       // Set up default retraining triggers if none exist
       await this.setupDefaultTriggers();
       this.initialized = true;
-      console.log('ML Service initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize ML Service:', error);
       throw error;
     }
   }
@@ -47,10 +44,8 @@ export class MLService {
       try {
         const deployedModel = await this.modelManager.getDeployedModel(modelType);
         if (deployedModel) {
-          console.log(`Loaded deployed ${modelType} model`);
         }
       } catch (error) {
-        console.warn(`No deployed model found for type ${modelType}:`, error.message);
       }
     }
   }
@@ -70,7 +65,6 @@ export class MLService {
           });
         } catch (error) {
           // Trigger might already exist, which is fine
-          console.log(`Trigger ${config.name} for ${modelType} already exists`);
         }
       }
     }
@@ -215,7 +209,6 @@ export class MLService {
         features: featureArray.length
       };
     } catch (error) {
-      console.error('Prediction failed:', error);
       throw new Error('Failed to make prediction');
     }
   }
@@ -269,7 +262,6 @@ export class MLService {
           });
       }
     } catch (error) {
-      console.error('Failed to record prediction:', error);
     }
   }
   /**
@@ -419,7 +411,6 @@ export class MLService {
    * Cleanup resources
    */
   async cleanup() {
-    console.log('Cleaning up ML Service...');
     // Stop retraining scheduler
     this.retrainingScheduler.stop();
     // Clean up model manager
@@ -428,7 +419,6 @@ export class MLService {
     this.abTestingFramework.userAssignments.clear();
     this.abTestingFramework.activeExperiments.clear();
     this.initialized = false;
-    console.log('ML Service cleanup complete');
   }
 }
 // Create singleton instance

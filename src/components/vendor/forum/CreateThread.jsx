@@ -87,11 +87,9 @@ const CreateThread = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       // In real implementation, this would create the thread via API
-      console.log('Creating thread:', formData);
       // Redirect to the new thread
       navigate('/vendor/forum/thread/new-thread-id');
     } catch (error) {
-      console.error('Error creating thread:', error);
       setErrors({ submit: 'Failed to create thread. Please try again.' });
     } finally {
       setLoading(false);

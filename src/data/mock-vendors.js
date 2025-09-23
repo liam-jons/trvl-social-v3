@@ -1,3 +1,5 @@
+import { imageAssetService } from '../services/image-asset-service';
+
 // Mock vendor data for development and testing
 export const mockVendors = [
   {

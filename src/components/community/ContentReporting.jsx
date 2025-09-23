@@ -110,7 +110,6 @@ const ContentReporting = ({
         alert('Failed to submit report. Please try again.');
       }
     } catch (error) {
-      console.error('Error submitting report:', error);
       alert('An error occurred while submitting the report.');
     } finally {
       setIsSubmitting(false);

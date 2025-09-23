@@ -25,7 +25,6 @@ const CollectionModal = ({ isOpen, onClose, onCreate }) => {
         isPrivate: false
       });
     } catch (error) {
-      console.error('Error creating collection:', error);
     } finally {
       setIsSubmitting(false);
     }

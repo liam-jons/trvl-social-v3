@@ -45,7 +45,6 @@ const CommunityFeed = () => {
         setUserPreferences(prefs);
         setActiveFilter(prefs.default_filter || 'global');
       } catch (error) {
-        console.error('Failed to load user preferences:', error);
         setActiveFilter('global');
       }
     };
@@ -84,7 +83,6 @@ const CommunityFeed = () => {
         if (result.success) {
           setPosts(result.data);
         } else {
-          console.error('Failed to load personalized feed:', result.error);
           // Fallback to basic location filtering
           const filterConfig = {
             type: activeFilter,
@@ -99,7 +97,6 @@ const CommunityFeed = () => {
         }
       }
     } catch (error) {
-      console.error('Failed to load posts:', error);
       setPosts([]);
     } finally {
       setLoading(false);
@@ -121,7 +118,6 @@ const CommunityFeed = () => {
       // Refresh posts to show updated engagement
       loadPosts();
     } catch (error) {
-      console.error('Failed to track reaction:', error);
     }
   };
   const handlePostSave = async (postId) => {
@@ -132,7 +128,6 @@ const CommunityFeed = () => {
       // Refresh posts
       loadPosts();
     } catch (error) {
-      console.error('Failed to save post:', error);
     }
   };
   const handlePostShare = async (postId) => {
@@ -143,7 +138,6 @@ const CommunityFeed = () => {
       // Refresh posts
       loadPosts();
     } catch (error) {
-      console.error('Failed to share post:', error);
     }
   };
   const sortOptions = [
@@ -164,7 +158,6 @@ const CommunityFeed = () => {
       // Reload posts to show the new post
       loadPosts();
     } catch (error) {
-      console.error('Failed to create post:', error);
       throw error; // Re-throw to let PostCreator handle the error display
     }
   };

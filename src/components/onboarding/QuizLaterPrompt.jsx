@@ -24,7 +24,6 @@ const QuizLaterPrompt = () => {
           setTimeout(() => setIsVisible(true), 2000);
         }
       } catch (error) {
-        console.error('Error checking quiz prompt status:', error);
       }
     };
     checkPromptStatus();

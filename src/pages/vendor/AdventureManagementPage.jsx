@@ -38,7 +38,6 @@ const AdventureManagementPage = () => {
   };
   const handleBulkAction = (action) => {
     // Handle bulk operations like publish, unpublish, delete
-    console.log(`Bulk ${action} for adventures:`, selectedAdventures);
   };
   const filteredAdventures = adventures?.filter(adventure => {
     const matchesSearch = adventure.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||

@@ -1,74 +1,74 @@
 /* Dual Range Slider Styles */
 .slider-thumb-min::-webkit-slider-thumb {
   appearance: none;
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  background: #4f46e5;
-  border: 2px solid #ffffff;
+  height: var(--space-5);
+  width: var(--space-5);
+  border-radius: var(--radius-full);
+  background: rgb(var(--color-primary-600));
+  border: 2px solid rgb(var(--color-surface-base));
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 2;
+  box-shadow: var(--shadow-sm);
+  z-index: var(--z-docked);
   position: relative;
 }
 
 .slider-thumb-max::-webkit-slider-thumb {
   appearance: none;
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  background: #4f46e5;
-  border: 2px solid #ffffff;
+  height: var(--space-5);
+  width: var(--space-5);
+  border-radius: var(--radius-full);
+  background: rgb(var(--color-primary-600));
+  border: 2px solid rgb(var(--color-surface-base));
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 1;
+  box-shadow: var(--shadow-sm);
+  z-index: var(--z-base);
   position: relative;
 }
 
 .slider-thumb-min::-moz-range-thumb {
   appearance: none;
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  background: #4f46e5;
-  border: 2px solid #ffffff;
+  height: var(--space-5);
+  width: var(--space-5);
+  border-radius: var(--radius-full);
+  background: rgb(var(--color-primary-600));
+  border: 2px solid rgb(var(--color-surface-base));
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 2;
+  box-shadow: var(--shadow-sm);
+  z-index: var(--z-docked);
   position: relative;
 }
 
 .slider-thumb-max::-moz-range-thumb {
   appearance: none;
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  background: #4f46e5;
-  border: 2px solid #ffffff;
+  height: var(--space-5);
+  width: var(--space-5);
+  border-radius: var(--radius-full);
+  background: rgb(var(--color-primary-600));
+  border: 2px solid rgb(var(--color-surface-base));
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 1;
+  box-shadow: var(--shadow-sm);
+  z-index: var(--z-base);
   position: relative;
 }
 
 /* Track styles */
 .slider-thumb-min::-webkit-slider-track {
-  height: 8px;
-  border-radius: 4px;
+  height: var(--space-2);
+  border-radius: var(--radius-base);
   background: linear-gradient(
     to right,
-    #e5e7eb 0%,
-    #e5e7eb var(--min-percent, 0%),
-    #4f46e5 var(--min-percent, 0%),
-    #4f46e5 var(--max-percent, 100%),
-    #e5e7eb var(--max-percent, 100%),
-    #e5e7eb 100%
+    rgb(var(--color-border-base)) 0%,
+    rgb(var(--color-border-base)) var(--min-percent, 0%),
+    rgb(var(--color-primary-600)) var(--min-percent, 0%),
+    rgb(var(--color-primary-600)) var(--max-percent, 100%),
+    rgb(var(--color-border-base)) var(--max-percent, 100%),
+    rgb(var(--color-border-base)) 100%
   );
 }
 
 .slider-thumb-max::-webkit-slider-track {
-  height: 8px;
-  border-radius: 4px;
+  height: var(--space-2);
+  border-radius: var(--radius-base);
   background: transparent;
 }
 
@@ -76,21 +76,21 @@
 .dark .slider-thumb-min::-webkit-slider-track {
   background: linear-gradient(
     to right,
-    #374151 0%,
-    #374151 var(--min-percent, 0%),
-    #6366f1 var(--min-percent, 0%),
-    #6366f1 var(--max-percent, 100%),
-    #374151 var(--max-percent, 100%),
-    #374151 100%
+    rgb(var(--color-border-base)) 0%,
+    rgb(var(--color-border-base)) var(--min-percent, 0%),
+    rgb(var(--color-primary-500)) var(--min-percent, 0%),
+    rgb(var(--color-primary-500)) var(--max-percent, 100%),
+    rgb(var(--color-border-base)) var(--max-percent, 100%),
+    rgb(var(--color-border-base)) 100%
   );
 }
 
 .dark .slider-thumb-min::-webkit-slider-thumb {
-  background: #6366f1;
-  border: 2px solid #1f2937;
+  background: rgb(var(--color-primary-500));
+  border: 2px solid rgb(var(--color-surface-base));
 }
 
 .dark .slider-thumb-max::-webkit-slider-thumb {
-  background: #6366f1;
-  border: 2px solid #1f2937;
+  background: rgb(var(--color-primary-500));
+  border: 2px solid rgb(var(--color-surface-base));
 }

@@ -30,7 +30,6 @@ const PrivacyPreferenceCenter = () => {
       setConsentStatus(status);
       setAuditTrail(audit);
     } catch (error) {
-      console.error('Failed to load privacy data:', error);
     } finally {
       setLoading(false);
     }
@@ -41,7 +40,6 @@ const PrivacyPreferenceCenter = () => {
       gdprConsentService.setConsent(category, enabled, true);
       // Status will update via event listener
     } catch (error) {
-      console.error('Failed to update consent:', error);
     } finally {
       setSaving(false);
     }
@@ -66,7 +64,6 @@ const PrivacyPreferenceCenter = () => {
       URL.revokeObjectURL(url);
       alert('Your data has been exported and downloaded successfully.');
     } catch (error) {
-      console.error('Failed to export data:', error);
       alert('Failed to export data. Please try again.');
     } finally {
       setExportLoading(false);
@@ -85,7 +82,6 @@ const PrivacyPreferenceCenter = () => {
       // Redirect to logout or home page
       window.location.href = '/';
     } catch (error) {
-      console.error('Failed to initiate data deletion:', error);
       alert('Failed to initiate data deletion. Please contact support.');
     } finally {
       setDeleteLoading(false);
@@ -261,8 +257,11 @@ const PrivacyPreferenceCenter = () => {
                 </ul>
                 <p className="mt-4 text-sm text-gray-600">
                   To exercise these rights, please contact our support team at{' '}
-                  <a href="mailto:privacy@trvl.com" className="text-blue-600 hover:underline">
-                    privacy@trvl.com
+                  <a
+                    href="mailto:privacy@trvlsocial.com"
+                    className="text-blue-600 hover:underline underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+                  >
+                    privacy@trvlsocial.com
                   </a>
                 </p>
               </div>
@@ -357,8 +356,18 @@ const PrivacyPreferenceCenter = () => {
               <div className="border-t pt-6">
                 <h3 className="font-medium text-gray-900 mb-2">Contact Information</h3>
                 <div className="text-sm text-gray-600">
-                  <p>Data Protection Officer: <a href="mailto:dpo@trvl.com" className="text-blue-600 hover:underline">dpo@trvl.com</a></p>
-                  <p>Privacy Questions: <a href="mailto:privacy@trvl.com" className="text-blue-600 hover:underline">privacy@trvl.com</a></p>
+                  <p>Data Protection Officer: <a
+                    href="mailto:dpo@trvlsocial.com"
+                    className="text-blue-600 hover:underline underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+                  >
+                    dpo@trvlsocial.com
+                  </a></p>
+                  <p>Privacy Questions: <a
+                    href="mailto:privacy@trvlsocial.com"
+                    className="text-blue-600 hover:underline underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+                  >
+                    privacy@trvlsocial.com
+                  </a></p>
                   <p>Last Updated: {formatDate(new Date().toISOString())}</p>
                 </div>
               </div>

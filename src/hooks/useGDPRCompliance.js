@@ -18,7 +18,6 @@ export const useGDPRCompliance = () => {
       setConsentStatus(status);
       setIsInitialized(true);
     } catch (error) {
-      console.error('Failed to load GDPR consent status:', error);
     } finally {
       setLoading(false);
     }
@@ -76,7 +75,6 @@ export const useGDPRCompliance = () => {
       URL.revokeObjectURL(url);
       return exportData;
     } catch (error) {
-      console.error('Failed to export user data:', error);
       throw error;
     }
   }, []);
@@ -85,7 +83,6 @@ export const useGDPRCompliance = () => {
     try {
       return await gdprConsentService.deleteUserData(userId, categories);
     } catch (error) {
-      console.error('Failed to delete user data:', error);
       throw error;
     }
   }, []);

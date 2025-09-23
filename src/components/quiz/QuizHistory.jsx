@@ -4,7 +4,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import GlassCard from '../ui/GlassCard';
 import LoadingSpinner from '../common/LoadingSpinner';
-import { assessmentService } from '../../services/assessment-service';
+import lazyAssessmentService from '../../services/lazy-assessment-service';
 import { useAuth } from '../../hooks/useAuth';
 const PERSONALITY_TYPE_COLORS = {
   'The Thrill Seeker': { primary: '#ef4444', secondary: '#dc2626', gradient: 'from-red-500 to-orange-500' },
@@ -43,7 +43,7 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
     try {
       setLoading(true);
       setError(null);
-      const result = await assessmentService.queryAssessments({
+      const result = await lazyAssessmentService.getUserAssessments(user.id, {
         userId: user.id,
         limit: 50,
         offset: 0
@@ -63,7 +63,6 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
       }
       setAssessments(sortedAssessments);
     } catch (err) {
-      console.error('Error loading assessment history:', err);
       setError('Failed to load your assessment history. Please try again.');
     } finally {
       setLoading(false);
@@ -130,7 +129,6 @@ export default function QuizHistory({ onRetakeQuiz, onViewResult, className = ''
       link.href = canvas.toDataURL();
       link.click();
     } catch (err) {
-      console.error('Failed to download history:', err);
     }
   };
   const containerVariants = {

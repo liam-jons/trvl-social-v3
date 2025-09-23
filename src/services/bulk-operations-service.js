@@ -36,7 +36,6 @@ export const bulkOperationsService = {
       }
       return { data: results, error: null };
     } catch (error) {
-      console.error('Bulk update adventures error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -106,7 +105,6 @@ export const bulkOperationsService = {
       }
       return { data: results, error: null };
     } catch (error) {
-      console.error('Bulk pricing update error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -141,7 +139,6 @@ export const bulkOperationsService = {
         error: null
       };
     } catch (error) {
-      console.error('Bulk status update error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -189,7 +186,6 @@ export const bulkOperationsService = {
       const { data, error } = await query;
       return { data, error };
     } catch (error) {
-      console.error('Get bulk bookings data error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -225,7 +221,6 @@ export const bulkOperationsService = {
         .select('id, status');
       return { data, error };
     } catch (error) {
-      console.error('Bulk booking status update error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -317,12 +312,10 @@ export const bulkOperationsService = {
           // Send email if requested
           if (includeEmail && recipient.email) {
             // Integration point for email service
-            console.log(`Would send email to ${recipient.email}: ${message}`);
           }
           // Send WhatsApp if requested
           if (includeWhatsApp) {
             // Integration point for WhatsApp service
-            console.log(`Would send WhatsApp to ${recipient.fullName}: ${message}`);
           }
           results.successful.push({
             recipient: recipient.fullName,
@@ -338,7 +331,6 @@ export const bulkOperationsService = {
       }
       return { data: results, error: null };
     } catch (error) {
-      console.error('Bulk notifications error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -395,7 +387,6 @@ export const bulkOperationsService = {
         error: null
       };
     } catch (error) {
-      console.error('Export adventures CSV error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -446,7 +437,6 @@ export const bulkOperationsService = {
         error: null
       };
     } catch (error) {
-      console.error('Export bookings CSV error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -532,7 +522,6 @@ export const bulkOperationsService = {
       results.total = lines.length - 1; // Exclude header row
       return { data: results, error: null };
     } catch (error) {
-      console.error('Import adventures CSV error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -557,7 +546,6 @@ export const bulkOperationsService = {
         .single();
       return { data, error };
     } catch (error) {
-      console.error('Log bulk action error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -588,7 +576,6 @@ export const bulkOperationsService = {
       const { data, error } = await query;
       return { data, error };
     } catch (error) {
-      console.error('Get bulk action history error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -613,7 +600,6 @@ export const bulkOperationsService = {
         .single();
       return { data, error };
     } catch (error) {
-      console.error('Create batch job error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -636,7 +622,6 @@ export const bulkOperationsService = {
         .single();
       return { data, error };
     } catch (error) {
-      console.error('Update batch job progress error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -652,7 +637,6 @@ export const bulkOperationsService = {
         .single();
       return { data, error };
     } catch (error) {
-      console.error('Get batch job status error:', error);
       return { data: null, error: error.message };
     }
   }

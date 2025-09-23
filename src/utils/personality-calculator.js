@@ -75,7 +75,6 @@ export async function calculatePersonalityProfile(answers, options = { useAI: tr
       profile.descriptionSource = 'static';
     }
   } catch (error) {
-    console.warn('Failed to generate AI descriptions, using fallback:', error.message);
     profile.traitDescriptions = generateTraitDescriptions(profile);
     profile.descriptionSource = 'fallback';
     profile.descriptionError = error.message;

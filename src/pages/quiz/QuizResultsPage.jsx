@@ -39,7 +39,6 @@ export default function QuizResultsPage() {
           return;
         }
       } catch (err) {
-        console.error('Error loading quiz results:', err);
         setError('Failed to load your quiz results. Please try taking the quiz again.');
       } finally {
         setIsLoading(false);
@@ -71,11 +70,9 @@ export default function QuizResultsPage() {
         const shareText = `${shareData.text}\n\n${shareData.url}`;
         await navigator.clipboard.writeText(shareText);
         // You could show a toast notification here
-        console.log('Results copied to clipboard!');
       }
     } catch (err) {
       if (err.name !== 'AbortError') {
-        console.error('Error sharing results:', err);
       }
     }
   };

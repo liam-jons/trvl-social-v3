@@ -1,0 +1,255 @@
+{
+  "summary": {
+    "testDuration": 5146,
+    "tablesAccessible": 4,
+    "totalTablesExpected": 6,
+    "tableAccessRate": 67,
+    "foreignKeyTests": {
+      "passed": 4,
+      "total": 7,
+      "passRate": 57
+    },
+    "dataIntegrityTests": {
+      "passed": 2,
+      "total": 3,
+      "passRate": 67
+    },
+    "rlsPolicyIssues": {
+      "resolved": 0,
+      "total": 2,
+      "unresolved": 2
+    },
+    "errorCount": 0,
+    "overallHealth": 67,
+    "timestamp": "2025-09-20T11:40:58.607Z"
+  },
+  "tableStructure": [
+    {
+      "table": "profiles",
+      "status": "accessible",
+      "duration": 525,
+      "hasData": false,
+      "rowCount": 0,
+      "expectedColumns": [
+        "id",
+        "email"
+      ],
+      "timestamp": "2025-09-20T11:40:53.986Z",
+      "actualColumns": [],
+      "missingColumns": [
+        "id",
+        "email"
+      ],
+      "hasExpectedColumns": false
+    },
+    {
+      "table": "vendors",
+      "status": "accessible",
+      "duration": 395,
+      "hasData": false,
+      "rowCount": 0,
+      "expectedColumns": [
+        "id",
+        "user_id"
+      ],
+      "timestamp": "2025-09-20T11:40:54.381Z",
+      "actualColumns": [],
+      "missingColumns": [
+        "id",
+        "user_id"
+      ],
+      "hasExpectedColumns": false
+    },
+    {
+      "table": "adventures",
+      "status": "accessible",
+      "duration": 309,
+      "hasData": false,
+      "rowCount": 0,
+      "expectedColumns": [
+        "id",
+        "vendor_id"
+      ],
+      "timestamp": "2025-09-20T11:40:54.690Z",
+      "actualColumns": [],
+      "missingColumns": [
+        "id",
+        "vendor_id"
+      ],
+      "hasExpectedColumns": false
+    },
+    {
+      "table": "bookings",
+      "status": "accessible",
+      "duration": 146,
+      "hasData": false,
+      "rowCount": 0,
+      "expectedColumns": [
+        "id",
+        "adventure_id",
+        "user_id"
+      ],
+      "timestamp": "2025-09-20T11:40:54.837Z",
+      "actualColumns": [],
+      "missingColumns": [
+        "id",
+        "adventure_id",
+        "user_id"
+      ],
+      "hasExpectedColumns": false
+    },
+    {
+      "table": "groups",
+      "status": "error",
+      "duration": 344,
+      "error": "infinite recursion detected in policy for relation \"group_members\"",
+      "hasData": null,
+      "rowCount": 0,
+      "expectedColumns": [
+        "id",
+        "owner_id"
+      ],
+      "timestamp": "2025-09-20T11:40:55.181Z"
+    },
+    {
+      "table": "group_members",
+      "status": "error",
+      "duration": 328,
+      "error": "infinite recursion detected in policy for relation \"group_members\"",
+      "hasData": null,
+      "rowCount": 0,
+      "expectedColumns": [
+        "id",
+        "group_id",
+        "user_id"
+      ],
+      "timestamp": "2025-09-20T11:40:55.509Z"
+    }
+  ],
+  "foreignKeys": [
+    {
+      "name": "profiles_to_auth_users",
+      "description": "Profiles should reference auth.users",
+      "status": "passed",
+      "duration": 310,
+      "dataCount": 0,
+      "timestamp": "2025-09-20T11:40:55.819Z"
+    },
+    {
+      "name": "vendors_to_profiles",
+      "description": "Vendors should reference profiles",
+      "status": "passed",
+      "duration": 327,
+      "dataCount": 0,
+      "timestamp": "2025-09-20T11:40:56.146Z"
+    },
+    {
+      "name": "adventures_to_vendors",
+      "description": "Adventures should reference vendors",
+      "status": "passed",
+      "duration": 314,
+      "dataCount": 0,
+      "timestamp": "2025-09-20T11:40:56.460Z"
+    },
+    {
+      "name": "bookings_to_adventures_and_profiles",
+      "description": "Bookings should reference adventures and profiles",
+      "status": "passed",
+      "duration": 133,
+      "dataCount": 0,
+      "timestamp": "2025-09-20T11:40:56.593Z"
+    },
+    {
+      "name": "group_members_to_groups_and_profiles",
+      "description": "Group members should reference groups and profiles",
+      "status": "failed",
+      "duration": 314,
+      "error": "infinite recursion detected in policy for relation \"group_members\"",
+      "dataCount": 0,
+      "timestamp": "2025-09-20T11:40:56.908Z"
+    },
+    {
+      "name": "vendor_adventure_relationship",
+      "description": "Check if vendors have related adventures",
+      "type": "cascade_test",
+      "status": "failed",
+      "duration": 148,
+      "details": {
+        "success": false,
+        "error": "No vendors found"
+      },
+      "timestamp": "2025-09-20T11:40:58.296Z"
+    },
+    {
+      "name": "group_member_relationship",
+      "description": "Check if groups have related members",
+      "type": "cascade_test",
+      "status": "failed",
+      "duration": 311,
+      "details": {
+        "success": false,
+        "error": "infinite recursion detected in policy for relation \"group_members\""
+      },
+      "timestamp": "2025-09-20T11:40:58.607Z"
+    }
+  ],
+  "indexes": [],
+  "rlsPolicies": [
+    {
+      "table": "groups",
+      "knownIssue": "infinite recursion detected in policy for relation \"group_members\"",
+      "status": "policy_error",
+      "duration": 307,
+      "error": "infinite recursion detected in policy for relation \"group_members\"",
+      "timestamp": "2025-09-20T11:40:57.214Z"
+    },
+    {
+      "table": "group_members",
+      "knownIssue": "infinite recursion detected in policy",
+      "status": "policy_error",
+      "duration": 353,
+      "error": "infinite recursion detected in policy for relation \"group_members\"",
+      "timestamp": "2025-09-20T11:40:57.568Z"
+    }
+  ],
+  "dataIntegrity": [
+    {
+      "name": "profiles_unique_email",
+      "description": "Profiles should have unique email addresses",
+      "status": "failed",
+      "duration": 131,
+      "details": {
+        "success": false,
+        "error": "column profiles.email does not exist"
+      },
+      "timestamp": "2025-09-20T11:40:57.699Z"
+    },
+    {
+      "name": "bookings_valid_status",
+      "description": "Bookings should have valid status values",
+      "status": "passed",
+      "duration": 326,
+      "details": {
+        "success": true,
+        "totalRecords": 0,
+        "invalidCount": 0,
+        "invalidStatuses": []
+      },
+      "timestamp": "2025-09-20T11:40:58.025Z"
+    },
+    {
+      "name": "adventures_price_validation",
+      "description": "Adventures should have positive prices",
+      "status": "passed",
+      "duration": 122,
+      "details": {
+        "success": true,
+        "totalRecords": 0,
+        "invalidCount": 0,
+        "averagePrice": 0
+      },
+      "timestamp": "2025-09-20T11:40:58.148Z"
+    }
+  ],
+  "errors": []
+}

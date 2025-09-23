@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Sparkles, Target, Users, Scale, Handshake } from 'lucide-react';
 
 const GroupDynamicsSummary = ({
   insights = [],
@@ -23,14 +24,14 @@ const GroupDynamicsSummary = ({
     return 'Very large group - requires strong leadership';
   }, [memberCount]);
 
-  const dynamicsIcon = useMemo(() => {
+  const DynamicsIcon = useMemo(() => {
     switch (compatibilityLevel.level) {
-      case 'excellent': return '✨';
-      case 'great': return '🎯';
-      case 'good': return '👥';
-      case 'mixed': return '⚖️';
-      case 'challenging': return '🤝';
-      default: return '👥';
+      case 'excellent': return Sparkles;
+      case 'great': return Target;
+      case 'good': return Users;
+      case 'mixed': return Scale;
+      case 'challenging': return Handshake;
+      default: return Users;
     }
   }, [compatibilityLevel.level]);
 
@@ -46,7 +47,7 @@ const GroupDynamicsSummary = ({
     <div className={`space-y-3 ${className}`}>
       {/* Compatibility Summary */}
       <div className={`inline-flex items-center px-3 py-2 rounded-full ${compatibilityLevel.bgColor}`}>
-        <span className="mr-2 text-lg">{dynamicsIcon}</span>
+        <DynamicsIcon className="mr-2 w-5 h-5" />
         <span className={`text-sm font-medium ${compatibilityLevel.color}`}>
           {compatibilityLevel.level.charAt(0).toUpperCase() + compatibilityLevel.level.slice(1)} Chemistry
         </span>

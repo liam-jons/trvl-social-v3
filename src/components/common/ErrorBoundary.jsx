@@ -17,7 +17,6 @@ class ErrorBoundary extends Component {
     return { hasError: true };
   }
   componentDidCatch(error, errorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
     // Capture error in Sentry with full context
     const eventId = sentryService.captureException(error, {
       tags: {
@@ -55,7 +54,7 @@ class ErrorBoundary extends Component {
   };
   handleReportFeedback = () => {
     if (this.state.eventId) {
-      const feedbackUrl = `mailto:support@trvl-social.com?subject=Error Report&body=Error ID: ${this.state.eventId}%0A%0APlease describe what you were doing when this error occurred:`;
+      const feedbackUrl = `mailto:support@trvlsocial.com?subject=Error Report&body=Error ID: ${this.state.eventId}%0A%0APlease describe what you were doing when this error occurred:`;
       window.open(feedbackUrl, '_blank');
     }
   };

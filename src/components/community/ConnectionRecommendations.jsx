@@ -38,7 +38,6 @@ const ConnectionRecommendations = ({ onUpdate }) => {
         setRecommendations(result.data);
       }
     } catch (error) {
-      console.error('Error loading recommendations:', error);
     } finally {
       setLoading(false);
     }
@@ -52,10 +51,8 @@ const ConnectionRecommendations = ({ onUpdate }) => {
         setRecommendations(prev => prev.filter(rec => rec.user_id !== recipientId));
         onUpdate?.();
       } else {
-        console.error('Failed to send request:', result.error);
       }
     } catch (error) {
-      console.error('Error sending request:', error);
     } finally {
       setSendingRequest(null);
     }

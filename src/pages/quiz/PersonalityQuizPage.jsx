@@ -1,21 +1,30 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import QuizContainer from '../../components/quiz/QuizContainer';
-import { calculatePersonalityProfile } from '../../utils/personality-calculator';
-import { assessmentService } from '../../services/assessment-service';
+import lazyAssessmentService from '../../services/lazy-assessment-service';
+import { preloadMLServices } from '../../services/ml/lazy-ml-loader';
 export default function PersonalityQuizPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  // Preload ML services when component mounts for better UX
+  useEffect(() => {
+    preloadMLServices();
+  }, []);
+
   const handleQuizComplete = useCallback(async (answers) => {
     try {
-      // Calculate personality profile from answers
-      const profile = await calculatePersonalityProfile(answers);
+      // Calculate personality profile with ML-enhanced scoring if available
+      const profile = await lazyAssessmentService.calculatePersonalityProfile(answers);
+
       // Store profile in session storage for immediate display
       sessionStorage.setItem('personalityProfile', JSON.stringify(profile));
       sessionStorage.setItem('quizAnswers', JSON.stringify(answers));
+
       // Clear any historical assessment flag
       sessionStorage.removeItem('selectedAssessment');
+
       // Save to database if user is authenticated
       if (user?.id) {
         try {
@@ -27,20 +36,23 @@ export default function PersonalityQuizPage() {
             metadata: {
               version: '1.0',
               source: 'personality_quiz_page',
-              userAgent: navigator.userAgent
+              userAgent: navigator.userAgent,
+              mlEnhanced: lazyAssessmentService.isMLAvailable()
             }
           };
-          await assessmentService.saveAssessment(assessmentData);
-          console.log('Assessment saved successfully to database');
+          await lazyAssessmentService.createAssessment(assessmentData);
         } catch (dbError) {
           // Don't prevent navigation if database save fails
-          console.error('Failed to save assessment to database:', dbError);
+          console.warn('Failed to save assessment to database:', dbError);
         }
       }
+
       // Navigate to results page
       navigate('/quiz/results');
     } catch (error) {
-      console.error('Error processing quiz results:', error);
+      console.error('Quiz completion error:', error);
+      // Navigate anyway with basic profile calculation
+      navigate('/quiz/results');
     }
   }, [navigate, user?.id]);
   return (

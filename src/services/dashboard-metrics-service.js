@@ -215,7 +215,6 @@ class DashboardMetricsService {
         topAdventures: topAdventuresList
       };
     } catch (error) {
-      console.error('Error generating overview metrics:', error);
       // Fallback to minimal data structure
       return {
         kpis: {
@@ -323,7 +322,6 @@ class DashboardMetricsService {
         paymentMethods
       };
     } catch (error) {
-      console.error('Error generating revenue metrics:', error);
       // Fallback to empty data structure
       return {
         monthlyRevenue: [],
@@ -425,7 +423,6 @@ class DashboardMetricsService {
         topUserLocations
       };
     } catch (error) {
-      console.error('Error generating user metrics:', error);
       // Fallback to minimal data structure
       return {
         totalUsers: 0,
@@ -517,7 +514,6 @@ class DashboardMetricsService {
         conversionRates
       };
     } catch (error) {
-      console.error('Error generating adventure metrics:', error);
       return {
         totalAdventures: 0,
         totalBookings: 0,
@@ -607,7 +603,6 @@ class DashboardMetricsService {
         compatibilityScores
       };
     } catch (error) {
-      console.error('Error generating group metrics:', error);
       return {
         totalGroups: 0,
         activeGroups: 0,
@@ -669,7 +664,6 @@ class DashboardMetricsService {
       }
       return data;
     } catch (error) {
-      console.error('Error getting revenue time series:', error);
       return this.generateTimeSeriesData(days, 15000);
     }
   }
@@ -696,7 +690,6 @@ class DashboardMetricsService {
       }
       return data;
     } catch (error) {
-      console.error('Error getting user growth time series:', error);
       return this.generateTimeSeriesData(days, 250);
     }
   }
@@ -722,7 +715,6 @@ class DashboardMetricsService {
       }
       return data;
     } catch (error) {
-      console.error('Error getting user registration time series:', error);
       return [];
     }
   }
@@ -755,7 +747,6 @@ class DashboardMetricsService {
       }
       return data;
     } catch (error) {
-      console.error('Error getting group formation time series:', error);
       return [];
     }
   }
@@ -776,7 +767,6 @@ class DashboardMetricsService {
         .gte('updated_at', cutoffDate);
       return usersRegistered > 0 ? Math.round((usersActive / usersRegistered) * 100) : 0;
     } catch (error) {
-      console.error('Error calculating retention:', error);
       return 0;
     }
   }

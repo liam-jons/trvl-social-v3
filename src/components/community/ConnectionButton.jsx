@@ -43,7 +43,6 @@ const ConnectionButton = ({
       const status = await connectionService.getConnectionStatus(user.id, userId);
       setConnectionStatus(status);
     } catch (error) {
-      console.error('Error loading connection status:', error);
     } finally {
       setLoading(false);
     }
@@ -67,7 +66,6 @@ const ConnectionButton = ({
         onConnectionChange?.();
       }
     } catch (error) {
-      console.error('Error cancelling request:', error);
     }
   };
   const handleDisconnect = async () => {
@@ -83,7 +81,6 @@ const ConnectionButton = ({
       setConnectionStatus(null);
       onConnectionChange?.();
     } catch (error) {
-      console.error('Error disconnecting:', error);
     }
   };
   const handleBlock = async () => {
@@ -94,7 +91,6 @@ const ConnectionButton = ({
         onConnectionChange?.();
       }
     } catch (error) {
-      console.error('Error blocking user:', error);
     }
   };
   const handleUnblock = async () => {
@@ -105,7 +101,6 @@ const ConnectionButton = ({
         onConnectionChange?.();
       }
     } catch (error) {
-      console.error('Error unblocking user:', error);
     }
   };
   if (loading) {

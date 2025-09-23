@@ -18,7 +18,6 @@ class MixpanelService {
     if (this.isInitialized) return;
     const token = import.meta.env.VITE_MIXPANEL_TOKEN;
     if (!token || token === 'YOUR_MIXPANEL_TOKEN_HERE') {
-      console.warn('Mixpanel token not configured. Analytics disabled.');
       return;
     }
     const isProduction = import.meta.env.NODE_ENV === 'production';
@@ -28,7 +27,6 @@ class MixpanelService {
       persistence: 'localStorage',
       api_host: 'https://api.mixpanel.com',
       loaded: () => {
-        console.log('Mixpanel loaded successfully');
       },
       // Sampling configuration for cost optimization
       loaded_callback: () => {
@@ -89,7 +87,15 @@ class MixpanelService {
     NOTIFICATION_OPENED: 'Notification Opened',
     NOTIFICATION_DISMISSED: 'Notification Dismissed',
     // Errors
-    ERROR_OCCURRED: 'Error Occurred'
+    ERROR_OCCURRED: 'Error Occurred',
+    // Age Verification Events
+    AGE_VERIFICATION_STARTED: 'Age Verification Started',
+    AGE_VERIFICATION_COMPLETED: 'Age Verification Completed',
+    AGE_VERIFICATION_FAILED: 'Age Verification Failed',
+    UNDERAGE_ATTEMPT_BLOCKED: 'Underage Attempt Blocked',
+    AGE_VERIFICATION_DASHBOARD_VIEWED: 'Age Verification Dashboard Viewed',
+    COMPLIANCE_REPORT_GENERATED: 'Compliance Report Generated',
+    COMPLIANCE_REPORT_EXPORTED: 'Compliance Report Exported'
   };
   // User identification
   identify(userId, userData = {}) {
@@ -286,6 +292,46 @@ class MixpanelService {
       ...cohortData,
       cohort_date: cohortData.cohortDate,
       cohort_type: cohortData.cohortType
+    });
+  }
+
+  // Age verification tracking
+  trackAgeVerification(stage, verificationData) {
+    const eventMap = {
+      started: MixpanelService.EVENT_NAMES.AGE_VERIFICATION_STARTED,
+      completed: MixpanelService.EVENT_NAMES.AGE_VERIFICATION_COMPLETED,
+      failed: MixpanelService.EVENT_NAMES.AGE_VERIFICATION_FAILED,
+      underage_blocked: MixpanelService.EVENT_NAMES.UNDERAGE_ATTEMPT_BLOCKED
+    };
+
+    this.track(eventMap[stage], {
+      session_id: verificationData.sessionId,
+      result: verificationData.result,
+      error_type: verificationData.errorType,
+      calculated_age: verificationData.calculatedAge,
+      is_underage: verificationData.isUnderage,
+      processing_time_ms: verificationData.processingTime,
+      user_agent: navigator.userAgent,
+      referrer: document.referrer,
+      ...(stage === 'failed' && { failure_reason: verificationData.failureReason })
+    });
+  }
+
+  // Compliance dashboard tracking
+  trackComplianceDashboard(action, dashboardData = {}) {
+    const eventMap = {
+      viewed: MixpanelService.EVENT_NAMES.AGE_VERIFICATION_DASHBOARD_VIEWED,
+      report_generated: MixpanelService.EVENT_NAMES.COMPLIANCE_REPORT_GENERATED,
+      report_exported: MixpanelService.EVENT_NAMES.COMPLIANCE_REPORT_EXPORTED
+    };
+
+    this.track(eventMap[action], {
+      dashboard_section: dashboardData.section,
+      date_range: dashboardData.dateRange,
+      export_format: dashboardData.exportFormat,
+      report_type: dashboardData.reportType,
+      user_role: dashboardData.userRole || 'admin',
+      metrics_displayed: dashboardData.metricsDisplayed
     });
   }
 }

@@ -67,14 +67,12 @@ const StripeConnectOnboarding = () => {
               setOnboardingStep('onboarding');
             }
           } catch (statusError) {
-            console.error('Error fetching account status:', statusError);
             setOnboardingStep('onboarding');
           }
         }
         // Load any existing notifications
         loadNotifications();
       } catch (error) {
-        console.error('Error checking existing account:', error);
         setError('Failed to load account information');
       } finally {
         setLoading(false);
@@ -95,7 +93,6 @@ const StripeConnectOnboarding = () => {
         .limit(5);
       setNotifications(notifs || []);
     } catch (error) {
-      console.error('Error loading notifications:', error);
     }
   };
   // Add notification
@@ -119,7 +116,6 @@ const StripeConnectOnboarding = () => {
         read: false
       });
     } catch (error) {
-      console.error('Error saving notification:', error);
     }
   };
   // Create Stripe Connect account with business info
@@ -164,7 +160,6 @@ const StripeConnectOnboarding = () => {
       setOnboardingUrl(linkResult.url);
       setOnboardingStep('onboarding');
     } catch (error) {
-      console.error('Error creating Stripe account:', error);
       setError(error.message || 'Failed to create Stripe account');
       setOnboardingStep('initial');
       await addNotification(
@@ -193,7 +188,6 @@ const StripeConnectOnboarding = () => {
         'info'
       );
     } catch (error) {
-      console.error('Error generating onboarding link:', error);
       setError(error.message || 'Failed to generate onboarding link');
     } finally {
       setLoading(false);
@@ -243,7 +237,6 @@ const StripeConnectOnboarding = () => {
         );
       }
     } catch (error) {
-      console.error('Error checking account status:', error);
       setError('Failed to verify account status');
       setOnboardingStep('onboarding');
       await addNotification(
@@ -269,7 +262,6 @@ const StripeConnectOnboarding = () => {
         setOnboardingStep('verifying');
       }
     } catch (error) {
-      console.error('Error refreshing account status:', error);
     } finally {
       setLoading(false);
     }

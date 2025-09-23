@@ -67,7 +67,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
       });
       onActionComplete?.();
     } catch (error) {
-      console.error('Export failed:', error);
       alert('Export failed: ' + error.message);
     } finally {
       setIsLoading(false);
@@ -110,7 +109,6 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
       });
       onActionComplete?.();
     } catch (error) {
-      console.error('Import failed:', error);
       setImportResults({
         successful: [],
         failed: [{ error: error.message }],
@@ -335,7 +333,7 @@ const CSVImportExport = ({ vendorId, onActionComplete }) => {
               Bookings
             </div>
             <div className="text-sm text-gray-400 mt-1">
-              Coming soon...
+              In development...
             </div>
           </div>
         </div>

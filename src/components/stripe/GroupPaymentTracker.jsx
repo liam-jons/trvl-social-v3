@@ -135,10 +135,8 @@ const GroupPaymentTracker = ({
   const sendReminder = async (individualPaymentId) => {
     try {
       // This would integrate with your reminder system
-      console.log(`Sending reminder for payment ${individualPaymentId}`);
       // You could call a specific reminder endpoint here
     } catch (error) {
-      console.error('Failed to send reminder:', error);
     }
   };
   if (loading) {

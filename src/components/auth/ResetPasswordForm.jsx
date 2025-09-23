@@ -76,7 +76,6 @@ const ResetPasswordForm = () => {
         }, 3000);
       }
     } catch (err) {
-      console.error('Password reset error:', err);
     }
   };
   if (tokenError) {

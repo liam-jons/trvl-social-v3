@@ -48,7 +48,6 @@ const WishlistPage = () => {
         collectionId
       });
       if (itemsError) {
-        console.error('Error loading wishlist:', itemsError);
         addNotification({
           type: 'error',
           title: 'Error',
@@ -59,13 +58,11 @@ const WishlistPage = () => {
       // Load collections
       const { data: collectionData, error: collectionsError } = await WishlistService.getUserCollections(user.id);
       if (collectionsError) {
-        console.error('Error loading collections:', collectionsError);
       } else {
         setCollections(collectionData || []);
       }
       setWishlistItems(items || []);
     } catch (error) {
-      console.error('Error loading wishlist data:', error);
       addNotification({
         type: 'error',
         title: 'Error',
@@ -139,7 +136,6 @@ const WishlistPage = () => {
         message: `"${name}" collection has been created`
       });
     } catch (error) {
-      console.error('Error creating collection:', error);
     }
   };
   const handleExport = async (format) => {
@@ -173,7 +169,6 @@ const WishlistPage = () => {
         message: 'Your wishlist has been exported successfully'
       });
     } catch (error) {
-      console.error('Error exporting wishlist:', error);
     }
   };
   const toggleSelection = (itemId) => {

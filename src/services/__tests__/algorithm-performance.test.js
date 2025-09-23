@@ -144,7 +144,6 @@ describe('Algorithm Performance Benchmarks', () => {
       expect(successfulAlgorithms.length).toBeGreaterThan(0);
       // Log performance comparison for analysis
       successfulAlgorithms.forEach(([name, result]) => {
-        console.log(`${name}: ${result.duration.toFixed(2)}ms, quality: ${result.quality.toFixed(2)}, efficiency: ${result.efficiency.toFixed(4)}`);
       });
     });
   });
@@ -217,7 +216,6 @@ describe('Algorithm Performance Benchmarks', () => {
         expect(groups.length).toBeGreaterThan(0);
         expect(participantsPerSecond).toBeGreaterThan(10); // Minimum throughput
         // Log performance metrics
-        console.log(`${test.description}: ${duration.toFixed(2)}ms (${participantsPerSecond.toFixed(2)} participants/sec)`);
       });
     });
   });

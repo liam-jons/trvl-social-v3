@@ -297,13 +297,10 @@ const apiService = new APIService();
 // Add default error handling interceptor
 apiService.addErrorInterceptor(async (error) => {
   if (error instanceof RateLimitError) {
-    console.warn('Rate limit exceeded:', error.message);
     // You could show a toast notification here
   } else if (error.name === 'AuthenticationError') {
-    console.error('Authentication failed:', error.message);
     // Redirect to login
   } else if (error.name === 'ServerError') {
-    console.error('Server error:', error.message);
     // Show error notification
   }
 

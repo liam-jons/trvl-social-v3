@@ -133,19 +133,15 @@ const GroupsPage = () => {
   }, [groups, searchQuery, selectedFilters]);
   const handleJoinGroup = (groupId) => {
     // Implement join group logic
-    console.log('Joining group:', groupId);
   };
   const handleLeaveGroup = (groupId) => {
     // Implement leave group logic
-    console.log('Leaving group:', groupId);
   };
   const handleViewDetails = (groupId) => {
     // Navigate to group detail page
-    console.log('Viewing group details:', groupId);
   };
   const handleCreateGroup = () => {
     // Navigate to create group page or open modal
-    console.log('Creating new group');
   };
   const clearFilters = () => {
     setSelectedFilters({

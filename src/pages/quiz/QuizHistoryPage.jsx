@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import QuizHistory from '../../components/quiz/QuizHistory';
-import { assessmentService } from '../../services/assessment-service';
+import lazyAssessmentService from '../../services/lazy-assessment-service';
 export default function QuizHistoryPage() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
@@ -26,7 +26,6 @@ export default function QuizHistoryPage() {
         navigate('/quiz/results');
       }
     } catch (error) {
-      console.error('Error viewing assessment result:', error);
     }
   };
   // Show loading while auth is being determined

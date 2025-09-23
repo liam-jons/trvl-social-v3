@@ -156,7 +156,6 @@ export const paymentCollectionWorkflow = {
         .eq('id', individualPayment.user_id)
         .single();
       if (userError) {
-        console.warn(`Could not fetch user data for ${individualPayment.user_id}:`, userError);
       }
       // Get booking details for context
       const { data: bookingData, error: bookingError } = await supabase
@@ -165,7 +164,6 @@ export const paymentCollectionWorkflow = {
         .eq('id', splitPayment.booking_id)
         .single();
       if (bookingError) {
-        console.warn(`Could not fetch booking data for ${splitPayment.booking_id}:`, bookingError);
       }
       // Create payment request notification
       const notification = {
@@ -187,10 +185,8 @@ export const paymentCollectionWorkflow = {
       // Send notification
       await notificationService.sendNotification(notification);
       // Log the request
-      console.log(`Payment request sent to user ${individualPayment.user_id} for $${(individualPayment.amount_due / 100).toFixed(2)}`);
       return true;
     } catch (error) {
-      console.error('Failed to send payment request:', error);
       return false;
     }
   },
@@ -214,7 +210,6 @@ export const paymentCollectionWorkflow = {
         .lte('scheduled_for', now.toISOString())
         .order('scheduled_for');
       if (error) throw error;
-      console.log(`Processing ${dueReminders.length} scheduled reminders`);
       // Process each reminder
       const results = await Promise.allSettled(
         dueReminders.map(reminder => this.sendScheduledReminder(reminder))
@@ -227,7 +222,6 @@ export const paymentCollectionWorkflow = {
         failed,
       };
     } catch (error) {
-      console.error('Failed to process scheduled reminders:', error);
       throw error;
     }
   },
@@ -290,7 +284,6 @@ export const paymentCollectionWorkflow = {
           last_reminder_sent: new Date().toISOString(),
         })
         .eq('id', payment.id);
-      console.log(`Sent ${reminder.reminder_type} reminder to user ${payment.user_id}`);
       return { sent: true, reminderType: reminder.reminder_type };
     } catch (error) {
       // Mark reminder as failed
@@ -301,7 +294,6 @@ export const paymentCollectionWorkflow = {
           metadata: { error: error.message },
         })
         .eq('id', reminder.id);
-      console.error(`Failed to send reminder ${reminder.id}:`, error);
       throw error;
     }
   },
@@ -321,7 +313,6 @@ export const paymentCollectionWorkflow = {
       if (error) throw error;
       return true;
     } catch (error) {
-      console.error('Failed to cancel reminder:', error);
       return false;
     }
   },
@@ -403,7 +394,6 @@ export const paymentCollectionWorkflow = {
       if (error) throw error;
       return true;
     } catch (error) {
-      console.error('Failed to cancel all reminders:', error);
       return false;
     }
   },
@@ -455,11 +445,9 @@ export const collectionAutomation = {
    * Run automated collection processes
    */
   async runAutomatedCollection() {
-    console.log('Starting automated payment collection process...');
     try {
       // Process scheduled reminders
       const reminderResults = await paymentCollectionWorkflow.processScheduledReminders();
-      console.log(`Reminder results:`, reminderResults);
       // Enforce payment deadlines
       await paymentDeadlineManager.enforcePaymentDeadlines();
       return {
@@ -467,7 +455,6 @@ export const collectionAutomation = {
         timestamp: new Date().toISOString(),
       };
     } catch (error) {
-      console.error('Automated collection process failed:', error);
       throw error;
     }
   },
@@ -476,7 +463,6 @@ export const collectionAutomation = {
    */
   async scheduleCollectionJob() {
     // This would integrate with your job scheduler (e.g., node-cron, Bull Queue, etc.)
-    console.log('Collection job scheduled to run every 15 minutes');
     return true;
   },
 };

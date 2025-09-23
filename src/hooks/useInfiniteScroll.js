@@ -57,7 +57,6 @@ export const useInfiniteScroll = (fetchMore, options = {}) => {
       }
     } catch (err) {
       setError(err.message || 'Failed to load more data');
-      console.error('Infinite scroll fetch error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -149,7 +148,6 @@ export const useInfiniteScrollObserver = (fetchMore, options = {}) => {
       }
     } catch (err) {
       setError(err.message || 'Failed to load more data');
-      console.error('Infinite scroll fetch error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -247,7 +245,6 @@ export const useVirtualInfiniteScroll = (fetchMore, options = {}) => {
       }
     } catch (err) {
       setError(err.message || 'Failed to load more data');
-      console.error('Virtual infinite scroll fetch error:', err);
     } finally {
       setIsLoading(false);
     }

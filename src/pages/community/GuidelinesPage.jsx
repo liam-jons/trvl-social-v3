@@ -287,7 +287,7 @@ const GuidelinesPage = () => {
             significant changes and the updated guidelines will take effect immediately.
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Last updated: March 15, 2024
+            Last updated: September 20, 2025
           </p>
         </GlassCard>
       </div>

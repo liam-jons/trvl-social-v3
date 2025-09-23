@@ -8,6 +8,7 @@ import { useAuth } from './hooks/useAuth';
 import MainLayout from './components/layout/MainLayout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import LoadingSpinner from './components/common/LoadingSpinner';
+import { QuizLoadingFallback, AdminLoadingFallback, VendorLoadingFallback } from './components/common/LazyRoute';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import CookieConsentBanner from './components/common/CookieConsentBanner';
 import PWAInstallPrompt from './components/common/PWAInstallPrompt';

@@ -298,14 +298,7 @@ describe('Algorithm Regression Tests', () => {
         id: p.id,
         profile: {
           full_name: `Participant ${p.id}`,
-          avatar_url: `https://example.com/avatar${p.id}.png`,
-          age: 30,
-          bio: `Bio for participant ${p.id}`
-        },
-        personality: p.personality,
-        bookingId: `booking_${p.id}`,
-        metadata: {
-          joinDate: '2023-01-15',
+          avatar_url: `/images/placeholders/demo-placeholder.svg'2023-01-15',
           preferences: ['hiking', 'photography']
         }
       }));

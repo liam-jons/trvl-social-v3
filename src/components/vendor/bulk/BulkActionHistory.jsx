@@ -37,7 +37,6 @@ const BulkActionHistory = ({ vendorId }) => {
         setHistory(data);
       }
     } catch (error) {
-      console.error('Failed to load action history:', error);
     } finally {
       setIsLoading(false);
     }

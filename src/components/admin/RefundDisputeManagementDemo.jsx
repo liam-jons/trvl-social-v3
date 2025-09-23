@@ -266,7 +266,6 @@ const RefundDisputeManagementDemo = () => {
           splitPaymentId={demoData.splitPaymentId}
           userId={demoData.userId}
           onRefundRequested={(request) => {
-            console.log('Refund requested:', request);
             setShowRefundModal(false);
           }}
         />
@@ -340,7 +339,6 @@ const RefundDisputeManagementDemo = () => {
         adminView={true}
         onRefundSelect={(refund) => {
           setSelectedRefund(refund);
-          console.log('Selected refund:', refund);
         }}
       />
     </div>

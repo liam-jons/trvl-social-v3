@@ -102,7 +102,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
         onSave();
         onCancel();
       } catch (error) {
-        console.error('Failed to issue warning:', error);
       }
     };
     return (
@@ -225,7 +224,6 @@ const UserModerationPanel = ({ userId, onClose }) => {
         onSave();
         onCancel();
       } catch (error) {
-        console.error('Failed to restrict user:', error);
       }
     };
     return (

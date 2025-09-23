@@ -55,7 +55,6 @@ const ConflictResolver = ({
       }
       return null;
     } catch (error) {
-      console.error('Failed to merge conflicting updates:', error);
       return null;
     }
   };
@@ -130,7 +129,6 @@ const ConflictResolver = ({
       await onResolveConflict(conflictId, resolution);
       setActiveConflict(null);
     } catch (error) {
-      console.error('Failed to resolve conflict:', error);
     } finally {
       setIsResolving(false);
     }

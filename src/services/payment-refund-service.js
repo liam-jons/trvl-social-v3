@@ -36,11 +36,9 @@ export const automaticRefundManager = {
    * Process automatic refunds for failed group payments
    */
   async processAutomaticRefunds() {
-    console.log('Starting automatic refund processing...');
     try {
       // Find split payments that need refund processing
       const candidatePayments = await this.findRefundCandidates();
-      console.log(`Found ${candidatePayments.length} payments requiring refund processing`);
       const results = {
         processed: 0,
         successful: 0,
@@ -62,13 +60,10 @@ export const automaticRefundManager = {
             paymentId: payment.id,
             error: error.message,
           });
-          console.error(`Failed to process refund for payment ${payment.id}:`, error);
         }
       }
-      console.log('Automatic refund processing completed:', results);
       return results;
     } catch (error) {
-      console.error('Error in automatic refund processing:', error);
       throw error;
     }
   },
@@ -106,7 +101,6 @@ export const automaticRefundManager = {
    */
   async processPaymentRefund(splitPayment) {
     try {
-      console.log(`Processing refund for split payment ${splitPayment.id}`);
       // Get current payment statistics
       const stats = groupPaymentManager.calculatePaymentStats(splitPayment.individual_payments);
       // Determine refund strategy
@@ -288,7 +282,6 @@ export const automaticRefundManager = {
         .select()
         .single();
       if (refundError) {
-        console.error('Failed to create refund record:', refundError);
       }
       // Update individual payment status
       await supabase
@@ -306,7 +299,6 @@ export const automaticRefundManager = {
         refundRecordId: refundRecord?.id,
       };
     } catch (error) {
-      console.error(`Failed to process individual refund for payment ${individualPayment.id}:`, error);
       // Create failed refund record
       try {
         await supabase
@@ -324,7 +316,6 @@ export const automaticRefundManager = {
             },
           });
       } catch (recordError) {
-        console.error('Failed to create failed refund record:', recordError);
       }
       return {
         success: false,
@@ -352,7 +343,6 @@ export const automaticRefundManager = {
         })
         .eq('id', bookingId);
     } catch (error) {
-      console.error(`Failed to update booking ${bookingId} status:`, error);
     }
   },
   /**
@@ -367,7 +357,6 @@ export const automaticRefundManager = {
         await this.notifyParticipant(refundDetail, splitPayment);
       }
     } catch (error) {
-      console.error('Failed to send refund notifications:', error);
     }
   },
   /**
@@ -392,7 +381,6 @@ export const automaticRefundManager = {
       };
       await notificationService.sendNotification(notification);
     } catch (error) {
-      console.error('Failed to notify organizer:', error);
     }
   },
   /**
@@ -420,7 +408,6 @@ export const automaticRefundManager = {
       };
       await notificationService.sendNotification(notification);
     } catch (error) {
-      console.error('Failed to notify participant:', error);
     }
   },
 };
@@ -730,7 +717,6 @@ export const disputeManager = {
           .eq('id', dispute.booking_id);
       }
     } catch (error) {
-      console.error('Failed to handle dispute status change:', error);
     }
   },
   /**
@@ -815,7 +801,6 @@ export const disputeManager = {
       }));
       await supabase.from('notifications').insert(notifications);
     } catch (error) {
-      console.error('Failed to notify admin of dispute:', error);
     }
   },
   /**
@@ -823,21 +808,18 @@ export const disputeManager = {
    */
   async notifyDisputeWon(dispute) {
     // Implementation for won dispute notifications
-    console.log('Dispute won:', dispute.stripe_dispute_id);
   },
   /**
    * Notify dispute lost
    */
   async notifyDisputeLost(dispute) {
     // Implementation for lost dispute notifications
-    console.log('Dispute lost:', dispute.stripe_dispute_id);
   },
   /**
    * Notify dispute warning closed
    */
   async notifyDisputeWarningClosed(dispute) {
     // Implementation for warning closed notifications
-    console.log('Dispute warning closed:', dispute.stripe_dispute_id);
   },
 };
 /**

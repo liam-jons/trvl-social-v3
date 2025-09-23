@@ -23,7 +23,6 @@ const LocationSettings = ({ onClose }) => {
           setCustomLocation(userPrefs.custom_location);
         }
       } catch (error) {
-        console.error('Failed to load location preferences:', error);
         // Set defaults if loading fails
         setPreferences({
           default_filter: 'global',
@@ -54,7 +53,6 @@ const LocationSettings = ({ onClose }) => {
       await locationService.updateLocationPreferences(user.id, preferences);
       onClose?.();
     } catch (error) {
-      console.error('Failed to save location preferences:', error);
     } finally {
       setSaving(false);
     }

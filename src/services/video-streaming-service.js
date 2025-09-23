@@ -53,7 +53,6 @@ class VideoStreamingService {
       this.isInitialized = true;
       return this.callFrame;
     } catch (error) {
-      console.error('Failed to initialize video streaming:', error);
       throw new Error('Video streaming initialization failed');
     }
   }
@@ -76,22 +75,17 @@ class VideoStreamingService {
     });
     // Call events
     this.callFrame.on('joined-meeting', (event) => {
-      console.log('Joined stream:', event);
     });
     this.callFrame.on('left-meeting', (event) => {
-      console.log('Left stream:', event);
       this.cleanup();
     });
     // Stream events
     this.callFrame.on('recording-started', (event) => {
-      console.log('Recording started:', event);
     });
     this.callFrame.on('recording-stopped', (event) => {
-      console.log('Recording stopped:', event);
     });
     // Error handling
     this.callFrame.on('error', (error) => {
-      console.error('Daily.co error:', error);
     });
   }
   /**
@@ -126,7 +120,6 @@ class VideoStreamingService {
       };
       return room;
     } catch (error) {
-      console.error('Failed to create room:', error);
       throw new Error('Room creation failed');
     }
   }
@@ -152,7 +145,6 @@ class VideoStreamingService {
       });
       return this.callFrame.participants();
     } catch (error) {
-      console.error('Failed to join room:', error);
       throw new Error('Failed to join stream');
     }
   }
@@ -165,7 +157,6 @@ class VideoStreamingService {
         await this.callFrame.leave();
       }
     } catch (error) {
-      console.error('Failed to leave room:', error);
     }
   }
   /**
@@ -192,7 +183,6 @@ class VideoStreamingService {
       }
       return true;
     } catch (error) {
-      console.error('Failed to start broadcast:', error);
       throw new Error('Broadcast start failed');
     }
   }
@@ -207,7 +197,6 @@ class VideoStreamingService {
       await this.stopRecording();
       return true;
     } catch (error) {
-      console.error('Failed to stop broadcast:', error);
       throw new Error('Broadcast stop failed');
     }
   }
@@ -223,7 +212,6 @@ class VideoStreamingService {
         }
       });
     } catch (error) {
-      console.error('Failed to start recording:', error);
     }
   }
   /**
@@ -234,7 +222,6 @@ class VideoStreamingService {
       if (!this.callFrame) return;
       await this.callFrame.stopRecording();
     } catch (error) {
-      console.error('Failed to stop recording:', error);
     }
   }
   /**
@@ -248,7 +235,6 @@ class VideoStreamingService {
       await this.callFrame.setLocalVideo(!currentVideoState);
       return !currentVideoState;
     } catch (error) {
-      console.error('Failed to toggle camera:', error);
     }
   }
   /**
@@ -262,7 +248,6 @@ class VideoStreamingService {
       await this.callFrame.setLocalAudio(!currentAudioState);
       return !currentAudioState;
     } catch (error) {
-      console.error('Failed to toggle microphone:', error);
     }
   }
   /**
@@ -303,7 +288,6 @@ class VideoStreamingService {
         timestamp: Date.now()
       });
     } catch (error) {
-      console.error('Failed to send chat message:', error);
     }
   }
   /**

@@ -6,6 +6,7 @@
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const multer = require('multer');
+const { corsMiddleware } = require('../../../src/utils/cors-config.js');
 
 // Configure multer for file uploads
 const upload = multer({
@@ -31,15 +32,24 @@ const upload = multer({
 });
 
 export default async function handler(req, res) {
-  // Enable CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  // Apply secure CORS middleware
+  const corsHandler = corsMiddleware(true); // Enable security headers
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+  // Handle CORS middleware first
+  return new Promise((resolve) => {
+    corsHandler(req, res, async () => {
+      try {
+        await handleRequest(req, res);
+        resolve();
+      } catch (error) {
+        console.error('Request handler error:', error);
+        resolve();
+      }
+    });
+  });
+}
 
+async function handleRequest(req, res) {
   try {
     if (req.method === 'POST') {
       return await handleFileUpload(req, res);

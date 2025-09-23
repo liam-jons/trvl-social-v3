@@ -54,8 +54,8 @@ const ModerationAppeals = () => {
         originalModerator: 'mod_sarah',
         actionDate: '2024-09-13T15:45:00Z',
         evidenceUrls: [
-          'https://example.com/photo1.jpg',
-          'https://example.com/photo2.jpg'
+          '/images/placeholders/demo-placeholder.svg',
+          '/images/placeholders/demo-placeholder.svg'
         ],
         supportingInfo: 'I have receipts and photos from my actual trip to prove authenticity.',
         moderatorNotes: [],
@@ -164,7 +164,6 @@ const ModerationAppeals = () => {
           : appeal
       ));
     } catch (error) {
-      console.error('Failed to approve appeal:', error);
     }
   };
   const handleRejectAppeal = async (appealId, reason) => {
@@ -189,7 +188,6 @@ const ModerationAppeals = () => {
           : appeal
       ));
     } catch (error) {
-      console.error('Failed to reject appeal:', error);
     }
   };
   const AppealCard = ({ appeal }) => (

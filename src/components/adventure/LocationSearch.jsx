@@ -81,7 +81,6 @@ const LocationSearch = ({
       setSelectedIndex(-1);
     } catch (error) {
       if (error.name !== 'AbortError') {
-        console.error('Location search error:', error);
         onError?.(error);
         setResults([]);
         setIsOpen(false);

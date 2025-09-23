@@ -3,7 +3,7 @@ import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
 
 const CookiePolicy = () => {
-  const lastUpdated = new Date().toLocaleDateString();
+  const lastUpdated = "September 20, 2025";
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
@@ -177,6 +177,24 @@ const CookiePolicy = () => {
                       </a>
                     </td>
                   </tr>
+                  <tr>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Resend</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Email Services</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
+                      <a href="https://resend.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="hover:underline">
+                        View Policy
+                      </a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Mapbox</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Maps & Location</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
+                      <a href="https://www.mapbox.com/legal/privacy" target="_blank" rel="noopener noreferrer" className="hover:underline">
+                        View Policy
+                      </a>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -285,8 +303,20 @@ const CookiePolicy = () => {
               If you have questions about our use of cookies, please contact us:
             </p>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <p><strong>Privacy Team:</strong> <a href="mailto:privacy@trvl.com" className="text-blue-600 hover:underline">privacy@trvl.com</a></p>
-              <p><strong>Data Protection Officer:</strong> <a href="mailto:dpo@trvl.com" className="text-blue-600 hover:underline">dpo@trvl.com</a></p>
+              <p><strong>Privacy Team:</strong> <a
+                href="mailto:privacy@trvlsocial.com"
+                className="text-blue-600 hover:underline underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+              >
+                privacy@trvlsocial.com
+              </a></p>
+              <p><strong>Data Protection Officer:</strong> <a
+                href="mailto:dpo@trvlsocial.com"
+                className="text-blue-600 hover:underline underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+              >
+                dpo@trvlsocial.com
+              </a></p>
+              <p><strong>Phone:</strong> +1 (917) 242-1333</p>
+              <p><strong>Website:</strong> trvlsocial.com</p>
             </div>
           </section>
         </div>

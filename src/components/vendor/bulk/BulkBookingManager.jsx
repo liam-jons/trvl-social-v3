@@ -44,7 +44,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
         setBookings(data);
       }
     } catch (error) {
-      console.error('Failed to load bookings:', error);
     } finally {
       setIsLoading(false);
     }
@@ -116,7 +115,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
         case 'refunds':
           // This would integrate with the refund processing system
           result = { data: { successful: [], failed: [], total: selectedBookings.length }, error: null };
-          console.log('Processing refunds for bookings:', selectedBookings);
           break;
         default:
           throw new Error('Invalid operation type');
@@ -135,7 +133,6 @@ const BulkBookingManager = ({ vendorId, onActionComplete }) => {
       loadBookings();
       onActionComplete?.();
     } catch (error) {
-      console.error('Bulk operation failed:', error);
       setResults({
         successful: [],
         failed: selectedBookings.map(id => ({ id, error: error.message })),

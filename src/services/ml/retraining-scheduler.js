@@ -18,18 +18,15 @@ export class RetrainingScheduler {
    * Start the retraining scheduler
    */
   async start(intervalMinutes = 60) {
-    console.log('Starting retraining scheduler...');
     // Load active triggers
     await this.loadActiveTriggers();
     // Start monitoring loop
     this.monitoringInterval = setInterval(() => {
       this.checkTriggers().catch(error => {
-        console.error('Error checking retraining triggers:', error);
       });
     }, intervalMinutes * 60 * 1000);
     // Initial check
     await this.checkTriggers();
-    console.log(`Retraining scheduler started with ${intervalMinutes}-minute intervals`);
   }
   /**
    * Stop the retraining scheduler
@@ -38,7 +35,6 @@ export class RetrainingScheduler {
     if (this.monitoringInterval) {
       clearInterval(this.monitoringInterval);
       this.monitoringInterval = null;
-      console.log('Retraining scheduler stopped');
     }
   }
   /**
@@ -50,29 +46,24 @@ export class RetrainingScheduler {
       .select('*')
       .eq('is_active', true);
     if (error) {
-      console.error('Failed to load retraining triggers:', error);
       return;
     }
     this.activeTriggers.clear();
     data.forEach(trigger => {
       this.activeTriggers.set(trigger.id, trigger);
     });
-    console.log(`Loaded ${data.length} active retraining triggers`);
   }
   /**
    * Check all active triggers
    */
   async checkTriggers() {
-    console.log('Checking retraining triggers...');
     for (const [triggerId, trigger] of this.activeTriggers) {
       try {
         const shouldTrigger = await this.evaluateTrigger(trigger);
         if (shouldTrigger) {
-          console.log(`Trigger ${trigger.name} activated`);
           await this.executeTrigger(trigger);
         }
       } catch (error) {
-        console.error(`Error evaluating trigger ${trigger.name}:`, error);
       }
     }
   }
@@ -95,7 +86,6 @@ export class RetrainingScheduler {
       case 'manual':
         return false; // Manual triggers are handled separately
       default:
-        console.warn(`Unknown trigger type: ${trigger_type}`);
         return false;
     }
   }
@@ -114,7 +104,6 @@ export class RetrainingScheduler {
       const recordCount = await this.getNewRecordCount(dataSource, cutoffDate);
       totalNewRecords += recordCount;
     }
-    console.log(`Data volume check: ${totalNewRecords} new records since ${cutoffDate}`);
     return totalNewRecords >= minNewRecords;
   }
   /**
@@ -129,7 +118,6 @@ export class RetrainingScheduler {
     };
     const tableName = tables[dataSource];
     if (!tableName) {
-      console.warn(`Unknown data source: ${dataSource}`);
       return 0;
     }
     try {
@@ -138,12 +126,10 @@ export class RetrainingScheduler {
         .select('*', { count: 'exact', head: true })
         .gte('created_at', cutoffDate.toISOString());
       if (error) {
-        console.error(`Error counting records in ${tableName}:`, error);
         return 0;
       }
       return count || 0;
     } catch (error) {
-      console.error(`Error querying ${tableName}:`, error);
       return 0;
     }
   }
@@ -209,7 +195,6 @@ export class RetrainingScheduler {
     const performanceDecrease = baselinePerformance - currentPerformance;
     const shouldTrigger = performanceDecrease >= thresholdDecrease;
     if (shouldTrigger) {
-      console.log(`Performance degradation detected: ${metricName} decreased by ${performanceDecrease.toFixed(3)}`);
     }
     return shouldTrigger;
   }
@@ -224,12 +209,9 @@ export class RetrainingScheduler {
       const job = await this.createRetrainingJob(trigger);
       // Start retraining in background
       this.startRetrainingJob(job).catch(error => {
-        console.error(`Retraining job ${job.id} failed:`, error);
         this.updateRetrainingJobStatus(job.id, 'failed', error.message);
       });
-      console.log(`Retraining job ${job.id} started for trigger ${trigger.name}`);
     } catch (error) {
-      console.error(`Failed to execute trigger ${trigger.name}:`, error);
     }
   }
   /**
@@ -246,7 +228,6 @@ export class RetrainingScheduler {
       })
       .eq('id', triggerId);
     if (error) {
-      console.error('Failed to update trigger timestamp:', error);
     }
   }
   /**
@@ -309,7 +290,6 @@ export class RetrainingScheduler {
         );
         if (shouldDeploy) {
           await this.modelManager.deployModel(trainingResult.modelRecord.id);
-          console.log(`Auto-deployed improved model ${trainingResult.modelRecord.id}`);
         }
       }
     } catch (error) {
@@ -364,7 +344,6 @@ export class RetrainingScheduler {
       .update(updateData)
       .eq('id', jobId);
     if (error) {
-      console.error('Failed to update retraining job status:', error);
     }
   }
   /**
@@ -390,7 +369,6 @@ export class RetrainingScheduler {
       const minImprovement = 0.01; // 1% minimum improvement
       return improvement >= minImprovement;
     } catch (error) {
-      console.error('Error comparing models for auto-deployment:', error);
       return false;
     }
   }

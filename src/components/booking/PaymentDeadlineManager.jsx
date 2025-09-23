@@ -61,7 +61,6 @@ const PaymentDeadlineManager = ({
         });
       }
     } catch (err) {
-      console.error('Failed to load reminder settings:', err);
     }
   };
   const handleUpdateDeadline = async () => {
@@ -88,7 +87,6 @@ const PaymentDeadlineManager = ({
       if (individualError) throw individualError;
       onDeadlineUpdate?.();
     } catch (err) {
-      console.error('Failed to update deadline:', err);
     } finally {
       setUpdatingDeadline(false);
     }
@@ -98,7 +96,6 @@ const PaymentDeadlineManager = ({
       await paymentDeadlineManager.sendPaymentReminders();
       onDeadlineUpdate?.();
     } catch (err) {
-      console.error('Failed to send reminders:', err);
     }
   };
   const handleEnforceDeadlines = async () => {
@@ -107,7 +104,6 @@ const PaymentDeadlineManager = ({
       await paymentDeadlineManager.enforcePaymentDeadlines();
       onDeadlineUpdate?.();
     } catch (err) {
-      console.error('Failed to enforce deadlines:', err);
     } finally {
       setEnforcingDeadlines(false);
     }
@@ -120,7 +116,6 @@ const PaymentDeadlineManager = ({
       await paymentDeadlineManager.proceedWithPartialPayment(splitPaymentDetails, paymentStats);
       onDeadlineUpdate?.();
     } catch (err) {
-      console.error('Failed to proceed with partial payment:', err);
     }
   };
   const handleCancelAndRefund = async () => {
@@ -131,7 +126,6 @@ const PaymentDeadlineManager = ({
       await paymentDeadlineManager.cancelAndRefundSplitPayment(splitPaymentDetails, paymentStats);
       onDeadlineUpdate?.();
     } catch (err) {
-      console.error('Failed to cancel and refund:', err);
     }
   };
   const formatDateTime = (dateString) => {

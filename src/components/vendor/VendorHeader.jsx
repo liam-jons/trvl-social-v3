@@ -33,7 +33,8 @@ const VendorHeader = ({ onMenuClick }) => {
     <GlassCard
       variant="light"
       padding="sm"
-      className="sticky top-0 z-30 flex-shrink-0 border-b border-white/20 dark:border-white/10 backdrop-blur-xl"
+      className="sticky z-30 flex-shrink-0 border-b border-white/20 dark:border-white/10 backdrop-blur-xl"
+      style={{ top: '88px' }}
     >
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Left section */}

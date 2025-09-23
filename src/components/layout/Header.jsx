@@ -17,6 +17,7 @@ import GlassCard from '../ui/GlassCard';
 import GlassButton from '../ui/GlassButton';
 import NotificationDropdown from '../notifications/NotificationDropdown';
 import useNotificationStore from '../../stores/notificationStore';
+import { supabase } from '../../lib/supabase';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -26,6 +27,12 @@ const Header = () => {
   const { isDarkMode, toggleTheme } = useTheme();
   const { unreadCount, initialize } = useNotificationStore();
   const location = useLocation();
+
+  // Get logo URL from Supabase storage
+  const { data: logoUrlData } = supabase.storage
+    .from('images')
+    .getPublicUrl('5Ccompany_logo_sm.webp');
+  const logoUrl = logoUrlData?.publicUrl;
 
   // Handle scroll effect
   useEffect(() => {
@@ -78,9 +85,11 @@ const Header = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-sticky transition-all duration-normal ${
         isScrolled ? 'py-2' : 'py-4'
       }`}
+      role="banner"
+      aria-label="Site header"
     >
       <GlassCard
         className={`container mx-auto px-4 ${
@@ -91,14 +100,31 @@ const Header = () => {
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              TRVL
-            </span>
-            <span className="text-xl font-light">Social</span>
+            {logoUrl ? (
+              <>
+                <img
+                  src={logoUrl}
+                  alt="TRVL"
+                  className="h-8 w-auto object-contain"
+                />
+                <span className="text-lg font-light">Social</span>
+              </>
+            ) : (
+              <>
+                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  TRVL
+                </span>
+                <span className="text-lg font-light">Social</span>
+              </>
+            )}
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
+          <nav
+            className="hidden md:flex items-center space-x-1"
+            role="navigation"
+            aria-label="Main navigation"
+          >
             {navItems.map((item) => {
               // Skip auth-required items if user is not authenticated
               if (item.requiresAuth && !isAuthenticated) return null;
@@ -108,7 +134,7 @@ const Header = () => {
                   key={item.path}
                   to={item.path}
                   className={({ isActive }) =>
-                    `px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${
+                    `px-4 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2 min-h-[2.75rem] ${
                       isActive
                         ? 'bg-glass-heavy text-blue-600 dark:text-blue-400'
                         : 'hover:bg-glass-light'
@@ -127,7 +153,7 @@ const Header = () => {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-glass-light transition-colors"
+              className="touch-target-sm p-3 rounded-lg hover:bg-glass-light transition-colors flex items-center justify-center"
               aria-label="Toggle theme"
             >
               {isDarkMode ? (
@@ -147,7 +173,8 @@ const Header = () => {
                 <div className="relative">
                   <button
                     onClick={toggleNotificationDropdown}
-                    className="relative p-2 rounded-lg hover:bg-glass-light transition-colors"
+                    className="relative touch-target-sm p-3 rounded-lg hover:bg-glass-light transition-colors flex items-center justify-center"
+                    aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -168,7 +195,12 @@ const Header = () => {
 
                 {/* Profile Dropdown */}
                 <div className="relative group">
-                  <button className="flex items-center space-x-2 p-2 rounded-lg hover:bg-glass-light transition-colors">
+                  <button
+                    className="flex items-center space-x-2 p-2 rounded-lg hover:bg-glass-light transition-colors"
+                    aria-label="User menu"
+                    aria-expanded="false"
+                    aria-haspopup="true"
+                  >
                     <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
                       {user?.email?.charAt(0).toUpperCase()}
                     </div>
@@ -215,7 +247,7 @@ const Header = () => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-glass-light transition-colors"
+            className="md:hidden touch-target-sm p-3 rounded-lg hover:bg-glass-light transition-colors flex items-center justify-center"
             aria-label="Toggle mobile menu"
           >
             {isMobileMenuOpen ? (
@@ -236,7 +268,11 @@ const Header = () => {
             isMobileMenuOpen ? 'max-h-96 mt-4' : 'max-h-0'
           }`}
         >
-          <nav className="space-y-2 pb-4">
+          <nav
+            className="space-y-2 pb-4"
+            role="navigation"
+            aria-label="Mobile navigation"
+          >
             {navItems.map((item) => {
               // Skip auth-required items if user is not authenticated
               if (item.requiresAuth && !isAuthenticated) return null;

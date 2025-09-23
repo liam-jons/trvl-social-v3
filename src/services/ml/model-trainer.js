@@ -29,7 +29,6 @@ export class ModelTrainer {
       validationConfig = { method: 'k_fold', k: 5 },
       saveToDatabase = true
     } = trainingConfig;
-    console.log(`Starting training for ${modelName} v${version}`);
     try {
       // Create model record in database
       const modelRecord = await this.createModelRecord({
@@ -46,12 +45,10 @@ export class ModelTrainer {
         status: 'running'
       });
       // Load and prepare training data
-      console.log('Loading training data...');
       const trainingData = await this.prepareTrainingData(dataConfig);
       if (!trainingData || trainingData.length === 0) {
         throw new Error('No training data available');
       }
-      console.log(`Loaded ${trainingData.length} training samples`);
       // Perform cross-validation
       const cvResults = await this.performCrossValidation(
         trainingData,
@@ -59,7 +56,6 @@ export class ModelTrainer {
         hyperparameters,
         validationConfig
       );
-      console.log('Cross-validation results:', cvResults);
       // Train final model on full dataset
       const finalModel = await this.trainFinalModel(
         trainingData,
@@ -84,7 +80,6 @@ export class ModelTrainer {
         finalEvaluation: evaluation,
         modelId: savedModelInfo?.id
       });
-      console.log(`Training completed for ${modelName} v${version}`);
       return {
         model: finalModel,
         modelRecord: savedModelInfo || modelRecord,
@@ -93,7 +88,6 @@ export class ModelTrainer {
         evaluation
       };
     } catch (error) {
-      console.error('Training failed:', error);
       // Update records with failure status
       if (trainingRun?.id) {
         await this.updateTrainingRun(trainingRun.id, {
@@ -118,7 +112,6 @@ export class ModelTrainer {
     const allData = [];
     // Extract data from each source
     for (const source of dataSources) {
-      console.log(`Extracting data from ${source}...`);
       const rawData = await this.dataPreprocessor.extractTrainingData({
         source,
         dateRange,
@@ -130,7 +123,6 @@ export class ModelTrainer {
     if (allData.length === 0) {
       throw new Error('No data extracted from sources');
     }
-    console.log(`Total extracted records: ${allData.length}`);
     // Transform data into feature vectors
     const transformedData = [];
     for (const record of allData) {
@@ -151,10 +143,8 @@ export class ModelTrainer {
           });
         }
       } catch (error) {
-        console.warn('Error transforming record:', error);
       }
     }
-    console.log(`Transformed records: ${transformedData.length}`);
     return transformedData;
   }
   /**
@@ -245,11 +235,9 @@ export class ModelTrainer {
     if (method !== 'k_fold') {
       throw new Error(`Validation method ${method} not implemented`);
     }
-    console.log(`Performing ${k}-fold cross-validation...`);
     const folds = this.createKFolds(trainingData, k, stratified);
     const foldResults = [];
     for (let i = 0; i < k; i++) {
-      console.log(`Training fold ${i + 1}/${k}...`);
       const { trainFold, validationFold } = this.prepareFoldData(folds, i);
       // Train model on training fold
       const foldModel = await this.trainFoldModel(
@@ -325,7 +313,6 @@ export class ModelTrainer {
       callbacks: {
         onEpochEnd: (epoch, logs) => {
           if (epoch % 10 === 0) {
-            console.log(`  Epoch ${epoch}: loss = ${logs.loss.toFixed(4)}, val_loss = ${logs.val_loss.toFixed(4)}`);
           }
         }
       }
@@ -437,7 +424,6 @@ export class ModelTrainer {
    * Train final model on full dataset
    */
   async trainFinalModel(trainingData, architectureConfig, hyperparameters) {
-    console.log('Training final model on full dataset...');
     const model = this.createModel(architectureConfig, trainingData[0].features.length);
     this.compileModel(model, hyperparameters);
     const tensors = this.dataToTensors(trainingData);
@@ -448,7 +434,6 @@ export class ModelTrainer {
       callbacks: {
         onEpochEnd: (epoch, logs) => {
           if (epoch % 20 === 0) {
-            console.log(`Epoch ${epoch}: loss = ${logs.loss.toFixed(4)}`);
           }
         }
       }
@@ -580,10 +565,8 @@ export class ModelTrainer {
       }
       // Store model in memory for quick access
       this.models.set(modelRecord.id, model);
-      console.log(`Model saved with ID: ${modelRecord.id}`);
       return data;
     } catch (error) {
-      console.error('Error saving model:', error);
       throw error;
     }
   }
@@ -656,7 +639,6 @@ export class ModelTrainer {
       .update(updateData)
       .eq('id', runId);
     if (error) {
-      console.warn('Failed to update training run:', error.message);
     }
   }
   /**
@@ -684,7 +666,6 @@ export class ModelTrainer {
       this.models.set(modelId, model);
       return model;
     } catch (error) {
-      console.error('Error loading model:', error);
       throw error;
     }
   }

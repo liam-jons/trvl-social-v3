@@ -36,7 +36,6 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
           setFormData(draft);
           hasDraft.current = true;
         } catch (e) {
-          console.error('Failed to load draft:', e);
         }
       }
     }
@@ -120,7 +119,6 @@ const PostCreator = ({ onSubmit, onCancel, initialData = null, userId }) => {
       localStorage.removeItem('post-creator-draft');
       setIsDirty(false);
     } catch (error) {
-      console.error('Failed to create post:', error);
       setErrors({ submit: 'Failed to create post. Please try again.' });
     } finally {
       setIsSubmitting(false);

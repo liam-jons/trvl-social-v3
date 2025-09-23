@@ -190,7 +190,6 @@ export const uploadVideo = async (file, userId, onProgress = null) => {
     try {
       thumbnail = await generateVideoThumbnail(file);
     } catch (thumbError) {
-      console.warn('Failed to generate video thumbnail:', thumbError);
     }
     // Generate file paths
     const videoPath = generateFilePath(userId, file.name, 'video');

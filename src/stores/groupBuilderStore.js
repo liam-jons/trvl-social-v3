@@ -61,7 +61,6 @@ const useGroupBuilderStore = create(
           });
           return { success: true, data: participants };
         } catch (error) {
-          console.error('Load participants error:', error);
           set({ error: error.message });
           return { success: false, error: error.message };
         } finally {
@@ -205,7 +204,6 @@ const useGroupBuilderStore = create(
           get().saveToHistory();
           return { success: true, data: result };
         } catch (error) {
-          console.error('Group optimization error:', error);
           set({ error: error.message });
           return { success: false, error: error.message };
         } finally {
@@ -247,7 +245,6 @@ const useGroupBuilderStore = create(
           set({ groupConfigurations: [data, ...configurations] });
           return { success: true, data };
         } catch (error) {
-          console.error('Save configuration error:', error);
           set({ error: error.message });
           return { success: false, error: error.message };
         } finally {
@@ -264,7 +261,6 @@ const useGroupBuilderStore = create(
           set({ groupConfigurations: data || [] });
           return { success: true, data };
         } catch (error) {
-          console.error('Load configurations error:', error);
           set({ error: error.message });
           return { success: false, error: error.message };
         }

@@ -86,7 +86,6 @@ class BatchCompatibilityProcessor {
         }
       };
     } catch (error) {
-      console.error('Bulk compatibility processing failed:', error);
       this.updateMetrics(false, Date.now() - startTime);
       return {
         success: false,
@@ -169,7 +168,6 @@ class BatchCompatibilityProcessor {
           }
           return score;
         } catch (error) {
-          console.error(`Error processing pair ${user1Id}-${user2Id}:`, error);
           return null;
         }
       });

@@ -110,7 +110,6 @@ const BulkAdventureEditor = ({ vendorId, onActionComplete }) => {
       loadAdventures();
       onActionComplete?.();
     } catch (error) {
-      console.error('Bulk operation failed:', error);
       setResults({
         successful: [],
         failed: selectedAdventures.map(id => ({ id, error: error.message })),

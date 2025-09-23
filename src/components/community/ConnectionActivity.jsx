@@ -47,7 +47,6 @@ const ConnectionActivity = () => {
         setHasMore(result.pagination.hasMore);
       }
     } catch (error) {
-      console.error('Error loading activity:', error);
     } finally {
       setLoading(false);
     }
@@ -107,7 +106,6 @@ const ConnectionActivity = () => {
         }));
       }
     } catch (error) {
-      console.error('Error toggling like:', error);
     }
   };
   const formatTimeAgo = (dateString) => {

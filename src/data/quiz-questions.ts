@@ -1,22 +1,23 @@
 import { QuizQuestion } from '../types/personality';
+import { imageAssetService } from '../services/image-asset-service';
 
 export const quizQuestions: QuizQuestion[] = [
   {
     id: 1,
     text: "What's your ideal vacation morning?",
-    imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop",
+    imageUrl: imageAssetService.getImageUrl('quiz', 'morning-vacation.webp', { width: 800, height: 600 }),
     category: 'energyLevel',
     options: [
       {
         id: '1a',
         text: 'Sunrise hike to catch the golden hour',
-        imageUrl: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=400&h=300&fit=crop',
+        imageUrl: imageAssetService.getImageUrl('quiz', 'sunrise-hike.webp', { width: 400, height: 300 }),
         traitScores: { energyLevel: 90, adventureStyle: 80, riskTolerance: 60 }
       },
       {
         id: '1b',
         text: 'Leisurely breakfast with ocean views',
-        imageUrl: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop',
+        imageUrl: imageAssetService.getImageUrl('quiz', 'ocean-breakfast.webp', { width: 400, height: 300 }),
         traitScores: { energyLevel: 30, socialPreference: 40, adventureStyle: 20 }
       },
       {
@@ -36,7 +37,7 @@ export const quizQuestions: QuizQuestion[] = [
   {
     id: 2,
     text: "How do you prefer to explore a new city?",
-    imageUrl: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&h=600&fit=crop",
+    imageUrl: imageAssetService.getImageUrl('quiz', 'city-exploration.webp', { width: 800, height: 600 }),
     category: 'socialPreference',
     options: [
       {

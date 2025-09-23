@@ -202,13 +202,10 @@ export const WithEventHandlers = {
     showDrawControls: true,
     allowClustering: true,
     onAdventureSelect: (adventure) => {
-      console.log('Selected adventure:', adventure);
     },
     onLocationSearch: (result) => {
-      console.log('Location search result:', result);
     },
     onBoundarySearch: (boundary) => {
-      console.log('Boundary search:', boundary);
     },
   },
 };

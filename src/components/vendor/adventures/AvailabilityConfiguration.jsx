@@ -530,7 +530,6 @@ const AvailabilityConfiguration = ({ data, onChange }) => {
               start: b.startDate,
               end: b.endDate || b.startDate
             })) || []}
-            onDateSelect={(date) => console.log('Date selected:', date)}
           />
         </div>
       </GlassCard>

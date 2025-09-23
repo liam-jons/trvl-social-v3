@@ -54,7 +54,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
         loadReconciliationSummary(),
       ]);
     } catch (error) {
-      console.error('Failed to load dashboard data:', error);
     } finally {
       setLoading(false);
     }
@@ -64,7 +63,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
       const stats = await payoutProcessingService.getPayoutStatistics(vendorStripeAccountId);
       setStatistics(stats);
     } catch (error) {
-      console.error('Failed to load statistics:', error);
     }
   };
   const loadPayoutHistory = async () => {
@@ -79,7 +77,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
       const history = await payoutProcessingService.getPayoutHistory(vendorStripeAccountId, options);
       setPayoutHistory(history);
     } catch (error) {
-      console.error('Failed to load payout history:', error);
     }
   };
   const loadPendingPayments = async () => {
@@ -107,7 +104,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
       if (error) throw error;
       setPendingPayments(data || []);
     } catch (error) {
-      console.error('Failed to load pending payments:', error);
     }
   };
   const loadReconciliationSummary = async () => {
@@ -131,7 +127,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
       if (error && error.code !== 'PGRST116') throw error; // Ignore "no rows returned"
       setReconciliationSummary(data);
     } catch (error) {
-      console.error('Failed to load reconciliation summary:', error);
     }
   };
   const refreshData = async () => {
@@ -154,7 +149,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
         alert(`Payout failed: ${result.error}`);
       }
     } catch (error) {
-      console.error('Failed to request manual payout:', error);
       alert('Failed to request payout. Please try again.');
     }
   };
@@ -183,7 +177,6 @@ const EnhancedPayoutDashboard = ({ vendorStripeAccountId }) => {
         URL.revokeObjectURL(url);
       }
     } catch (error) {
-      console.error('Failed to export data:', error);
       alert('Failed to export data. Please try again.');
     }
   };

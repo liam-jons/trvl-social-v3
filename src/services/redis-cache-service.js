@@ -42,25 +42,20 @@ class RedisCacheService {
       });
       // Event handlers
       this.redis.on('connect', () => {
-        console.log('Redis Cache: Connected successfully');
         this.connected = true;
       });
       this.redis.on('ready', () => {
-        console.log('Redis Cache: Ready for operations');
       });
       this.redis.on('error', (err) => {
-        console.error('Redis Cache: Connection error', err);
         this.connected = false;
         this.metrics.errors++;
       });
       this.redis.on('close', () => {
-        console.log('Redis Cache: Connection closed');
         this.connected = false;
       });
       // Attempt connection
       await this.redis.connect();
     } catch (error) {
-      console.error('Redis Cache: Initialization failed, falling back to memory cache', error);
       this.connected = false;
     }
   }
@@ -122,7 +117,6 @@ class RedisCacheService {
       }
       return true;
     } catch (error) {
-      console.error('Failed to cache compatibility score:', error);
       this.metrics.errors++;
       return false;
     }
@@ -168,7 +162,6 @@ class RedisCacheService {
         return null;
       }
     } catch (error) {
-      console.error('Failed to get cached compatibility score:', error);
       this.metrics.errors++;
       return null;
     }
@@ -199,7 +192,6 @@ class RedisCacheService {
       }
       return true;
     } catch (error) {
-      console.error('Failed to cache group analysis:', error);
       this.metrics.errors++;
       return false;
     }
@@ -234,7 +226,6 @@ class RedisCacheService {
         return null;
       }
     } catch (error) {
-      console.error('Failed to get cached group analysis:', error);
       this.metrics.errors++;
       return null;
     }
@@ -265,7 +256,6 @@ class RedisCacheService {
       }
       return true;
     } catch (error) {
-      console.error('Failed to cache bulk results:', error);
       this.metrics.errors++;
       return false;
     }
@@ -300,7 +290,6 @@ class RedisCacheService {
         return null;
       }
     } catch (error) {
-      console.error('Failed to get cached bulk results:', error);
       this.metrics.errors++;
       return null;
     }
@@ -331,7 +320,6 @@ class RedisCacheService {
       }
       return true;
     } catch (error) {
-      console.error('Failed to invalidate cache:', error);
       this.metrics.errors++;
       return false;
     }

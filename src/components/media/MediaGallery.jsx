@@ -45,7 +45,6 @@ const MediaGallery = ({
       // Clear selection
       setSelectedItems(new Set());
     } catch (error) {
-      console.error('Failed to delete media:', error);
       // You might want to show an error message to the user
     } finally {
       setIsDeleting(false);

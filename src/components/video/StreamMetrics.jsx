@@ -46,7 +46,6 @@ const StreamMetrics = ({ streamId, vendorId, className = "" }) => {
         const mockHistoricalData = generateMockHistoricalData(timeRange);
         setHistoricalData(mockHistoricalData);
       } catch (error) {
-        console.error('Failed to fetch historical data:', error);
       } finally {
         setIsLoading(false);
       }

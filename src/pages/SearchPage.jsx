@@ -50,7 +50,6 @@ const SearchPage = () => {
       const filteredResults = applyFilters(results);
       setSearchResults(filteredResults);
     } catch (error) {
-      console.error('Search error:', error);
       setSearchResults([]);
     } finally {
       setIsLoading(false);

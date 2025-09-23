@@ -90,7 +90,6 @@ class PayoutProcessingService {
       });
       // Mark payments as paid out
       await this.markPaymentsAsPaidOut(pendingPayments.map(p => p.id), payoutRecord.id);
-      console.log(`Successfully processed payout for vendor ${vendorAccount.stripe_account_id}: ${payoutCalculation.netAmount} cents`);
       return {
         success: true,
         payoutId: payoutRecord.id,
@@ -101,7 +100,6 @@ class PayoutProcessingService {
         arrivalDate: stripeResult.arrival_date,
       };
     } catch (error) {
-      console.error('Payout processing failed:', error);
       // Log failure for retry/analysis
       await this.logPayoutFailure(vendorStripeAccountId, error, payoutData);
       return {
@@ -144,7 +142,6 @@ class PayoutProcessingService {
       .eq('vendor_stripe_account_id', vendorAccount.id)
       .eq('status', 'active');
     if (error) {
-      console.warn('Could not check payout holds:', error);
     }
     if (holds && holds.length > 0) {
       const activeHold = holds[0];
@@ -174,7 +171,6 @@ class PayoutProcessingService {
         feePercent,
       };
     } catch (error) {
-      console.error('Failed to calculate payout amount:', error);
       throw error;
     }
   }
@@ -267,7 +263,6 @@ class PayoutProcessingService {
         .from('payout_line_items')
         .insert(lineItems);
       if (lineItemsError) {
-        console.error('Failed to create payout line items:', lineItemsError);
       }
     }
     return data;
@@ -327,7 +322,6 @@ class PayoutProcessingService {
         transfer_id: transferResult.id,
       };
     } catch (error) {
-      console.error('Stripe transfer failed:', error);
       throw error;
     }
   }
@@ -343,7 +337,6 @@ class PayoutProcessingService {
       })
       .eq('id', payoutId);
     if (error) {
-      console.error('Failed to update payout record:', error);
     }
   }
   /**
@@ -359,7 +352,6 @@ class PayoutProcessingService {
       })
       .in('id', paymentIds);
     if (error) {
-      console.error('Failed to mark payments as paid out:', error);
     }
   }
   /**
@@ -380,7 +372,6 @@ class PayoutProcessingService {
           requires_manual_review: true,
         });
     } catch (logError) {
-      console.error('Failed to log payout failure:', logError);
     }
   }
   /**
@@ -403,7 +394,6 @@ class PayoutProcessingService {
   async processBatchPayouts(vendorPayouts) {
     const results = [];
     const batchSize = Math.min(vendorPayouts.length, PAYOUT_CONFIG.maxBatchSize);
-    console.log(`Processing batch of ${batchSize} payouts`);
     for (let i = 0; i < vendorPayouts.length; i += batchSize) {
       const batch = vendorPayouts.slice(i, i + batchSize);
       const batchPromises = batch.map(payout => this.processVendorPayout(payout));
@@ -411,7 +401,6 @@ class PayoutProcessingService {
         const batchResults = await Promise.allSettled(batchPromises);
         results.push(...batchResults);
       } catch (error) {
-        console.error('Batch processing error:', error);
       }
       // Add delay between batches to avoid rate limits
       if (i + batchSize < vendorPayouts.length) {
@@ -420,7 +409,6 @@ class PayoutProcessingService {
     }
     const successful = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
     const failed = results.length - successful;
-    console.log(`Batch processing complete: ${successful} successful, ${failed} failed`);
     return {
       totalProcessed: results.length,
       successful,
@@ -505,7 +493,6 @@ class PayoutProcessingService {
         averagePayoutAmount: totalPayouts > 0 ? Math.round(totalAmount / totalPayouts) : 0,
       };
     } catch (error) {
-      console.error('Failed to get payout statistics:', error);
       throw error;
     }
   }

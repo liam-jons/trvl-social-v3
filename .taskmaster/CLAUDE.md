@@ -87,7 +87,7 @@ Task Master provides an MCP server that Claude Code can connect to. Configure in
       "command": "npx",
       "args": ["-y", "--package=task-master-ai", "task-master-ai"],
       "env": {
-        "ANTHROPIC_API_KEY": "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",
+        "ANTHROPIC_API_KEY": "YOUR_ANTHROPIC_API_KEY_HERE",
         "PERPLEXITY_API_KEY": "your_key_here",
         "OPENAI_API_KEY": "OPENAI_API_KEY_HERE",
         "GOOGLE_API_KEY": "GOOGLE_API_KEY_HERE",

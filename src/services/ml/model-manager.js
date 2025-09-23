@@ -96,7 +96,6 @@ export class ModelManager {
     if (copyWeights && this.loadedModels.has(baseModelId)) {
       const baseModelInstance = this.loadedModels.get(baseModelId);
       // In a real implementation, you would copy the model weights
-      console.log(`Copying weights from model ${baseModelId} to ${data.id}`);
     }
     return data;
   }
@@ -146,7 +145,6 @@ export class ModelManager {
         replaceExisting,
         healthCheck
       });
-      console.log(`Model ${modelId} deployed successfully`);
       return {
         modelId,
         status: 'deployed',
@@ -189,7 +187,6 @@ export class ModelManager {
     // Clean up cache
     this.modelMetadata.delete(modelId);
     await this.logModelEvent(modelId, 'archived');
-    console.log(`Model ${modelId} archived`);
   }
   /**
    * Rollback to previous model version
@@ -484,10 +481,8 @@ export class ModelManager {
           created_at: new Date().toISOString()
         });
       if (error) {
-        console.warn('Failed to log model event:', error.message);
       }
     } catch (error) {
-      console.warn('Error logging model event:', error);
     }
   }
   /**
@@ -512,7 +507,6 @@ export class ModelManager {
       .eq('status', 'trained')
       .lt('created_at', cutoffDate);
     if (error) {
-      console.warn('Failed to cleanup old models:', error.message);
     }
   }
   /**

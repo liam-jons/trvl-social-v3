@@ -75,7 +75,6 @@ class LazyScoreLoader {
         isApproximation: true
       };
     } catch (error) {
-      console.error('Quick score loading failed:', error);
       return {
         success: false,
         error: error.message,
@@ -104,7 +103,6 @@ class LazyScoreLoader {
       this.metrics.detailedLoads++;
       return result;
     } catch (error) {
-      console.error('Detailed score loading failed:', error);
       this.loadingStates.delete(loadKey);
       return {
         success: false,

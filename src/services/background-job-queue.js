@@ -65,7 +65,6 @@ class BackgroundJobQueue {
     this.queues[job.priority].push(job);
     this.metrics.totalJobs++;
     this.updateQueueSizes();
-    console.log(`Added bulk compatibility job ${job.id} for ${userIds.length} users`);
     return {
       jobId: job.id,
       queuePosition: this.getQueuePosition(job),
@@ -348,7 +347,6 @@ class BackgroundJobQueue {
       const worker = this.createWorker(`worker_${i}`);
       this.workers.push(worker);
     }
-    console.log(`Started ${this.maxWorkers} background job workers`);
   }
   /**
    * Create individual worker
@@ -399,9 +397,7 @@ class BackgroundJobQueue {
         job.processingTime = Date.now() - job.startedAt.getTime();
         this.completedJobs.set(job.id, job);
         this.metrics.completedJobs++;
-        console.log(`Job ${job.id} completed by ${workerId} in ${job.processingTime}ms`);
       } catch (error) {
-        console.error(`Job ${job.id} failed:`, error);
         job.status = 'failed';
         job.error = error.message;
         job.failedAt = new Date();
@@ -412,7 +408,6 @@ class BackgroundJobQueue {
           job.status = 'queued';
           job.retryAt = new Date(Date.now() + (job.retryCount * 30000)); // Exponential backoff
           this.queues[job.priority].push(job);
-          console.log(`Job ${job.id} queued for retry ${job.retryCount}/${job.maxRetries}`);
         } else {
           this.completedJobs.set(job.id, job);
           this.metrics.failedJobs++;
@@ -572,7 +567,6 @@ class BackgroundJobQueue {
           stored_at: new Date().toISOString()
         });
     } catch (error) {
-      console.error('Failed to store job results:', error);
     }
   }
   /**
@@ -654,7 +648,6 @@ class BackgroundJobQueue {
    * Shutdown the job queue gracefully
    */
   async shutdown() {
-    console.log('Shutting down background job queue...');
     this.isRunning = false;
     // Wait for active jobs to complete (with timeout)
     const shutdownTimeout = 30000; // 30 seconds
@@ -663,9 +656,7 @@ class BackgroundJobQueue {
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
     if (this.activeJobs.size > 0) {
-      console.warn(`${this.activeJobs.size} jobs were forcefully terminated during shutdown`);
     }
-    console.log('Background job queue shutdown complete');
   }
 }
 // Export singleton instance

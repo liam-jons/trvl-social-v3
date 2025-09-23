@@ -76,7 +76,6 @@ const useVendorDashboardStore = create(
           // Set up real-time subscriptions
           get().setupRealtimeSubscriptions(vendor.id);
         } catch (error) {
-          console.error('Dashboard initialization error:', error);
           set({ error: error.message });
         } finally {
           get().setLoading('vendor', false);
@@ -97,7 +96,6 @@ const useVendorDashboardStore = create(
             lastUpdated: Date.now()
           });
         } catch (error) {
-          console.error('Dashboard stats error:', error);
           set({ error: error.message });
         } finally {
           get().setLoading('stats', false);
@@ -113,7 +111,6 @@ const useVendorDashboardStore = create(
           }
           set({ recentActivities: activities || [] });
         } catch (error) {
-          console.error('Recent activities error:', error);
           set({ error: error.message });
         } finally {
           get().setLoading('activities', false);
@@ -129,7 +126,6 @@ const useVendorDashboardStore = create(
           }
           set({ adventures: adventures || [] });
         } catch (error) {
-          console.error('Adventures loading error:', error);
           set({ error: error.message });
         } finally {
           get().setLoading('adventures', false);
@@ -150,7 +146,6 @@ const useVendorDashboardStore = create(
           set({ adventures: [newAdventure, ...adventures] });
           return { success: true, data: newAdventure };
         } catch (error) {
-          console.error('Adventure creation error:', error);
           set({ error: error.message });
           return { success: false, error: error.message };
         } finally {
@@ -173,7 +168,6 @@ const useVendorDashboardStore = create(
           set({ adventures: updatedAdventures });
           return { success: true, data: updatedAdventure };
         } catch (error) {
-          console.error('Adventure update error:', error);
           set({ error: error.message });
           return { success: false, error: error.message };
         } finally {
@@ -194,7 +188,6 @@ const useVendorDashboardStore = create(
           set({ adventures: filteredAdventures });
           return { success: true };
         } catch (error) {
-          console.error('Adventure deletion error:', error);
           set({ error: error.message });
           return { success: false, error: error.message };
         } finally {
@@ -229,7 +222,6 @@ const useVendorDashboardStore = create(
           set({ adventures: [newAdventure, ...adventures] });
           return { success: true, data: newAdventure };
         } catch (error) {
-          console.error('Adventure duplication error:', error);
           set({ error: error.message });
           return { success: false, error: error.message };
         } finally {
@@ -247,7 +239,6 @@ const useVendorDashboardStore = create(
             get().loadRecentActivities(vendor.id)
           ]);
         } catch (error) {
-          console.error('Dashboard refresh error:', error);
           set({ error: error.message });
         }
       },
@@ -261,7 +252,6 @@ const useVendorDashboardStore = create(
         // Set up new subscription
         const unsubscribe = vendorService.subscribeToVendorUpdates(vendorId, {
           onBookingUpdate: (payload) => {
-            console.log('Booking update received:', payload);
             // Show notification based on event type
             const eventType = payload.eventType;
             let message = '';
@@ -298,7 +288,6 @@ const useVendorDashboardStore = create(
             }, 1000);
           },
           onAdventureUpdate: (payload) => {
-            console.log('Adventure update received:', payload);
             // Update adventures list
             const adventures = get().adventures;
             const updatedAdventures = adventures.map(adventure => {
@@ -332,7 +321,6 @@ const useVendorDashboardStore = create(
           set({ vendor: updatedVendor });
           return { success: true, data: updatedVendor };
         } catch (error) {
-          console.error('Vendor update error:', error);
           set({ error: error.message });
           return { success: false, error: error.message };
         } finally {
@@ -379,7 +367,6 @@ const useVendorDashboardStore = create(
           set({ analyticsData: analytics });
           return analytics;
         } catch (error) {
-          console.error('Analytics data error:', error);
           set({ error: error.message });
           return null;
         } finally {

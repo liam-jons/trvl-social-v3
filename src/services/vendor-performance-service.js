@@ -50,7 +50,6 @@ export const vendorPerformanceService = {
         error: null
       };
     } catch (error) {
-      console.error('Calculate performance metrics error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -399,7 +398,6 @@ export const vendorPerformanceService = {
       };
       return { data: comparison, error: null };
     } catch (error) {
-      console.error('Benchmark comparison error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -423,7 +421,6 @@ export const vendorPerformanceService = {
         .single();
       return { data, error };
     } catch (error) {
-      console.error('Save performance snapshot error:', error);
       return { data: null, error: error.message };
     }
   },
@@ -458,7 +455,6 @@ export const vendorPerformanceService = {
         error: null
       };
     } catch (error) {
-      console.error('Get performance history error:', error);
       return { data: null, error: error.message };
     }
   },

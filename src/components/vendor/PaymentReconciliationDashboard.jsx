@@ -60,7 +60,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
         loadActiveDiscrepancies(),
       ]);
     } catch (error) {
-      console.error('Failed to load reconciliation dashboard:', error);
     } finally {
       setLoading(false);
     }
@@ -77,7 +76,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
       });
       setReconciliationData(result);
     } catch (error) {
-      console.error('Failed to load latest reconciliation:', error);
     }
   };
   const loadReconciliationHistory = async () => {
@@ -88,7 +86,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
       });
       setReconciliationHistory(history);
     } catch (error) {
-      console.error('Failed to load reconciliation history:', error);
     }
   };
   const loadActiveDiscrepancies = async () => {
@@ -99,7 +96,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
         setDiscrepancies(reconciliationData.discrepancies);
       }
     } catch (error) {
-      console.error('Failed to load active discrepancies:', error);
     }
   };
   const runFullReconciliation = async () => {
@@ -121,7 +117,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
         await paymentReconciliationService.autoResolveDiscrepancies(result.reconciliationId);
       }
     } catch (error) {
-      console.error('Reconciliation failed:', error);
       alert('Reconciliation failed. Please try again.');
     } finally {
       setProcessing(false);
@@ -155,7 +150,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
         URL.revokeObjectURL(url);
       }
     } catch (error) {
-      console.error('Failed to export report:', error);
       alert('Failed to export report. Please try again.');
     }
   };
@@ -164,7 +158,6 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
       await paymentReconciliationService.resolveDiscrepancy(discrepancyId, resolution);
       await loadActiveDiscrepancies();
     } catch (error) {
-      console.error('Failed to resolve discrepancy:', error);
       alert('Failed to resolve discrepancy. Please try again.');
     }
   };
@@ -655,9 +648,9 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
             <CardContent>
               <div className="text-center py-12">
                 <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">Audit trail coming soon...</p>
+                <p className="text-gray-600">Payment audit trail in development</p>
                 <p className="text-sm text-gray-500">
-                  This will show all payment modifications and reconciliation actions
+                  Complete payment modification history and reconciliation tracking will be available shortly
                 </p>
               </div>
             </CardContent>
@@ -693,7 +686,7 @@ const PaymentReconciliationDashboard = ({ vendorStripeAccountId }) => {
                   disabled
                 >
                   <FileText className="h-4 w-4 mr-2" />
-                  Export PDF Report (Coming Soon)
+                  Export PDF Report (In Development)
                 </Button>
               </CardContent>
             </Card>

@@ -57,10 +57,8 @@ class PayoutSchedulerService {
       await this.setupScheduledJobs();
       // Start the main scheduler loop
       this.start();
-      console.log('Payout scheduler service initialized successfully');
       return { success: true };
     } catch (error) {
-      console.error('Failed to initialize payout scheduler:', error);
       throw error;
     }
   }
@@ -79,7 +77,6 @@ class PayoutSchedulerService {
         this.config = { ...this.config, ...JSON.parse(globalConfig.setting_value) };
       }
     } catch (error) {
-      console.warn('Could not load payout scheduler configuration, using defaults:', error.message);
     }
   }
   /**
@@ -104,9 +101,7 @@ class PayoutSchedulerService {
       for (const vendor of vendors) {
         await this.scheduleVendorPayouts(vendor);
       }
-      console.log(`Set up scheduled payouts for ${vendors.length} vendors`);
     } catch (error) {
-      console.error('Failed to setup scheduled jobs:', error);
       throw error;
     }
   }
@@ -131,7 +126,6 @@ class PayoutSchedulerService {
       status: 'scheduled',
     };
     this.scheduledJobs.set(scheduleKey, job);
-    console.log(`Scheduled ${interval} payouts for vendor ${vendor.stripe_account_id} at ${nextExecution}`);
   }
   /**
    * Calculate next execution time based on cron pattern
@@ -171,11 +165,9 @@ class PayoutSchedulerService {
    */
   start() {
     if (this.isRunning) {
-      console.warn('Payout scheduler is already running');
       return;
     }
     this.isRunning = true;
-    console.log('Starting payout scheduler...');
     // Run scheduler check every 5 minutes
     this.schedulerInterval = setInterval(() => {
       this.processScheduledJobs();
@@ -188,7 +180,6 @@ class PayoutSchedulerService {
    */
   stop() {
     if (!this.isRunning) {
-      console.warn('Payout scheduler is not running');
       return;
     }
     this.isRunning = false;
@@ -196,7 +187,6 @@ class PayoutSchedulerService {
       clearInterval(this.schedulerInterval);
       this.schedulerInterval = null;
     }
-    console.log('Payout scheduler stopped');
   }
   /**
    * Process all scheduled jobs
@@ -215,12 +205,10 @@ class PayoutSchedulerService {
     if (jobsToExecute.length === 0) {
       return;
     }
-    console.log(`Processing ${jobsToExecute.length} scheduled payout jobs`);
     for (const job of jobsToExecute) {
       try {
         await this.executePayoutJob(job);
       } catch (error) {
-        console.error(`Failed to execute payout job for vendor ${job.stripeAccountId}:`, error);
         await this.handleJobFailure(job, error);
       }
     }
@@ -237,7 +225,6 @@ class PayoutSchedulerService {
       // Check if vendor has pending payouts above minimum threshold
       const pendingAmount = await this.calculatePendingPayoutAmount(vendorId);
       if (pendingAmount < minimumAmount) {
-        console.log(`Vendor ${stripeAccountId} has ${pendingAmount} cents pending, below minimum ${minimumAmount} cents`);
         // Schedule next execution
         job.nextExecution = this.calculateNextExecution(job.schedule);
         job.status = 'scheduled';
@@ -284,12 +271,10 @@ class PayoutSchedulerService {
         job.nextExecution = this.calculateNextExecution(job.schedule);
         job.status = 'scheduled';
         job.retryCount = 0;
-        console.log(`Successfully processed payout for vendor ${job.stripeAccountId}: ${pendingAmount} cents`);
       } else {
         throw new Error(result.error || 'Payout processing failed');
       }
     } catch (error) {
-      console.error('Error processing payout queue item:', error);
     } finally {
       this.activeProcessors--;
       // Continue processing queue if items remain
@@ -317,7 +302,6 @@ class PayoutSchedulerService {
       const totalPending = data.reduce((sum, payment) => sum + (payment.net_amount || 0), 0);
       return totalPending;
     } catch (error) {
-      console.error('Failed to calculate pending payout amount:', error);
       return 0;
     }
   }
@@ -332,9 +316,7 @@ class PayoutSchedulerService {
       const retryDelay = this.config.retryDelay * Math.pow(2, job.retryCount - 1);
       job.nextExecution = new Date(Date.now() + retryDelay);
       job.status = 'scheduled';
-      console.log(`Scheduling retry for vendor ${job.stripeAccountId} in ${retryDelay}ms (attempt ${job.retryCount})`);
     } else {
-      console.error(`Max retries exceeded for vendor ${job.stripeAccountId}:`, error);
       // Log failure to database for manual review
       await this.logFailedPayout(job, error);
     }
@@ -358,7 +340,6 @@ class PayoutSchedulerService {
           requires_manual_review: true,
         });
     } catch (logError) {
-      console.error('Failed to log payout failure:', logError);
     }
   }
   /**
@@ -391,7 +372,6 @@ class PayoutSchedulerService {
       }
       return { success: true };
     } catch (error) {
-      console.error('Failed to update vendor schedule:', error);
       throw error;
     }
   }
@@ -436,7 +416,6 @@ class PayoutSchedulerService {
       });
       return result;
     } catch (error) {
-      console.error('Failed to trigger manual payout:', error);
       throw error;
     }
   }

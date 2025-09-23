@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+import { Globe, Plane } from 'lucide-react';
 import GlassCard from '../ui/GlassCard';
 import { PERSONALITY_DIMENSIONS } from '../../types/personality';
 const PERSONALITY_TYPE_COLORS = {
@@ -93,7 +94,7 @@ export default function QuizResults({ profile, onShare, onRetake, onViewHistory,
       return;
     }
     // Default share behavior - copy to clipboard
-    const shareText = `I just discovered my travel personality: ${profile.personalityType}! 🌍✈️`;
+    const shareText = `I just discovered my travel personality: ${profile.personalityType}!`;
     if (navigator.share) {
       try {
         await navigator.share({
@@ -115,7 +116,6 @@ export default function QuizResults({ profile, onShare, onRetake, onViewHistory,
       await navigator.clipboard.writeText(text);
       // You could show a toast notification here
     } catch (err) {
-      console.error('Failed to copy to clipboard:', err);
     }
   };
   const downloadResultCard = async () => {
@@ -131,7 +131,6 @@ export default function QuizResults({ profile, onShare, onRetake, onViewHistory,
       link.href = canvas.toDataURL();
       link.click();
     } catch (err) {
-      console.error('Failed to download result card:', err);
     }
   };
   return (
@@ -263,7 +262,7 @@ const PersonalityTypeCard = motion.forwardRef(({ profile, colors }, ref) => (
       <div
         className={`w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-r ${colors.gradient} flex items-center justify-center shadow-lg`}
       >
-        <span className="text-3xl">🌍</span>
+        <Globe className="w-8 h-8 text-white" />
       </div>
       <h2 className={`text-3xl font-bold mb-4 bg-gradient-to-r ${colors.gradient} bg-clip-text text-transparent`}>
         {profile.personalityType}

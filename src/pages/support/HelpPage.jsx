@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Rocket, CreditCard, Shield, Handshake, Settings, Phone } from 'lucide-react';
 import StaticPageLayout from '../../components/layout/StaticPageLayout';
 import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
@@ -12,7 +13,7 @@ const HelpPage = () => {
     {
       id: 'getting-started',
       title: 'Getting Started',
-      icon: '🚀',
+      iconComponent: Rocket,
       description: 'Learn the basics of using TRVL Social',
       articles: [
         'How to create your profile',
@@ -24,7 +25,7 @@ const HelpPage = () => {
     {
       id: 'booking',
       title: 'Booking & Payments',
-      icon: '💳',
+      iconComponent: CreditCard,
       description: 'Everything about bookings and payments',
       articles: [
         'How to book an adventure',
@@ -36,7 +37,7 @@ const HelpPage = () => {
     {
       id: 'safety',
       title: 'Safety & Security',
-      icon: '🛡️',
+      iconComponent: Shield,
       description: 'Staying safe while traveling',
       articles: [
         'Safety verification process',
@@ -48,7 +49,7 @@ const HelpPage = () => {
     {
       id: 'community',
       title: 'Community Guidelines',
-      icon: '🤝',
+      iconComponent: Handshake,
       description: 'How to be a great community member',
       articles: [
         'Community rules and guidelines',
@@ -60,7 +61,7 @@ const HelpPage = () => {
     {
       id: 'account',
       title: 'Account Management',
-      icon: '⚙️',
+      iconComponent: Settings,
       description: 'Managing your TRVL Social account',
       articles: [
         'Updating your profile',
@@ -148,7 +149,7 @@ const HelpPage = () => {
                 onClick={() => setSelectedCategory(selectedCategory === category.id ? null : category.id)}
               >
                 <div className="text-center mb-4">
-                  <div className="text-4xl mb-3">{category.icon}</div>
+                  <category.iconComponent className="w-12 h-12 mx-auto mb-3 text-blue-500" />
                   <h3 className="text-xl font-semibold mb-2">{category.title}</h3>
                   <p className="text-gray-600 dark:text-gray-300 text-sm">{category.description}</p>
                 </div>
@@ -204,7 +205,7 @@ const HelpPage = () => {
             </div>
             
             <div className="text-center">
-              <div className="text-4xl mb-4">📞</div>
+              <Phone className="w-12 h-12 mx-auto mb-4 text-blue-500" />
               <h3 className="text-lg font-semibold mb-2">Phone Support</h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
                 Call us during business hours

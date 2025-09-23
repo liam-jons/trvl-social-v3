@@ -38,7 +38,6 @@ export class GroupCompatibilityScorer {
       }
       return result;
     } catch (error) {
-      console.error(`Error calculating compatibility for group ${group.id}:`, error);
       // Return default compatibility data on error
       return {
         groupId: group.id,
@@ -92,7 +91,6 @@ export class GroupCompatibilityScorer {
         totalConfidence += compatibility.confidence;
         validCalculations++;
       } catch (error) {
-        console.warn(`Failed compatibility calculation with member ${member.userId}:`, error);
         // Add default score for failed calculations
         const defaultScore = {
           memberId: member.userId,
@@ -158,7 +156,6 @@ export class GroupCompatibilityScorer {
         riskFactors: this.identifyRiskFactors(memberScores, group)
       };
     } catch (error) {
-      console.warn('Error calculating group dynamics:', error);
       return this.getDefaultGroupDynamics();
     }
   }

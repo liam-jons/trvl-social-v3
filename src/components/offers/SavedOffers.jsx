@@ -47,7 +47,6 @@ const SavedOffers = ({ userId, onAction }) => {
   const filteredOffers = getFilteredAndSortedOffers();
   const handleRemoveFromSaved = async (savedOfferId) => {
     // TODO: Implement remove from saved functionality
-    console.log('Remove from saved:', savedOfferId);
   };
   if (loading.offers) {
     return <LoadingSpinner fullScreen={false} message="Loading saved offers..." />;

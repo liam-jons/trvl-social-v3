@@ -8,6 +8,7 @@ import {
   UpdateAlgorithmConfigRequest,
   ScoringParameters
 } from '../../types/compatibility';
+import { createCorsResponse } from '../../utils/cors-config';
 /**
  * Get current algorithm configuration
  * GET /api/compatibility/config
@@ -47,7 +48,6 @@ export async function getAlgorithmConfig(
       data: algorithm
     };
   } catch (error) {
-    console.error('Error getting algorithm config:', error);
     return {
       success: false,
       error: {
@@ -115,7 +115,6 @@ export async function updateAlgorithmConfig(
     );
     return response;
   } catch (error) {
-    console.error('Error updating algorithm config:', error);
     return {
       success: false,
       error: {
@@ -132,7 +131,6 @@ export const getAlgorithmConfigHandler = async (req: any, res: any) => {
     const response = await getAlgorithmConfig(algorithmId);
     res.status(response.success ? 200 : 400).json(response);
   } catch (error) {
-    console.error('Express handler error:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -151,7 +149,6 @@ export const updateAlgorithmConfigHandler = async (req: any, res: any) => {
     const response = await updateAlgorithmConfig(request);
     res.status(response.success ? 200 : 400).json(response);
   } catch (error) {
-    console.error('Express handler error:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -167,17 +164,10 @@ export const supabaseGetConfigHandler = async (req: Request): Promise<Response> 
     const url = new URL(req.url);
     const algorithmId = url.searchParams.get('algorithmId') || undefined;
     const response = await getAlgorithmConfig(algorithmId);
-    return new Response(JSON.stringify(response), {
-      status: response.success ? 200 : 400,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-      }
+    return createCorsResponse(response, req, {
+      status: response.success ? 200 : 400
     });
   } catch (error) {
-    console.error('Supabase Edge Function error:', error);
     return new Response(JSON.stringify({
       success: false,
       error: {
@@ -204,13 +194,11 @@ export const supabaseUpdateConfigHandler = async (req: Request): Promise<Respons
       status: response.success ? 200 : 400,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'PUT, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization'
       }
     });
   } catch (error) {
-    console.error('Supabase Edge Function error:', error);
     return new Response(JSON.stringify({
       success: false,
       error: {

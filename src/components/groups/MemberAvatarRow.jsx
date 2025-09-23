@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Mountain, ClipboardList, PartyPopper, Map, Palmtree } from 'lucide-react';
 
 const MemberAvatarRow = ({
   members = [],
@@ -117,12 +118,12 @@ const MemberAvatarRow = ({
             {/* Personality type indicator */}
             {member.personality_profile?.primary_type && size !== 'xs' && (
               <div className="absolute -top-1 -right-1">
-                <div className="w-4 h-4 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center text-xs">
-                  {member.personality_profile.primary_type === 'adventurer' && '🏔️'}
-                  {member.personality_profile.primary_type === 'planner' && '📋'}
-                  {member.personality_profile.primary_type === 'socializer' && '🎉'}
-                  {member.personality_profile.primary_type === 'explorer' && '🗺️'}
-                  {member.personality_profile.primary_type === 'relaxer' && '🌴'}
+                <div className="w-4 h-4 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center">
+                  {member.personality_profile.primary_type === 'adventurer' && <Mountain className="w-2.5 h-2.5" />}
+                  {member.personality_profile.primary_type === 'planner' && <ClipboardList className="w-2.5 h-2.5" />}
+                  {member.personality_profile.primary_type === 'socializer' && <PartyPopper className="w-2.5 h-2.5" />}
+                  {member.personality_profile.primary_type === 'explorer' && <Map className="w-2.5 h-2.5" />}
+                  {member.personality_profile.primary_type === 'relaxer' && <Palmtree className="w-2.5 h-2.5" />}
                 </div>
               </div>
             )}

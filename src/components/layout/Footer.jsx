@@ -1,8 +1,15 @@
 import { Link } from 'react-router-dom';
 import GlassCard from '../ui/GlassCard';
+import { supabase } from '../../lib/supabase';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+
+  // Get logo URL from Supabase storage
+  const { data: logoUrlData } = supabase.storage
+    .from('images')
+    .getPublicUrl('5Ccompany_logo_sm.webp');
+  const logoUrl = logoUrlData?.publicUrl;
 
   const footerLinks = {
     company: [
@@ -71,7 +78,11 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="relative mt-20">
+    <footer
+      className="relative mt-20"
+      role="contentinfo"
+      aria-label="Site footer"
+    >
       <GlassCard className="border-t border-glass" blur="md">
         <div className="container mx-auto px-4 py-12">
           {/* Main Footer Content */}
@@ -79,14 +90,37 @@ const Footer = () => {
             {/* Brand Section */}
             <div className="lg:col-span-1">
               <Link to="/" className="flex items-center space-x-2 mb-4">
-                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  TRVL
-                </span>
-                <span className="text-xl font-light">Social</span>
+                {logoUrl ? (
+                  <>
+                    <img
+                      src={logoUrl}
+                      alt="TRVL"
+                      className="h-8 w-auto object-contain"
+                    />
+                    <span className="text-lg font-light">Social</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                      TRVL
+                    </span>
+                    <span className="text-lg font-light">Social</span>
+                  </>
+                )}
               </Link>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 Connecting adventurers with unforgettable experiences around the world.
               </p>
+              <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                <p className="flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  <a href="tel:+19172421333" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                    +1 (917) 242-1333
+                  </a>
+                </p>
+              </div>
               <div className="flex space-x-3">
                 {socialLinks.map((social) => (
                   <a
@@ -189,6 +223,27 @@ const Footer = () => {
                   Subscribe
                 </button>
               </form>
+            </div>
+          </div>
+
+          {/* Age Verification Notice */}
+          <div className="border-t border-glass pt-6 pb-4">
+            <div className="text-center text-xs text-gray-500 dark:text-gray-400">
+              <p className="mb-2">
+                <span className="inline-flex items-center px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded text-xs font-medium mr-2">
+                  13+
+                </span>
+                TRVL Social is for users 13 years and older. We comply with COPPA.
+              </p>
+              <p>
+                Questions about age verification? Contact{' '}
+                <a
+                  href="mailto:privacy@trvlsocial.com"
+                  className="text-blue-600 dark:text-blue-400 hover:underline underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+                >
+                  privacy@trvlsocial.com
+                </a>
+              </p>
             </div>
           </div>
 

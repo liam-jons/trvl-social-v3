@@ -33,7 +33,6 @@ class AlgorithmTestSuite {
    */
   async runCompleteTestSuite(options = {}) {
     this.startTime = Date.now();
-    console.log('🚀 Starting Complete Algorithm Test Suite...\n');
     const testPhases = [
       { name: 'Unit Tests', method: this.runUnitTests.bind(this) },
       { name: 'Integration Tests', method: this.runIntegrationTests.bind(this) },
@@ -44,11 +43,8 @@ class AlgorithmTestSuite {
     ];
     for (const phase of testPhases) {
       try {
-        console.log(`\n📋 Running ${phase.name}...`);
         await phase.method(options);
-        console.log(`✅ ${phase.name} completed successfully`);
       } catch (error) {
-        console.error(`❌ ${phase.name} failed:`, error.message);
         this.results.summary.failed++;
       }
     }
@@ -423,68 +419,36 @@ class AlgorithmTestSuite {
     const duration = Date.now() - this.startTime;
     const totalTests = this.results.summary.totalTests;
     const passRate = totalTests > 0 ? (this.results.summary.passed / totalTests) * 100 : 0;
-    console.log('\n' + '='.repeat(80));
-    console.log('COMPREHENSIVE ALGORITHM TEST SUITE REPORT');
-    console.log('='.repeat(80));
-    console.log('\n📊 SUMMARY:');
-    console.log(`  Total Tests: ${totalTests}`);
-    console.log(`  Passed: ${this.results.summary.passed} (${passRate.toFixed(1)}%)`);
-    console.log(`  Failed: ${this.results.summary.failed}`);
-    console.log(`  Duration: ${(duration / 1000).toFixed(2)}s`);
-    console.log('\n🧪 UNIT TESTS:');
     Object.entries(this.results.unitTests).forEach(([test, result]) => {
-      console.log(`  ${test}: ${result.status.toUpperCase()}`);
       if (result.performance) {
-        console.log(`    Performance: ${result.performance.toFixed(2)}ms avg`);
       }
     });
-    console.log('\n🔗 INTEGRATION TESTS:');
     Object.entries(this.results.integrationTests).forEach(([test, result]) => {
-      console.log(`  ${test}: ${result.status.toUpperCase()}`);
       if (result.metrics) {
-        console.log(`    Compatibility: ${result.metrics.avgCompatibility.toFixed(1)}%`);
-        console.log(`    Duration: ${result.duration}ms`);
       }
     });
-    console.log('\n⚡ PERFORMANCE TESTS:');
     Object.entries(this.results.performanceTests).forEach(([test, result]) => {
-      console.log(`  ${test}: ${result.status.toUpperCase()}`);
       if (result.duration) {
-        console.log(`    Duration: ${result.duration}ms (limit: ${result.expectedMaxTime}ms)`);
-        console.log(`    Throughput: ${result.throughput} participants/sec`);
       }
     });
-    console.log('\n🔄 REGRESSION TESTS:');
     Object.entries(this.results.regressionTests).forEach(([test, result]) => {
-      console.log(`  ${test}: ${result.status.toUpperCase()}`);
       if (result.compatibility) {
-        console.log(`    Compatibility: ${result.compatibility}%`);
-        console.log(`    Conflicts: ${result.conflicts}`);
       }
     });
-    console.log('\n🧪 A/B TESTS:');
     Object.entries(this.results.abTests).forEach(([test, result]) => {
-      console.log(`  ${test}: ${result.status.toUpperCase()}`);
       if (result.analysis) {
-        console.log(`    Statistical Significance: ${result.analysis.isSignificant ? 'YES' : 'NO'}`);
         if (result.analysis.winningVariant) {
-          console.log(`    Winning Variant: ${result.analysis.winningVariant}`);
         }
       }
     });
-    console.log('\n📊 MONITORING TESTS:');
     Object.entries(this.results.monitoringMetrics).forEach(([test, result]) => {
-      console.log(`  ${test}: ${result.status.toUpperCase()}`);
     });
     // Generate recommendations
     const recommendations = this.generateRecommendations();
     if (recommendations.length > 0) {
-      console.log('\n💡 RECOMMENDATIONS:');
       recommendations.forEach(rec => {
-        console.log(`  • ${rec}`);
       });
     }
-    console.log('\n' + '='.repeat(80));
     // Update summary with calculated metrics
     this.results.summary.coverage = this.calculateTestCoverage();
     this.results.summary.duration = duration;

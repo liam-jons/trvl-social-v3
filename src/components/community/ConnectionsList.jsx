@@ -61,7 +61,6 @@ const ConnectionsList = ({ onUpdate }) => {
         setHasMore(result.pagination.hasMore);
       }
     } catch (error) {
-      console.error('Error loading connections:', error);
     } finally {
       setLoading(false);
     }
@@ -72,11 +71,9 @@ const ConnectionsList = ({ onUpdate }) => {
   };
   const handleStartConversation = async (connectionId) => {
     // Navigate to chat or open messaging interface
-    console.log('Start conversation with:', connectionId);
   };
   const handleViewProfile = (userId) => {
     // Navigate to user profile
-    console.log('View profile:', userId);
   };
   const formatLastInteraction = (lastInteraction) => {
     if (!lastInteraction) return 'No recent activity';

@@ -44,7 +44,6 @@ const PerformanceDashboard = ({ vendorId }) => {
       setAlerts(alertsData);
       setRecommendations(recommendationsData);
     } catch (err) {
-      console.error('Load performance data error:', err);
       setError(err.message);
     } finally {
       setLoading(false);

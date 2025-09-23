@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Backpack, Bot, Handshake, Sprout, Building } from 'lucide-react';
 import StaticPageLayout from '../../components/layout/StaticPageLayout';
 import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
@@ -20,52 +21,52 @@ const BlogPage = () => {
       title: "10 Essential Tips for First-Time Group Travelers",
       excerpt: "Traveling with strangers can be intimidating, but with the right mindset and preparation, it can lead to incredible friendships and unforgettable experiences.",
       author: "Emma Rodriguez",
-      date: "March 20, 2024",
+      date: "March 20, 2025",
       category: "travel-tips",
       readTime: "5 min read",
-      image: "🎒"
+      iconComponent: Backpack
     },
     {
       title: "How AI is Revolutionizing Travel Compatibility",
       excerpt: "Discover how machine learning algorithms are helping travelers find their perfect adventure companions based on personality, interests, and travel style.",
       author: "David Kim",
-      date: "March 18, 2024",
+      date: "March 18, 2025",
       category: "technology",
       readTime: "7 min read",
-      image: "🤖"
+      iconComponent: Bot
     },
     {
       title: "Building Meaningful Connections on the Road",
       excerpt: "Stories from our community about how travel has transformed not just their journeys, but their lives through the connections they've made.",
       author: "Sofia Martinez",
-      date: "March 15, 2024",
+      date: "March 15, 2025",
       category: "community",
       readTime: "4 min read",
-      image: "🤝"
+      iconComponent: Handshake
     },
     {
       title: "Sustainable Travel: Small Changes, Big Impact",
       excerpt: "Learn how conscious travel choices can help preserve the destinations we love while creating positive impacts on local communities.",
       author: "James Thompson",
-      date: "March 12, 2024",
+      date: "March 12, 2025",
       category: "travel-tips",
       readTime: "6 min read",
-      image: "🌱"
+      iconComponent: Sprout
     },
     {
       title: "Cultural Immersion: Beyond Tourist Attractions",
       excerpt: "How to experience authentic local culture and create meaningful connections with communities around the world.",
       author: "Priya Patel",
-      date: "March 10, 2024",
+      date: "March 10, 2025",
       category: "culture",
       readTime: "8 min read",
-      image: "🏛️"
+      iconComponent: Building
     },
     {
       title: "The Psychology of Travel Compatibility",
       excerpt: "Understanding what makes travelers compatible and how personality traits influence group dynamics during adventures.",
       author: "Dr. Michael Chen",
-      date: "March 8, 2024",
+      date: "March 8, 2025",
       category: "technology",
       readTime: "10 min read",
       image: "🧠"
@@ -133,7 +134,7 @@ const BlogPage = () => {
           {filteredPosts.slice(1).map((post, index) => (
             <GlassCard key={index} className="p-6 hover:shadow-xl transition-shadow duration-300">
               <div className="text-center mb-4">
-                <div className="text-4xl mb-3">{post.image}</div>
+                <post.iconComponent className="w-12 h-12 mx-auto mb-3 text-blue-500" />
                 <div className="inline-block px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full mb-3">
                   {categories.find(cat => cat.id === post.category)?.name}
                 </div>

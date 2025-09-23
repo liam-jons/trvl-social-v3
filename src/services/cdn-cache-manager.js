@@ -352,7 +352,6 @@ class CDNCacheManager {
             };
           }
         } catch (cdnError) {
-          console.warn(`CDN fetch failed for ${assetKey}, falling back to local:`, cdnError.message);
         }
       }
       // Return local asset with appropriate cache headers
@@ -365,7 +364,6 @@ class CDNCacheManager {
         etag: this.generateETag(asset.data, asset.version)
       };
     } catch (error) {
-      console.error(`Failed to get static asset ${assetKey}:`, error);
       return {
         data: null,
         error: error.message,
@@ -461,11 +459,9 @@ class CDNCacheManager {
     try {
       // This would typically use your CDN's API to invalidate cache
       // Example for CloudFlare, AWS CloudFront, etc.
-      console.log(`Invalidating CDN cache for ${assetKey}/${version}`);
       // Placeholder for actual CDN invalidation
       // await this.cdnProvider.invalidate([`/compatibility/${assetKey}/*`]);
     } catch (error) {
-      console.error(`CDN cache invalidation failed for ${assetKey}:`, error);
     }
   }
   /**
@@ -523,9 +519,7 @@ class CDNCacheManager {
       'scoring-algorithms',
       'demographic-compatibility'
     ];
-    console.log('Preloading critical compatibility assets...');
     const results = await this.batchLoadAssets(criticalAssets, { preferCDN: true });
-    console.log(`Preloaded ${results.summary.successful}/${results.summary.total} critical assets`);
     return results;
   }
   /**
@@ -563,7 +557,6 @@ class CDNCacheManager {
           });
         })
         .catch(error => {
-          console.error('Cache middleware error:', error);
           res.status(500).json({ error: 'Internal server error' });
         });
     };

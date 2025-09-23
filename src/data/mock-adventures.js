@@ -1,3 +1,5 @@
+import { imageAssetService } from '../services/image-asset-service';
+
 // Mock adventure data for development and testing
 export const mockAdventures = [
   {

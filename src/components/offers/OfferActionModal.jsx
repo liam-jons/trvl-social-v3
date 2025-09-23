@@ -48,7 +48,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
       }
     } catch (err) {
       setError('An unexpected error occurred');
-      console.error('Accept offer error:', err);
     } finally {
       setSubmitting(false);
     }
@@ -65,7 +64,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
       }
     } catch (err) {
       setError('An unexpected error occurred');
-      console.error('Reject offer error:', err);
     } finally {
       setSubmitting(false);
     }
@@ -91,7 +89,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
       }
     } catch (err) {
       setError('An unexpected error occurred');
-      console.error('Counteroffer error:', err);
     } finally {
       setSubmitting(false);
     }
@@ -108,7 +105,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
       }
     } catch (err) {
       setError('An unexpected error occurred');
-      console.error('Save offer error:', err);
     } finally {
       setSubmitting(false);
     }
@@ -129,7 +125,6 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
       }
     } catch (err) {
       setError('An unexpected error occurred');
-      console.error('Share offer error:', err);
     } finally {
       setSubmitting(false);
     }

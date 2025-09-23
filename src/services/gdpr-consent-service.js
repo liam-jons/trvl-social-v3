@@ -67,7 +67,6 @@ class GDPRConsentService {
     };
     // Initialize asynchronously
     this.init().catch(error => {
-      console.error('Failed to initialize GDPR service:', error);
     });
   }
   // Initialize the service
@@ -85,9 +84,7 @@ class GDPRConsentService {
       this.isInitialized = true;
       // Notify listeners
       this.notifyListeners('initialized', this.getConsentStatus());
-      console.log('GDPR Consent Service initialized');
     } catch (error) {
-      console.error('Failed to initialize GDPR Consent Service:', error);
     }
   }
   // Get user's geographic region for consent rules
@@ -103,7 +100,6 @@ class GDPRConsentService {
       localStorage.setItem('trvl_user_region', region);
       return region;
     } catch (error) {
-      console.warn('Failed to detect user region, defaulting to EU rules:', error);
       return 'EU'; // Default to strictest rules
     }
   }
@@ -133,11 +129,9 @@ class GDPRConsentService {
       if (this.isValidConsent(parsed)) {
         this.consent = parsed;
       } else {
-        console.warn('Invalid consent data found, creating new consent');
         this.consent = await this.createDefaultConsent();
       }
     } catch (error) {
-      console.error('Failed to load consent data:', error);
       this.consent = await this.createDefaultConsent();
     }
   }
@@ -180,7 +174,6 @@ class GDPRConsentService {
     if (!this.consent || !this.consent.expires) return false;
     const expired = new Date(this.consent.expires) < new Date();
     if (expired) {
-      console.log('Consent has expired, requiring new consent');
       this.consent.explicitConsentGiven = false;
       this.consent.bannerShown = false;
       this.saveConsent();
@@ -193,7 +186,6 @@ class GDPRConsentService {
       localStorage.setItem(this.consentKey, JSON.stringify(this.consent));
       this.logConsentEvent('consent_updated', this.consent);
     } catch (error) {
-      console.error('Failed to save consent:', error);
     }
   }
   // Set consent for specific category
@@ -203,7 +195,6 @@ class GDPRConsentService {
     }
     // Cannot disable essential cookies
     if (category === 'essential' && !enabled) {
-      console.warn('Cannot disable essential cookies');
       return false;
     }
     const previousState = this.consent.categories[category]?.enabled;
@@ -393,7 +384,6 @@ class GDPRConsentService {
       this.logConsentEvent('data_exported', { userId, exportId: uuidv4() });
       return exportData;
     } catch (error) {
-      console.error('Failed to export user data:', error);
       throw error;
     }
   }
@@ -421,7 +411,6 @@ class GDPRConsentService {
         message: 'Data deletion request has been logged and will be processed within 30 days'
       };
     } catch (error) {
-      console.error('Failed to initiate data deletion:', error);
       throw error;
     }
   }
@@ -441,7 +430,6 @@ class GDPRConsentService {
       this.logConsentEvent('all_consent_cleared', deletionRecord);
       this.notifyListeners('consentCleared', deletionRecord);
     } catch (error) {
-      console.error('Failed to clear consent:', error);
     }
   }
   // Set up data retention policies
@@ -491,7 +479,6 @@ class GDPRConsentService {
         }
       });
     } catch (error) {
-      console.error('Failed to enforce retention policies:', error);
     }
   }
   // Clean up expired data
@@ -506,9 +493,7 @@ class GDPRConsentService {
       });
       // Here you would integrate with your data storage systems
       // to actually delete the expired data
-      console.log(`Cleaning up ${category} data older than ${cutoffDate.toISOString()}`);
     } catch (error) {
-      console.error(`Failed to cleanup ${category} data:`, error);
     }
   }
   // Event logging for audit trail
@@ -534,7 +519,6 @@ class GDPRConsentService {
       }
       localStorage.setItem(this.auditKey, JSON.stringify(auditTrail));
     } catch (error) {
-      console.error('Failed to log consent event:', error);
     }
   }
   // Get audit trail
@@ -545,7 +529,6 @@ class GDPRConsentService {
       const auditTrail = JSON.parse(stored);
       return auditTrail.slice(-limit).reverse(); // Most recent first
     } catch (error) {
-      console.error('Failed to get audit trail:', error);
       return [];
     }
   }
@@ -565,7 +548,6 @@ class GDPRConsentService {
       try {
         callback(eventType, data);
       } catch (error) {
-        console.error('Error in consent event listener:', error);
       }
     });
   }

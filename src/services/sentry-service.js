@@ -10,36 +10,94 @@ class SentryService {
     if (this.isInitialized) return;
     const dsn = import.meta.env.VITE_SENTRY_DSN;
     if (!dsn || dsn === 'YOUR_SENTRY_DSN_HERE') {
-      console.warn('Sentry DSN not configured. Error monitoring disabled.');
+      console.warn('Sentry DSN not configured');
       return;
     }
     const isProduction = import.meta.env.PROD;
+    const isDevelopment = import.meta.env.DEV;
+
     Sentry.init({
       dsn,
       environment: isProduction ? 'production' : 'development',
-      debug: !isProduction,
-      // Performance monitoring
+      debug: isDevelopment,
+
+      // Performance monitoring with dynamic sampling
       tracesSampleRate: isProduction ? 0.1 : 1.0, // 10% in prod, 100% in dev
-      profilesSampleRate: isProduction ? 0.1 : 1.0,
-      // Session replay (privacy-conscious)
+      profilesSampleRate: isProduction ? 0.05 : 0.5, // 5% in prod, 50% in dev
+
+      // Session replay with privacy controls
       replaysSessionSampleRate: isProduction ? 0.01 : 0.1, // 1% in prod, 10% in dev
       replaysOnErrorSampleRate: 1.0, // Always capture replays on errors
-      // Release tracking
+
+      // Release and deployment tracking
       release: `trvl-social-v3@${import.meta.env.VITE_APP_VERSION || 'unknown'}`,
+      dist: import.meta.env.VITE_BUILD_NUMBER || 'unknown',
+
+      // Enhanced configuration for production
+      maxBreadcrumbs: isProduction ? 50 : 100,
+      attachStacktrace: true,
+      sendDefaultPii: false, // Privacy-first approach
+
       // Integration configurations
       integrations: [
-        // Performance monitoring integration
+        // Enhanced browser tracing for production
         Sentry.browserTracingIntegration({
-          // Router instrumentation
           instrumentNavigation: true,
           instrumentPageLoad: true,
+          instrumentXHR: true,
+          instrumentFetch: true,
+          // Mark important transactions for better sampling
+          beforeNavigate: (context) => {
+            return {
+              ...context,
+              name: this.getTransactionName(context.location.pathname),
+              tags: {
+                importance: this.getTransactionImportance(context.location.pathname)
+              }
+            };
+          },
+          // Only track performance for important routes in production
+          shouldCreateSpanForRequest: (url) => {
+            if (isProduction) {
+              return this.shouldTrackRequest(url);
+            }
+            return true;
+          }
         }),
-        // Session replay integration (if available)
+
+        // Privacy-conscious session replay
         ...(Sentry.replayIntegration ? [Sentry.replayIntegration({
           maskAllText: true,
           blockAllMedia: true,
           maskAllInputs: true,
-        })] : [])
+          // Privacy-first selectors
+          mask: ['.sensitive', '[data-sensitive]', '.payment-info'],
+          block: ['.pii', '[data-pii]', '.personal-data'],
+          // Network capture with filtering
+          networkDetailAllowUrls: [
+            // Only capture important API calls
+            /\/api\/adventures/,
+            /\/api\/bookings/,
+            /\/api\/groups/
+          ],
+          // Ignore sensitive requests
+          networkCaptureBodies: false,
+          networkRequestHeaders: ['content-type'],
+          networkResponseHeaders: ['content-type']
+        })] : []),
+
+        // HTTP context integration for better debugging
+        Sentry.httpContextIntegration(),
+
+        // Production-specific integrations
+        ...(isProduction ? [
+          // Context lines for production debugging
+          Sentry.contextLinesIntegration(),
+          // Dedupe integration to prevent duplicate errors
+          Sentry.dedupeIntegration(),
+          // Module metadata for better stack traces
+          Sentry.moduleMetadataIntegration()
+        ] : [])
       ],
       // Error filtering
       beforeSend(event, hint) {
@@ -92,7 +150,6 @@ class SentryService {
       }
     });
     this.isInitialized = true;
-    console.log('Sentry initialized successfully');
   }
   // Set user context
   setUser(user) {
@@ -132,7 +189,6 @@ class SentryService {
   // Capture exception
   captureException(error, context = {}) {
     if (!this.isInitialized) {
-      console.error('Sentry not initialized, logging error:', error);
       return;
     }
     Sentry.withScope((scope) => {
@@ -159,7 +215,6 @@ class SentryService {
   // Capture message
   captureMessage(message, level = 'info', context = {}) {
     if (!this.isInitialized) {
-      console.log('Sentry not initialized, logging message:', message);
       return;
     }
     Sentry.withScope((scope) => {
@@ -302,7 +357,6 @@ class SentryService {
           return { hasError: true };
         }
         componentDidCatch(error, errorInfo) {
-          console.error('Error caught by boundary:', error, errorInfo);
         }
         render() {
           if (this.state.hasError) {
@@ -333,6 +387,117 @@ class SentryService {
       scope.setExtra('metric_value', value);
       Sentry.captureMessage(`Custom Metric: ${name}`, 'info');
     });
+  }
+
+  // Helper methods for enhanced Sentry configuration
+
+  // Get transaction name from pathname
+  getTransactionName(pathname) {
+    // Map pathnames to meaningful transaction names
+    const routeMap = {
+      '/': 'Home',
+      '/adventures': 'Adventures List',
+      '/adventure': 'Adventure Detail',
+      '/booking': 'Booking Flow',
+      '/groups': 'Groups Management',
+      '/vendor/dashboard': 'Vendor Dashboard',
+      '/vendor/adventures': 'Vendor Adventures',
+      '/payment': 'Payment Processing',
+      '/quiz': 'Personality Quiz',
+      '/profile': 'User Profile'
+    };
+
+    // Check for exact matches first
+    if (routeMap[pathname]) {
+      return routeMap[pathname];
+    }
+
+    // Check for pattern matches
+    if (pathname.startsWith('/adventure/')) return 'Adventure Detail';
+    if (pathname.startsWith('/booking/')) return 'Booking Flow';
+    if (pathname.startsWith('/groups/')) return 'Group Detail';
+    if (pathname.startsWith('/vendor/')) return 'Vendor Area';
+    if (pathname.startsWith('/payment/')) return 'Payment Processing';
+
+    return pathname || 'Unknown Route';
+  }
+
+  // Get transaction importance for sampling decisions
+  getTransactionImportance(pathname) {
+    // Critical paths that should always be tracked
+    const criticalPaths = [
+      '/booking',
+      '/payment',
+      '/vendor/dashboard',
+      '/adventures'
+    ];
+
+    // Important paths that should be tracked frequently
+    const importantPaths = [
+      '/groups',
+      '/quiz',
+      '/profile'
+    ];
+
+    if (criticalPaths.some(path => pathname.startsWith(path))) {
+      return 'critical';
+    }
+
+    if (importantPaths.some(path => pathname.startsWith(path))) {
+      return 'important';
+    }
+
+    return 'normal';
+  }
+
+  // Determine if a request should be tracked for performance
+  shouldTrackRequest(url) {
+    // Always track API calls
+    if (url.includes('/api/')) return true;
+
+    // Track important static resources
+    const importantResources = [
+      'chunk',
+      'bundle',
+      'vendor',
+      'main'
+    ];
+
+    return importantResources.some(resource => url.includes(resource));
+  }
+
+  // Rate limiting to prevent spam
+  shouldRateLimit(event) {
+    const now = Date.now();
+    const errorKey = event.exception?.values?.[0]?.type || 'unknown';
+
+    // Initialize rate limiting storage
+    if (!this.rateLimitMap) {
+      this.rateLimitMap = new Map();
+    }
+
+    // Clean old entries (older than 1 minute)
+    for (const [key, data] of this.rateLimitMap.entries()) {
+      if (now - data.firstSeen > 60000) {
+        this.rateLimitMap.delete(key);
+      }
+    }
+
+    // Check rate limit for this error type
+    const errorData = this.rateLimitMap.get(errorKey);
+    if (!errorData) {
+      this.rateLimitMap.set(errorKey, { count: 1, firstSeen: now });
+      return false;
+    }
+
+    errorData.count++;
+
+    // Rate limit: max 5 of the same error type per minute
+    if (errorData.count > 5) {
+      return true;
+    }
+
+    return false;
   }
 }
 // Create singleton instance

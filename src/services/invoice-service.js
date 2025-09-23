@@ -5,6 +5,7 @@
 
 import { supabase } from '../lib/supabase.js';
 import CurrencyService from './currency-service.js';
+import emailService from './email-service.js';
 
 // Configuration
 const INVOICE_CONFIG = {
@@ -497,43 +498,78 @@ export class InvoiceService {
   }
 
   /**
-   * Send invoice via email
+   * Send invoice via email using the email service
    */
   static async sendInvoiceEmail(invoiceId, recipientEmail, options = {}) {
-    const { attachPDF = true, template = 'standard' } = options;
+    const { attachPDF = true, template = 'standard', customerName } = options;
 
     try {
       const invoice = await this.getInvoice(invoiceId);
-      let pdfBuffer = null;
 
+      if (!invoice) {
+        throw new Error(`Invoice ${invoiceId} not found`);
+      }
+
+      let attachments = [];
+
+      // Generate PDF attachment if requested
       if (attachPDF) {
-        const pdfBlob = await this.generatePDF(invoiceId, template);
-        pdfBuffer = await pdfBlob.arrayBuffer();
+        try {
+          const pdfBlob = await this.generatePDF(invoiceId, template);
+          const pdfBuffer = await pdfBlob.arrayBuffer();
+
+          attachments.push({
+            filename: `invoice-${invoice.invoice_number || invoiceId}.pdf`,
+            content: Buffer.from(pdfBuffer),
+            type: 'application/pdf'
+          });
+        } catch (pdfError) {
+          console.warn('PDF generation failed, sending email without attachment:', pdfError);
+        }
       }
 
-      // Call backend API to send email
-      const response = await fetch('/api/invoices/send-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          invoiceId,
-          recipientEmail,
-          attachPDF,
-          pdfBuffer: pdfBuffer ? Array.from(new Uint8Array(pdfBuffer)) : null,
-        }),
-      });
+      // Prepare email data
+      const emailData = {
+        invoiceNumber: invoice.invoice_number || invoiceId,
+        customerName: customerName || invoice.customer_info?.name || 'Valued Customer',
+        amount: invoice.total_amount,
+        currency: invoice.currency || 'USD',
+        dueDate: invoice.due_date,
+        companyName: COMPANY_INFO.name,
+        supportEmail: COMPANY_INFO.contact.email
+      };
 
-      if (!response.ok) {
-        throw new Error(`Failed to send invoice email: ${response.statusText}`);
-      }
+      // Send email using the email service
+      const result = await emailService.sendTemplatedEmail(
+        'invoiceDelivery',
+        recipientEmail,
+        emailData,
+        {
+          attachments: attachments.length > 0 ? attachments : undefined,
+          replyTo: COMPANY_INFO.contact.email,
+          entityId: `invoice-${invoiceId}`
+        }
+      );
 
       // Update invoice status
       await this.updateInvoiceStatus(invoiceId, 'sent');
 
-      return { success: true };
+      // Log successful delivery
+      console.log(`Invoice ${invoice.invoice_number} sent to ${recipientEmail}`, {
+        messageId: result.messageId,
+        attachments: attachments.length
+      });
+
+      return {
+        success: true,
+        messageId: result.messageId,
+        invoiceId,
+        recipientEmail,
+        attachmentIncluded: attachments.length > 0
+      };
+
     } catch (error) {
+      console.error('Invoice email sending failed:', error);
       throw new Error(`Invoice email delivery failed: ${error.message}`);
     }
   }

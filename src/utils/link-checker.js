@@ -38,7 +38,6 @@ class LinkChecker {
    * Main method to run the complete link check
    */
   async runFullCheck() {
-    console.log('🔍 Starting comprehensive link integrity check...\n');
     try {
       // Step 1: Extract all routes from App.jsx
       await this.extractRoutesFromApp();
@@ -51,7 +50,6 @@ class LinkChecker {
       // Step 5: Generate comprehensive report
       this.generateReport();
     } catch (error) {
-      console.error('❌ Error during link check:', error);
       throw error;
     }
   }
@@ -59,7 +57,6 @@ class LinkChecker {
    * Extract all route definitions from App.jsx
    */
   async extractRoutesFromApp() {
-    console.log('📱 Extracting routes from App.jsx...');
     const appPath = path.join(projectRoot, 'src/App.jsx');
     const appContent = fs.readFileSync(appPath, 'utf8');
     // Define the complete route structure based on App.jsx
@@ -139,16 +136,13 @@ class LinkChecker {
     definedRoutes.forEach(route => {
       this.routes.add(route);
     });
-    console.log(`✅ Found ${this.routes.size} route definitions`);
   }
   /**
    * Scan all components for Link, NavLink, navigate calls, etc.
    */
   async scanAllComponents() {
-    console.log('🔍 Scanning components for navigation links...');
     const componentsDir = path.join(projectRoot, 'src');
     await this.scanDirectory(componentsDir);
-    console.log(`✅ Found ${this.internalLinks.size} internal links and ${this.externalLinks.size} external links`);
   }
   /**
    * Recursively scan directory for React files
@@ -261,7 +255,6 @@ class LinkChecker {
    * Verify that all internal links have corresponding routes
    */
   async verifyRouteIntegrity() {
-    console.log('🔗 Verifying route integrity...');
     const routeArray = Array.from(this.routes);
     const linkArray = Array.from(this.internalLinks);
     // Check each internal link against defined routes
@@ -289,7 +282,6 @@ class LinkChecker {
         });
       }
     }
-    console.log(`✅ Checked ${linkArray.length} internal links`);
   }
   /**
    * Check if a path matches a parameterized route
@@ -307,10 +299,8 @@ class LinkChecker {
    * Check for placeholder pages that might not be fully implemented
    */
   async checkPlaceholderPages() {
-    console.log('📄 Checking for placeholder pages...');
     const pagesDir = path.join(projectRoot, 'src/pages');
     await this.scanPagesForPlaceholders(pagesDir);
-    console.log(`✅ Found ${this.placeholderPages.length} potential placeholder pages`);
   }
   /**
    * Recursively scan pages directory for placeholder content
@@ -398,14 +388,11 @@ class LinkChecker {
    * Generate comprehensive report
    */
   generateReport() {
-    console.log('\n📊 Generating Link Integrity Report...\n');
     const report = this.buildMarkdownReport();
     // Write report to file
     const reportPath = path.join(projectRoot, 'link-integrity-report.md');
     fs.writeFileSync(reportPath, report);
     // Also log to console
-    console.log(report);
-    console.log(`\n💾 Report saved to: ${reportPath}`);
   }
   /**
    * Build markdown report
@@ -615,5 +602,4 @@ export default LinkChecker;
 // If running directly (not imported)
 if (import.meta.url === `file://${process.argv[1]}`) {
   const checker = new LinkChecker();
-  checker.runFullCheck().catch(console.error);
 }

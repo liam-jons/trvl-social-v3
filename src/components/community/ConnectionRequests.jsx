@@ -42,7 +42,6 @@ const ConnectionRequests = ({ onUpdate }) => {
         setSentRequests(sentResult.data);
       }
     } catch (error) {
-      console.error('Error loading requests:', error);
     } finally {
       setLoading(false);
     }
@@ -56,10 +55,8 @@ const ConnectionRequests = ({ onUpdate }) => {
         setReceivedRequests(prev => prev.filter(req => req.id !== requestId));
         onUpdate?.();
       } else {
-        console.error('Failed to respond to request:', result.error);
       }
     } catch (error) {
-      console.error('Error responding to request:', error);
     } finally {
       setProcessingRequest(null);
     }
@@ -77,7 +74,6 @@ const ConnectionRequests = ({ onUpdate }) => {
         onUpdate?.();
       }
     } catch (error) {
-      console.error('Error cancelling request:', error);
     } finally {
       setProcessingRequest(null);
     }

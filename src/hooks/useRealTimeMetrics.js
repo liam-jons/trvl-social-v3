@@ -95,12 +95,10 @@ export const useRealTimeMetrics = (initialData = null, updateInterval = 30000) =
           setMetrics(newMetrics);
           setLastUpdated(new Date());
         } catch (error) {
-          console.error('Failed to fetch real-time metrics:', error);
           handleConnectionError();
         }
       }, updateInterval);
     } catch (error) {
-      console.error('Failed to initialize WebSocket connection:', error);
       handleConnectionError();
     }
   };
@@ -110,11 +108,9 @@ export const useRealTimeMetrics = (initialData = null, updateInterval = 30000) =
       retryCount.current += 1;
       const delay = Math.min(1000 * Math.pow(2, retryCount.current), 30000);
       retryTimeoutRef.current = setTimeout(() => {
-        console.log(`Retrying connection... Attempt ${retryCount.current}/${maxRetries}`);
         initializeWebSocket();
       }, delay);
     } else {
-      console.error('Max retry attempts reached. Real-time updates disabled.');
       analyticsService.trackError(new Error('Real-time metrics connection failed'), {
         context: 'websocket_connection',
         retry_count: retryCount.current
@@ -129,7 +125,6 @@ export const useRealTimeMetrics = (initialData = null, updateInterval = 30000) =
       setLastUpdated(new Date());
       return newMetrics;
     } catch (error) {
-      console.error('Manual refresh failed:', error);
       analyticsService.trackError(error, { context: 'manual_metrics_refresh' });
       throw error;
     }
@@ -154,7 +149,6 @@ export const useRealTimeMetrics = (initialData = null, updateInterval = 30000) =
       setMetrics(initialMetrics);
       setLastUpdated(new Date());
     }).catch(error => {
-      console.error('Failed to fetch initial metrics:', error);
     });
     return cleanup;
   }, [updateInterval]);

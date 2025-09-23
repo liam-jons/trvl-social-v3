@@ -47,7 +47,6 @@ const PaymentMethodSelector = ({
         const data = await response.json();
         setPaymentMethods(data.paymentMethods || []);
       } catch (error) {
-        console.error('Error fetching payment methods:', error);
         setError('Failed to load payment methods');
       } finally {
         setLoadingMethods(false);
@@ -81,7 +80,6 @@ const PaymentMethodSelector = ({
       }
       onMethodDelete?.(methodId);
     } catch (error) {
-      console.error('Error deleting payment method:', error);
       setError('Failed to delete payment method');
     } finally {
       setDeletingMethod(null);

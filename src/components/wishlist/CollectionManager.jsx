@@ -33,12 +33,10 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
       try {
         const { data, error } = await WishlistService.getUserCollections(user.id);
         if (error) {
-          console.error('Error loading collections:', error);
           return;
         }
         setCollections(data || []);
       } catch (error) {
-        console.error('Error loading collections:', error);
       } finally {
         setLoading(false);
       }
@@ -64,7 +62,6 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
         message: `"${name}" collection has been created`
       });
     } catch (error) {
-      console.error('Error creating collection:', error);
     }
   };
   const handleUpdateCollection = async (collectionId, updates) => {
@@ -86,7 +83,6 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
         message: 'Collection has been updated successfully'
       });
     } catch (error) {
-      console.error('Error updating collection:', error);
     }
   };
   const handleDeleteCollection = async (collectionId) => {
@@ -114,7 +110,6 @@ const CollectionManager = ({ onCollectionSelect, selectedCollectionId, className
         message: 'Collection has been deleted successfully'
       });
     } catch (error) {
-      console.error('Error deleting collection:', error);
     }
   };
   const handleShareCollection = (collection) => {

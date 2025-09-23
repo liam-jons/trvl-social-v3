@@ -31,7 +31,6 @@ const PerformanceReports = ({ vendorId }) => {
         setReports(JSON.parse(savedReports));
       }
     } catch (err) {
-      console.error('Load report history error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -80,7 +79,6 @@ const PerformanceReports = ({ vendorId }) => {
       localStorage.setItem(`vendor-reports-${vendorId}`, JSON.stringify(savedReports));
       setCurrentReport(report);
     } catch (err) {
-      console.error('Generate report error:', err);
       setError(err.message);
     } finally {
       setGenerating(false);

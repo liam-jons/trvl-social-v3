@@ -37,7 +37,6 @@ const BulkOperationsManager = ({ vendorId }) => {
         setRecentActions(data);
       }
     } catch (error) {
-      console.error('Failed to load recent actions:', error);
     }
   };
   const loadActiveBatchJobs = async () => {

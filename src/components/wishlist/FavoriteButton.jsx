@@ -19,20 +19,20 @@ const FavoriteButton = ({
   const [isFavorited, setIsFavorited] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  // Size configurations
+  // Size configurations with touch-friendly targets
   const sizeConfig = {
     sm: {
-      button: 'w-8 h-8',
+      button: 'w-11 h-11 min-w-[2.75rem] min-h-[2.75rem]', // 44px touch target
       icon: 'w-4 h-4',
       text: 'text-xs'
     },
     md: {
-      button: 'w-10 h-10',
+      button: 'w-12 h-12 min-w-[3rem] min-h-[3rem]', // 48px touch target
       icon: 'w-5 h-5',
       text: 'text-sm'
     },
     lg: {
-      button: 'w-12 h-12',
+      button: 'w-14 h-14 min-w-[3.5rem] min-h-[3.5rem]', // 56px touch target
       icon: 'w-6 h-6',
       text: 'text-base'
     }
@@ -53,12 +53,10 @@ const FavoriteButton = ({
       try {
         const { isInWishlist, error } = await WishlistService.isInWishlist(user.id, adventureId);
         if (error) {
-          console.error('Error checking favorite status:', error);
           return;
         }
         setIsFavorited(isInWishlist);
       } catch (error) {
-        console.error('Error checking favorite status:', error);
       }
     };
     checkFavoriteStatus();
@@ -120,7 +118,6 @@ const FavoriteButton = ({
         onToggle(adventureId, !isFavorited);
       }
     } catch (error) {
-      console.error('Error toggling favorite:', error);
       addNotification({
         type: 'error',
         title: 'Error',

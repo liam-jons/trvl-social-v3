@@ -125,7 +125,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
   }, [threadId]);
   const handleVote = async (type, targetId, targetType = 'thread') => {
     // Implementation for voting
-    console.log(`Vote ${type} on ${targetType} ${targetId}`);
   };
   const handleReply = async () => {
     if (!replyContent.trim()) return;
@@ -148,7 +147,6 @@ Instagram Reels and TikTok have been particularly effective for reaching younger
   };
   const markAsSolution = async (replyId) => {
     // Implementation for marking as solution
-    console.log(`Mark reply ${replyId} as solution`);
   };
   const getReputationBadge = (level) => {
     const badges = {

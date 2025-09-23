@@ -18,10 +18,10 @@ const GlassCard = forwardRef(({
 
   const paddingClasses = {
     none: '',
-    sm: 'p-4',
-    md: 'p-6',
-    lg: 'p-8',
-    xl: 'p-10',
+    sm: 'p-4',   // 16px - 2 grid units
+    md: 'p-6',   // 24px - 3 grid units
+    lg: 'p-8',   // 32px - 4 grid units
+    xl: 'p-12',  // 48px - 6 grid units
   };
 
   const variantClasses = {

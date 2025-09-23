@@ -11,7 +11,6 @@ const BulkOperationsPage = () => {
       try {
         await loadCurrentVendor();
       } catch (error) {
-        console.error('Failed to load vendor data:', error);
       } finally {
         setIsLoading(false);
       }

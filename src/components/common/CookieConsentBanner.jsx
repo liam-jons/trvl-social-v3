@@ -34,7 +34,6 @@ const CookieConsentBanner = () => {
       await gdprConsentService.acceptAll();
       setIsVisible(false);
     } catch (error) {
-      console.error('Error accepting all cookies:', error);
     } finally {
       setLoading(false);
     }
@@ -45,7 +44,6 @@ const CookieConsentBanner = () => {
       await gdprConsentService.rejectAll();
       setIsVisible(false);
     } catch (error) {
-      console.error('Error rejecting cookies:', error);
     } finally {
       setLoading(false);
     }

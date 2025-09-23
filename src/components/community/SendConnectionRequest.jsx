@@ -25,11 +25,9 @@ const SendConnectionRequest = ({
         onClose();
         setMessage(''); // Reset form
       } else {
-        console.error('Failed to send request:', result.error);
         // You might want to show an error toast here
       }
     } catch (error) {
-      console.error('Error sending request:', error);
     } finally {
       setSending(false);
     }

@@ -47,7 +47,6 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
         });
       }
     } catch (error) {
-      console.error('Failed to load payout preferences:', error);
       setError('Failed to load payout preferences');
     } finally {
       setLoading(false);
@@ -77,7 +76,6 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
         lastPayout: payoutError ? null : lastPayout,
       });
     } catch (error) {
-      console.error('Failed to load payout status:', error);
     }
   };
   const savePreferences = async () => {
@@ -103,7 +101,6 @@ const PayoutPreferences = ({ vendorStripeAccountId, onUpdate }) => {
       setError('Preferences saved successfully!');
       setTimeout(() => setError(null), 3000);
     } catch (error) {
-      console.error('Failed to save preferences:', error);
       setError('Failed to save preferences. Please try again.');
     } finally {
       setSaving(false);

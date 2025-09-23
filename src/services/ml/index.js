@@ -13,6 +13,5 @@ export { default as ABTestingFramework } from './ab-testing-framework.js';
 import mlService from './ml-service.js';
 // Initialize ML service on import
 mlService.initialize().catch(error => {
-  console.error('Failed to initialize ML service:', error);
 });
 export default mlService;

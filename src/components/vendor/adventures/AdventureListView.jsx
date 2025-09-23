@@ -46,21 +46,18 @@ const AdventureListView = ({
       await deleteAdventure(adventureId);
       setShowDeleteConfirm(null);
     } catch (error) {
-      console.error('Failed to delete adventure:', error);
     }
   };
   const handleDuplicateAdventure = async (adventure) => {
     try {
       await duplicateAdventure(adventure);
     } catch (error) {
-      console.error('Failed to duplicate adventure:', error);
     }
   };
   const handleStatusChange = async (adventureId, newStatus) => {
     try {
       await updateAdventure(adventureId, { status: newStatus });
     } catch (error) {
-      console.error('Failed to update status:', error);
     }
   };
   const getStatusBadge = (status) => {

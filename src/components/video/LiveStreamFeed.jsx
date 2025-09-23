@@ -94,7 +94,6 @@ const LiveStreamFeed = ({ maxStreams = 4, showHeader = true, className = "" }) =
   // Handle like stream
   const handleLikeStream = (streamId) => {
     // In a real implementation, this would make an API call
-    console.log('Liked stream:', streamId);
   };
   // Handle share stream
   const handleShareStream = (stream) => {

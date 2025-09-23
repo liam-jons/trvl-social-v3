@@ -80,7 +80,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
       if (error) throw error;
       setDisputes(data || []);
     } catch (error) {
-      console.error('Failed to load disputes:', error);
     } finally {
       setLoading(false);
     }
@@ -141,7 +140,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
       // Reload disputes
       await loadDisputes();
     } catch (error) {
-      console.error('Failed to submit dispute response:', error);
       alert(`Failed to submit response: ${error.message}`);
     } finally {
       setSubmittingResponse(false);
@@ -176,7 +174,6 @@ const DisputeResolutionInterface = ({ adminId }) => {
         .eq('id', disputeId);
       await loadDisputes();
     } catch (error) {
-      console.error('Failed to accept dispute:', error);
       alert(`Failed to accept dispute: ${error.message}`);
     }
   };

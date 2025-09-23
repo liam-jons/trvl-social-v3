@@ -81,7 +81,6 @@ const SplitPaymentContainer = ({
         }
       } catch (err) {
         // No existing split payment - this is fine
-        console.log('No existing split payment found');
       }
     };
     loadExistingSplitPayment();

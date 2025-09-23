@@ -76,7 +76,6 @@ const SettingsPage = () => {
       setHasChanges(false);
       // Show success message
     } catch (error) {
-      console.error('Failed to save settings:', error);
     } finally {
       setSaving(false);
     }

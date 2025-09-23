@@ -161,15 +161,12 @@ export function formatTestResults(results) {
  * Run configuration test and log results
  */
 export async function runConfigurationTest() {
-  console.log('🧪 Running Stripe configuration tests...');
   try {
     const results = await testStripeConfiguration();
     const formatted = formatTestResults(results);
-    console.log(formatted);
     // Return results for programmatic use
     return results;
   } catch (error) {
-    console.error('❌ Configuration test failed:', error);
     return {
       overall: 'critical',
       error: error.message,
@@ -182,12 +179,10 @@ export async function runConfigurationTest() {
  */
 export function testPlatformFeeCalculation() {
   const testAmounts = [1000, 5000, 10000, 25000]; // in cents
-  console.log('\n💰 Platform Fee Calculation Test:');
   testAmounts.forEach(amount => {
     const fee = stripeConfig.calculatePlatformFee(amount);
     const vendorAmount = amount - fee;
     const feePercent = ((fee / amount) * 100).toFixed(2);
-    console.log(`Amount: ${stripeConfig.formatAmount(amount)} | Fee: ${stripeConfig.formatAmount(fee)} (${feePercent}%) | Vendor: ${stripeConfig.formatAmount(vendorAmount)}`);
   });
 }
 // Export all utilities

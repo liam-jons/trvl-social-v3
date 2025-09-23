@@ -37,7 +37,6 @@ const ShareModal = ({ isOpen, onClose, collection }) => {
       }
       setShareUrl(data.shareUrl);
     } catch (error) {
-      console.error('Error generating share link:', error);
       addNotification({
         type: 'error',
         title: 'Error',
@@ -58,7 +57,6 @@ const ShareModal = ({ isOpen, onClose, collection }) => {
       });
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error('Failed to copy to clipboard:', error);
       addNotification({
         type: 'error',
         title: 'Error',

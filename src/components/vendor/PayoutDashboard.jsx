@@ -48,7 +48,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
         loadPendingPayments(),
       ]);
     } catch (error) {
-      console.error('Failed to load dashboard data:', error);
     } finally {
       setLoading(false);
     }
@@ -58,7 +57,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
       const stats = await payoutProcessingService.getPayoutStatistics(vendorStripeAccountId);
       setStatistics(stats);
     } catch (error) {
-      console.error('Failed to load statistics:', error);
     }
   };
   const loadPayoutHistory = async () => {
@@ -73,7 +71,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
       const history = await payoutProcessingService.getPayoutHistory(vendorStripeAccountId, options);
       setPayoutHistory(history);
     } catch (error) {
-      console.error('Failed to load payout history:', error);
     }
   };
   const loadPendingPayments = async () => {
@@ -101,7 +98,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
       if (error) throw error;
       setPendingPayments(data || []);
     } catch (error) {
-      console.error('Failed to load pending payments:', error);
     }
   };
   const refreshData = async () => {
@@ -124,7 +120,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
         alert(`Payout failed: ${result.error}`);
       }
     } catch (error) {
-      console.error('Failed to request manual payout:', error);
       alert('Failed to request payout. Please try again.');
     }
   };
@@ -153,7 +148,6 @@ const PayoutDashboard = ({ vendorStripeAccountId }) => {
         URL.revokeObjectURL(url);
       }
     } catch (error) {
-      console.error('Failed to export data:', error);
       alert('Failed to export data. Please try again.');
     }
   };

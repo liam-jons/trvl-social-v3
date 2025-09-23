@@ -44,7 +44,6 @@ const useNotificationStore = create(
           }
           return initialized;
         } catch (error) {
-          console.error('Error initializing notifications:', error);
           set({ error: error.message });
           return false;
         } finally {
@@ -58,7 +57,6 @@ const useNotificationStore = create(
           set({ permission });
           return permission;
         } catch (error) {
-          console.error('Error requesting notification permission:', error);
           set({ error: error.message });
           return 'denied';
         }
@@ -79,7 +77,6 @@ const useNotificationStore = create(
           set({ notifications: data || [] });
           return data;
         } catch (error) {
-          console.error('Error loading notifications:', error);
           set({ error: error.message });
           return [];
         } finally {
@@ -95,7 +92,6 @@ const useNotificationStore = create(
           set({ unreadCount: count });
           return count;
         } catch (error) {
-          console.error('Error loading unread count:', error);
           return 0;
         }
       },
@@ -119,7 +115,6 @@ const useNotificationStore = create(
           set({ preferences });
           return preferences;
         } catch (error) {
-          console.error('Error loading preferences:', error);
         }
       },
       // Update preferences
@@ -143,7 +138,6 @@ const useNotificationStore = create(
             throw new Error('Failed to update preferences');
           }
         } catch (error) {
-          console.error('Error updating preferences:', error);
           set({ error: error.message });
           return false;
         } finally {
@@ -168,7 +162,6 @@ const useNotificationStore = create(
           }
           return success;
         } catch (error) {
-          console.error('Error marking notification as read:', error);
           return false;
         }
       },
@@ -193,7 +186,6 @@ const useNotificationStore = create(
           });
           return true;
         } catch (error) {
-          console.error('Error marking all notifications as read:', error);
           return false;
         }
       },
@@ -211,7 +203,6 @@ const useNotificationStore = create(
           }
           return result;
         } catch (error) {
-          console.error('Error sending notification:', error);
           return { success: false, error: error.message };
         }
       },
@@ -221,7 +212,6 @@ const useNotificationStore = create(
           const notification = await notificationService.showNotification(title, options);
           return notification;
         } catch (error) {
-          console.error('Error showing notification:', error);
           return null;
         }
       },
@@ -242,7 +232,6 @@ const useNotificationStore = create(
           }
           return success;
         } catch (error) {
-          console.error('Error clearing notifications:', error);
           set({ error: error.message });
           return false;
         } finally {
@@ -287,7 +276,6 @@ const useNotificationStore = create(
           }
           return true;
         } catch (error) {
-          console.error('Error handling notification click:', error);
           return false;
         }
       },

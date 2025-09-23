@@ -72,9 +72,7 @@ class TraitCompatibilityMatrix {
     }
   }
 }
-console.log('🧪 Testing Trait Compatibility Matrices...');
 // Test social compatibility
-console.log('\n📊 Social Compatibility Tests:');
 const tests = [
   { name: 'Identical introverts', input: [20, 20], expected: 1.0 },
   { name: 'Similar introverts', input: [15, 25], expected: 0.85 },
@@ -83,10 +81,8 @@ const tests = [
 ];
 tests.forEach(test => {
   const result = TraitCompatibilityMatrix.calculateTraitCompatibility('social', test.input[0], test.input[1]);
-  console.log(`${result === test.expected ? '✅' : '❌'} ${test.name} (${test.input[0]}, ${test.input[1]}): ${result} (expected: ${test.expected})`);
 });
 // Test adventure compatibility
-console.log('\n🏔️ Adventure Compatibility Tests:');
 const adventureTests = [
   { name: 'Nearly identical', input: [50, 52], expected: 0.85 },
   { name: 'Optimal difference', input: [45, 55], expected: 0.9 },
@@ -95,10 +91,8 @@ const adventureTests = [
 ];
 adventureTests.forEach(test => {
   const result = TraitCompatibilityMatrix.calculateTraitCompatibility('adventure', test.input[0], test.input[1]);
-  console.log(`${result === test.expected ? '✅' : '❌'} ${test.name} (${test.input[0]}, ${test.input[1]}): ${result} (expected: ${test.expected})`);
 });
 // Test planning compatibility
-console.log('\n📋 Planning Compatibility Tests:');
 const planningTests = [
   { name: 'Very similar', input: [50, 55], expected: 0.8 },
   { name: 'Complementary', input: [40, 55], expected: 0.9 },
@@ -107,18 +101,12 @@ const planningTests = [
 ];
 planningTests.forEach(test => {
   const result = TraitCompatibilityMatrix.calculateTraitCompatibility('planning', test.input[0], test.input[1]);
-  console.log(`${result === test.expected ? '✅' : '❌'} ${test.name} (${test.input[0]}, ${test.input[1]}): ${result} (expected: ${test.expected})`);
 });
 // Test risk compatibility with adventure types
-console.log('\n⚡ Risk Compatibility with Adventure Types:');
 const baseRisk = TraitCompatibilityMatrix.calculateTraitCompatibility('risk', 80, 85);
 const extremeSportsRisk = TraitCompatibilityMatrix.calculateTraitCompatibility('risk', 80, 85, 'extreme-sports');
 const wellnessRisk = TraitCompatibilityMatrix.calculateTraitCompatibility('risk', 80, 85, 'wellness-retreat');
-console.log(`Base risk (80, 85): ${baseRisk.toFixed(3)}`);
-console.log(`${extremeSportsRisk > baseRisk ? '✅' : '❌'} Extreme sports risk (80, 85): ${extremeSportsRisk.toFixed(3)} (should be > ${baseRisk.toFixed(3)})`);
-console.log(`${wellnessRisk < baseRisk ? '✅' : '❌'} Wellness retreat risk (80, 85): ${wellnessRisk.toFixed(3)} (should be < ${baseRisk.toFixed(3)})`);
 // Test adventure type weights
-console.log('\n⚖️ Adventure Type Weighting Tests:');
 const weightTests = [
   { type: 'extreme-sports', dimension: 'risk', expected: 1.3 },
   { type: 'luxury-travel', dimension: 'planning', expected: 1.3 },
@@ -127,18 +115,14 @@ const weightTests = [
 ];
 weightTests.forEach(test => {
   const result = TraitCompatibilityMatrix.getAdventureTypeWeight(test.type, test.dimension);
-  console.log(`${result === test.expected ? '✅' : '❌'} ${test.type} ${test.dimension} weight: ${result} (expected: ${test.expected})`);
 });
 // Test key behavioral patterns
-console.log('\n🎯 Key Behavioral Pattern Tests:');
 // 1. Adventure complementarity should beat identical matches
 const adventureIdentical = TraitCompatibilityMatrix.calculateTraitCompatibility('adventure', 50, 50);
 const adventureComplementary = TraitCompatibilityMatrix.calculateTraitCompatibility('adventure', 45, 55);
-console.log(`${adventureComplementary > adventureIdentical ? '✅' : '❌'} Adventure complementarity (${adventureComplementary}) > identical (${adventureIdentical})`);
 // 2. Planning complementarity should beat identical matches
 const planningIdentical = TraitCompatibilityMatrix.calculateTraitCompatibility('planning', 50, 50);
 const planningComplementary = TraitCompatibilityMatrix.calculateTraitCompatibility('planning', 42, 58);
-console.log(`${planningComplementary > planningIdentical ? '✅' : '❌'} Planning complementarity (${planningComplementary}) > identical (${planningIdentical})`);
 // 3. Extreme differences should be heavily penalized
 const extremeTests = [
   TraitCompatibilityMatrix.calculateTraitCompatibility('social', 10, 90),
@@ -147,14 +131,5 @@ const extremeTests = [
   TraitCompatibilityMatrix.calculateTraitCompatibility('risk', 10, 90)
 ];
 const allExtremesLow = extremeTests.every(score => score < 0.3);
-console.log(`${allExtremesLow ? '✅' : '❌'} All extreme differences penalized (<0.3): [${extremeTests.map(s => s.toFixed(2)).join(', ')}]`);
 // 4. Adventure type weighting works correctly
 const riskWeightingWorks = extremeSportsRisk > baseRisk && wellnessRisk < baseRisk;
-console.log(`${riskWeightingWorks ? '✅' : '❌'} Adventure type weighting works for risk compatibility`);
-console.log('\n🎉 Trait Compatibility Matrix validation complete!');
-console.log('\n📋 Summary:');
-console.log('- Social compatibility matrix: Penalizes extreme introvert/extrovert mismatches');
-console.log('- Adventure compatibility matrix: Rewards complementary differences over identical matches');
-console.log('- Planning compatibility matrix: Balances similarity with dynamic flexibility');
-console.log('- Risk compatibility matrix: Adapts weighting based on adventure type context');
-console.log('- All matrices properly penalize extreme differences to prevent conflicts');

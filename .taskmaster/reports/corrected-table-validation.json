@@ -1,0 +1,191 @@
+{
+  "summary": {
+    "testDuration": 3843,
+    "tableAccess": {
+      "accessible": 5,
+      "total": 7,
+      "rate": 71
+    },
+    "relationships": {
+      "passed": 4,
+      "total": 4,
+      "rate": 100
+    },
+    "dataQuality": {
+      "passed": 2,
+      "total": 3,
+      "rate": 67
+    },
+    "performanceAverage": 174,
+    "errorCount": 0,
+    "rlsIssuesDetected": 2,
+    "overallHealth": 0,
+    "timestamp": "2025-09-20T11:43:30.032Z"
+  },
+  "tableValidation": [
+    {
+      "table": "profiles",
+      "description": "User profiles extending auth.users",
+      "status": "accessible",
+      "duration": 233,
+      "dataCount": 0,
+      "timestamp": "2025-09-20T11:43:26.423Z"
+    },
+    {
+      "table": "user_preferences",
+      "description": "User notification and privacy preferences",
+      "status": "accessible",
+      "duration": 440,
+      "dataCount": 0,
+      "timestamp": "2025-09-20T11:43:26.862Z"
+    },
+    {
+      "table": "vendors",
+      "description": "Vendor business profiles",
+      "status": "accessible",
+      "duration": 146,
+      "dataCount": 0,
+      "timestamp": "2025-09-20T11:43:27.008Z"
+    },
+    {
+      "table": "adventures",
+      "description": "Adventure listings by vendors",
+      "status": "accessible",
+      "duration": 130,
+      "dataCount": 0,
+      "timestamp": "2025-09-20T11:43:27.139Z"
+    },
+    {
+      "table": "bookings",
+      "description": "Adventure bookings by users",
+      "status": "accessible",
+      "duration": 132,
+      "dataCount": 0,
+      "timestamp": "2025-09-20T11:43:27.271Z"
+    },
+    {
+      "table": "groups",
+      "description": "Travel groups for social organization",
+      "status": "error",
+      "duration": 316,
+      "error": "infinite recursion detected in policy for relation \"groups\"",
+      "dataCount": 0,
+      "timestamp": "2025-09-20T11:43:27.587Z"
+    },
+    {
+      "table": "group_members",
+      "description": "Members belonging to travel groups",
+      "status": "error",
+      "duration": 161,
+      "error": "infinite recursion detected in policy for relation \"group_members\"",
+      "dataCount": 0,
+      "timestamp": "2025-09-20T11:43:27.748Z"
+    }
+  ],
+  "schemaValidation": [],
+  "relationshipValidation": [
+    {
+      "name": "user_preferences_to_profiles",
+      "description": "User preferences should reference profiles",
+      "status": "passed",
+      "duration": 129,
+      "dataCount": 0,
+      "hasJoinData": false,
+      "timestamp": "2025-09-20T11:43:27.878Z"
+    },
+    {
+      "name": "vendors_to_profiles",
+      "description": "Vendors should reference profiles",
+      "status": "passed",
+      "duration": 126,
+      "dataCount": 0,
+      "hasJoinData": false,
+      "timestamp": "2025-09-20T11:43:28.004Z"
+    },
+    {
+      "name": "adventures_to_vendors",
+      "description": "Adventures should reference vendors",
+      "status": "passed",
+      "duration": 150,
+      "dataCount": 0,
+      "hasJoinData": false,
+      "timestamp": "2025-09-20T11:43:28.154Z"
+    },
+    {
+      "name": "bookings_relationships",
+      "description": "Bookings should reference both adventures and profiles",
+      "status": "passed",
+      "duration": 139,
+      "dataCount": 0,
+      "hasJoinData": false,
+      "timestamp": "2025-09-20T11:43:28.293Z"
+    }
+  ],
+  "dataQuality": [
+    {
+      "name": "profiles_data_completeness",
+      "description": "Check profiles have essential data",
+      "status": "passed",
+      "duration": 157,
+      "details": {
+        "total": 0,
+        "withUsername": 0,
+        "withFullName": 0,
+        "validRoles": 0
+      },
+      "timestamp": "2025-09-20T11:43:28.450Z"
+    },
+    {
+      "name": "adventures_pricing_validation",
+      "description": "Check adventure price validity",
+      "status": "passed",
+      "duration": 126,
+      "details": {
+        "total": 0,
+        "validPrices": 0,
+        "averagePrice": 0,
+        "priceRange": null
+      },
+      "timestamp": "2025-09-20T11:43:28.577Z"
+    },
+    {
+      "name": "group_member_constraints",
+      "description": "Check group member uniqueness and validity",
+      "status": "failed",
+      "duration": 134,
+      "details": {
+        "success": false,
+        "error": "infinite recursion detected in policy for relation \"group_members\""
+      },
+      "error": "infinite recursion detected in policy for relation \"group_members\"",
+      "timestamp": "2025-09-20T11:43:28.711Z"
+    }
+  ],
+  "performanceMetrics": [
+    {
+      "name": "simple_select",
+      "description": "Simple table select performance",
+      "status": "completed",
+      "metrics": {
+        "iterations": 5,
+        "averageTime": 138.0308336,
+        "minTime": 127.11558299999979,
+        "maxTime": 155.89274999999998
+      },
+      "timestamp": "2025-09-20T11:43:29.401Z"
+    },
+    {
+      "name": "join_query",
+      "description": "Foreign key join performance",
+      "status": "completed",
+      "metrics": {
+        "iterations": 3,
+        "averageTime": 210.09545866666667,
+        "minTime": 134.97966700000006,
+        "maxTime": 312.7656670000001
+      },
+      "timestamp": "2025-09-20T11:43:30.032Z"
+    }
+  ],
+  "errors": []
+}

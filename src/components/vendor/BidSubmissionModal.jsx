@@ -202,7 +202,6 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
       // Success
       onBidSubmitted();
     } catch (err) {
-      console.error('Bid submission error:', err);
       setError(err.message);
     } finally {
       setLoading(false);

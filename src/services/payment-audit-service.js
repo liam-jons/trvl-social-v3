@@ -64,7 +64,6 @@ class PaymentAuditService {
       }
       return { success: true, entryId };
     } catch (error) {
-      console.error('Failed to log payment action:', error);
       throw error;
     }
   }
@@ -91,7 +90,6 @@ class PaymentAuditService {
       .from('payment_audit_trail')
       .insert(entry);
     if (error) {
-      console.error('Failed to insert audit entry:', error);
       throw error;
     }
     return { success: true };
@@ -108,16 +106,13 @@ class PaymentAuditService {
         .from('payment_audit_trail')
         .insert(entries);
       if (error) {
-        console.error('Failed to batch insert audit entries:', error);
         // Re-queue entries for retry
         entries.forEach((entry, index) => {
           this.pendingEntries.set(`retry_${Date.now()}_${index}`, entry);
         });
       } else {
-        console.log(`Successfully logged ${entries.length} audit entries`);
       }
     } catch (error) {
-      console.error('Batch audit logging failed:', error);
       // Re-queue entries for retry
       entries.forEach((entry, index) => {
         this.pendingEntries.set(`retry_${Date.now()}_${index}`, entry);
@@ -361,7 +356,6 @@ class PaymentAuditService {
         recentActions: actions.slice(0, 5),
       };
     } catch (error) {
-      console.error('Failed to get payment audit summary:', error);
       throw error;
     }
   }
@@ -461,10 +455,8 @@ class PaymentAuditService {
         .delete()
         .lt('created_at', cutoffDate.toISOString());
       if (error) throw error;
-      console.log(`Cleaned up audit entries older than ${retentionDays} days`);
       return { success: true };
     } catch (error) {
-      console.error('Failed to cleanup old audit entries:', error);
       throw error;
     }
   }

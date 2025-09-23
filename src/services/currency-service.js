@@ -152,10 +152,8 @@ export class CurrencyService {
       exchangeRateCache.timestamp = now;
       return rates;
     } catch (error) {
-      console.error('Failed to fetch exchange rates:', error);
       // Return cached data if available
       if (exchangeRateCache.data[baseCurrency]) {
-        console.warn('Using cached exchange rates due to API failure');
         return exchangeRateCache.data[baseCurrency];
       }
       // Return 1:1 rates as last resort
@@ -307,7 +305,6 @@ export class CurrencyService {
         return currencyMap[countryCode] || 'USD';
       }
     } catch (error) {
-      console.warn('Failed to detect user currency:', error);
     }
     // Fallback to browser locale
     try {
@@ -321,7 +318,6 @@ export class CurrencyService {
       if (locale.includes('da')) return 'DKK';
       if (locale.includes('nb') || locale.includes('nn')) return 'NOK';
     } catch (error) {
-      console.warn('Failed to detect locale:', error);
     }
     return 'USD'; // Default fallback
   }
@@ -379,7 +375,6 @@ export class CurrencyService {
             formatted: this.formatAmount(convertedAmount, toCurrency),
           };
         } catch (error) {
-          console.warn(`Failed to convert to ${toCurrency}:`, error);
           conversions[toCurrency] = null;
         }
       }

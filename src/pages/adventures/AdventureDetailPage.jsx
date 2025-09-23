@@ -183,7 +183,7 @@ const AdventureDetailPage = () => {
       </motion.div>
 
       {/* Navigation Tabs */}
-      <div className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
+      <div className="sticky z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700" style={{ top: '88px' }}>
         <div className="container mx-auto px-4">
           <nav className="flex space-x-8">
             {sections.map((section) => (

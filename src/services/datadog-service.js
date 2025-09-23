@@ -13,7 +13,6 @@ class DatadogService {
     const site = import.meta.env.VITE_DATADOG_SITE || 'datadoghq.com';
     if (!applicationId || applicationId === 'YOUR_DATADOG_APPLICATION_ID_HERE' ||
         !clientToken || clientToken === 'YOUR_DATADOG_CLIENT_TOKEN_HERE') {
-      console.warn('Datadog credentials not configured. Performance monitoring disabled.');
       return;
     }
     const isProduction = import.meta.env.NODE_ENV === 'production';
@@ -71,7 +70,6 @@ class DatadogService {
     // Start RUM
     datadogRum.startSessionReplayRecording();
     this.isInitialized = true;
-    console.log('Datadog RUM and Logs initialized successfully');
     // Track initialization
     this.addCustomMetric('datadog.initialization', 1, {
       environment: isProduction ? 'production' : 'development'
@@ -250,21 +248,18 @@ class DatadogService {
   // Logging methods
   logInfo(message, context = {}) {
     if (!this.isInitialized) {
-      console.info(message, context);
       return;
     }
     datadogLogs.logger.info(message, context);
   }
   logWarning(message, context = {}) {
     if (!this.isInitialized) {
-      console.warn(message, context);
       return;
     }
     datadogLogs.logger.warn(message, context);
   }
   logError(message, error, context = {}) {
     if (!this.isInitialized) {
-      console.error(message, error, context);
       return;
     }
     datadogLogs.logger.error(message, {

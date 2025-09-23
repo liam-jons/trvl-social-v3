@@ -59,7 +59,6 @@ const PWAInstallPrompt = () => {
         setIsVisible(false);
       }
     } catch (error) {
-      console.error('PWA install error:', error);
     }
 
     setInstallPrompt(null);
@@ -73,11 +72,12 @@ const PWAInstallPrompt = () => {
   if (!isVisible || isInstalled) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-50 animate-slide-up">
+    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-toast animate-slide-up">
       <GlassCard className="relative p-4">
         <button
           onClick={handleDismiss}
           className="absolute top-2 right-2 p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          aria-label="Dismiss PWA install prompt"
         >
           <X className="w-4 h-4" />
         </button>

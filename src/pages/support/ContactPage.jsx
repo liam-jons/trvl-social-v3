@@ -54,7 +54,6 @@ const ContactPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Handle form submission
-    console.log('Form submitted:', formData);
   };
   const handleInputChange = (e) => {
     setFormData({

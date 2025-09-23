@@ -9,112 +9,7 @@ function generateTestParticipant(id, personality = {}) {
     id,
     profile: {
       full_name: `Participant ${id}`,
-      avatar_url: `https://example.com/avatar${id}.png`,
-      age: 20 + Math.random() * 40
-    },
-    personality: {
-      energy_level: personality.energy_level || Math.random() * 100,
-      social_preference: personality.social_preference || Math.random() * 100,
-      adventure_style: personality.adventure_style || Math.random() * 100,
-      risk_tolerance: personality.risk_tolerance || Math.random() * 100,
-      planning_style: personality.planning_style || Math.random() * 100,
-      communication_style: personality.communication_style || Math.random() * 100,
-      experience_level: personality.experience_level || Math.random() * 100,
-      leadership_style: personality.leadership_style || Math.random() * 100,
-      age: personality.age || 20 + Math.random() * 40
-    }
-  };
-}
-function generateTestParticipants(count, personalityVariations = []) {
-  const participants = [];
-  for (let i = 0; i < count; i++) {
-    const personality = personalityVariations[i] || {};
-    participants.push(generateTestParticipant(i + 1, personality));
-  }
-  return participants;
-}
-// Test scenarios
-const testScenarios = {
-  // Small diverse group
-  smallDiverse: generateTestParticipants(8, [
-    { energy_level: 90, social_preference: 80, risk_tolerance: 85 }, // High energy extrovert
-    { energy_level: 20, social_preference: 15, risk_tolerance: 30 }, // Low energy introvert
-    { energy_level: 60, social_preference: 70, risk_tolerance: 40 }, // Moderate balanced
-    { energy_level: 85, social_preference: 30, risk_tolerance: 90 }, // High energy introvert
-    { energy_level: 40, social_preference: 85, risk_tolerance: 20 }, // Low energy extrovert
-    { energy_level: 70, social_preference: 50, risk_tolerance: 60 }, // Balanced
-    { energy_level: 95, social_preference: 95, risk_tolerance: 95 }, // Extreme high
-    { energy_level: 10, social_preference: 10, risk_tolerance: 10 }  // Extreme low
-  ]),
-  // Large homogeneous group
-  largeHomogeneous: generateTestParticipants(24, Array(24).fill({
-    energy_level: 60 + Math.random() * 20, // 60-80
-    social_preference: 50 + Math.random() * 30, // 50-80
-    risk_tolerance: 40 + Math.random() * 20, // 40-60
-    experience_level: 50 + Math.random() * 20
-  })),
-  // High conflict group
-  highConflict: generateTestParticipants(12, [
-    { energy_level: 95, social_preference: 90, risk_tolerance: 95, leadership_style: 90 },
-    { energy_level: 5, social_preference: 10, risk_tolerance: 5, leadership_style: 10 },
-    { energy_level: 90, social_preference: 15, risk_tolerance: 85, leadership_style: 85 },
-    { energy_level: 15, social_preference: 85, risk_tolerance: 20, leadership_style: 15 },
-    { energy_level: 95, social_preference: 95, risk_tolerance: 10, leadership_style: 90 },
-    { energy_level: 10, social_preference: 10, risk_tolerance: 95, leadership_style: 85 },
-    { energy_level: 85, social_preference: 20, risk_tolerance: 90, leadership_style: 80 },
-    { energy_level: 20, social_preference: 80, risk_tolerance: 15, leadership_style: 20 },
-    { energy_level: 90, social_preference: 85, risk_tolerance: 85, leadership_style: 85 },
-    { energy_level: 15, social_preference: 15, risk_tolerance: 15, leadership_style: 15 },
-    { energy_level: 85, social_preference: 90, risk_tolerance: 20, leadership_style: 80 },
-    { energy_level: 25, social_preference: 20, risk_tolerance: 80, leadership_style: 25 }
-  ]),
-  // Age diverse group
-  ageDiverse: generateTestParticipants(15, [
-    { age: 22, energy_level: 85, experience_level: 20 },
-    { age: 25, energy_level: 80, experience_level: 30 },
-    { age: 28, energy_level: 75, experience_level: 45 },
-    { age: 32, energy_level: 70, experience_level: 60 },
-    { age: 35, energy_level: 65, experience_level: 70 },
-    { age: 38, energy_level: 60, experience_level: 75 },
-    { age: 42, energy_level: 55, experience_level: 80 },
-    { age: 45, energy_level: 50, experience_level: 85 },
-    { age: 48, energy_level: 45, experience_level: 90 },
-    { age: 52, energy_level: 40, experience_level: 85 },
-    { age: 55, energy_level: 35, experience_level: 80 },
-    { age: 58, energy_level: 30, experience_level: 75 },
-    { age: 62, energy_level: 25, experience_level: 70 },
-    { age: 65, energy_level: 20, experience_level: 65 },
-    { age: 68, energy_level: 15, experience_level: 60 }
-  ])
-};
-/**
- * Performance test runner
- */
-export class GroupOptimizationTester {
-  constructor() {
-    this.results = {
-      algorithmPerformance: {},
-      accuracyTests: {},
-      edgeCaseTests: {},
-      stressTests: {},
-      summary: {}
-    };
-  }
-  // Run all tests
-  async runAllTests() {
-    console.log('🚀 Starting Group Optimization Algorithm Tests...\n');
-    await this.testAlgorithmPerformance();
-    await this.testAccuracy();
-    await this.testEdgeCases();
-    await this.testStressConditions();
-    await this.testConflictDetection();
-    this.generateSummaryReport();
-    return this.results;
-  }
-  // Test algorithm performance with different group sizes
-  async testAlgorithmPerformance() {
-    console.log('⚡ Testing Algorithm Performance...');
-    const algorithms = ['kmeans', 'hierarchical', 'spectral', 'hybrid'];
+      avatar_url: `/images/placeholders/demo-placeholder.svg'kmeans', 'hierarchical', 'spectral', 'hybrid'];
     const groupSizes = [8, 16, 32, 64, 100];
     for (const algorithm of algorithms) {
       this.results.algorithmPerformance[algorithm] = {};
@@ -153,25 +48,20 @@ export class GroupOptimizationTester {
             participantsProcessed: size,
             success: true
           };
-          console.log(`  ${algorithm} (${size} participants): ${duration}ms, compatibility: ${Math.round(avgCompatibility)}%`);
         } catch (error) {
           this.results.algorithmPerformance[algorithm][size] = {
             duration: -1,
             error: error.message,
             success: false
           };
-          console.log(`  ${algorithm} (${size} participants): FAILED - ${error.message}`);
         }
       }
     }
-    console.log('✅ Algorithm Performance Tests Complete\n');
   }
   // Test algorithm accuracy with known scenarios
   async testAccuracy() {
-    console.log('🎯 Testing Algorithm Accuracy...');
     const scenarios = Object.keys(testScenarios);
     for (const scenarioName of scenarios) {
-      console.log(`  Testing scenario: ${scenarioName}`);
       const participants = testScenarios[scenarioName];
       this.results.accuracyTests[scenarioName] = {};
       // Test each algorithm
@@ -220,11 +110,9 @@ export class GroupOptimizationTester {
         }
       }
     }
-    console.log('✅ Accuracy Tests Complete\n');
   }
   // Test edge cases and error conditions
   async testEdgeCases() {
-    console.log('🔬 Testing Edge Cases...');
     const edgeCases = [
       { name: 'empty_array', participants: [] },
       { name: 'single_participant', participants: generateTestParticipants(1) },
@@ -248,7 +136,6 @@ export class GroupOptimizationTester {
       ])}
     ];
     for (const testCase of edgeCases) {
-      console.log(`  Testing: ${testCase.name}`);
       this.results.edgeCaseTests[testCase.name] = {};
       // Test hybrid algorithm (most robust)
       try {
@@ -268,11 +155,9 @@ export class GroupOptimizationTester {
         };
       }
     }
-    console.log('✅ Edge Case Tests Complete\n');
   }
   // Test stress conditions and scalability
   async testStressConditions() {
-    console.log('💪 Testing Stress Conditions...');
     const stressTests = [
       { name: 'large_group_500', size: 500, timeout: 30000 },
       { name: 'very_large_group_1000', size: 1000, timeout: 60000 },
@@ -280,7 +165,6 @@ export class GroupOptimizationTester {
       { name: 'memory_pressure', size: 200, iterations: 5 }
     ];
     for (const test of stressTests) {
-      console.log(`  Stress testing: ${test.name}`);
       try {
         if (test.name === 'repeated_calls') {
           // Test repeated calls for memory leaks
@@ -339,11 +223,9 @@ export class GroupOptimizationTester {
         };
       }
     }
-    console.log('✅ Stress Tests Complete\n');
   }
   // Test conflict detection accuracy
   async testConflictDetection() {
-    console.log('🔍 Testing Conflict Detection...');
     // Create groups with known conflicts
     const conflictScenarios = [
       {
@@ -400,7 +282,6 @@ export class GroupOptimizationTester {
         };
       }
     }
-    console.log('✅ Conflict Detection Tests Complete\n');
   }
   // Calculate group balance score
   calculateGroupBalance(groups) {
@@ -413,7 +294,6 @@ export class GroupOptimizationTester {
   }
   // Generate comprehensive summary report
   generateSummaryReport() {
-    console.log('📊 Generating Summary Report...');
     // Algorithm performance summary
     const performanceSummary = {};
     Object.keys(this.results.algorithmPerformance).forEach(algorithm => {
@@ -447,7 +327,6 @@ export class GroupOptimizationTester {
       overallHealth: Math.round((edgeCaseSuccessRate + stressTestSuccessRate) / 2),
       recommendations: this.generateRecommendations(performanceSummary)
     };
-    console.log('✅ Summary Report Generated\n');
   }
   // Generate optimization recommendations
   generateRecommendations(performanceSummary) {
@@ -484,26 +363,10 @@ export class GroupOptimizationTester {
   }
   // Print detailed report
   printReport() {
-    console.log('\n' + '='.repeat(80));
-    console.log('GROUP OPTIMIZATION ALGORITHM TEST REPORT');
-    console.log('='.repeat(80));
-    console.log('\n📈 PERFORMANCE SUMMARY:');
     Object.entries(this.results.summary.performanceSummary || {}).forEach(([algorithm, stats]) => {
-      console.log(`  ${algorithm.toUpperCase()}:`);
-      console.log(`    Average Duration: ${stats.avgDuration}ms`);
-      console.log(`    Average Compatibility: ${stats.avgCompatibility}%`);
-      console.log(`    Average Balance: ${stats.avgBalance}%`);
-      console.log(`    Success Rate: ${stats.successRate}%`);
-      console.log('');
     });
-    console.log(`\n🛡️  EDGE CASE SUCCESS RATE: ${this.results.summary.edgeCaseSuccessRate}%`);
-    console.log(`💪 STRESS TEST SUCCESS RATE: ${this.results.summary.stressTestSuccessRate}%`);
-    console.log(`🎯 OVERALL HEALTH SCORE: ${this.results.summary.overallHealth}%`);
-    console.log('\n💡 RECOMMENDATIONS:');
     this.results.summary.recommendations?.forEach(rec => {
-      console.log(`  • ${rec}`);
     });
-    console.log('\n' + '='.repeat(80));
   }
 }
 // Export for use in other modules
@@ -520,8 +383,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     import('./__tests__/algorithm-test-runner.test.js').then(({ AlgorithmTestSuite }) => {
       const testSuite = new AlgorithmTestSuite();
       testSuite.runCompleteTestSuite().then(() => {
-        console.log('🎉 Comprehensive testing completed!');
-      }).catch(console.error);
     });
   } else if (abTesting) {
     // Run A/B testing framework
@@ -538,25 +399,19 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         successMetrics: ['compatibility', 'processing_time'],
         sampleSize: 30
       });
-      console.log('🧪 Running A/B Testing Framework...');
       // Run tests
       const runExperiment = async () => {
         for (let i = 0; i < 30; i++) {
           const participants = generateTestParticipants(24);
           await abTester.runTest('cli_test', participants, `cli_test_${i}`);
           if (i % 10 === 0) {
-            console.log(`Progress: ${i + 1}/30 tests completed`);
           }
         }
         const analysis = abTester.analyzeResults('cli_test');
-        console.log('\n📊 A/B Test Results:');
-        console.log(JSON.stringify(analysis, null, 2));
       };
-      runExperiment().catch(console.error);
     });
   } else if (monitoring) {
     // Generate monitoring dashboard data
-    console.log('📊 Generating monitoring dashboard data...');
     const generateMonitoringData = async () => {
       const metrics = [];
       for (let i = 0; i < 20; i++) {
@@ -577,24 +432,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
           groupCount: groups.length,
           throughput: Math.round((participants.length / processingTime) * 1000)
         });
-        console.log(`Generated metric ${i + 1}/20: ${Math.round(processingTime)}ms, ${Math.round(avgCompatibility)}% compatibility`);
       }
-      console.log('\n📈 Monitoring Metrics Summary:');
-      console.log(`Average Processing Time: ${Math.round(metrics.reduce((sum, m) => sum + m.processingTimeMs, 0) / metrics.length)}ms`);
-      console.log(`Average Compatibility: ${Math.round(metrics.reduce((sum, m) => sum + m.avgCompatibility, 0) / metrics.length)}%`);
-      console.log(`Average Throughput: ${Math.round(metrics.reduce((sum, m) => sum + m.throughput, 0) / metrics.length)} participants/sec`);
     };
-    generateMonitoringData().catch(console.error);
   } else {
     // Original test runner
     const tester = new GroupOptimizationTester();
     tester.runAllTests().then(() => {
       tester.printReport();
-      console.log('\n🔧 Advanced Testing Options:');
-      console.log('  --comprehensive  Run complete test suite with unit, integration, performance, and A/B tests');
-      console.log('  --ab-testing     Run A/B testing framework demonstration');
-      console.log('  --monitoring     Generate sample monitoring dashboard data');
-      console.log('\nExample: node src/services/group-optimization-test.js --comprehensive');
-    }).catch(console.error);
   }
 }

@@ -1,0 +1,246 @@
+{
+  "summary": {
+    "testDuration": 3279,
+    "authSystem": {
+      "passed": 3,
+      "total": 4,
+      "rate": 75
+    },
+    "sessionManagement": {
+      "passed": 3,
+      "total": 3,
+      "rate": 100
+    },
+    "triggers": {
+      "passed": 2,
+      "total": 3,
+      "rate": 67
+    },
+    "security": {
+      "passed": 3,
+      "total": 3,
+      "rate": 100
+    },
+    "overall": {
+      "passed": 11,
+      "total": 13,
+      "rate": 85
+    },
+    "performanceAverage": 0,
+    "errorCount": 1,
+    "overallHealth": 85,
+    "timestamp": "2025-09-20T12:08:26.999Z"
+  },
+  "authSystemTests": [
+    {
+      "name": "auth_client_initialization",
+      "description": "Verify auth client initializes correctly",
+      "status": "passed",
+      "duration": 0,
+      "details": {
+        "success": true,
+        "hasAuthClient": true,
+        "sessionAccessible": true
+      },
+      "timestamp": "2025-09-20T12:08:23.720Z"
+    },
+    {
+      "name": "auth_user_endpoint",
+      "description": "Test auth.getUser() endpoint accessibility",
+      "status": "failed",
+      "duration": 0,
+      "details": {
+        "success": false,
+        "userEndpointAccessible": false,
+        "userData": {
+          "user": null
+        },
+        "error": "Auth session missing!"
+      },
+      "timestamp": "2025-09-20T12:08:23.720Z"
+    },
+    {
+      "name": "auth_session_endpoint",
+      "description": "Test auth.getSession() endpoint functionality",
+      "status": "passed",
+      "duration": 0,
+      "details": {
+        "success": true,
+        "sessionEndpointAccessible": true,
+        "hasSession": false,
+        "sessionData": null
+      },
+      "timestamp": "2025-09-20T12:08:23.720Z"
+    },
+    {
+      "name": "auth_config_validation",
+      "description": "Validate auth configuration and URLs",
+      "status": "passed",
+      "duration": 0,
+      "details": {
+        "success": true,
+        "authUrlValid": true,
+        "supabaseUrl": "https://vhecnqaejsukulaktjob.supabase.co",
+        "hasValidKey": true
+      },
+      "timestamp": "2025-09-20T12:08:23.720Z"
+    }
+  ],
+  "sessionManagement": [
+    {
+      "name": "session_state_consistency",
+      "description": "Test session state consistency across calls",
+      "status": "passed",
+      "duration": 101,
+      "details": {
+        "success": true,
+        "consistent": true,
+        "session1HasError": false,
+        "session2HasError": false,
+        "bothHaveSession": false
+      },
+      "timestamp": "2025-09-20T12:08:23.820Z"
+    },
+    {
+      "name": "auth_state_listeners",
+      "description": "Test auth state change listener setup",
+      "status": "passed",
+      "duration": 501,
+      "details": {
+        "success": true,
+        "listenerSetup": true,
+        "listenerCalled": true,
+        "hasUnsubscribe": true
+      },
+      "timestamp": "2025-09-20T12:08:24.322Z"
+    },
+    {
+      "name": "session_refresh_capability",
+      "description": "Test session refresh mechanism availability",
+      "status": "passed",
+      "duration": 0,
+      "details": {
+        "success": true,
+        "refreshEndpointAvailable": true,
+        "error": "Auth session missing!",
+        "hasRefreshMethod": true
+      },
+      "timestamp": "2025-09-20T12:08:24.322Z"
+    }
+  ],
+  "triggerTests": [
+    {
+      "name": "handle_new_user_trigger_exists",
+      "description": "Verify handle_new_user trigger function exists",
+      "status": "passed",
+      "duration": 600,
+      "details": {
+        "success": true,
+        "profilesTableAccessible": true,
+        "triggerInfrastructurePresent": true
+      },
+      "timestamp": "2025-09-20T12:08:24.923Z"
+    },
+    {
+      "name": "user_preferences_creation",
+      "description": "Test user preferences trigger creation",
+      "status": "passed",
+      "duration": 668,
+      "details": {
+        "success": true,
+        "userPreferencesAccessible": true,
+        "tableStructureValid": true
+      },
+      "timestamp": "2025-09-20T12:08:25.591Z"
+    },
+    {
+      "name": "auth_user_metadata_support",
+      "description": "Test auth user metadata handling",
+      "status": "failed",
+      "duration": 0,
+      "details": {
+        "success": false,
+        "userMetadataSupported": false,
+        "authUserStructureValid": false,
+        "error": "Auth session missing!"
+      },
+      "timestamp": "2025-09-20T12:08:25.591Z"
+    }
+  ],
+  "securityTests": [
+    {
+      "name": "rls_enabled_auth_tables",
+      "description": "Verify RLS is enabled on auth-related tables",
+      "status": "passed",
+      "duration": 626,
+      "details": {
+        "success": true,
+        "profilesRLSActive": true,
+        "preferencesRLSActive": true
+      },
+      "timestamp": "2025-09-20T12:08:26.217Z"
+    },
+    {
+      "name": "password_requirements",
+      "description": "Test password policy enforcement",
+      "status": "passed",
+      "duration": 781,
+      "details": {
+        "success": true,
+        "weakPasswordHandled": true,
+        "strongPasswordHandled": true,
+        "signUpEndpointWorking": true
+      },
+      "timestamp": "2025-09-20T12:08:26.998Z"
+    },
+    {
+      "name": "auth_rate_limiting",
+      "description": "Test auth rate limiting behavior",
+      "status": "passed",
+      "duration": 0,
+      "details": {
+        "success": true,
+        "totalRequests": 3,
+        "successfulRequests": 3,
+        "rateLimitingDetected": false,
+        "allSucceeded": true
+      },
+      "timestamp": "2025-09-20T12:08:26.998Z"
+    }
+  ],
+  "performanceMetrics": [
+    {
+      "name": "auth_session_retrieval",
+      "description": "Benchmark session retrieval performance",
+      "status": "completed",
+      "metrics": {
+        "iterations": 5,
+        "averageTime": 0.0033168000000841857,
+        "minTime": 0.0016249999998763087,
+        "maxTime": 0.007292000000234111,
+        "times": [
+          0.007292000000234111,
+          0.004042000000026746,
+          0.0018340000001444423,
+          0.0016249999998763087,
+          0.00179100000013932
+        ]
+      },
+      "timestamp": "2025-09-20T12:08:26.998Z"
+    },
+    {
+      "name": "auth_user_retrieval",
+      "description": "Benchmark user retrieval performance",
+      "status": "error",
+      "error": "Auth session missing!",
+      "timestamp": "2025-09-20T12:08:26.998Z"
+    }
+  ],
+  "errors": [
+    {
+      "context": "Auth Performance Test: auth_user_retrieval",
+      "error": "Auth session missing!",
+      "timestamp": "2025-09-20T12:08:26.998Z"
+    }
+  ]
+}

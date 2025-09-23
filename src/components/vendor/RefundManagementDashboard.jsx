@@ -74,7 +74,6 @@ const RefundManagementDashboard = ({ vendorId }) => {
       if (error) throw error;
       setRefundRequests(requests || []);
     } catch (error) {
-      console.error('Failed to load refund data:', error);
     } finally {
       setLoading(false);
     }
@@ -96,7 +95,6 @@ const RefundManagementDashboard = ({ vendorId }) => {
       await loadRefundData();
       setSelectedRequest(null);
     } catch (error) {
-      console.error('Failed to update request status:', error);
     } finally {
       setProcessingRefund(null);
     }
@@ -132,7 +130,6 @@ const RefundManagementDashboard = ({ vendorId }) => {
         throw new Error('Refund processing failed');
       }
     } catch (error) {
-      console.error('Failed to process refund:', error);
       await updateRequestStatus(request.id, 'processing_failed', `Failed to process refund: ${error.message}`);
     } finally {
       setProcessingRefund(null);

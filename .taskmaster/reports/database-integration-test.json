@@ -1,0 +1,217 @@
+{
+  "summary": {
+    "testDuration": 11296,
+    "connection": true,
+    "tablesAccessible": 19,
+    "totalTables": 21,
+    "tableAccessRate": 90,
+    "authentication": true,
+    "realtime": true,
+    "relationships": 3,
+    "errorCount": 0,
+    "overallHealth": 96,
+    "timestamp": "2025-09-20T11:38:59.123Z"
+  },
+  "connectionPool": {
+    "status": "connected",
+    "url": "https://vhecnqaejsukulaktjob.supabase.co",
+    "connectionTime": 414,
+    "timestamp": "2025-09-20T11:38:48.758Z"
+  },
+  "tableAccess": [
+    {
+      "table": "profiles",
+      "status": "accessible",
+      "duration": 358,
+      "hasData": false,
+      "timestamp": "2025-09-20T11:38:49.116Z"
+    },
+    {
+      "table": "user_preferences",
+      "status": "accessible",
+      "duration": 356,
+      "hasData": false,
+      "timestamp": "2025-09-20T11:38:49.472Z"
+    },
+    {
+      "table": "vendors",
+      "status": "accessible",
+      "duration": 370,
+      "hasData": false,
+      "timestamp": "2025-09-20T11:38:49.843Z"
+    },
+    {
+      "table": "adventures",
+      "status": "accessible",
+      "duration": 327,
+      "hasData": false,
+      "timestamp": "2025-09-20T11:38:50.170Z"
+    },
+    {
+      "table": "adventure_availability",
+      "status": "accessible",
+      "duration": 366,
+      "hasData": false,
+      "timestamp": "2025-09-20T11:38:50.536Z"
+    },
+    {
+      "table": "adventure_media",
+      "status": "accessible",
+      "duration": 318,
+      "hasData": false,
+      "timestamp": "2025-09-20T11:38:50.854Z"
+    },
+    {
+      "table": "bookings",
+      "status": "accessible",
+      "duration": 394,
+      "hasData": false,
+      "timestamp": "2025-09-20T11:38:51.249Z"
+    },
+    {
+      "table": "booking_payments",
+      "status": "accessible",
+      "duration": 370,
+      "hasData": false,
+      "timestamp": "2025-09-20T11:38:51.619Z"
+    },
+    {
+      "table": "booking_participants",
+      "status": "accessible",
+      "duration": 337,
+      "hasData": false,
+      "timestamp": "2025-09-20T11:38:51.956Z"
+    },
+    {
+      "table": "groups",
+      "status": "error",
+      "duration": 346,
+      "error": "infinite recursion detected in policy for relation \"group_members\"",
+      "hasData": null,
+      "timestamp": "2025-09-20T11:38:52.302Z"
+    },
+    {
+      "table": "group_members",
+      "status": "error",
+      "duration": 137,
+      "error": "infinite recursion detected in policy for relation \"group_members\"",
+      "hasData": null,
+      "timestamp": "2025-09-20T11:38:52.439Z"
+    },
+    {
+      "table": "personality_assessments",
+      "status": "accessible",
+      "duration": 343,
+      "hasData": false,
+      "timestamp": "2025-09-20T11:38:52.782Z"
+    },
+    {
+      "table": "assessment_responses",
+      "status": "accessible",
+      "duration": 329,
+      "hasData": false,
+      "timestamp": "2025-09-20T11:38:53.112Z"
+    },
+    {
+      "table": "community_posts",
+      "status": "accessible",
+      "duration": 167,
+      "hasData": false,
+      "timestamp": "2025-09-20T11:38:53.279Z"
+    },
+    {
+      "table": "community_connections",
+      "status": "accessible",
+      "duration": 340,
+      "hasData": false,
+      "timestamp": "2025-09-20T11:38:53.619Z"
+    },
+    {
+      "table": "post_reactions",
+      "status": "accessible",
+      "duration": 199,
+      "hasData": false,
+      "timestamp": "2025-09-20T11:38:53.818Z"
+    },
+    {
+      "table": "post_comments",
+      "status": "accessible",
+      "duration": 144,
+      "hasData": false,
+      "timestamp": "2025-09-20T11:38:53.962Z"
+    },
+    {
+      "table": "trip_requests",
+      "status": "accessible",
+      "duration": 357,
+      "hasData": false,
+      "timestamp": "2025-09-20T11:38:54.318Z"
+    },
+    {
+      "table": "vendor_bids",
+      "status": "accessible",
+      "duration": 352,
+      "hasData": false,
+      "timestamp": "2025-09-20T11:38:54.671Z"
+    },
+    {
+      "table": "reviews",
+      "status": "accessible",
+      "duration": 353,
+      "hasData": false,
+      "timestamp": "2025-09-20T11:38:55.024Z"
+    },
+    {
+      "table": "engagement_scores",
+      "status": "accessible",
+      "duration": 358,
+      "hasData": false,
+      "timestamp": "2025-09-20T11:38:55.382Z"
+    }
+  ],
+  "authFlow": {
+    "sessionAccess": true,
+    "userAccess": false,
+    "hasActiveSession": false,
+    "userError": "Auth session missing!",
+    "timestamp": "2025-09-20T11:38:55.382Z"
+  },
+  "realtime": {
+    "status": "connected",
+    "subscribeResult": "SUBSCRIBED",
+    "timestamp": "2025-09-20T11:38:56.450Z"
+  },
+  "foreignKeys": {
+    "tests": [
+      {
+        "relationship": "profiles_to_users",
+        "status": "accessible"
+      },
+      {
+        "relationship": "adventures_to_vendors",
+        "status": "accessible"
+      },
+      {
+        "relationship": "bookings_to_adventures",
+        "status": "accessible"
+      }
+    ],
+    "timestamp": "2025-09-20T11:38:57.300Z"
+  },
+  "performance": {
+    "simpleRead": {
+      "count": 5,
+      "avgDuration": 210.19,
+      "minDuration": 138.5517090000012,
+      "maxDuration": 314.0487499999999
+    },
+    "complexRead": {
+      "count": 3,
+      "avgDuration": 257.09,
+      "minDuration": 135.54862499999945,
+      "maxDuration": 320.1500419999993
+    },
+    "timestamp": "2025-09-20T11:38:59.122Z"
+  },
+  "errors": []
+}

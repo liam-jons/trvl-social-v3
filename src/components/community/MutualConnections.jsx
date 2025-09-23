@@ -30,7 +30,6 @@ const MutualConnections = ({ userId, className = '' }) => {
         setMutualConnections(result.data);
       }
     } catch (error) {
-      console.error('Error loading mutual connections:', error);
     } finally {
       setLoading(false);
     }

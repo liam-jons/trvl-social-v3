@@ -6,7 +6,10 @@ import {
   Target,
   Award,
   Lightbulb,
-  Medal
+  Medal,
+  Trophy,
+  TrendingUp,
+  Gem
 } from 'lucide-react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
@@ -42,7 +45,6 @@ const PerformanceBadges = ({ vendorId }) => {
       const available = calculateAvailableBadges(performanceResult.data, earnedBadges);
       setAvailableBadges(available);
     } catch (err) {
-      console.error('Load badge data error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -56,7 +58,7 @@ const PerformanceBadges = ({ vendorId }) => {
         type: 'excellence_award',
         name: 'Excellence Award',
         description: 'Maintain an overall performance score of 90+ for 30 days',
-        icon: '🏆',
+        icon: Trophy,
         tier: 'gold',
         criteria: performance.performanceScore >= 90,
         requirement: 'Performance Score: 90+',
@@ -100,7 +102,7 @@ const PerformanceBadges = ({ vendorId }) => {
         type: 'growth_champion',
         name: 'Growth Champion',
         description: 'Achieve 20%+ revenue growth over previous period',
-        icon: '📈',
+        icon: TrendingUp,
         tier: 'silver',
         criteria: metrics.revenue.growthRate >= 20,
         requirement: 'Revenue growth: 20%+',
@@ -344,7 +346,7 @@ const PerformanceBadges = ({ vendorId }) => {
             { tier: 'bronze', name: 'Bronze', icon: '🥉', points: '30-60 pts' },
             { tier: 'silver', name: 'Silver', icon: '🥈', points: '70-80 pts' },
             { tier: 'gold', name: 'Gold', icon: '🥇', points: '100-150 pts' },
-            { tier: 'platinum', name: 'Platinum', icon: '💎', points: '200+ pts' },
+            { tier: 'platinum', name: 'Platinum', icon: Gem, points: '200+ pts' },
             { tier: 'special', name: 'Special', icon: Medal, points: 'Variable' }
           ].map((tier) => (
             <div key={tier.tier} className="text-center">

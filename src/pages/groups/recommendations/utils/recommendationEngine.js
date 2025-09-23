@@ -68,7 +68,6 @@ export class GroupRecommendationEngine {
         totalCompatibleGroups: filteredGroups.length
       };
     } catch (error) {
-      console.error('Error generating recommendations:', error);
       throw new Error(`Failed to generate recommendations: ${error.message}`);
     }
   }
@@ -92,7 +91,6 @@ export class GroupRecommendationEngine {
           });
         }
       } catch (error) {
-        console.warn(`Failed to calculate compatibility for group ${group.id}:`, error);
         // Skip this group but continue processing others
         continue;
       }
@@ -137,7 +135,6 @@ export class GroupRecommendationEngine {
         totalScore += compatibilityScore.overallScore;
         totalConfidence += compatibilityScore.confidence;
       } catch (error) {
-        console.warn(`Failed to calculate compatibility with member ${member.userId}:`, error);
         // Use neutral score for failed calculations
         individualScores.push({
           memberId: member.userId,

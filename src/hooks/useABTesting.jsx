@@ -25,7 +25,6 @@ export const ABTestingProvider = ({ children }) => {
         setExperiments(new Map(allExperiments.map(exp => [exp.id, exp])));
         setFeatureFlags(new Map(allFlags.map(flag => [flag.id, flag])));
       } catch (error) {
-        console.error('Failed to initialize A/B testing:', error);
       }
     };
     initializeABTesting();

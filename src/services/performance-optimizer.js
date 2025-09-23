@@ -48,20 +48,16 @@ class PerformanceOptimizer {
    */
   async initialize(options = {}) {
     if (this.initialized) return;
-    console.log('🚀 Initializing Performance Optimizer...');
     try {
       // Set optimization level
       this.optimizationLevel = options.level || 'balanced';
       const strategy = this.strategies[this.optimizationLevel];
       // Initialize CDN cache manager first (static assets)
       await cdnCacheManager.preloadCriticalAssets();
-      console.log('✅ CDN cache manager initialized');
       // Initialize Redis cache service
       const redisHealth = await redisCacheService.healthCheck();
       if (redisHealth.status !== 'healthy') {
-        console.warn('⚠️  Redis cache not available, using fallback memory cache');
       } else {
-        console.log('✅ Redis cache service connected');
       }
       // Initialize approximation engine with personality archetypes
       const archetypes = await cdnCacheManager.getStaticAsset('personality-archetypes');
@@ -70,15 +66,12 @@ class PerformanceOptimizer {
         Object.entries(archetypes.data).forEach(([key, value]) => {
           scoreApproximationEngine.personalityArchetypes.set(key, value);
         });
-        console.log('✅ Score approximation engine loaded with personality data');
       }
       // Start background job queue if enabled
       if (strategy.backgroundProcessing) {
         backgroundJobQueue.startWorkers();
-        console.log('✅ Background job queue started');
       }
       this.initialized = true;
-      console.log(`🎯 Performance Optimizer initialized with ${this.optimizationLevel} strategy`);
       return {
         success: true,
         level: this.optimizationLevel,
@@ -90,7 +83,6 @@ class PerformanceOptimizer {
         }
       };
     } catch (error) {
-      console.error('❌ Performance Optimizer initialization failed:', error);
       return {
         success: false,
         error: error.message
@@ -138,7 +130,6 @@ class PerformanceOptimizer {
         }
       };
     } catch (error) {
-      console.error('Optimization failed:', error);
       return {
         success: false,
         error: error.message,
@@ -301,7 +292,6 @@ class PerformanceOptimizer {
           request.user2Id,
           { groupId: request.groupId }
         ).catch(error => {
-          console.error('Background detailed score loading failed:', error);
         });
       });
     }
@@ -352,12 +342,10 @@ class PerformanceOptimizer {
   async warmCaches(options = {}) {
     const strategy = this.strategies[this.optimizationLevel];
     try {
-      console.log('🔥 Starting intelligent cache warming...');
       // Load frequently accessed user pairs from database
       const hotPairs = await this.getHotUserPairs(options.limit || 100);
       // Warm approximation cache
       if (strategy.useApproximation && hotPairs.length > 0) {
-        console.log(`Warming approximation cache for ${hotPairs.length} pairs...`);
         const userIds = [...new Set(hotPairs.flatMap(pair => [pair.user1Id, pair.user2Id]))];
         await scoreApproximationEngine.approximateBatch(
           hotPairs.map(pair => [pair.user1Id, pair.user2Id]),
@@ -366,18 +354,15 @@ class PerformanceOptimizer {
       }
       // Warm lazy loader cache
       if (hotPairs.length > 0) {
-        console.log('Warming lazy loader cache...');
         const userIds = [...new Set(hotPairs.flatMap(pair => [pair.user1Id, pair.user2Id]))];
         await lazyScoreLoader.warmCache(userIds);
       }
-      console.log('✅ Cache warming completed');
       return {
         success: true,
         warmedPairs: hotPairs.length,
         caches: ['approximation', 'lazy_loader', 'redis']
       };
     } catch (error) {
-      console.error('Cache warming failed:', error);
       return {
         success: false,
         error: error.message
@@ -397,7 +382,6 @@ class PerformanceOptimizer {
         accessCount: Math.floor(Math.random() * 50) + 10
       }));
     } catch (error) {
-      console.error('Failed to get hot user pairs:', error);
       return [];
     }
   }
@@ -510,14 +494,11 @@ class PerformanceOptimizer {
    * Shutdown all performance optimization components
    */
   async shutdown() {
-    console.log('🛑 Shutting down Performance Optimizer...');
     try {
       await backgroundJobQueue.shutdown();
       await redisCacheService.disconnect();
       this.initialized = false;
-      console.log('✅ Performance Optimizer shutdown complete');
     } catch (error) {
-      console.error('❌ Performance Optimizer shutdown failed:', error);
     }
   }
 }

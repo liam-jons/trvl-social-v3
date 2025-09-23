@@ -59,7 +59,6 @@ const explanationCache = {
       }
       return data;
     } catch (error) {
-      console.warn('Explanation cache retrieval error:', error);
       return null;
     }
   },
@@ -71,7 +70,6 @@ const explanationCache = {
       };
       localStorage.setItem(`exp_${key}`, JSON.stringify(cacheEntry));
     } catch (error) {
-      console.warn('Explanation cache storage error:', error);
     }
   },
   clear() {
@@ -83,7 +81,6 @@ const explanationCache = {
         }
       });
     } catch (error) {
-      console.warn('Explanation cache clearing error:', error);
     }
   }
 };
@@ -306,7 +303,6 @@ async function callAnthropicAPI(prompt, retryCount = 0) {
     }
     if (retryCount < API_CONFIG.maxRetries) {
       const delay = API_CONFIG.retryDelay * Math.pow(2, retryCount);
-      console.warn(`Anthropic API call failed, retrying in ${delay}ms (attempt ${retryCount + 1}/${API_CONFIG.maxRetries}):`, error.message);
       await sleep(delay);
       return callAnthropicAPI(prompt, retryCount + 1);
     }
@@ -350,7 +346,6 @@ async function callOpenAIAPI(prompt, retryCount = 0) {
     }
     if (retryCount < API_CONFIG.maxRetries) {
       const delay = API_CONFIG.retryDelay * Math.pow(2, retryCount);
-      console.warn(`OpenAI API call failed, retrying in ${delay}ms (attempt ${retryCount + 1}/${API_CONFIG.maxRetries}):`, error.message);
       await sleep(delay);
       return callOpenAIAPI(prompt, retryCount + 1);
     }
@@ -370,7 +365,6 @@ export async function generateCompatibilityExplanation(compatibilityScore, optio
     throw new Error('Invalid compatibility score provided');
   }
   if (!SUPPORTED_LANGUAGES[language]) {
-    console.warn(`Language ${language} not supported, falling back to English`);
     options.language = 'en';
   }
   // Aggregate context from scoring dimensions
@@ -412,13 +406,11 @@ export async function generateCompatibilityExplanation(compatibilityScore, optio
             break;
           }
         } catch (providerError) {
-          console.warn(`${providerName} provider failed:`, providerError.message);
           error = providerError.message;
           continue;
         }
       }
     } catch (aiError) {
-      console.warn('AI explanation generation failed:', aiError.message);
       error = aiError.message;
     }
   }
@@ -476,7 +468,6 @@ export async function generateBulkExplanations(compatibilityScores, options = {}
 // Utility functions for cache management and configuration
 export function clearExplanationCache() {
   explanationCache.clear();
-  console.log('Explanation cache cleared');
 }
 export function getExplanationServiceConfig() {
   return {

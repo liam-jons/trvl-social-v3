@@ -42,7 +42,6 @@ const InvoiceManagement = ({
       }
       setInvoices(invoiceData);
     } catch (error) {
-      console.error('Failed to load invoices:', error);
       setInvoices([]);
     } finally {
       setLoading(false);
@@ -53,7 +52,6 @@ const InvoiceManagement = ({
       const statsData = await InvoiceService.getInvoiceStats(userId, vendorId);
       setStats(statsData);
     } catch (error) {
-      console.error('Failed to load invoice stats:', error);
     }
   };
   const handleDownloadPDF = async (invoiceId, template = 'standard') => {
@@ -70,7 +68,6 @@ const InvoiceManagement = ({
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Failed to download invoice:', error);
       alert('Failed to download invoice. Please try again.');
     } finally {
       setActionLoading(prev => ({ ...prev, [`download-${invoiceId}`]: false }));
@@ -86,7 +83,6 @@ const InvoiceManagement = ({
       ));
       alert('Invoice sent successfully!');
     } catch (error) {
-      console.error('Failed to send invoice:', error);
       alert('Failed to send invoice. Please try again.');
     } finally {
       setActionLoading(prev => ({ ...prev, [`email-${invoiceId}`]: false }));
@@ -103,7 +99,6 @@ const InvoiceManagement = ({
       ));
       alert('Invoice cancelled successfully.');
     } catch (error) {
-      console.error('Failed to cancel invoice:', error);
       alert('Failed to cancel invoice. Please try again.');
     } finally {
       setActionLoading(prev => ({ ...prev, [`cancel-${invoiceId}`]: false }));

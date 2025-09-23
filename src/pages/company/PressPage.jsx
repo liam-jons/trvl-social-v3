@@ -1,5 +1,5 @@
 import StaticPageLayout from '../../components/layout/StaticPageLayout';
-import { Star, Rocket } from 'lucide-react';
+import { Star, Rocket, Trophy } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import GlassButton from '../../components/ui/GlassButton';
 
@@ -9,17 +9,17 @@ const PressPage = () => {
   const pressReleases = [
     {
       title: "TRVL Social Raises $15M Series A to Revolutionize Social Travel",
-      date: "March 15, 2024",
+      date: "March 15, 2025",
       excerpt: "Funding will accelerate global expansion and enhance AI-powered travel matching technology."
     },
     {
       title: "TRVL Social Launches AI-Powered Group Formation Technology",
-      date: "January 22, 2024",
+      date: "January 22, 2025",
       excerpt: "New algorithm creates optimal travel groups based on personality compatibility and interests."
     },
     {
       title: "TRVL Social Reaches 50,000 Active Users Milestone",
-      date: "December 8, 2023",
+      date: "December 8, 2024",
       excerpt: "Platform celebrates rapid growth with community spanning over 120 countries worldwide."
     }
   ];
@@ -132,21 +132,21 @@ const PressPage = () => {
           <h2 className="text-3xl font-bold mb-8 text-center">Awards & Recognition</h2>
           <div className="grid md:grid-cols-3 gap-6">
             <GlassCard className="text-center p-6">
-              <div className="text-4xl mb-4">🏆</div>
+              <Trophy className="w-12 h-12 mx-auto mb-4 text-yellow-500" />
               <h3 className="text-lg font-semibold mb-2">TechCrunch Startup Battlefield</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300">Finalist 2023</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Finalist 2024</p>
             </GlassCard>
 
             <GlassCard className="text-center p-6">
               <Star className="w-12 h-12 mx-auto mb-4 text-yellow-500" />
               <h3 className="text-lg font-semibold mb-2">Best Travel App</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300">Travel + Leisure 2024</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Travel + Leisure 2025</p>
             </GlassCard>
 
             <GlassCard className="text-center p-6">
               <Rocket className="w-12 h-12 mx-auto mb-4 text-blue-500" />
               <h3 className="text-lg font-semibold mb-2">Fast Company's Most Innovative</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300">Travel Companies 2024</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Travel Companies 2025</p>
             </GlassCard>
           </div>
         </section>

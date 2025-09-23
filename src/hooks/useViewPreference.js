@@ -6,7 +6,6 @@ export const useViewPreference = (defaultView = 'grid') => {
       const saved = localStorage.getItem(VIEW_PREFERENCE_KEY);
       return saved ? JSON.parse(saved) : defaultView;
     } catch (error) {
-      console.warn('Failed to load view preference from localStorage:', error);
       return defaultView;
     }
   });
@@ -15,7 +14,6 @@ export const useViewPreference = (defaultView = 'grid') => {
       setViewMode(newView);
       localStorage.setItem(VIEW_PREFERENCE_KEY, JSON.stringify(newView));
     } catch (error) {
-      console.warn('Failed to save view preference to localStorage:', error);
       // Still update the state even if localStorage fails
       setViewMode(newView);
     }
@@ -28,7 +26,6 @@ export const useViewPreference = (defaultView = 'grid') => {
           const newView = JSON.parse(event.newValue);
           setViewMode(newView);
         } catch (error) {
-          console.warn('Failed to parse view preference from storage event:', error);
         }
       }
     };

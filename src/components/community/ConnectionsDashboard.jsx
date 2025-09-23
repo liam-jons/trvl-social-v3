@@ -46,7 +46,6 @@ const ConnectionsDashboard = () => {
         recommendations: recommendationsResult.success ? recommendationsResult.data.length : 0
       });
     } catch (error) {
-      console.error('Error loading dashboard stats:', error);
     } finally {
       setLoading(false);
     }

@@ -29,7 +29,6 @@ const OnboardingPage = () => {
         }
         // User needs onboarding, stay on this page
       } catch (error) {
-        console.error('Error checking onboarding status:', error);
         // On error, allow onboarding to proceed (fail-safe approach)
       }
     };

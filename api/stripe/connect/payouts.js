@@ -5,19 +5,29 @@
 
 import Stripe from 'stripe';
 import { supabase } from '../../../src/lib/supabase.js';
+import { corsMiddleware } from '../../../src/utils/cors-config.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export default async function handler(req, res) {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Stripe-Account');
+  // Apply secure CORS middleware
+  const corsHandler = corsMiddleware(true); // Enable security headers
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+  // Handle CORS middleware first
+  return new Promise((resolve) => {
+    corsHandler(req, res, async () => {
+      try {
+        await handleRequest(req, res);
+        resolve();
+      } catch (error) {
+        console.error('Request handler error:', error);
+        resolve();
+      }
+    });
+  });
+}
 
+async function handleRequest(req, res) {
   try {
     switch (req.method) {
       case 'POST':

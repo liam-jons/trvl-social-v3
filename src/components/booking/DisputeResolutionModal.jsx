@@ -231,7 +231,6 @@ const DisputeResolutionModal = ({
       }));
       await supabase.from('notifications').insert(notifications);
     } catch (error) {
-      console.error('Failed to notify admin team:', error);
     }
   };
   const notifyVendor = async (dispute) => {
@@ -255,7 +254,6 @@ const DisputeResolutionModal = ({
       };
       await supabase.from('notifications').insert(notification);
     } catch (error) {
-      console.error('Failed to notify vendor:', error);
     }
   };
   const renderStep1 = () => (

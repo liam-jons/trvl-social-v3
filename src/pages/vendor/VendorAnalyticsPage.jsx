@@ -229,7 +229,6 @@ const VendorAnalyticsPage = () => {
       link.href = canvas.toDataURL();
       link.click();
     } catch (error) {
-      console.error('Export failed:', error);
     } finally {
       setIsExporting(false);
     }

@@ -61,7 +61,6 @@ export class FeatureEngineer {
           const extractedFeatures = await extractor(context);
           Object.assign(features, extractedFeatures);
         } catch (error) {
-          console.warn(`Error extracting features with ${extractorName}:`, error);
         }
       }
     }
@@ -306,7 +305,6 @@ export class FeatureEngineer {
           .order('created_at', { ascending: false })
           .limit(50);
         if (error) {
-          console.warn('Error fetching booking history:', error);
           return features;
         }
         if (bookings && bookings.length > 0) {
@@ -336,7 +334,6 @@ export class FeatureEngineer {
           }
         }
       } catch (error) {
-        console.warn('Error extracting booking history features:', error);
       }
     }
     return features;
@@ -356,7 +353,6 @@ export class FeatureEngineer {
           .eq('group_id', group.id)
           .order('created_at', { ascending: false });
         if (error) {
-          console.warn('Error fetching group booking history:', error);
           return features;
         }
         if (bookings && bookings.length > 0) {
@@ -372,7 +368,6 @@ export class FeatureEngineer {
           features.group_recent_activity = recentBookings.length;
         }
       } catch (error) {
-        console.warn('Error extracting group success history features:', error);
       }
     }
     return features;
@@ -411,7 +406,6 @@ export class FeatureEngineer {
           .eq('user_id', user.id)
           .eq('is_active', true);
         if (error) {
-          console.warn('Error fetching user memberships:', error);
           return features;
         }
         if (memberships) {
@@ -422,7 +416,6 @@ export class FeatureEngineer {
             : 0;
         }
       } catch (error) {
-        console.warn('Error extracting social network features:', error);
       }
     }
     return features;

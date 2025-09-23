@@ -49,7 +49,6 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
         setAllAdventures(adventuresResult.data);
       }
     } catch (error) {
-      console.error('Failed to load data:', error);
     } finally {
       setIsLoading(false);
     }
@@ -148,7 +147,6 @@ const BulkNotificationSystem = ({ vendorId, onActionComplete }) => {
       });
       onActionComplete?.();
     } catch (error) {
-      console.error('Send notifications failed:', error);
       setResults({
         successful: [],
         failed: [{ error: error.message }],

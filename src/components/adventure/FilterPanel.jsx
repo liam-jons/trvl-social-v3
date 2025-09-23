@@ -12,6 +12,7 @@ import {
   XMarkIcon,
   AdjustmentsHorizontalIcon
 } from '@heroicons/react/24/outline';
+import { Footprints, Waves, Building, Plane, TreePine, Building2, Camera, Heart } from 'lucide-react';
 import GlassCard from '../ui/GlassCard';
 import { useGeolocation } from '../../hooks/useGeolocation';
 
@@ -45,14 +46,14 @@ const FilterPanel = ({
 
   // Adventure type options
   const adventureTypeOptions = [
-    { id: 'hiking', name: 'Hiking & Trekking', icon: '🥾' },
-    { id: 'water-sports', name: 'Water Sports', icon: '🏄‍♂️' },
-    { id: 'cultural', name: 'Cultural', icon: '🏛️' },
-    { id: 'extreme', name: 'Extreme Sports', icon: '🪂' },
-    { id: 'wildlife', name: 'Nature & Wildlife', icon: '🦋' },
-    { id: 'urban', name: 'Urban Exploration', icon: '🏙️' },
-    { id: 'photography', name: 'Photography', icon: '📸' },
-    { id: 'wellness', name: 'Wellness & Retreat', icon: '🧘‍♀️' }
+    { id: 'hiking', name: 'Hiking & Trekking', iconComponent: Footprints },
+    { id: 'water-sports', name: 'Water Sports', iconComponent: Waves },
+    { id: 'cultural', name: 'Cultural', iconComponent: Building },
+    { id: 'extreme', name: 'Extreme Sports', iconComponent: Plane },
+    { id: 'wildlife', name: 'Nature & Wildlife', iconComponent: TreePine },
+    { id: 'urban', name: 'Urban Exploration', iconComponent: Building2 },
+    { id: 'photography', name: 'Photography', iconComponent: Camera },
+    { id: 'wellness', name: 'Wellness & Retreat', iconComponent: Heart }
   ];
 
   // Group size options
@@ -539,7 +540,7 @@ const FilterPanel = ({
                         onChange={() => toggleAdventureType(option.id)}
                         className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
                       />
-                      <span className="text-lg">{option.icon}</span>
+                      <option.iconComponent className="w-5 h-5" />
                       <span className="text-sm font-medium text-gray-900 dark:text-white">
                         {option.name}
                       </span>

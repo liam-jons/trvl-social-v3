@@ -28,7 +28,6 @@ export class DataPreprocessor {
           throw new Error(`Unknown data source: ${source}`);
       }
     } catch (error) {
-      console.error('Error extracting training data:', error);
       throw error;
     }
   }
@@ -220,11 +219,9 @@ export class DataPreprocessor {
           invalidRecords++;
         }
       } catch (error) {
-        console.warn('Error cleaning record:', error);
         invalidRecords++;
       }
     }
-    console.log(`Data cleaning complete: ${validRecords} valid, ${invalidRecords} invalid records`);
     return cleanedData;
   }
   /**
@@ -306,7 +303,6 @@ export class DataPreprocessor {
           }
         });
       } catch (error) {
-        console.warn('Error transforming record to features:', error);
       }
     }
     return transformedData;
@@ -327,7 +323,6 @@ export class DataPreprocessor {
         // Convert to appropriate type
         features[name] = this.convertFeatureType(value, type);
       } catch (error) {
-        console.warn(`Error extracting feature ${name}:`, error);
         features[name] = null;
       }
     }
@@ -563,7 +558,6 @@ export class DataPreprocessor {
       }
       return data;
     } catch (error) {
-      console.error('Error saving dataset:', error);
       throw error;
     }
   }
@@ -597,7 +591,6 @@ export class DataPreprocessor {
       // In a real implementation, load the actual data from the stored URL
       return data;
     } catch (error) {
-      console.error('Error loading dataset:', error);
       throw error;
     }
   }

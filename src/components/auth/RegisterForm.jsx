@@ -1,8 +1,16 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import GlassCard from '../ui/GlassCard';
 import GlassButton from '../ui/GlassButton';
+import AgeVerificationNotice from '../common/AgeVerificationNotice';
+import {
+  validateAge,
+  debounceValidation,
+  getMaxAllowedDate,
+  getMinAllowedDate,
+} from '../../utils/age-verification';
+import { getErrorMessage, isRetryableError, ERROR_CODES } from '../../utils/error-mapping';
 const RegisterForm = () => {
   const navigate = useNavigate();
   const { signUp, loading, error } = useAuth();
@@ -11,12 +19,28 @@ const RegisterForm = () => {
     password: '',
     confirmPassword: '',
     fullName: '',
+    dateOfBirth: '',
     role: 'traveler',
     agreeToTerms: false,
   });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [retryAttempts, setRetryAttempts] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  // Create debounced validation function for real-time age validation
+  const debouncedAgeValidation = useCallback(
+    debounceValidation((dateValue) => {
+      const ageValidation = validateAge(dateValue, 13);
+      if (!ageValidation.isValid && dateValue) {
+        setErrors(prev => ({ ...prev, dateOfBirth: ageValidation.error }));
+      } else if (ageValidation.isValid) {
+        setErrors(prev => ({ ...prev, dateOfBirth: '' }));
+      }
+    }, 500),
+    []
+  );
   const validateForm = () => {
     const newErrors = {};
     // Email validation
@@ -44,6 +68,11 @@ const RegisterForm = () => {
     } else if (formData.fullName.trim().length < 2) {
       newErrors.fullName = 'Please enter your full name';
     }
+    // Enhanced date of birth validation using age-verification utility
+    const ageValidation = validateAge(formData.dateOfBirth, 13);
+    if (!ageValidation.isValid) {
+      newErrors.dateOfBirth = ageValidation.error;
+    }
     // Terms agreement
     if (!formData.agreeToTerms) {
       newErrors.agreeToTerms = 'You must agree to the terms and conditions';
@@ -57,9 +86,29 @@ const RegisterForm = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
-    // Clear error for this field
+
+    // Clear error for this field immediately
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+
+    // Apply debounced validation for date of birth
+    if (name === 'dateOfBirth' && value) {
+      debouncedAgeValidation(value);
+    }
+  };
+
+  // Handle blur events for immediate validation
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+
+    if (name === 'dateOfBirth' && value) {
+      const ageValidation = validateAge(value, 13);
+      if (!ageValidation.isValid) {
+        setErrors(prev => ({ ...prev, dateOfBirth: ageValidation.error }));
+      } else {
+        setErrors(prev => ({ ...prev, dateOfBirth: '' }));
+      }
     }
   };
   const handleSubmit = async (e) => {
@@ -67,15 +116,78 @@ const RegisterForm = () => {
     if (!validateForm()) {
       return;
     }
-    const result = await signUp({
-      email: formData.email,
-      password: formData.password,
-      fullName: formData.fullName,
-      role: formData.role,
-    });
-    if (result.success) {
-      setRegistrationSuccess(true);
+
+    await performRegistration();
+  };
+
+  const performRegistration = async (isRetry = false) => {
+    // Clear any existing server-side errors
+    setErrors(prev => ({ ...prev, serverError: '', serverAgeError: '', networkError: '' }));
+
+    if (isRetry) {
+      setIsRetrying(true);
     }
+
+    try {
+      const result = await signUp({
+        email: formData.email,
+        password: formData.password,
+        fullName: formData.fullName,
+        dateOfBirth: formData.dateOfBirth,
+        role: formData.role,
+      });
+
+      if (result.success) {
+        setRegistrationSuccess(true);
+        setRetryAttempts(0);
+        return;
+      }
+
+      // Handle different types of errors
+      if (result.code === ERROR_CODES.COPPA_AGE_RESTRICTION ||
+          result.code === ERROR_CODES.AGE_VERIFICATION_FAILED ||
+          result.code === ERROR_CODES.INVALID_DATE_FORMAT) {
+        // Age verification errors - don't retry
+        setErrors(prev => ({
+          ...prev,
+          serverAgeError: getErrorMessage(result.code, result.error)
+        }));
+        setRetryAttempts(0);
+        return;
+      }
+
+      // Check if error is retryable
+      if (isRetryableError(result.code) && retryAttempts < 3) {
+        setErrors(prev => ({
+          ...prev,
+          networkError: `${getErrorMessage(result.code, result.error)} (Attempt ${retryAttempts + 1}/3)`
+        }));
+        setRetryAttempts(prev => prev + 1);
+
+        // Show retry option but don't auto-retry
+        return;
+      }
+
+      // Non-retryable error or max retries exceeded
+      setErrors(prev => ({
+        ...prev,
+        serverError: getErrorMessage(result.code, result.error)
+      }));
+      setRetryAttempts(0);
+
+    } catch (error) {
+      console.error('Registration submission error:', error);
+      setErrors(prev => ({
+        ...prev,
+        serverError: 'An unexpected error occurred. Please try again.'
+      }));
+    } finally {
+      setIsRetrying(false);
+    }
+  };
+
+  const handleRetry = () => {
+    performRegistration(true);
   };
   if (registrationSuccess) {
     return (
@@ -117,6 +229,10 @@ const RegisterForm = () => {
           Join TRVL Social and start your adventure
         </p>
       </div>
+
+      {/* Age Verification Notice */}
+      <AgeVerificationNotice className="mb-6" />
+
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Full Name */}
         <div>
@@ -136,6 +252,50 @@ const RegisterForm = () => {
             <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>
           )}
         </div>
+
+        {/* Date of Birth */}
+        <div>
+          <label htmlFor="dateOfBirth" className="block text-sm font-medium mb-1">
+            Date of Birth
+          </label>
+          <div className="relative">
+            <input
+              type="date"
+              id="dateOfBirth"
+              name="dateOfBirth"
+              value={formData.dateOfBirth}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              max={getMaxAllowedDate()}
+              min={getMinAllowedDate()}
+              className={`w-full px-4 py-2 glass-input rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.dateOfBirth ? 'border-red-500 ring-red-500' : ''
+              }`}
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            You must be 13 or older to use TRVL Social
+          </p>
+          {errors.dateOfBirth && (
+            <p className="text-red-500 text-xs mt-1">{errors.dateOfBirth}</p>
+          )}
+          {errors.serverAgeError && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-3 py-2 rounded-md text-sm mt-2">
+              <div className="flex items-center">
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                <span className="font-medium">Age Verification: {errors.serverAgeError}</span>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Email */}
         <div>
           <label htmlFor="email" className="block text-sm font-medium mb-1">
@@ -266,10 +426,42 @@ const RegisterForm = () => {
             <p className="text-red-500 text-xs mt-1">{errors.agreeToTerms}</p>
           )}
         </div>
-        {/* Error Message */}
+        {/* Error Messages */}
         {error && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
             {error}
+          </div>
+        )}
+
+        {errors.serverError && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
+            <div className="flex items-center">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              {errors.serverError}
+            </div>
+          </div>
+        )}
+
+        {errors.networkError && (
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-yellow-600 dark:text-yellow-400 px-4 py-3 rounded-lg text-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {errors.networkError}
+              </div>
+              <button
+                type="button"
+                onClick={handleRetry}
+                disabled={isRetrying}
+                className="ml-2 text-xs bg-yellow-100 dark:bg-yellow-900 hover:bg-yellow-200 dark:hover:bg-yellow-800 px-2 py-1 rounded transition-colors disabled:opacity-50"
+              >
+                {isRetrying ? 'Retrying...' : 'Retry'}
+              </button>
+            </div>
           </div>
         )}
         {/* Submit Button */}
@@ -277,9 +469,9 @@ const RegisterForm = () => {
           type="submit"
           variant="primary"
           className="w-full"
-          disabled={loading}
+          disabled={loading || isRetrying}
         >
-          {loading ? 'Creating Account...' : 'Create Account'}
+          {loading ? 'Creating Account...' : isRetrying ? 'Retrying...' : 'Create Account'}
         </GlassButton>
         {/* Divider */}
         <div className="relative my-6">
@@ -295,7 +487,6 @@ const RegisterForm = () => {
           <GlassButton
             type="button"
             variant="secondary"
-            onClick={() => console.log('Google login')}
             className="flex items-center justify-center"
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -309,7 +500,6 @@ const RegisterForm = () => {
           <GlassButton
             type="button"
             variant="secondary"
-            onClick={() => console.log('Facebook login')}
             className="flex items-center justify-center"
           >
             <svg className="w-5 h-5 mr-2" fill="#1877F2" viewBox="0 0 24 24">

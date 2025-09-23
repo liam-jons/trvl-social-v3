@@ -104,7 +104,6 @@ export class CompatibilityService {
         }
       };
     } catch (error) {
-      console.error('Compatibility calculation error:', error);
       return {
         success: false,
         error: {
@@ -224,7 +223,6 @@ export class CompatibilityService {
         }
       };
     } catch (error) {
-      console.error('Bulk compatibility calculation error:', error);
       return {
         success: false,
         error: {
@@ -273,7 +271,6 @@ export class CompatibilityService {
         calculatedAt: new Date(dbScore.calculated_at)
       };
     } catch (error) {
-      console.error('Error retrieving cached score:', error);
       return null;
     }
   }
@@ -291,13 +288,11 @@ export class CompatibilityService {
         .eq('id', algorithmId)
         .single();
       if (error || !data) {
-        console.warn('Algorithm not found, using default parameters');
         return this.getDefaultParameters();
       }
       // Convert database record to ScoringParameters
       return this.convertDbAlgorithmToParameters(data);
     } catch (error) {
-      console.error('Error loading algorithm parameters:', error);
       return this.getDefaultParameters();
     }
   }
@@ -341,7 +336,6 @@ export class CompatibilityService {
         data: this.convertDbAlgorithmToCompatibilityAlgorithm(data)
       };
     } catch (error) {
-      console.error('Error updating algorithm config:', error);
       return {
         success: false,
         error: {
@@ -363,7 +357,6 @@ export class CompatibilityService {
         .eq('user_id', userId)
         .single();
       if (personalityError || !personalityData) {
-        console.warn(`No personality assessment found for user ${userId}`);
         return null;
       }
       // Load user profile for additional data
@@ -373,7 +366,6 @@ export class CompatibilityService {
         .eq('id', userId)
         .single();
       if (profileError || !profileData) {
-        console.warn(`No profile found for user ${userId}`);
         return null;
       }
       // Construct UserCompatibilityProfile
@@ -413,7 +405,6 @@ export class CompatibilityService {
       };
       return userProfile;
     } catch (error) {
-      console.error(`Error loading user profile for ${userId}:`, error);
       return null;
     }
   }
@@ -453,10 +444,8 @@ export class CompatibilityService {
           onConflict: 'group_id,user_id'
         });
       if (error) {
-        console.error('Error persisting compatibility score:', error);
       }
     } catch (error) {
-      console.error('Error persisting compatibility score:', error);
     }
   }
   /**
@@ -480,7 +469,6 @@ export class CompatibilityService {
       });
       return result.explanation;
     } catch (error) {
-      console.error('AI explanation generation failed:', error);
       // Fallback to simple explanation
       return this.generateSimpleExplanation(score);
     }

@@ -80,7 +80,6 @@ async function withRetry(operation, context = 'operation', maxRetries = SERVICE_
       }
       if (attempt < maxRetries) {
         const delay = SERVICE_CONFIG.retryDelay * Math.pow(2, attempt);
-        console.warn(`${context} failed (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${delay}ms:`, error.message);
         await sleep(delay);
       }
     }
@@ -141,7 +140,6 @@ export class AssessmentService {
               .from('assessment_responses')
               .insert(assessmentResponses);
             if (responsesError) {
-              console.warn('Failed to save assessment responses:', responsesError);
               // Don't fail the entire operation for response storage issues
             }
           }
@@ -150,7 +148,6 @@ export class AssessmentService {
         SERVICE_CONFIG.timeout,
         'saveAssessment'
       );
-      console.log('Assessment saved successfully:', result.id);
       return {
         ...result,
         metadata,
@@ -319,7 +316,6 @@ export class AssessmentService {
         SERVICE_CONFIG.timeout,
         'updateAssessment'
       );
-      console.log('Assessment updated successfully:', result.id);
       return {
         ...result,
         calculatorProfile: reconstructCalculatorProfile(result),
@@ -361,7 +357,6 @@ export class AssessmentService {
         SERVICE_CONFIG.timeout,
         'deleteAssessment'
       );
-      console.log('Assessment deleted successfully for user:', userId);
       return result;
     } catch (error) {
       if (error instanceof AssessmentServiceError) {
@@ -458,19 +453,15 @@ export class AssessmentService {
               };
               callback(enrichedPayload);
             } catch (error) {
-              console.error('Error processing real-time assessment change:', error);
               callback({ error: error.message, originalPayload: payload });
             }
           }
         )
         .subscribe((status) => {
           if (status === 'SUBSCRIBED') {
-            console.log(`Assessment subscription active: ${subscriptionId}`);
           } else if (status === 'CHANNEL_ERROR') {
-            console.error(`Assessment subscription error: ${subscriptionId}`);
             callback({ error: 'Subscription channel error', status });
           } else if (status === 'TIMED_OUT') {
-            console.warn(`Assessment subscription timeout: ${subscriptionId}`);
             callback({ error: 'Subscription timed out', status });
           }
         });
@@ -482,7 +473,6 @@ export class AssessmentService {
         unsubscribe: () => {
           channel.unsubscribe();
           this.activeSubscriptions.delete(subscriptionId);
-          console.log(`Assessment subscription closed: ${subscriptionId}`);
         },
         status: () => channel.state,
       };
@@ -502,7 +492,6 @@ export class AssessmentService {
         this.activeSubscriptions.delete(id);
       }
     });
-    console.log(`Closed ${subscriptionIds.length} assessment subscriptions`);
   }
   /**
    * Get service health status

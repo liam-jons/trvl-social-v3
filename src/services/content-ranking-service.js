@@ -71,7 +71,6 @@ export class ContentRankingService {
       });
       return result;
     } catch (error) {
-      console.error('Error generating personalized feed:', error);
       return {
         success: false,
         error: error.message,
@@ -116,7 +115,6 @@ export class ContentRankingService {
         engagementLevel: engagementData.data?.engagement_score || 0
       };
     } catch (error) {
-      console.error('Error getting user context:', error);
       return {
         location: null,
         preferences: {},
@@ -162,7 +160,6 @@ export class ContentRankingService {
         .slice(0, 10)
         .map(([tag]) => tag);
     } catch (error) {
-      console.error('Error inferring user interests:', error);
       return [];
     }
   }
@@ -220,7 +217,6 @@ export class ContentRankingService {
       if (error) throw error;
       return posts || [];
     } catch (error) {
-      console.error('Error fetching relevant content:', error);
       return [];
     }
   }
@@ -249,7 +245,6 @@ export class ContentRankingService {
       }
       return scoredPosts;
     } catch (error) {
-      console.error('Error ranking content:', error);
       return posts.map(post => ({ ...post, scores: {}, finalScore: 0 }));
     }
   }
@@ -486,7 +481,6 @@ export class ContentRankingService {
         data: analytics
       };
     } catch (error) {
-      console.error('Error getting content analytics:', error);
       return {
         success: false,
         error: error.message

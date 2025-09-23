@@ -136,9 +136,7 @@ const ModerationTools = () => {
         created_at: new Date()
       };
       setModerationLog(prev => [newLogEntry, ...prev]);
-      console.log(`Action ${action} performed on content ${contentId}`);
     } catch (error) {
-      console.error('Moderation action failed:', error);
     } finally {
       setLoading(false);
     }

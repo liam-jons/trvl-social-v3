@@ -62,7 +62,6 @@ export class ABTestingFramework {
     await this.initializePerformanceTracking(data.id);
     // Cache active experiment
     this.activeExperiments.set(data.id, data);
-    console.log(`A/B test experiment "${name}" created with ID: ${data.id}`);
     return data;
   }
   /**
@@ -175,7 +174,6 @@ export class ABTestingFramework {
       .eq('user_id', userId)
       .single();
     if (error && error.code !== 'PGRST116') { // Not found is OK
-      console.error('Error fetching user assignment:', error);
       return null;
     }
     if (data) {
@@ -209,7 +207,6 @@ export class ABTestingFramework {
   async recordPredictionResult(experimentId, userId, prediction, outcome = null) {
     const assignment = await this.getUserAssignment(experimentId, userId);
     if (!assignment) {
-      console.warn(`No assignment found for user ${userId} in experiment ${experimentId}`);
       return;
     }
     // Log prediction with assignment context
@@ -228,7 +225,6 @@ export class ABTestingFramework {
         created_at: new Date().toISOString()
       });
     if (error) {
-      console.error('Failed to record prediction result:', error);
     }
     // Update performance tracker
     this.updatePerformanceTracker(experimentId, assignment.assignment_group, prediction, outcome);
@@ -500,7 +496,6 @@ export class ABTestingFramework {
       })
       .eq('id', experimentId);
     if (error) {
-      console.error('Failed to save analysis results:', error);
     }
   }
   /**
@@ -537,7 +532,6 @@ export class ABTestingFramework {
     // Clean up caches
     this.activeExperiments.delete(experimentId);
     this.performanceTrackers.delete(experimentId);
-    console.log(`Experiment ${experiment.name} ended. Winner: ${winnerModelId}`);
     return {
       experimentId,
       winnerModelId,

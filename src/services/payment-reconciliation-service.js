@@ -41,7 +41,6 @@ class PaymentReconciliationService {
       forceRefresh = false,
     } = options;
     try {
-      console.log('Starting full payment reconciliation...');
       // Get all payment data from multiple sources
       const [
         databasePayments,
@@ -89,7 +88,6 @@ class PaymentReconciliationService {
         timestamp: new Date(),
       };
     } catch (error) {
-      console.error('Full reconciliation failed:', error);
       throw new Error(`Reconciliation failed: ${error.message}`);
     }
   }
@@ -155,7 +153,6 @@ class PaymentReconciliationService {
       const result = await response.json();
       return result.data || [];
     } catch (error) {
-      console.error('Failed to get Stripe payments:', error);
       throw error;
     }
   }
@@ -566,12 +563,10 @@ class PaymentReconciliationService {
           .from('payment_discrepancies')
           .insert(discrepancyRecords);
         if (discrepancyError) {
-          console.error('Failed to store discrepancies:', discrepancyError);
         }
       }
       return reconciliationRecord;
     } catch (error) {
-      console.error('Failed to store reconciliation results:', error);
       throw error;
     }
   }
@@ -652,7 +647,6 @@ class PaymentReconciliationService {
         });
         resolved.push(discrepancy.id);
       } catch (error) {
-        console.error(`Failed to auto-resolve discrepancy ${discrepancy.id}:`, error);
       }
     }
     return { resolvedCount: resolved.length, resolvedIds: resolved };

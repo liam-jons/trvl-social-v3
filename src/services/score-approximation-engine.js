@@ -113,7 +113,6 @@ class ScoreApproximationEngine {
         algorithm: 'fast-approximation-v1'
       };
     } catch (error) {
-      console.error('Score approximation failed:', error);
       return this.getFallbackApproximation(user1Id, user2Id, { error: error.message });
     }
   }
@@ -183,7 +182,6 @@ class ScoreApproximationEngine {
       });
       return profile;
     } catch (error) {
-      console.error(`Failed to load lightweight profile for ${userId}:`, error);
       return this.generateSyntheticProfile(userId);
     }
   }

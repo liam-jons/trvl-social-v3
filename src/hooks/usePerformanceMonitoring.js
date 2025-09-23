@@ -131,7 +131,6 @@ export const usePerformanceMonitoring = () => {
           clsObserver.disconnect();
         };
       } catch (error) {
-        console.warn('Failed to set up Core Web Vitals tracking:', error);
       }
     }
   }, [trackBusinessKPI, isInitialized]);
@@ -212,7 +211,6 @@ export const usePerformanceMonitoring = () => {
       longTaskObserver.observe({ entryTypes: ['longtask'] });
       return () => longTaskObserver.disconnect();
     } catch (error) {
-      console.warn('Failed to set up long task tracking:', error);
     }
   }, [trackEvent, trackBusinessKPI, isInitialized]);
   /**
@@ -286,7 +284,6 @@ export const useComponentPerformance = (componentName, dependencies = []) => {
   // Track excessive re-renders
   useEffect(() => {
     if (renderCountRef.current > 10) {
-      console.warn(`Component ${componentName} has rendered ${renderCountRef.current} times`);
     }
   }, [componentName]);
 };

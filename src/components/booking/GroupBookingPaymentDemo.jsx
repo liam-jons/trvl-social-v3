@@ -29,11 +29,9 @@ const GroupBookingPaymentDemo = () => {
     }
   };
   const handlePaymentComplete = (paymentData) => {
-    console.log('Payment completed:', paymentData);
     // Handle payment completion - update booking status, send confirmations, etc.
   };
   const handlePaymentError = (error) => {
-    console.error('Payment error:', error);
     // Handle payment errors - show user-friendly error messages
   };
   if (showPaymentSplit) {

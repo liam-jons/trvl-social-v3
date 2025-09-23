@@ -27,7 +27,7 @@ const LoadingSpinner = ({
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center z-50 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm">
+      <div className="fixed inset-0 flex items-center justify-center z-modal bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm">
         <GlassCard className="p-8">
           {spinner}
         </GlassCard>

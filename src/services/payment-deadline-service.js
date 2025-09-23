@@ -33,11 +33,9 @@ export const deadlineEnforcement = {
    * Main enforcement process - runs periodically
    */
   async enforcePaymentDeadlines() {
-    console.log('Starting payment deadline enforcement...');
     try {
       // Find overdue payments
       const overduePayments = await this.findOverduePayments();
-      console.log(`Found ${overduePayments.length} overdue payments`);
       const results = {
         processed: 0,
         actions: {
@@ -73,13 +71,10 @@ export const deadlineEnforcement = {
             paymentId: payment.id,
             error: error.message,
           });
-          console.error(`Failed to process overdue payment ${payment.id}:`, error);
         }
       }
-      console.log('Payment deadline enforcement completed:', results);
       return results;
     } catch (error) {
-      console.error('Error in payment deadline enforcement:', error);
       throw error;
     }
   },
@@ -121,7 +116,6 @@ export const deadlineEnforcement = {
       const stats = groupPaymentManager.calculatePaymentStats(splitPayment.individual_payments);
       // Determine appropriate action based on overdue time and payment status
       const action = this.determineEnforcementAction(overdueMinutes, stats, splitPayment);
-      console.log(`Processing overdue payment ${splitPayment.id}: ${overdueMinutes}min overdue, action: ${action.type}`);
       // Execute the determined action
       const result = await this.executeEnforcementAction(action, splitPayment, stats);
       // Log the action taken
@@ -424,7 +418,6 @@ export const deadlineEnforcement = {
         .eq('id', individualPayment.id);
       return true;
     } catch (error) {
-      console.error(`Failed to send overdue notification to ${individualPayment.user_id}:`, error);
       return false;
     }
   },
@@ -492,7 +485,6 @@ export const deadlineEnforcement = {
         .from('payment_enforcement_log')
         .insert(logEntry);
     } catch (error) {
-      console.error('Failed to log enforcement action:', error);
       // Don't throw here as this is just logging
     }
   },

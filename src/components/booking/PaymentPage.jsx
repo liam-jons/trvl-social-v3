@@ -190,10 +190,8 @@ const PaymentPage = () => {
   };
   const handlePaymentSuccess = (paymentIntent) => {
     setPaymentCompleted(true);
-    console.log('Payment successful:', paymentIntent);
   };
   const handlePaymentError = (error) => {
-    console.error('Payment failed:', error);
   };
   const formatDateTime = (dateString) => {
     return new Date(dateString).toLocaleString('en-US', {

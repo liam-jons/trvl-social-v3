@@ -61,7 +61,6 @@ const IndividualPaymentForm = ({
       const now = new Date();
       const deadline = new Date(payment.payment_deadline);
       if (now > deadline) {
-        console.warn('Payment deadline has passed, but allowing payment attempt');
       }
       setPaymentData(payment);
     } catch (err) {
@@ -103,14 +102,12 @@ const IndividualPaymentForm = ({
         amount: paymentData.amount_due,
       });
     } catch (error) {
-      console.error('Failed to update payment status:', error);
       // Payment succeeded with Stripe but status update failed
       // The webhook should handle this, but we should notify the user
       onError?.('Payment processed successfully, but there was an issue updating the status. Please contact support if you see this payment as incomplete.');
     }
   };
   const handlePaymentError = (error) => {
-    console.error('Payment failed:', error);
     onError?.(error);
   };
   const formatAmount = (amountInCents) => {

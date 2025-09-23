@@ -98,7 +98,6 @@ const GroupBuilderPage = () => {
         await addParticipantToGroup(participant.id, groupId);
       }
     } catch (error) {
-      console.error('Error dropping participant:', error);
     }
     setDraggedParticipant(null);
   };

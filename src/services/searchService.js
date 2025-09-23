@@ -203,7 +203,6 @@ class SearchService {
       // Track search analytics (could be sent to analytics service)
       this.trackSearchAnalytics(query);
     } catch (e) {
-      console.warn('Failed to save recent searches to localStorage:', e);
     }
   }
   /**
@@ -221,7 +220,6 @@ class SearchService {
       });
     }
     // Console log for development (remove in production)
-    console.log(`Search Analytics: "${query}" at ${new Date().toISOString()}`);
   }
   /**
    * Load recent searches from localStorage
@@ -232,7 +230,6 @@ class SearchService {
       const stored = localStorage.getItem('travel_recent_searches');
       return stored ? JSON.parse(stored) : [];
     } catch (e) {
-      console.warn('Failed to load recent searches from localStorage:', e);
       return [];
     }
   }
@@ -251,7 +248,6 @@ class SearchService {
     try {
       localStorage.removeItem('travel_recent_searches');
     } catch (e) {
-      console.warn('Failed to clear recent searches from localStorage:', e);
     }
   }
   /**

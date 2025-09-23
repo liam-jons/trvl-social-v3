@@ -39,7 +39,6 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
       if (error) throw error;
       setGroups(data || []);
     } catch (error) {
-      console.error('Error loading WhatsApp groups:', error);
       toast.error('Failed to load WhatsApp groups');
     }
   };
@@ -137,7 +136,6 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
         onGroupCreated(result.group);
       }
     } catch (error) {
-      console.error('Error creating WhatsApp group:', error);
       toast.error(error.message || 'Failed to create WhatsApp group');
     } finally {
       setLoading(false);
@@ -170,7 +168,6 @@ export default function WhatsAppGroupManager({ adventureId, adventureTitle, onGr
       toast.success('Group updated successfully! Invitations will be sent.');
       await loadExistingGroups();
     } catch (error) {
-      console.error('Error updating group:', error);
       toast.error(error.message || 'Failed to update group');
     }
   };

@@ -53,7 +53,7 @@ const GlassModal = forwardRef(({
 
   const modalContent = (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${overlayClassName}`}
+      className={`fixed inset-0 z-modal flex items-center justify-center p-4 ${overlayClassName}`}
       onClick={handleOverlayClick}
     >
       <div className="absolute inset-0 bg-black/50 glass-blur-sm" />
@@ -61,7 +61,7 @@ const GlassModal = forwardRef(({
       <div
         ref={combinedRef}
         className={`
-          relative z-10
+          relative z-modal
           ${sizeClasses[size]}
           w-full
           glass-blur-md bg-white/10 dark:bg-black/20

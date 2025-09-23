@@ -105,7 +105,6 @@ const useOfferManagementStore = create(
           });
           set({ offers: allOffers });
         } catch (error) {
-          console.error('Load trip requests error:', error);
           get().setError(error.message);
         } finally {
           get().setLoading('requests', false);
@@ -196,7 +195,6 @@ const useOfferManagementStore = create(
             .eq('trip_request_id', updatedOffer.trip_request_id)
             .neq('id', offerId);
           if (rejectError) {
-            console.warn('Error rejecting other offers:', rejectError);
           }
           // Update trip request status to accepted
           await supabase
@@ -211,7 +209,6 @@ const useOfferManagementStore = create(
           await get().loadUserTripRequests(userId);
           return { success: true, data: updatedOffer };
         } catch (error) {
-          console.error('Accept offer error:', error);
           get().setError(error.message);
           return { success: false, error: error.message };
         } finally {
@@ -245,7 +242,6 @@ const useOfferManagementStore = create(
           }));
           return { success: true, data };
         } catch (error) {
-          console.error('Reject offer error:', error);
           get().setError(error.message);
           return { success: false, error: error.message };
         } finally {
@@ -290,7 +286,6 @@ const useOfferManagementStore = create(
           }));
           return { success: true, data };
         } catch (error) {
-          console.error('Submit counteroffer error:', error);
           get().setError(error.message);
           return { success: false, error: error.message };
         } finally {
@@ -316,7 +311,6 @@ const useOfferManagementStore = create(
           }));
           return { success: true };
         } catch (error) {
-          console.error('Save offer error:', error);
           return { success: false, error: error.message };
         }
       },
@@ -338,7 +332,6 @@ const useOfferManagementStore = create(
           if (error) throw error;
           set({ savedOffers: data || [] });
         } catch (error) {
-          console.error('Load saved offers error:', error);
           get().setError(error.message);
         }
       },
@@ -358,7 +351,6 @@ const useOfferManagementStore = create(
           if (error) throw error;
           return { success: true, data };
         } catch (error) {
-          console.error('Share offer error:', error);
           return { success: false, error: error.message };
         }
       },

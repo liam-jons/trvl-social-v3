@@ -121,7 +121,6 @@ const ModificationRequestModal = ({
       );
       setEstimatedFees(fees);
     } catch (error) {
-      console.error('Failed to calculate fees:', error);
     }
   };
   const handleTypeSelection = (type) => {

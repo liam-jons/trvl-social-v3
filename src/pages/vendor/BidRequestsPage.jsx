@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Backpack } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import useVendorDashboardStore from '../../stores/vendorDashboardStore';
 import { vendorService } from '../../services/vendor-service';
@@ -39,7 +40,6 @@ const BidRequestsPage = () => {
       }
       setTripRequests(data || []);
     } catch (err) {
-      console.error('Load trip requests error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -164,7 +164,7 @@ const BidRequestsPage = () => {
             {/* Trip Requests Grid */}
             {tripRequests.length === 0 ? (
               <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-12 text-center border border-white/20 dark:border-gray-700/30">
-                <div className="text-6xl mb-4">🎒</div>
+                <Backpack className="w-16 h-16 mx-auto mb-4 text-gray-400" />
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                   No Trip Requests Found
                 </h3>

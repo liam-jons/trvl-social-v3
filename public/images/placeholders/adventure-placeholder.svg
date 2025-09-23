@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" fill="none">
+  <rect width="800" height="600" fill="#f3f4f6"/>
+  <rect x="50" y="50" width="700" height="500" fill="#e5e7eb" rx="8"/>
+
+  <!-- Mountain silhouette -->
+  <path d="M100 450 L200 350 L300 400 L400 300 L500 350 L600 280 L700 320 L700 450 Z" fill="#9ca3af"/>
+  <path d="M150 450 L250 380 L350 420 L450 340 L550 380 L650 320 L700 340 L700 450 Z" fill="#6b7280"/>
+
+  <!-- Sun -->
+  <circle cx="650" cy="150" r="40" fill="#fbbf24"/>
+
+  <!-- Adventure icon -->
+  <g transform="translate(350, 250)">
+    <circle cx="50" cy="50" r="80" fill="#3b82f6" opacity="0.1"/>
+    <path d="M20 50 L50 20 L80 50 L50 80 Z" fill="#3b82f6" opacity="0.6"/>
+    <circle cx="50" cy="50" r="3" fill="#1d4ed8"/>
+  </g>
+
+  <!-- Text -->
+  <text x="400" y="520" text-anchor="middle" fill="#6b7280" font-family="system-ui, sans-serif" font-size="18" font-weight="500">
+    Adventure Image
+  </text>
+</svg>

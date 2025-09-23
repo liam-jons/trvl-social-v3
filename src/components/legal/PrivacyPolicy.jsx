@@ -2,7 +2,7 @@ import React from 'react';
 import { Card } from '../ui/card';
 
 const PrivacyPolicy = () => {
-  const lastUpdated = new Date().toLocaleDateString();
+  const lastUpdated = "September 20, 2025";
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
@@ -29,6 +29,7 @@ const PrivacyPolicy = () => {
             <h3 className="text-xl font-medium mb-3">2.1 Personal Information</h3>
             <ul className="list-disc list-inside mb-4 space-y-2">
               <li>Account information (name, email, profile picture)</li>
+              <li><strong>Age verification data (date of birth, age calculation)</strong></li>
               <li>Travel preferences and personality assessment data</li>
               <li>Booking and payment information</li>
               <li>Location data (with your consent)</li>
@@ -106,7 +107,9 @@ const PrivacyPolicy = () => {
               <li>Analytics platforms (Mixpanel, Datadog)</li>
               <li>Error monitoring services (Sentry)</li>
               <li>Payment processors (Stripe)</li>
-              <li>Communication services (email, SMS)</li>
+              <li>Email communication services (Resend)</li>
+              <li>Maps and location services (Mapbox)</li>
+              <li>Performance monitoring and optimization</li>
             </ul>
 
             <h3 className="text-xl font-medium mb-3">5.2 Business Partners</h3>
@@ -190,10 +193,70 @@ const PrivacyPolicy = () => {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">10. Children's Privacy</h2>
+            <h2 className="text-2xl font-semibold mb-4">10. Children's Privacy and COPPA Compliance</h2>
+
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg mb-4">
+              <h3 className="text-lg font-semibold mb-3 text-blue-800 dark:text-blue-200">Age Verification Requirements</h3>
+              <p className="mb-3">
+                TRVL Social requires all users to be at least 13 years of age. We comply with the Children's Online Privacy Protection Act (COPPA) and implement strict age verification measures.
+              </p>
+            </div>
+
+            <h3 className="text-xl font-medium mb-3">10.1 Age Verification Data Collection</h3>
+            <p className="mb-4">To verify age compliance, we collect and process the following information:</p>
+            <ul className="list-disc list-inside mb-4 space-y-2">
+              <li><strong>Date of Birth:</strong> Required during registration to verify minimum age requirement</li>
+              <li><strong>Age Calculation Data:</strong> Automatically calculated from provided birth date</li>
+              <li><strong>Verification Timestamps:</strong> When age verification was completed</li>
+              <li><strong>IP Address:</strong> For location-based age verification requirements</li>
+            </ul>
+
+            <h3 className="text-xl font-medium mb-3">10.2 How Age Verification Data is Protected</h3>
+            <ul className="list-disc list-inside mb-4 space-y-2">
+              <li>Birth dates are encrypted both in transit and at rest</li>
+              <li>Access to age verification data is restricted to authorized personnel only</li>
+              <li>Age verification data is never shared with third parties except as required by law</li>
+              <li>Regular audits ensure proper handling of age-related information</li>
+            </ul>
+
+            <h3 className="text-xl font-medium mb-3">10.3 COPPA Compliance Measures</h3>
             <p className="mb-4">
-              Our service is not intended for children under 16. We do not knowingly collect personal information from children under 16. If we become aware that we have collected such information, we will delete it promptly.
+              We do not knowingly collect personal information from children under 13. Our compliance measures include:
             </p>
+            <ul className="list-disc list-inside mb-4 space-y-2">
+              <li>Mandatory age verification during account registration</li>
+              <li>Immediate account suspension for users found to be under 13</li>
+              <li>Automatic deletion of data for verified underage accounts</li>
+              <li>Regular monitoring and auditing of age verification systems</li>
+            </ul>
+
+            <h3 className="text-xl font-medium mb-3">10.4 Parental Rights and Contact</h3>
+            <p className="mb-4">
+              If you are a parent or guardian and believe your child under 13 has created an account or provided personal information to us:
+            </p>
+            <ul className="list-disc list-inside mb-4 space-y-2">
+              <li>Contact us immediately at <a
+                href="mailto:privacy@trvlsocial.com"
+                className="text-blue-600 hover:underline underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+              >
+                privacy@trvlsocial.com
+              </a></li>
+              <li>We will investigate and take appropriate action within 24 hours</li>
+              <li>We will permanently delete all associated data if the account is confirmed to belong to a child under 13</li>
+              <li>No fees will be charged for reasonable requests related to children's privacy</li>
+            </ul>
+
+            <h3 className="text-xl font-medium mb-3">10.5 Data Deletion for Underage Users</h3>
+            <p className="mb-4">
+              When we become aware that we have collected information from a child under 13, we will:
+            </p>
+            <ul className="list-disc list-inside mb-4 space-y-2">
+              <li>Immediately suspend the account to prevent further data collection</li>
+              <li>Delete all personal information associated with the account within 30 days</li>
+              <li>Remove all user-generated content, including posts, messages, and profile information</li>
+              <li>Notify the parent or guardian (if contact information is available) of the deletion</li>
+              <li>Maintain deletion logs for compliance audit purposes only</li>
+            </ul>
           </section>
 
           <section className="mb-8">
@@ -207,10 +270,20 @@ const PrivacyPolicy = () => {
             <h2 className="text-2xl font-semibold mb-4">12. Contact Information</h2>
             <p className="mb-4">For privacy-related questions or to exercise your rights, contact us at:</p>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <p><strong>Data Protection Officer:</strong> <a href="mailto:dpo@trvl.com" className="text-blue-600 hover:underline">dpo@trvl.com</a></p>
-              <p><strong>Privacy Team:</strong> <a href="mailto:privacy@trvl.com" className="text-blue-600 hover:underline">privacy@trvl.com</a></p>
-              <p><strong>Mail:</strong> TRVL Social, Privacy Team, [Address]</p>
-              <p><strong>EU Representative:</strong> [EU Address] (for GDPR inquiries)</p>
+              <p><strong>Data Protection Officer:</strong> <a
+                href="mailto:dpo@trvlsocial.com"
+                className="text-blue-600 hover:underline underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+              >
+                dpo@trvlsocial.com
+              </a></p>
+              <p><strong>Privacy Team:</strong> <a
+                href="mailto:privacy@trvlsocial.com"
+                className="text-blue-600 hover:underline underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+              >
+                privacy@trvlsocial.com
+              </a></p>
+              <p><strong>Phone:</strong> +1 (917) 242-1333</p>
+              <p><strong>Website:</strong> trvlsocial.com</p>
             </div>
           </section>
 

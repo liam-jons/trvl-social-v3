@@ -40,7 +40,6 @@ export default function WhatsAppSettings() {
       }
       setPhoneNumber(profile?.phone_number || '');
     } catch (error) {
-      console.error('Error loading profile:', error);
     }
   };
   /**
@@ -63,7 +62,6 @@ export default function WhatsAppSettings() {
         });
       }
     } catch (error) {
-      console.error('Error loading WhatsApp preferences:', error);
     }
   };
   /**
@@ -95,7 +93,6 @@ export default function WhatsAppSettings() {
       setPhoneNumber(formattedPhone);
       toast.success('Phone number updated successfully');
     } catch (error) {
-      console.error('Error updating phone number:', error);
       toast.error('Failed to update phone number');
     } finally {
       setLoading(false);
@@ -132,7 +129,6 @@ export default function WhatsAppSettings() {
       });
       toast.success('WhatsApp preferences updated');
     } catch (error) {
-      console.error('Error updating WhatsApp preferences:', error);
       toast.error('Failed to update preferences');
       // Revert local state
       loadWhatsAppPreferences();
@@ -172,7 +168,6 @@ export default function WhatsAppSettings() {
       }
       toast.success('Test message sent! Check your WhatsApp.');
     } catch (error) {
-      console.error('Error sending test message:', error);
       toast.error(error.message || 'Failed to send test message');
     } finally {
       setLoading(false);

@@ -12,12 +12,10 @@ const WishlistStats = ({ userId, className = '' }) => {
       try {
         const { data, error } = await WishlistService.getWishlistStats(userId);
         if (error) {
-          console.error('Error loading wishlist stats:', error);
           return;
         }
         setStats(data);
       } catch (error) {
-        console.error('Error loading wishlist stats:', error);
       } finally {
         setLoading(false);
       }

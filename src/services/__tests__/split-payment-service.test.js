@@ -191,7 +191,6 @@ describe('Payment Deadline Manager', () => {
   });
   describe('sendPaymentReminders', () => {
     it('should send reminders for payments approaching deadline', async () => {
-      // Mock console.log to verify reminder sending
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation();
       // Mock successful reminder sending
       const mockPaymentData = {

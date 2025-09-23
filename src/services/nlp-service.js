@@ -47,7 +47,6 @@ const cache = {
       }
       return data;
     } catch (error) {
-      // console.warn('NLP cache retrieval error:', error);
       return null;
     }
   },
@@ -59,7 +58,6 @@ const cache = {
       };
       localStorage.setItem(key, JSON.stringify(cacheEntry));
     } catch (error) {
-      // console.warn('NLP cache storage error:', error);
     }
   },
   clear() {
@@ -71,7 +69,6 @@ const cache = {
         }
       });
     } catch (error) {
-      // console.warn('NLP cache clearing error:', error);
     }
   }
 };
@@ -227,7 +224,6 @@ async function callOpenAI(prompt, retryCount = 0) {
     // Retry logic
     if (retryCount < API_CONFIG.maxRetries) {
       const delay = API_CONFIG.retryDelay * Math.pow(2, retryCount);
-      // console.warn(`OpenAI API call failed, retrying in ${delay}ms (attempt ${retryCount + 1}/${API_CONFIG.maxRetries}):`, error.message);
       await sleep(delay);
       return callOpenAI(prompt, retryCount + 1);
     }
@@ -281,7 +277,6 @@ async function callAnthropic(prompt, retryCount = 0) {
     // Retry logic
     if (retryCount < API_CONFIG.maxRetries) {
       const delay = API_CONFIG.retryDelay * Math.pow(2, retryCount);
-      // console.warn(`Anthropic API call failed, retrying in ${delay}ms (attempt ${retryCount + 1}/${API_CONFIG.maxRetries}):`, error.message);
       await sleep(delay);
       return callAnthropic(prompt, retryCount + 1);
     }
@@ -481,7 +476,6 @@ export async function parseTripDescription(description, options = {}) {
   const cacheKey = generateCacheKey(trimmedDescription);
   const cachedResult = cache.get(cacheKey);
   if (cachedResult && !options.skipCache) {
-    // console.log('Returning cached NLP parsing result');
     return {
       ...cachedResult,
       source: 'cache'
@@ -493,28 +487,23 @@ export async function parseTripDescription(description, options = {}) {
   let error = null;
   // Try OpenAI first
   try {
-    // console.log('Parsing trip description with OpenAI');
     const aiResponse = await callOpenAI(prompt);
     result = parseAIResponse(aiResponse);
     source = 'openai';
   } catch (openaiError) {
-    // console.warn('OpenAI parsing failed:', openaiError.message);
     error = openaiError.message;
     // Try Anthropic as fallback
     try {
-      // console.log('Falling back to Anthropic Claude');
       const aiResponse = await callAnthropic(prompt);
       result = parseAIResponse(aiResponse);
       source = 'anthropic';
       error = null; // Clear error since Anthropic succeeded
     } catch (anthropicError) {
-      // console.warn('Anthropic parsing failed:', anthropicError.message);
       error = `Both APIs failed - OpenAI: ${openaiError.message}, Anthropic: ${anthropicError.message}`;
     }
   }
   // Use regex fallback if AI failed
   if (!result) {
-    // console.warn('AI parsing failed, using regex fallback');
     result = fallbackParse(trimmedDescription);
     source = 'fallback';
   }
@@ -560,7 +549,6 @@ export function getConfidenceExplanation(parsedResult) {
 // Clear NLP cache
 export function clearNLPCache() {
   cache.clear();
-  // console.log('NLP parsing cache cleared');
 }
 // Get service configuration for debugging
 export function getNLPServiceConfig() {

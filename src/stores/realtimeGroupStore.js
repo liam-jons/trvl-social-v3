@@ -35,7 +35,6 @@ const useRealtimeGroupStore = create((set, get) => ({
             filter: `group_id=eq.${groupId}`
           },
           (payload) => {
-            console.log('Group member change:', payload);
             get().handleGroupMemberChange(groupId, payload);
           }
         )
@@ -48,12 +47,10 @@ const useRealtimeGroupStore = create((set, get) => ({
             filter: `id=eq.${groupId}`
           },
           (payload) => {
-            console.log('Group update:', payload);
             get().handleGroupUpdate(groupId, payload);
           }
         )
         .subscribe((status) => {
-          console.log(`Group ${groupId} subscription status:`, status);
           if (status === 'SUBSCRIBED') {
             set({ connectionStatus: 'connected' });
           } else if (status === 'CHANNEL_ERROR') {
@@ -64,7 +61,6 @@ const useRealtimeGroupStore = create((set, get) => ({
       subscriptions.set(groupId, memberSubscription);
       set({ subscriptions: new Map(subscriptions) });
     } catch (error) {
-      console.error('Failed to subscribe to group updates:', error);
       set({ connectionStatus: 'error' });
     }
   },
@@ -121,7 +117,6 @@ const useRealtimeGroupStore = create((set, get) => ({
       // Notify subscribers
       get().notifyCompatibilityChange(groupId, payload);
     } catch (error) {
-      console.error('Failed to process group member change:', error);
     }
   },
   // Handle general group updates
@@ -244,7 +239,6 @@ const useRealtimeGroupStore = create((set, get) => ({
       set({ compatibilityCache: new Map(compatibilityCache) });
       return newCompatibility;
     } catch (error) {
-      console.error('Failed to recalculate compatibility:', error);
       throw error;
     }
   },
@@ -266,7 +260,6 @@ const useRealtimeGroupStore = create((set, get) => ({
       const scoreDiff = Math.abs(compatibility.avgScore - prevCompatibility.avgScore);
       if (scoreDiff > 10) {
         // This would trigger a notification
-        console.log(`Significant compatibility change in group ${groupId}: ${scoreDiff} points`);
         // You could emit a custom event here for components to listen to
         window.dispatchEvent(new CustomEvent('compatibilityChange', {
           detail: {

@@ -7,6 +7,7 @@ import {
   CalculateCompatibilityRequest,
   CalculateCompatibilityResponse
 } from '../../types/compatibility';
+import { createCorsResponse } from '../../utils/cors-config';
 export async function calculateCompatibility(
   request: CalculateCompatibilityRequest
 ): Promise<CalculateCompatibilityResponse> {
@@ -43,7 +44,6 @@ export async function calculateCompatibility(
     const response = await compatibilityService.calculateCompatibility(request);
     return response;
   } catch (error) {
-    console.error('API: Compatibility calculation error:', error);
     return {
       success: false,
       error: {
@@ -75,7 +75,6 @@ export const calculateCompatibilityHandler = async (req: any, res: any) => {
     const response = await calculateCompatibility(request);
     res.status(response.success ? 200 : 400).json(response);
   } catch (error) {
-    console.error('Express handler error:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -106,18 +105,11 @@ export const supabaseEdgeFunctionHandler = async (req: Request): Promise<Respons
       }
     };
     const response = await calculateCompatibility(request);
-    return new Response(JSON.stringify(response), {
-      status: response.success ? 200 : 400,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-      }
+    return createCorsResponse(response, req, {
+      status: response.success ? 200 : 400
     });
   } catch (error) {
-    console.error('Supabase Edge Function error:', error);
-    return new Response(JSON.stringify({
+    return createCorsResponse({
       success: false,
       error: {
         code: 'INTERNAL_ERROR',
@@ -128,9 +120,6 @@ export const supabaseEdgeFunctionHandler = async (req: Request): Promise<Respons
         cacheHit: false,
         algorithmVersion: 'unknown'
       }
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    }, req, { status: 500 });
   }
 };

@@ -56,7 +56,6 @@ const PaymentCheckout = ({
       });
       setClientSecret(paymentData.clientSecret);
     } catch (error) {
-      console.error('Error creating payment intent:', error);
       setError(error.message);
       onError?.(error.message);
     } finally {
@@ -102,7 +101,6 @@ const PaymentCheckout = ({
         throw new Error(result.error || 'Payment failed');
       }
     } catch (error) {
-      console.error('Error processing payment:', error);
       setError(error.message);
       setStep('method-selection');
       onError?.(error.message);

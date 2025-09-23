@@ -94,7 +94,6 @@ const MapView = ({
   // Get current location programmatically
   const getCurrentLocation = useCallback(() => {
     if (!navigator.geolocation) {
-      console.warn('Geolocation is not supported by this browser.');
       return;
     }
     setIsLocating(true);
@@ -111,7 +110,6 @@ const MapView = ({
         setIsLocating(false);
       },
       (error) => {
-        console.error('Error getting current location:', error);
         setIsLocating(false);
       },
       {

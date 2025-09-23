@@ -97,7 +97,6 @@ const GroupContainer = ({
         const participant = JSON.parse(participantData);
         onDrop && onDrop(participant, group.id);
       } catch (error) {
-        console.error('Error parsing dropped participant data:', error);
       }
     }
   };

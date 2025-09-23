@@ -29,7 +29,6 @@ const SharedWishlistPage = () => {
         }
         setWishlistData(data);
       } catch (error) {
-        console.error('Error loading shared wishlist:', error);
         setError('Failed to load wishlist');
       } finally {
         setLoading(false);

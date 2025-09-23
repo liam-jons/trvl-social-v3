@@ -61,7 +61,6 @@ const useMapClustering = (
       const clusterData = supercluster.getClusters(bounds, zoom);
       setClusters(clusterData);
     } catch (error) {
-      console.error('Error getting clusters:', error);
       setClusters(points); // Fallback to original points
     }
   }, [points, viewState, supercluster]);
@@ -85,7 +84,6 @@ const useMapClustering = (
     try {
       return supercluster.getLeaves(clusterId, limit, offset);
     } catch (error) {
-      console.error('Error getting cluster leaves:', error);
       return [];
     }
   };
@@ -95,7 +93,6 @@ const useMapClustering = (
     try {
       return supercluster.getClusterExpansionZoom(clusterId);
     } catch (error) {
-      console.error('Error getting cluster expansion zoom:', error);
       return null;
     }
   };

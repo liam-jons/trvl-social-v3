@@ -118,7 +118,6 @@ const AdventureCard = memo(({
               variant="floating"
               onToggle={(adventureId, isFavorited) => {
                 // Optional: Update parent component state
-                console.log(`Adventure ${adventureId} favorite status: ${isFavorited}`);
               }}
             />
           </div>
