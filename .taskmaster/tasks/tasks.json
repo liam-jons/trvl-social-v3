@@ -2397,11 +2397,846 @@
         "dependencies": [],
         "priority": "high",
         "subtasks": []
+      },
+      {
+        "id": 43,
+        "title": "Production Database Migration and Validation",
+        "description": "Complete the verification and migration of the Supabase production database, including schema validation, RLS policies review, stored functions review, execution of data migration scripts, and removal of legacy trvl-social v1 artifacts.",
+        "details": "1. **Schema and Policy Validation:**\n   - Connect to the production database using credentials configured in Task 38.\n   - Run `supabase db diff --schema-only` to generate a diff between the local schema (`supabase/migrations`) and the live production database.\n   - Analyze the diff to identify any discrepancies in tables, columns, types, or constraints. The goal is to resolve all unexpected differences.\n   - Extract all Row Level Security (RLS) policies and stored functions from the production database for a security review. Compare them against the definitions in the codebase to ensure they are up-to-date and correctly implemented as per Task 2.\n\n2. **Data Migration Scripting:**\n   - Create a new Supabase migration file (e.g., `supabase migration new migrate_v1_data`).\n   - Write SQL scripts to transform and move data from any existing v1 tables into the new v3 schema. Pay close attention to data type conversions, foreign key relationships, and default values.\n   - This script must be developed and tested against a clone of the production database in a staging environment.\n\n3. **Legacy Artifact Cleanup:**\n   - Create a separate migration file (e.g., `supabase migration new cleanup_v1_artifacts`) that will be run *after* successful data migration.\n   - This script should contain `DROP TABLE IF EXISTS...` and `DROP FUNCTION IF EXISTS...` statements to completely remove all database objects related to the v1 application.\n\n4. **Execution Plan:**\n   - Schedule a maintenance window for the migration.\n   - Perform a full backup of the production database using `pg_dump` before applying any changes.\n   - Apply the schema alignment, data migration, and cleanup migrations sequentially using `supabase db push` or `supabase migration up`.\n   - Perform a final post-migration backup.",
+        "testStrategy": "1. **Staging Environment Rehearsal:**\n   - Create a complete clone of the production database in a dedicated staging environment.\n   - Execute the entire migration plan (validation, data migration, cleanup) on the staging clone. This serves as a full dry run to identify potential issues.\n\n2. **Data Integrity Validation:**\n   - Before and after running the data migration script in staging, run a suite of validation queries. \n   - Use `COUNT(*)` on source and destination tables to ensure no data loss.\n   - Spot-check a dozen critical records (e.g., users with bookings, vendors with adventures) to verify correct data transformation.\n\n3. **RLS and Function Testing:**\n   - Using the `supabase-js` client against the migrated staging database, write a test suite to verify RLS policies. Authenticate as different user roles and attempt to access/modify data to confirm policies are enforced correctly.\n   - Directly invoke migrated database functions with sample data to ensure they produce the expected results.\n\n4. **Production Smoke Testing:**\n   - Immediately after the production migration is complete, run a small, critical subset of the data integrity validation queries.\n   - Manually perform critical user flows: user login, viewing a profile, searching for an adventure, and initiating a booking.\n   - Closely monitor Sentry and Datadog dashboards (configured in Task 40) for any spike in database-related errors post-migration.",
+        "status": "pending",
+        "dependencies": [
+          38,
+          2,
+          42
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Production Database Backup and Staging Clone",
+            "description": "Before any migration activities, perform a full backup of the production Supabase database. Use the backup to create an isolated staging environment that is a 1-to-1 clone of production for safe testing.",
+            "dependencies": [],
+            "details": "Use `pg_dump` with the production database connection string to create a complete SQL backup file. Store this file securely. Then, create a new Supabase project for staging and restore the production data into it using `psql`. Document the exact `pg_dump` and `psql` commands used.",
+            "status": "pending",
+            "testStrategy": "Verify the backup file is created and its size is reasonable. Confirm the staging database is successfully populated by running `SELECT` queries on key tables and comparing row counts against production."
+          },
+          {
+            "id": 2,
+            "title": "Analyze Schema, RLS, and Function Differences",
+            "description": "Connect to the production database and run a diff against the local `supabase/migrations` to identify all schema, RLS policy, and function discrepancies. This is a discovery and analysis task.",
+            "dependencies": [
+              "43.1"
+            ],
+            "details": "Using the Supabase CLI, execute `supabase db diff --schema-only -f prod_diff`. This will generate a `prod_diff.sql` file. Manually review this file to categorize differences into: 1) Expected v1 legacy objects, 2) Unexpected schema drift on v3 tables, 3) Missing or incorrect RLS policies/functions. Document all findings.",
+            "status": "pending",
+            "testStrategy": "The output `prod_diff.sql` file should be committed to a temporary branch for review. The analysis should result in a clear checklist of items to be addressed in subsequent subtasks."
+          },
+          {
+            "id": 3,
+            "title": "Create Schema Alignment Migration",
+            "description": "Based on the analysis from the diff, create a new migration file to resolve any unintended schema drift and align the production database with the v3 schema defined in the local migration history.",
+            "dependencies": [
+              "43.2"
+            ],
+            "details": "Create a new migration using `supabase migration new align_prod_schema`. Copy the necessary DDL statements (e.g., `ALTER TABLE`, `CREATE POLICY`) from the `prod_diff.sql` analysis file into this new migration. This script should only contain changes to bring existing v3 tables and policies in line with the codebase, not remove v1 artifacts yet.",
+            "status": "pending",
+            "testStrategy": "Apply this migration to the staging database clone using `supabase db push`. Run `supabase db diff --schema-only` again against the staging database; the diff should now only show the v1 legacy objects."
+          },
+          {
+            "id": 4,
+            "title": "Develop V1 to V3 Data Migration Script",
+            "description": "Create a new migration script to transform and move data from legacy v1 tables into the new v3 schema tables. This script must handle data type conversions and foreign key relationships.",
+            "dependencies": [
+              "43.3"
+            ],
+            "details": "Generate a new migration file: `supabase migration new migrate_v1_data`. Write idempotent SQL `INSERT ... SELECT` statements to transfer data. For example: `INSERT INTO v3_profiles (id, username) SELECT user_id, user_name FROM v1_users ON CONFLICT (id) DO NOTHING;`. Pay close attention to transforming data types and mapping old foreign keys to new ones.",
+            "status": "pending",
+            "testStrategy": "Execute the migration on the staging database. Write verification queries to confirm data integrity, such as comparing row counts between old and new tables and spot-checking transformed data for correctness."
+          },
+          {
+            "id": 5,
+            "title": "Develop Legacy Artifact Cleanup Script",
+            "description": "Create a final migration script that safely removes all legacy v1 database objects, including tables, functions, and types, after the data has been successfully migrated.",
+            "dependencies": [
+              "43.4"
+            ],
+            "details": "Generate a new migration file: `supabase migration new cleanup_v1_artifacts`. Add `DROP TABLE IF EXISTS ... CASCADE;`, `DROP FUNCTION IF EXISTS ...;`, and `DROP TYPE IF EXISTS ...;` statements for all identified v1 objects. The `CASCADE` option is important for removing dependent objects.",
+            "status": "pending",
+            "testStrategy": "Run this migration on the staging database *after* the data migration script has been successfully applied. Verify that all v1 objects are gone and that v3 application functionality remains intact."
+          },
+          {
+            "id": 6,
+            "title": "Optimize Indexes for V3 Tables",
+            "description": "Analyze and create necessary indexes on the newly populated v3 tables to ensure optimal query performance for production workloads. This is critical after a large data migration.",
+            "dependencies": [
+              "43.4"
+            ],
+            "details": "Use `EXPLAIN ANALYZE` on common application queries against the staging database to identify performance bottlenecks or sequential scans on large tables. Create a new migration file `supabase migration new optimize_v3_indexes`. Add `CREATE INDEX CONCURRENTLY ...` statements for foreign key columns and columns frequently used in `WHERE` clauses.",
+            "status": "pending",
+            "testStrategy": "Apply the index migration to the staging database. Re-run the `EXPLAIN ANALYZE` queries and confirm that the query plans now use the new indexes and that execution time has improved."
+          },
+          {
+            "id": 7,
+            "title": "Configure and Verify Production Connection Pooling",
+            "description": "Enable and configure Supabase's connection pooler (PgBouncer) for the production database to manage connections efficiently and prevent exhaustion under load.",
+            "dependencies": [],
+            "details": "In the Supabase Dashboard for the production project, navigate to Database settings and enable the Connection Pooler. Configure the pool mode (likely 'transaction') and pool size according to expected traffic. Update the application's database connection string to use the pooler-specific port and URI. Also, update `supabase/config.toml` with a `[db.pooler]` section for local development parity.",
+            "status": "pending",
+            "testStrategy": "Connect to the production database using the new pooler connection string from a local `psql` client to verify it works. Monitor the 'Connection Stats' in the Supabase reports section after deployment to ensure connections are being managed correctly."
+          },
+          {
+            "id": 8,
+            "title": "Document and Rehearse Migration and Rollback Plan",
+            "description": "Create a detailed, step-by-step execution plan for the production migration. Document the rollback procedure and perform a full end-to-end rehearsal on the staging environment.",
+            "dependencies": [
+              "43.1",
+              "43.3",
+              "43.4",
+              "43.5",
+              "43.6"
+            ],
+            "details": "Create a markdown document (`MIGRATION_PLAN.md`) that lists the exact sequence of commands to be run during the maintenance window (e.g., enable maintenance mode, run `pg_dump`, apply migrations, disable maintenance mode). The rollback plan must detail how to restore the database from the backup. Execute this entire plan, including a simulated failure and rollback, on the staging clone.",
+            "status": "pending",
+            "testStrategy": "The migration rehearsal on the staging environment must complete without any errors. The rollback test must successfully restore the staging database to its pre-migration state. The `MIGRATION_PLAN.md` document must be peer-reviewed for clarity and completeness."
+          }
+        ]
+      },
+      {
+        "id": 44,
+        "title": "Establish Comprehensive Environment Variable and Configuration Management",
+        "description": "Formalize the management of environment variables across all environments by creating standardized templates, implementing a robust feature flag system, documenting the secrets rotation strategy, and adding build-time validation.",
+        "details": "1. **Create `.env.example` Template:**\n   - Create a definitive `.env.example` file in the project root. This file must be committed to version control.\n   - Document every environment variable required for the application to run, including those for Supabase (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`), Stripe, and any other third-party services identified in tasks 10 and 12.\n   - Use clear comments to explain the purpose of each variable and where to obtain its value.\n   - Example: `# The public URL for your Supabase project. Found in your Supabase dashboard.\nNEXT_PUBLIC_SUPABASE_URL=\n`\n\n2. **Implement Environment Variable Validation:**\n   - Integrate a library like `@t3-oss/env-nextjs` to provide build-time validation and type-safety for environment variables.\n   - Create a schema file (e.g., `src/env.mjs`) that defines all server-side and client-side (`NEXT_PUBLIC_`) variables using Zod.\n   - This will ensure that the application fails to build if a required variable is missing, preventing runtime errors in production.\n\n3. **Formalize Feature Flag System:**\n   - Establish a convention for feature flags using environment variables, prefixed with `NEXT_PUBLIC_FEATURE_`.\n   - Example: `NEXT_PUBLIC_FEATURE_VENDOR_FORUM_V2=true`.\n   - Document this convention in the main `README.md` or a new `CONTRIBUTING.md` file.\n   - The documentation should include instructions on how to add a new flag and how to consume it in the Next.js application.\n\n4. **Document Secrets Rotation Strategy:**\n   - Create a new markdown file named `SECRETS_MANAGEMENT.md`.\n   - This document will serve as the official guide for secrets management, building upon the system implemented in Task 34.\n   - Detail the step-by-step process for rotating critical secrets (e.g., `SUPABASE_SERVICE_ROLE_KEY`, Stripe API keys, database passwords).\n   - Include instructions for updating secrets in the production hosting environment (e.g., Vercel, AWS Secrets Manager) and the required deployment/restart procedures.\n\n5. **Define Environment-Specific Configurations:**\n   - Clarify the hierarchy and usage of `.env.*` files (`.env.local` for local overrides, `.env.development` for development defaults, `.env.production` for production defaults).\n   - Ensure sensitive production keys are *not* in these files but are managed exclusively through the hosting provider's secret management interface, as configured in Task 38.",
+        "testStrategy": "1. **Template Validation:**\n   - A new developer should be able to clone the repository, copy `.env.example` to `.env.local`, fill in the values, and successfully run the application locally (`npm run dev`).\n\n2. **Schema Validation Test:**\n   - In a local environment, comment out a required variable in `.env.local` (e.g., `SUPABASE_SERVICE_ROLE_KEY`).\n   - Run the build command (`npm run build`). The build must fail with a clear Zod error message identifying the missing variable.\n\n3. **Feature Flag Test:**\n   - Implement a temporary UI element that is conditionally rendered based on a new test feature flag.\n   - Verify that the element is not visible when the flag is set to `false` or is absent.\n   - Set the flag to `true` in `.env.local` and confirm the UI element appears without requiring a server restart (due to Next.js hot-reloading).\n\n4. **Secrets Documentation Review:**\n   - Conduct a peer review of the `SECRETS_MANAGEMENT.md` document.\n   - Perform a dry-run of a key rotation process in a staging environment by following the documentation. The process must be successful and the documentation should be clear enough to follow without assistance.\n\n5. **Production Build Verification:**\n   - Verify that the production build process correctly sources variables from the hosting environment's secrets and that no sensitive information is exposed in the client-side bundle.",
+        "status": "pending",
+        "dependencies": [
+          38,
+          34,
+          33
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create and Populate `.env.example` Template",
+            "description": "Create a definitive `.env.example` file in the project root to serve as a template for all required environment variables. This file will be committed to version control.",
+            "dependencies": [],
+            "details": "Create the `.env.example` file. Based on codebase analysis and task requirements, add placeholders and descriptive comments for all necessary variables, including `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY`, and `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`. Comments should explain each variable's purpose and where to find its value.",
+            "status": "pending",
+            "testStrategy": "A new developer should be able to copy `.env.example` to `.env.local`, populate the values, and successfully run `npm run dev` without environment-related errors."
+          },
+          {
+            "id": 2,
+            "title": "Install and Configure `@t3-oss/env-nextjs` for Validation",
+            "description": "Integrate `@t3-oss/env-nextjs` to provide build-time validation and type-safety for all environment variables.",
+            "dependencies": [],
+            "details": "Run `npm install @t3-oss/env-nextjs zod`. Create a new file at `src/env.mjs`. In this file, use `createEnv` to define a Zod schema that validates all variables listed in `.env.example`. Separate variables into `server` and `client` properties, ensuring client variables are prefixed with `NEXT_PUBLIC_`.",
+            "status": "pending",
+            "testStrategy": "Temporarily remove a required variable from `.env.local` and run `npm run dev`. The build process should fail with a clear error message indicating the missing variable."
+          },
+          {
+            "id": 3,
+            "title": "Integrate Environment Schema into Next.js Build Process",
+            "description": "Ensure the environment validation schema is checked at the very start of any build or development server process.",
+            "dependencies": [
+              "44.2"
+            ],
+            "details": "Modify the `next.config.mjs` file. At the top of the file, add `import '@/env.mjs';`. This simple import will trigger the validation logic from `@t3-oss/env-nextjs` before the Next.js build configuration is processed, causing the build to fail early if the environment is misconfigured.",
+            "status": "pending",
+            "testStrategy": "Verify that running `npm run build` fails if a required environment variable is missing, confirming the integration with the build process."
+          },
+          {
+            "id": 4,
+            "title": "Refactor Application to Use Type-Safe Environment Variables",
+            "description": "Update all existing code that uses `process.env` to instead import and use the new type-safe `env` object.",
+            "dependencies": [
+              "44.2"
+            ],
+            "details": "Perform a global search for `process.env`. In every file where an environment variable is accessed, remove the `process.env` call and add `import { env } from '@/env.mjs';`. Update the code to use the imported object, for example, changing `process.env.NEXT_PUBLIC_SUPABASE_URL` to `env.NEXT_PUBLIC_SUPABASE_URL`.",
+            "status": "pending",
+            "testStrategy": "After refactoring, manually test all features that rely on environment variables (e.g., database connection, Stripe payments) to ensure they function correctly. The application should build and run without errors."
+          },
+          {
+            "id": 5,
+            "title": "Formalize and Document the Feature Flag System",
+            "description": "Establish a clear convention for feature flags and document it for all developers.",
+            "dependencies": [],
+            "details": "Create a `CONTRIBUTING.md` file in the project root if one does not exist. Add a section titled \"Feature Flags\". Document the convention that all feature flags must be prefixed with `NEXT_PUBLIC_FEATURE_`. Provide an example like `NEXT_PUBLIC_FEATURE_GROUP_CHAT=true` and include a code snippet showing how to use it within a React component: `if (env.NEXT_PUBLIC_FEATURE_GROUP_CHAT) { ... }`.",
+            "status": "pending",
+            "testStrategy": "Add a new test feature flag to `.env.local` and implement a simple conditional UI element based on it. Verify the UI element appears/disappears when the flag is toggled."
+          },
+          {
+            "id": 6,
+            "title": "Create `SECRETS_MANAGEMENT.md` for Rotation Strategy",
+            "description": "Document the official process for rotating critical secrets to enhance security and provide a clear guide for emergency situations.",
+            "dependencies": [],
+            "details": "Create a new markdown file named `SECRETS_MANAGEMENT.md` in the project root. Detail the step-by-step process for rotating `SUPABASE_SERVICE_ROLE_KEY` and `STRIPE_SECRET_KEY`. The guide should include: 1. How to generate a new key from the service's dashboard. 2. Where to update the key in the Vercel project settings (for Production, Preview, and Development environments). 3. The required deployment or restart procedures after updating a secret.",
+            "status": "pending",
+            "testStrategy": "Have a team member review the document for clarity and accuracy, ensuring they could theoretically perform a secret rotation using only the guide."
+          },
+          {
+            "id": 7,
+            "title": "Document Environment Hierarchy and Vercel Configuration in README",
+            "description": "Clarify the usage of `.env.*` files and the procedure for managing production variables in the main project documentation.",
+            "dependencies": [],
+            "details": "Add a new section named \"Environment Configuration\" to the `README.md` file. Explain the Next.js environment file hierarchy, specifically stating that `.env.local` is used for local development and is git-ignored. Emphasize that no sensitive production keys should be committed, and all production/preview variables must be configured exclusively through the Vercel project's Environment Variables settings. Provide a link to the `SECRETS_MANAGEMENT.md` document for handling sensitive keys.",
+            "status": "pending",
+            "testStrategy": "Ask a new developer to read the `README.md` section and confirm they understand how to set up their local environment and where production secrets are managed."
+          }
+        ]
+      },
+      {
+        "id": 45,
+        "title": "CI/CD Pipeline with GitHub Actions",
+        "description": "Implement a comprehensive continuous integration and deployment pipeline with GitHub Actions including build verification, automated testing, staging deployment, and production deployment with approvals.",
+        "details": "Create a set of GitHub Actions workflows in the `.github/workflows/` directory to automate the build, test, and deployment lifecycle. The pipeline will have distinct jobs for different stages and environments, leveraging GitHub Environments and Secrets for configuration.\n\n1.  **CI Workflow (`ci.yml`):**\n    *   **Trigger:** On `pull_request` to the `main` and `develop` branches.\n    *   **Jobs:**\n        *   `lint`: Run `npm run lint` to enforce code style.\n        *   `unit-tests`: Run `npm run test` to execute Jest unit and integration tests.\n        *   `e2e-tests`: Run `npm run cypress:run` to execute the Cypress end-to-end test suite. This job must start a preview of the application.\n        *   `build-check`: Run `npm run build` to verify the Next.js application builds successfully without errors. It should use environment variables from `.env.example` as defined in Task 44.\n\n2.  **Staging Deployment Workflow (`deploy-staging.yml`):**\n    *   **Trigger:** On `push` to the `develop` branch.\n    *   **Environment:** Use a GitHub Environment named `staging`.\n    *   **Secrets:** Configure secrets for the staging environment (e.g., `STAGING_SUPABASE_URL`, `STAGING_SUPABASE_ANON_KEY`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `VERCEL_TOKEN`).\n    *   **Jobs:**\n        *   `deploy-staging`: Depends on the CI workflow passing for the commit.\n        *   **Step 1: DB Migration:** Run Supabase migrations against the staging database. Use the Supabase CLI: `npx supabase db push`.\n        *   **Step 2: Deploy to Vercel:** Deploy the application to the staging Vercel project. Use the Vercel CLI or the official Vercel GitHub Action.\n\n3.  **Production Deployment Workflow (`deploy-production.yml`):**\n    *   **Trigger:** On `push` to the `main` branch.\n    *   **Environment:** Use a GitHub Environment named `production` with a required approver.\n    *   **Secrets:** Use production-level secrets as established in Task 34 and Task 38.\n    *   **Jobs:**\n        *   `deploy-production`: This job will pause for manual approval before running.\n        *   **Step 1: DB Migration:** Run Supabase migrations against the production database as defined in Task 42. This is a critical step and must be idempotent.\n        *   **Step 2: Deploy to Vercel:** Deploy the application to the production Vercel project.\n\n4.  **Rollback Mechanism:**\n    *   Document the rollback procedure in `DEPLOYMENT.md`. For the application, this involves promoting a previous successful deployment via the Vercel dashboard. For the database, document the process for reverting migrations using the Supabase CLI, which should be reserved for critical emergencies.",
+        "testStrategy": "1.  **CI Validation:**\n    *   Create a pull request with a linting error; verify the `lint` job fails and blocks the PR.\n    *   Create a pull request with a failing unit test; verify the `unit-tests` job fails.\n    *   Create a pull request with a breaking change for an E2E test; verify the `e2e-tests` job fails.\n\n2.  **Staging Deployment Validation:**\n    *   Merge a feature branch into `develop`.\n    *   Confirm the `deploy-staging.yml` workflow is triggered automatically.\n    *   Verify that the Supabase migration step completes successfully by checking the staging database schema.\n    *   Access the staging URL to confirm the new feature is deployed and functional.\n\n3.  **Production Deployment Validation:**\n    *   Merge `develop` into `main`.\n    *   Verify the `deploy-production` workflow is triggered but pauses for approval.\n    *   As the designated approver, approve the deployment and confirm the job proceeds.\n    *   Verify the production site is updated and fully functional.\n    *   Perform a test where the approval is rejected and confirm the deployment does not proceed.\n\n4.  **Rollback Test (Staging):**\n    *   Manually trigger a rollback in the staging Vercel project by promoting the previously active deployment.\n    *   Verify the staging URL reverts to the previous version.",
+        "status": "pending",
+        "dependencies": [
+          44,
+          42,
+          38,
+          34
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Foundational CI Workflow (`ci.yml`)",
+            "description": "Create the initial `.github/workflows/ci.yml` file. This workflow will trigger on pull requests to the `main` and `develop` branches. It should include basic setup steps like checking out the code, setting up Node.js, and caching npm dependencies.",
+            "dependencies": [],
+            "details": "In `.github/workflows/`, create `ci.yml`. Configure the `on: pull_request` trigger for `branches: [main, develop]`. Define a base job structure that uses `actions/checkout@v4` and `actions/setup-node@v4` with a specified Node.js version (e.g., 20.x). Implement dependency caching using `actions/cache@v4` for the `.npm` directory and run `npm ci` to install dependencies.",
+            "status": "pending",
+            "testStrategy": "Create a test pull request and verify the workflow triggers and the setup job completes successfully."
+          },
+          {
+            "id": 2,
+            "title": "Add Lint and Unit Test Jobs to `ci.yml`",
+            "description": "Extend the `ci.yml` workflow to include two parallel jobs: `lint` and `unit-tests`. These jobs will run the respective npm scripts to ensure code quality and test coverage.",
+            "dependencies": [
+              "45.1"
+            ],
+            "details": "In `ci.yml`, add a `lint` job that runs the `npm run lint` command. Add a separate `unit-tests` job that runs `npm run test`. Both jobs should inherit the setup steps from the foundational workflow or repeat them. Ensure they run in parallel after the initial setup.",
+            "status": "pending",
+            "testStrategy": "Push a commit with a linting error to a PR to see the `lint` job fail. Push a commit with a failing unit test to a PR to see the `unit-tests` job fail."
+          },
+          {
+            "id": 3,
+            "title": "Add Build Check and E2E Test Jobs to `ci.yml`",
+            "description": "Add two more jobs to `ci.yml`: `build-check` to verify the Next.js application builds successfully, and `e2e-tests` to run the Cypress test suite against a preview of the application.",
+            "dependencies": [
+              "45.1"
+            ],
+            "details": "Add a `build-check` job that runs `npm run build`. For the `e2e-tests` job, use a tool like `start-server-and-test` to build the app, start a preview server (`npm start`), and then run `npm run cypress:run`. This job will require environment variables; use the contents of `.env.example` for the preview build.",
+            "status": "pending",
+            "testStrategy": "Introduce a build-breaking change and verify the `build-check` job fails. Modify a component that an E2E test relies on and verify the `e2e-tests` job fails."
+          },
+          {
+            "id": 4,
+            "title": "Create Staging Deployment Workflow (`deploy-staging.yml`)",
+            "description": "Create a new workflow file `.github/workflows/deploy-staging.yml` that triggers on pushes to the `develop` branch. This workflow will handle database migrations and deploy the application to the Vercel staging environment.",
+            "dependencies": [],
+            "details": "Create the workflow to trigger on `push: branches: [develop]`. Define a GitHub Environment named `staging`. The `deploy-staging` job will first install the Supabase CLI and run `npx supabase db push` using staging database secrets. Then, it will use the Vercel CLI (`vercel --token=$VERCEL_TOKEN --prod --yes`) or the official Vercel Action to deploy the project. Configure `STAGING_SUPABASE_URL`, `STAGING_SUPABASE_ANON_KEY`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, and `VERCEL_TOKEN` as secrets in the `staging` environment.",
+            "status": "pending",
+            "testStrategy": "Push a commit to the `develop` branch and verify the workflow runs, the Supabase migration completes, and a new deployment is created on Vercel for the staging project."
+          },
+          {
+            "id": 5,
+            "title": "Create Production Deployment Workflow with Approval (`deploy-production.yml`)",
+            "description": "Create `.github/workflows/deploy-production.yml` for deployments to the `main` branch. This workflow will require manual approval before running database migrations and deploying to the production Vercel project.",
+            "dependencies": [],
+            "details": "Create the workflow to trigger on `push: branches: [main]`. Define a GitHub Environment named `production` and configure it to require an approver. The `deploy-production` job will use this environment. Once approved, the job will run `npx supabase db push` against the production database, followed by a Vercel deployment using production secrets. This ensures a human gate before production changes.",
+            "status": "pending",
+            "testStrategy": "Push a commit to `main`. Verify the workflow starts but pauses for approval. Approve the run and confirm that the database migration and Vercel deployment steps execute successfully."
+          },
+          {
+            "id": 6,
+            "title": "Integrate Dependency Security Scanning into CI",
+            "description": "Add a security scanning job to the `ci.yml` workflow to automatically check for vulnerabilities in project dependencies on every pull request.",
+            "dependencies": [
+              "45.1"
+            ],
+            "details": "In `ci.yml`, add a new job named `security-scan`. This job will use the `actions/dependency-review-action` to check for vulnerable dependencies based on the GitHub Advisory Database. Configure it to fail the check if any vulnerabilities are found, preventing the merging of insecure code.",
+            "status": "pending",
+            "testStrategy": "Create a PR that introduces a dependency with a known vulnerability. Verify that the `security-scan` job fails and blocks the PR."
+          },
+          {
+            "id": 7,
+            "title": "Integrate Lighthouse Performance Checks into CI",
+            "description": "Add a job to the `ci.yml` workflow that runs Lighthouse performance audits against the application preview generated during the E2E tests.",
+            "dependencies": [
+              "45.3"
+            ],
+            "details": "In `ci.yml`, add a new job `lighthouse-check` that `needs: e2e-tests`. Since the E2E job already builds and serves the application, this job can run in parallel or after. Use the `treosh/lighthouse-ci-action` or a similar action. Configure it to run against the local server (`http://localhost:3000`) and set performance budgets. The action should upload the results as a build artifact and can be configured to comment on the PR.",
+            "status": "pending",
+            "testStrategy": "In a PR, introduce a change that negatively impacts performance (e.g., add a very large, unoptimized image). Verify the `lighthouse-check` job runs and reports a drop in performance scores."
+          },
+          {
+            "id": 8,
+            "title": "Document Rollback Procedures in `DEPLOYMENT.md`",
+            "description": "Create a `DEPLOYMENT.md` file in the project root to document the manual rollback procedures for both the Vercel application and the Supabase database.",
+            "dependencies": [],
+            "details": "Create a new file named `DEPLOYMENT.md`. For Vercel, document the process of promoting a previous successful deployment to production via the Vercel dashboard. For Supabase, explain the emergency procedure for reverting a migration. This may involve using `supabase db diff --schema-only` to generate a revert script or restoring from a backup. Emphasize that database rollbacks are high-risk and for emergencies only.",
+            "status": "pending",
+            "testStrategy": "Have a team member review the `DEPLOYMENT.md` file for clarity and accuracy by walking through the described steps on the Vercel and Supabase dashboards in a non-production environment."
+          }
+        ]
+      },
+      {
+        "id": 46,
+        "title": "Implement GDPR/COPPA Data Portability and Erasure Features",
+        "description": "Implement comprehensive data privacy features allowing users to export their personal data and permanently delete their accounts, ensuring compliance with GDPR 'Right to be Forgotten' and 'Right to Data Portability'.",
+        "details": "1. **UI Implementation in User Settings:**\n   - Create a new 'Data & Privacy' section within the user profile management area.\n   - Add a button to 'Request Data Export'. On click, this should trigger an API call and show a confirmation message that the export is being processed and will be emailed.\n   - Add a 'Delete Account' button. This must open a confirmation modal requiring the user to type their username or a specific phrase to confirm, preventing accidental deletion.\n   - Build a 'Consent Management' panel where users can granularly opt-in/out of analytics tracking (Mixpanel), marketing communications, and other data processing activities, building on the initial work in Task #12.\n\n2. **Data Export Functionality (Right to Portability):**\n   - Create a new Supabase Edge Function named `data-export-request`.\n   - This function, triggered from the UI, will queue a background job to prevent request timeouts. The job will query all user-related data from tables like `profiles`, `bookings`, `community_posts`, `reviews`, `trip_requests`, `community_connections`, etc., linked to the user's ID.\n   - The job must also gather URLs of user-uploaded files from Supabase Storage (e.g., avatars, post media).\n   - Consolidate all collected data into a single, machine-readable JSON file.\n   - Upload the generated JSON file to a secure, private Supabase Storage bucket.\n   - Generate a short-lived signed URL for the file and email it to the user.\n\n3. **Account Deletion Functionality (Right to be Forgotten/Erasure):**\n   - Create a new Supabase Edge Function named `account-deletion-request`, which requires re-authentication for security.\n   - **Primary Deletion:** The function will call `supabase.auth.admin.deleteUser(userId, shouldSoftDelete = false)` to permanently remove the user from `auth.users`.\n   - **Database Cascades & Anonymization:**\n      - Review and update the database schema (from Task #2) to ensure all foreign key constraints referencing `auth.users.id` are set to `ON DELETE CASCADE`. This will automatically delete most user-specific records (e.g., `profiles`, `bookings`).\n      - For user-generated content that should persist for community integrity (e.g., `community_posts`, `reviews`), create a database trigger on `auth.users` that runs `BEFORE DELETE`. This trigger will update the relevant records, setting the `user_id` to `NULL` or a dedicated 'anonymous_user' ID to anonymize the content instead of deleting it.\n   - **Third-Party Data Erasure:** The Edge Function must orchestrate deletion requests to integrated third-party services:\n      - **Stripe (Task #10):** Call the Stripe API to delete the corresponding Customer object.\n      - **Mixpanel (Task #12):** Call the Mixpanel API to delete the user's profile.\n      - **Sentry/Datadog (Task #12, #40):** Ensure user identifiers are disassociated from future error/performance reports.\n\n4. **Data Retention Policy Automation:**\n   - Formalize a data retention policy (e.g., delete accounts inactive for 24 months).\n   - Implement this policy using a `pg_cron` job within Supabase. The cron job will run a stored procedure monthly to identify accounts meeting the inactivity criteria and trigger the same `account-deletion-request` logic for each one.",
+        "testStrategy": "1. **Data Export Verification:**\n   - Write an integration test for the `data-export-request` function that mocks database queries and verifies a JSON file is generated and a signed URL is created.\n   - Manually trigger an export for a test user. Verify the email is received and the downloaded JSON file contains all expected data from profile, posts, bookings, etc.\n\n2. **Account Deletion E2E Test:**\n   - Create a test user and generate associated data: a profile, a community post, a booking, and a review.\n   - Initiate the account deletion flow through the UI, including the confirmation step.\n   - **Verification:**\n      - Attempt to log in as the deleted user; it must fail.\n      - Query the `auth.users` table; the user must be gone.\n      - Query related tables (`profiles`, `bookings`); the records must be deleted via `CASCADE`.\n      - Query the `community_posts` and `reviews` tables; the records should still exist but with the `user_id` field set to `NULL` (anonymized).\n      - Check the Stripe and Mixpanel dashboards (in a test environment) to confirm the corresponding customer/profile has been deleted.\n\n3. **Database and Policy Testing:**\n   - Write unit tests for the `BEFORE DELETE` trigger using the Supabase test framework to ensure it correctly anonymizes content.\n   - Manually execute the `pg_cron` job in a staging environment with back-dated user data to verify that it correctly identifies and deletes inactive accounts.",
+        "status": "pending",
+        "dependencies": [
+          3,
+          2,
+          32,
+          12,
+          43
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create 'Data & Privacy' UI in User Settings",
+            "description": "Establish the user-facing interface for all data privacy features. This involves creating a new settings page and adding the necessary buttons and layout, which will be wired up in subsequent tasks.",
+            "dependencies": [],
+            "details": "Modify `src/app/(app)/settings/layout.tsx` to add a new navigation link named 'Data & Privacy' pointing to `/settings/privacy`. Create the corresponding page file at `src/app/(app)/settings/privacy/page.tsx`. This page should include two sections with placeholder buttons: 'Request Data Export' under a 'Data Portability' heading, and 'Delete Account' under an 'Account Erasure' heading. Use existing UI components from `src/components/ui` for consistency.",
+            "status": "pending",
+            "testStrategy": "Manually navigate to the new settings page and verify the layout and presence of the new buttons. Ensure it matches the existing settings page styles."
+          },
+          {
+            "id": 2,
+            "title": "Implement 'Delete Account' Confirmation Modal",
+            "description": "Build a secure confirmation modal to prevent accidental account deletion. This is a critical safety feature that requires explicit user confirmation.",
+            "dependencies": [
+              "46.1"
+            ],
+            "details": "Create a new component, `DeleteAccountModal`, using the existing `Modal` component from `src/components/ui/modal.tsx`. The modal must contain a text input field where the user is required to type their username to enable the final 'Permanently Delete' button. The modal will be triggered by the 'Delete Account' button on the `/settings/privacy` page. The final delete button's `onClick` handler will initially log to the console, to be replaced later with an API call.",
+            "status": "pending",
+            "testStrategy": "Trigger the modal and test its validation logic. The delete button should remain disabled until the correct username is typed. Confirm the button becomes active when the input matches the current user's name."
+          },
+          {
+            "id": 3,
+            "title": "Create `data-export-request` Edge Function for Data Aggregation",
+            "description": "Develop the backend function to gather all of a user's personal data from the database and Supabase Storage in preparation for export.",
+            "dependencies": [],
+            "details": "Create a new Supabase Edge Function at `supabase/functions/data-export-request/index.ts`. This function must be authenticated. Using the admin client (`supabase/functions/shared/supabase-admin-client.ts`), query all data linked to the authenticated user's ID from tables such as `profiles`, `bookings`, `community_posts`, `reviews`, and `trip_requests`. Additionally, list all files associated with the user from Supabase Storage buckets. Consolidate all this information into a single structured JavaScript object.",
+            "status": "pending",
+            "testStrategy": "Write a unit test for the Edge Function that mocks the database and storage clients, providing sample user data and verifying that the output object has the correct structure and content."
+          },
+          {
+            "id": 4,
+            "title": "Implement Export File Generation and Email Notification",
+            "description": "Complete the data export flow by packaging the aggregated data into a JSON file, uploading it, and notifying the user via email with a secure download link.",
+            "dependencies": [
+              "46.3"
+            ],
+            "details": "Extend the `data-export-request` function. After aggregating the data, convert the object to a JSON string. Upload this JSON file to a new, private Supabase Storage bucket named `user-data-exports`. Generate a signed URL for the uploaded file with a short expiration (e.g., 24 hours). Finally, use an email service (e.g., Resend) to send an email to the user's address containing the secure, time-limited download link.",
+            "status": "pending",
+            "testStrategy": "Trigger the function for a test user. Verify that a JSON file is created in the `user-data-exports` bucket. Confirm that an email is received and the signed URL successfully downloads the correct JSON file."
+          },
+          {
+            "id": 5,
+            "title": "Configure Database Schema for Content Anonymization",
+            "description": "Update database foreign key constraints to ensure that when a user is deleted, their personal records are removed while community-generated content is preserved but anonymized.",
+            "dependencies": [],
+            "details": "Create a new database migration file in `supabase/migrations/`. Analyze tables with foreign keys referencing `public.profiles(id)` or `auth.users(id)`, such as `community_posts` and `reviews`. For tables where content should be anonymized rather than deleted, modify the foreign key constraint to use `ON DELETE SET NULL`. For tables containing direct personal data (e.g., `bookings`), ensure the constraint is `ON DELETE CASCADE`. Apply these changes using `ALTER TABLE` statements in the migration.",
+            "status": "pending",
+            "testStrategy": "In a staging environment, create a test user with associated posts and reviews. Manually delete the user from the `auth.users` table and verify that their profile is gone, but their posts/reviews remain with `user_id` set to NULL."
+          },
+          {
+            "id": 6,
+            "title": "Create `account-deletion-request` Edge Function",
+            "description": "Implement the core backend logic for permanently deleting a user from Supabase authentication and triggering cascaded data removal.",
+            "dependencies": [
+              "46.2",
+              "46.5"
+            ],
+            "details": "Create a new Supabase Edge Function at `supabase/functions/account-deletion-request/index.ts`. This function must be authenticated. It should retrieve the user's ID from the JWT. For security, it should verify a recent sign-in or require re-authentication. Using the admin client, call `supabase.auth.admin.deleteUser(userId, shouldSoftDelete = false)`. Wire this function up to the 'Permanently Delete' button in the `DeleteAccountModal` component.",
+            "status": "pending",
+            "testStrategy": "Write an integration test that calls the function with a valid test user's JWT. Verify that the function returns a success status and that the user is removed from the `auth.users` table."
+          },
+          {
+            "id": 7,
+            "title": "Integrate Third-Party Data Erasure (Stripe, Mixpanel)",
+            "description": "Extend the account deletion process to send erasure requests to integrated third-party services, ensuring full data removal across all platforms.",
+            "dependencies": [
+              "46.6"
+            ],
+            "details": "Modify the `account-deletion-request` Edge Function. Before deleting the Supabase user, retrieve the user's `stripe_customer_id` from their profile. If it exists, call the Stripe API to delete the Customer object. Similarly, use the user's ID to call the Mixpanel API to delete their user profile, referencing the existing integration in `src/lib/analytics.ts`. Wrap these calls in try/catch blocks to prevent failure in one service from halting the entire deletion process.",
+            "status": "pending",
+            "testStrategy": "For a test user with a Stripe customer ID and Mixpanel profile, trigger the deletion function. Verify through the Stripe and Mixpanel dashboards that the corresponding user/customer objects have been deleted."
+          },
+          {
+            "id": 8,
+            "title": "Build UI for Consent Management",
+            "description": "Implement a user-facing panel for granularly managing consent for data processing activities like analytics and marketing communications.",
+            "dependencies": [
+              "46.1"
+            ],
+            "details": "On the `/settings/privacy` page, create a 'Consent Management' section. Add UI controls (e.g., Switches) for options such as 'Allow Analytics Tracking' and 'Receive Marketing Emails'. These controls should read their initial state from corresponding boolean columns (e.g., `allow_analytics`, `allow_marketing`) on the user's `profiles` table. When a user toggles a switch, call a Supabase RPC function to update the value in their profile.",
+            "status": "pending",
+            "testStrategy": "Load the privacy page and verify the switches reflect the user's current consent status in the database. Toggle a switch and confirm the change is persisted in the `profiles` table and that the UI remains in sync after a page refresh."
+          }
+        ]
+      },
+      {
+        "id": 47,
+        "title": "Unit Testing and Test Coverage Improvement",
+        "description": "Systematically fix failing unit tests and increase overall test coverage from 65% to over 95% by enhancing unit, component, and integration tests, establishing an E2E testing suite, and implementing standardized mocking strategies.",
+        "details": "1. **Initial Analysis and Configuration:**\n   - Execute `npm test -- --coverage` to generate a baseline report and identify low-coverage areas.\n   - Systematically debug and fix all currently failing tests identified in the CI pipeline (from Task 45).\n   - Update `jest.config.js` to set a global coverage threshold: `coverageThreshold: { global: { branches: 95, functions: 95, lines: 95, statements: 95 } }`. This will enforce the quality standard on all future pull requests.\n\n2. **Standardize Mocking Strategies:**\n   - Integrate **Mock Service Worker (MSW)** to create a mock API layer. Create handlers in `src/mocks/handlers.js` for key API routes (e.g., auth, adventures, bookings) to ensure components can be tested in isolation.\n   - For Supabase client interactions in service-level unit tests, use `jest.mock('@supabase/supabase-js', ...)` to provide mock implementations. Create reusable data factories using `@faker-js/faker` for generating consistent test data (e.g., `userFactory`, `adventureFactory`).\n   - Document the new mocking strategy in a `TESTING.md` file in the project root.\n\n3. **Unit & Integration Test Expansion (Jest & React Testing Library):**\n   - Prioritize writing tests for critical business logic in `src/services/` and `src/lib/`, such as the age verification service (Task 32), data portability functions (Task 46), and ML-related services (Task 39).\n   - Write integration tests for all Next.js API routes in `src/pages/api/`. Use a library like `next-test-api-route-handler` to test request validation, business logic, and response status codes.\n   - Increase component test coverage using `@testing-library/react` and `@testing-library/user-event`. Focus on components with complex user interaction, such as forms, modals, and data-dependent UI from tasks like the user settings (Task 46) and registration (Task 3).\n\n4. **End-to-End (E2E) Test Suite Implementation (Cypress):**\n   - Formalize the E2E test setup from Task 45. Configure `cypress.config.ts` with a `baseUrl` and environment variables for testing.\n   - Create custom Cypress commands in `cypress/support/commands.ts` for common actions like `cy.login()` and `cy.logout()` to streamline test authoring.\n   - Implement E2E tests for critical user flows: User Registration, Login/Logout, Profile Management, Adventure Search and Booking, and Data Privacy actions (Export/Delete Account from Task 46).\n\n5. **Continuous Test Monitoring and Reporting:**\n   - Integrate **Codecov** (or a similar service) into the `ci.yml` workflow from Task 45. Configure it to upload coverage reports on each run.\n   - Configure the Codecov GitHub App to post coverage reports as comments on pull requests, highlighting coverage changes and blocking merges if coverage drops below the defined threshold.",
+        "testStrategy": "1. **CI/CD Integration Verification:**\n   - Create a PR that introduces code with insufficient test coverage; verify the Codecov check fails and blocks the merge.\n   - Create a PR with a failing E2E test; verify the `e2e-tests` job in GitHub Actions fails and correctly uploads video/screenshot artifacts for debugging.\n\n2. **Mocking Strategy Validation:**\n   - Run the component test suite while the local development server is offline. Verify that tests relying on MSW still pass, confirming API requests are being correctly intercepted.\n   - In a service unit test, assert that the mocked Supabase client function was called, confirming module-level mocking is working as expected.\n\n3. **E2E Suite Validation:**\n   - Execute the full Cypress suite locally via `npx cypress open`. Verify that all critical user flow tests pass against a running instance of the application.\n\n4. **Coverage Goal Confirmation:**\n   - After merging several PRs with new tests, check the project's dashboard on Codecov to confirm the overall coverage is trending towards and has met the 95% target.\n   - Locally, run `npm test -- --coverage` and inspect the generated HTML report in `coverage/lcov-report/index.html` to manually audit any remaining untested files or code branches.",
+        "status": "pending",
+        "dependencies": [
+          45,
+          44,
+          12
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Analyze Test Failures, Generate Baseline Coverage, and Configure Threshold",
+            "description": "Execute the test suite to identify all failing tests. Generate an initial code coverage report to establish a baseline and identify areas with the lowest coverage. Update the Jest configuration to enforce a strict 95% coverage threshold.",
+            "dependencies": [],
+            "details": "Run `npm test -- --coverage` to get a list of failing tests and a baseline coverage report. In `jest.config.js`, add the `coverageThreshold` object: `coverageThreshold: { global: { branches: 95, functions: 95, lines: 95, statements: 95 } }`. This will cause the test runner to fail if coverage drops below the target, enforcing the new standard.",
+            "status": "pending",
+            "testStrategy": "Verify that the `npm test` command now fails if the coverage is below 95% after the configuration change."
+          },
+          {
+            "id": 2,
+            "title": "Fix Failing React Component and Hook Tests",
+            "description": "Systematically debug and resolve failures in existing React component (`*.test.tsx`) and hook (`*.test.ts`) tests. Failures are likely due to missing mock providers (React Query, Auth Context) or incorrect asynchronous handling.",
+            "dependencies": [
+              "47.1"
+            ],
+            "details": "Create a reusable `test-utils.tsx` file that exports a custom `render` function. This function should wrap the tested component with all necessary context providers (e.g., `QueryClientProvider`, `AuthProvider`). Refactor failing tests to use this new utility to ensure a consistent and correct rendering environment.",
+            "status": "pending",
+            "testStrategy": "Run `npm test -- src/components` and `npm test -- src/hooks` to confirm all previously failing tests in these directories now pass."
+          },
+          {
+            "id": 3,
+            "title": "Standardize API and Supabase Mocking Strategy",
+            "description": "Implement a standardized mocking strategy. Use Mock Service Worker (MSW) for API requests in component/integration tests and `jest.mock` for the Supabase client in service-level unit tests.",
+            "dependencies": [],
+            "details": "Populate `src/mocks/handlers.js` with MSW handlers for key API endpoints like `/api/auth/user`, `/api/adventures`, and `/api/bookings`. For service tests (e.g., `auth.service.test.ts`), use `jest.mock('@supabase/supabase-js', ...)` to create a mock Supabase client, allowing for precise control over database responses without making network requests.",
+            "status": "pending",
+            "testStrategy": "Verify that component tests using mocked API data pass correctly. Verify that service unit tests can successfully mock Supabase `from().select()` and other calls."
+          },
+          {
+            "id": 4,
+            "title": "Increase Test Coverage for Services and Libraries",
+            "description": "Write comprehensive unit tests for critical business logic located in `src/services/` and `src/lib/`. Focus on achieving near-100% coverage for these modules.",
+            "dependencies": [
+              "47.3"
+            ],
+            "details": "Using the standardized Supabase mock from the previous subtask, write unit tests for all functions in `src/services/`. Prioritize services related to recent features, such as the age verification service (Task 32), data portability functions (Task 46), and any ML-related services (Task 39). Ensure all logical branches and error states are tested.",
+            "status": "pending",
+            "testStrategy": "Run `npm test -- --coverage src/services/ src/lib/` and verify that the coverage for these specific directories is above 95%."
+          },
+          {
+            "id": 5,
+            "title": "Implement Integration Tests for Next.js API Routes",
+            "description": "Create integration tests for all API routes in `src/pages/api/` to validate request handling, business logic execution, and response accuracy.",
+            "dependencies": [
+              "47.3"
+            ],
+            "details": "Install `next-test-api-route-handler`. For each file in `src/pages/api/`, create a corresponding `*.test.ts` file. Write tests that simulate different HTTP methods (GET, POST, etc.) and payloads to test input validation (Zod schemas), successful logic execution, and correct HTTP status codes and response bodies for both success and error cases.",
+            "status": "pending",
+            "testStrategy": "Confirm that tests for API routes cover validation errors (400), authentication/authorization errors (401/403), and successful operations (200/201)."
+          },
+          {
+            "id": 6,
+            "title": "Establish E2E Test Suite with Cypress for Critical User Flows",
+            "description": "Configure and implement an end-to-end (E2E) test suite using Cypress to validate critical user journeys from the user's perspective.",
+            "dependencies": [],
+            "details": "In `cypress.config.ts`, set the `baseUrl` to `http://localhost:3000`. In `cypress/support/commands.ts`, create a custom `cy.login()` command that programmatically authenticates a test user to speed up tests. Implement E2E test files (`*.cy.ts`) for: User Registration, Login/Logout, Profile Update, Adventure Search, and the Account Data Export/Delete flow from Task 46.",
+            "status": "pending",
+            "testStrategy": "Run `npm run cy:run` and verify that all critical path tests pass successfully in a headless browser, simulating real user interaction."
+          },
+          {
+            "id": 7,
+            "title": "Integrate Codecov Reporting and Merge Gates in CI",
+            "description": "Enhance the GitHub Actions workflow to upload coverage reports to Codecov and configure Codecov to block pull requests that decrease coverage or fail to meet the 95% threshold.",
+            "dependencies": [
+              "47.1"
+            ],
+            "details": "In `.github/workflows/ci.yml`, ensure the `codecov/codecov-action` step is correctly configured with a `CODECOV_TOKEN` secret. In the Codecov web UI for the repository, configure the GitHub App integration to post a comment on pull requests detailing coverage changes. Set up a status check that fails if coverage drops or is below the 95% global target, and make this a required check for merging to the main branch.",
+            "status": "pending",
+            "testStrategy": "Create a test PR that lowers code coverage; verify that the Codecov check fails and blocks the merge. Create another PR that meets the standard; verify it passes."
+          },
+          {
+            "id": 8,
+            "title": "Final Coverage Push and Create TESTING.md",
+            "description": "Address remaining low-coverage areas, particularly in UI components, to surpass the 95% total coverage goal. Document the established testing and mocking strategies in a new `TESTING.md` file.",
+            "dependencies": [
+              "47.2",
+              "47.4",
+              "47.5"
+            ],
+            "details": "Run `npm test -- --coverage` one last time and analyze the report. Write simple render tests for presentational components in `src/components/ui/` that are still below the threshold. Once the 95% goal is achieved across the board, create a `TESTING.md` file in the project root. Document the purpose of Jest/RTL, MSW, and Cypress, and provide clear instructions on how to write new tests using the `test-utils.tsx` helper and mock handlers.",
+            "status": "pending",
+            "testStrategy": "The final `npm test -- --coverage` run should pass successfully, indicating global coverage is above 95%. A peer review of `TESTING.md` should confirm its clarity and completeness."
+          }
+        ]
+      },
+      {
+        "id": 48,
+        "title": "Staging Environment Setup and Configuration",
+        "description": "Set up a complete staging environment on Vercel, mirroring production, with automated deployments from the 'develop' branch, a dedicated Supabase database, and staging-specific configurations.",
+        "details": "1. **Vercel Project and Git Integration:**\n   - Create a new Vercel project linked to the existing GitHub repository.\n   - Configure the Git integration: set the \"Production Branch\" to `main`.\n   - Add a new domain for staging (e.g., `trvl-social-staging.vercel.app`) and link it to the `develop` branch.\n   - Enable automatic deployments for all pushes and merges to the `develop` branch.\n\n2. **Supabase Staging Project Setup:**\n   - In the Supabase dashboard, create a new project named `trvl-social-v3-staging`.\n   - Apply all existing database migrations from the `supabase/migrations` directory to the new staging project to replicate the schema defined in Task 2.\n   - Consider creating a database seeding script (`supabase/seed.sql`) to populate the staging database with realistic, non-sensitive test data for features like users, posts, and adventures. This will facilitate better testing.\n\n3. **Staging Environment Variable Configuration:**\n   - In the Vercel project settings, navigate to the Environment Variables section.\n   - Add all variables from the `.env.example` file (established in Task 44), but scoped specifically to the Staging environment (the `develop` branch).\n   - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Use the API URL and anon key from the new `trvl-social-v3-staging` Supabase project.\n   - `SUPABASE_SERVICE_ROLE_KEY`: Use the service role key from the staging Supabase project.\n   - `STRIPE_SECRET_KEY` & `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`: Use Stripe **test mode** API keys to avoid real charges (related to Task 10).\n   - `ALLOWED_ORIGINS`: Add the Vercel staging URL to the list of allowed origins to ensure CORS is configured correctly (as per the pattern in Task 31).\n   - For services like Sentry or Mixpanel (Task 12), create staging-specific projects or use an `ENVIRONMENT=staging` variable to segment data.\n\n4. **Automated Deployment and Parity Validation:**\n   - Confirm the Vercel build command (`npm run build`) and output directory are configured correctly.\n   - Create a checklist or document to periodically compare Vercel settings (Node.js version, build settings, etc.) between the Production (`main`) and Staging (`develop`) environments to ensure parity and prevent configuration drift.",
+        "testStrategy": "1. **Deployment Verification:**\n   - Push a minor, visible change (e.g., text update on the homepage) to a feature branch and merge it into `develop`.\n   - Verify that a Vercel deployment is automatically triggered for the `develop` branch and completes successfully.\n   - Access the staging URL and confirm the change is live.\n\n2. **Environment Isolation Testing:**\n   - On the staging website, perform a user registration (Task 3). Log into the `trvl-social-v3-staging` Supabase project and verify the new user record exists there.\n   - Check the production database to ensure no new data was added, confirming environment isolation.\n   - Use browser developer tools to inspect network requests and confirm all API calls are directed to the staging Supabase URL.\n\n3. **Configuration and Integration Validation:**\n   - Execute a test payment flow. Verify in the Stripe dashboard that the transaction appears in **test mode**.\n   - Intentionally trigger a client-side or server-side error. Verify the error is captured in the designated staging project/environment in Sentry (Task 12).\n   - Attempt to make an API call from the browser console on an unrelated website to the staging API. Verify the request is blocked due to CORS policy (Task 31).\n\n4. **Core Functionality Smoke Test:**\n   - Perform a high-level walkthrough of all critical user flows on the staging environment as defined in Task 36, including registration, login, creating a post (Task 11), and initiating a booking.",
+        "status": "pending",
+        "dependencies": [
+          38,
+          44,
+          31,
+          36
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create and Push 'develop' Git Branch",
+            "description": "Create a new local branch named 'develop' from the 'main' branch to serve as the integration branch for staging. Push this branch to the remote GitHub repository.",
+            "dependencies": [],
+            "details": "Execute the following git commands: `git checkout main`, `git pull origin main`, `git checkout -b develop`, `git push -u origin develop`. This branch will be the source for all automated staging deployments on Vercel.",
+            "status": "pending",
+            "testStrategy": "Verify the 'develop' branch exists on the remote GitHub repository."
+          },
+          {
+            "id": 2,
+            "title": "Configure Vercel Project for Staging Deployments",
+            "description": "In the Vercel dashboard for the project, configure the Git integration settings. Set the 'Production Branch' to 'main'. Add and assign a new domain (e.g., `staging.trvlsocial.com` or the default Vercel URL) to the 'develop' branch.",
+            "dependencies": [
+              "48.1"
+            ],
+            "details": "Navigate to Project Settings > Git. Ensure 'main' is the Production Branch. In Project Settings > Domains, add a new domain and assign it specifically to the 'develop' branch. This will ensure pushes to 'develop' deploy to the staging URL.",
+            "status": "pending",
+            "testStrategy": "After configuration, confirm in the Vercel dashboard that the 'develop' branch is linked to the staging domain and 'main' is linked to the production domain."
+          },
+          {
+            "id": 3,
+            "title": "Create a Dedicated Staging Supabase Project",
+            "description": "In the Supabase dashboard, create a new project named 'trvl-social-v3-staging'. Securely store the new project's API URL, anon key, and service role key for use in the next steps.",
+            "dependencies": [],
+            "details": "Log into app.supabase.com and create a new project. Choose a strong password for the database. Once created, navigate to Project Settings > API to find the required keys and URL. These will be used for the staging environment variables.",
+            "status": "pending",
+            "testStrategy": "Confirm the 'trvl-social-v3-staging' project is successfully created and accessible in the Supabase dashboard."
+          },
+          {
+            "id": 4,
+            "title": "Apply Database Migrations to Staging Supabase",
+            "description": "Use the Supabase CLI to apply all existing database migrations from the `supabase/migrations` directory to the new 'trvl-social-v3-staging' database to replicate the production schema.",
+            "dependencies": [
+              "48.3"
+            ],
+            "details": "Link the Supabase CLI to the new staging project using `supabase link --project-ref <staging-project-ref>`. Then, run `supabase db push` to execute all migration files in the `supabase/migrations` directory against the staging database. This ensures schema parity.",
+            "status": "pending",
+            "testStrategy": "Use the Supabase SQL Editor in the staging project dashboard to verify that all tables, columns, and relationships from the migration files have been created correctly."
+          },
+          {
+            "id": 5,
+            "title": "Configure Staging Environment Variables in Vercel",
+            "description": "In the Vercel project settings, add all environment variables from `.env.example` but scope them to the 'Staging' environment (the 'develop' branch). Use the credentials from the new staging Supabase project and Stripe test keys.",
+            "dependencies": [
+              "48.2",
+              "48.3"
+            ],
+            "details": "Navigate to Project Settings > Environment Variables. For each variable in `.env.example`, add it with the correct staging value. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from the staging Supabase project. Use Stripe **test mode** keys. Add the staging Vercel URL to `ALLOWED_ORIGINS`.",
+            "status": "pending",
+            "testStrategy": "After a deployment, inspect the running application's network requests to confirm it is communicating with the staging Supabase URL. Verify Stripe checkout is in test mode."
+          },
+          {
+            "id": 6,
+            "title": "Create Database Seeding Script for Staging Data",
+            "description": "Create a new file `supabase/seed.sql`. Populate this script with SQL INSERT statements to add realistic, non-sensitive test data for users, posts, adventures, and other core features.",
+            "dependencies": [
+              "48.4"
+            ],
+            "details": "The `seed.sql` file will be automatically run by Supabase when the database is reset. Create sample users, at least 10-15 posts, and a few adventures with associated vendors. Use placeholder data for PII. This data is crucial for testing features in the staging environment.",
+            "status": "pending",
+            "testStrategy": "Run `supabase db reset` locally (linked to the staging project) to execute the seed script. Verify the data is populated correctly using the Supabase Studio table editor."
+          },
+          {
+            "id": 7,
+            "title": "Trigger Initial Staging Deployment and Verify Full Integration",
+            "description": "Make a minor, visible code change (e.g., update text on the homepage) and push it to the 'develop' branch to trigger an automated Vercel deployment. Verify the deployment succeeds and the staging site is fully functional.",
+            "dependencies": [
+              "48.2",
+              "48.5",
+              "48.6"
+            ],
+            "details": "Push a commit to the 'develop' branch. Monitor the deployment in the Vercel dashboard. Once complete, access the staging URL. Verify the code change is visible. Check that the site loads data from the staging database (i.e., the seeded data is present). Create a basic checklist in project documentation to periodically verify parity between staging and production Vercel settings.",
+            "status": "pending",
+            "testStrategy": "Confirm the automated deployment was triggered on Vercel. Access the staging URL and see the visible change. Log in with a seeded test user account and confirm you can view seeded data (e.g., posts, adventures)."
+          }
+        ]
+      },
+      {
+        "id": 49,
+        "title": "Implement Health Checks, Performance Budgets, and Advanced Monitoring",
+        "description": "Enhance the existing monitoring solution by adding a dedicated health check endpoint, integrating performance budgets into the CI/CD pipeline, and configuring advanced Real User Monitoring (RUM) and alerting.",
+        "details": "Building on the existing Sentry implementation from Task 40, this task will add critical monitoring components for production stability and performance.\n\n1. **Health Check Endpoint Implementation:**\n   - Create a new API route at `src/pages/api/health.ts`.\n   - The endpoint must perform a lightweight check on critical dependencies. It should execute a simple query against the Supabase database (e.g., `SELECT 1`) to verify connectivity. Use the existing Supabase client setup.\n   - On success, it should return a `200 OK` status with a JSON body: `{ \"status\": \"ok\", \"timestamp\": \"<ISO_DATE_STRING>\", \"dependencies\": { \"database\": \"ok\" } }`.\n   - If the database check fails, it must return a `503 Service Unavailable` status with a body detailing the failure: `{ \"status\": \"error\", \"timestamp\": \"...\", \"dependencies\": { \"database\": \"unavailable\" } }`.\n\n2. **External Uptime Monitoring:**\n   - Configure an external monitoring service (e.g., Better Uptime, UptimeRobot, or Sentry Cron Monitors) to poll the production `/api/health` endpoint every 2-5 minutes.\n   - Set up alerting within this service to notify the development team via a designated Slack channel or email if the endpoint returns a non-200 status code for two consecutive checks.\n\n3. **Performance Budget Integration into CI/CD:**\n   - In the project root, create a `lighthouserc.json` configuration file to define performance budgets.\n   - Set budgets for key metrics like Performance Score (>85), Largest Contentful Paint (<2.5s), and Total Blocking Time (<200ms).\n   - Modify the GitHub Actions workflow from Task 45 (`.github/workflows/ci.yml`) to add a new job named `performance-budget-check` that runs on pull requests targeting the `main` branch.\n   - This job will use the `treo/lighthouse-ci-action` to run Lighthouse against the preview deployment URL and assert that the configured budgets are met. The job must fail if any budget is exceeded, blocking the PR.\n\n4. **Advanced Real User Monitoring (RUM) and Alerting:**\n   - Enhance the Sentry configuration in `sentry.client.config.js` and `sentry.server.config.js` to ensure `tracesSampleRate` is set to an appropriate value for production (e.g., `0.2`) to capture a representative sample of user interactions.\n   - In the Sentry dashboard, create a new dashboard dedicated to Core Web Vitals and RUM.\n   - Configure Sentry alerts to trigger for performance regressions:\n     - When the p75 of LCP on key pages (e.g., homepage, adventure details) exceeds 2.5 seconds.\n     - When the Apdex score drops below 0.9.\n     - When the failure rate of a critical API transaction (e.g., `POST /api/bookings`) exceeds 5%.",
+        "testStrategy": "1. **Health Check Verification:**\n   - Write an integration test using a library like `supertest` to call the `/api/health` endpoint. Assert a `200 OK` response and the correct JSON structure.\n   - Modify the test to mock a Supabase client failure and assert that the endpoint correctly returns a `503 Service Unavailable` status.\n   - Manually access the endpoint on a staging deployment to confirm it's publicly accessible and functioning.\n\n2. **Uptime Monitor Test:**\n   - Once configured, manually trigger a failure by deploying a broken version of the health check to staging. Verify that the uptime monitor detects the failure and sends an alert to the correct channel within the expected timeframe.\n\n3. **Performance Budget CI Test:**\n   - Create a test pull request that intentionally introduces a large, un-treeshaken library to a page. Verify that the `performance-budget-check` job in GitHub Actions fails and blocks the PR from being merged.\n   - In a separate PR, add a CPU-intensive script and verify the Lighthouse check for Total Blocking Time fails.\n\n4. **RUM and Alerting Validation:**\n   - After deploying to production, navigate the site and confirm that your session's performance data (transactions, LCP, etc.) appears in the Sentry dashboard.\n   - Temporarily lower an alert threshold in Sentry for a staging environment (e.g., LCP > 1ms) and navigate the staging site to confirm the alert is triggered and delivered.",
+        "status": "pending",
+        "dependencies": [
+          40,
+          38,
+          45,
+          2
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Health Check API Endpoint",
+            "description": "Create a new API route at `src/pages/api/health.ts` to perform a lightweight check on critical dependencies, primarily the Supabase database.",
+            "dependencies": [],
+            "details": "Implement an API handler in `src/pages/api/health.ts`. Use the server-side Supabase client (likely from `src/lib/supabase/server.ts`) to execute a simple query like `supabase.rpc('echo', { message: 'ok' })` or a direct `SELECT 1`. If the query succeeds, return a 200 OK status with the JSON body: `{ \"status\": \"ok\", \"timestamp\": \"<ISO_DATE_STRING>\", \"dependencies\": { \"database\": \"ok\" } }`. If it fails, catch the error and return a 503 Service Unavailable status with the body: `{ \"status\": \"error\", \"timestamp\": \"...\", \"dependencies\": { \"database\": \"unavailable\" } }`.",
+            "status": "pending",
+            "testStrategy": "Create a new integration test file for the health endpoint. Use a library like `supertest` to make a request to the mocked API route. Test the success case (200 OK and correct body) and mock a Supabase client failure to assert the 503 response."
+          },
+          {
+            "id": 2,
+            "title": "Configure Lighthouse CI Budget File",
+            "description": "Create a `lighthouserc.json` file in the project root to define performance budgets for Lighthouse CI.",
+            "dependencies": [],
+            "details": "In the root of the project, create a new file named `lighthouserc.json`. Configure it with a `ci` block. Under `ci.assert.budgets`, define budgets for key performance metrics. Set `performance` to have a minScore of 0.85, `metrics/largest-contentful-paint` to have a max of 2500ms, and `metrics/total-blocking-time` to have a max of 200ms. This file will be used by the GitHub Action in a subsequent step.",
+            "status": "pending",
+            "testStrategy": "N/A - This is a configuration file. Its correctness will be validated when the CI job runs."
+          },
+          {
+            "id": 3,
+            "title": "Integrate Lighthouse CI into GitHub Actions Workflow",
+            "description": "Modify the `.github/workflows/ci.yml` file to add a new job that runs Lighthouse CI against preview deployments on pull requests.",
+            "dependencies": [
+              "49.2"
+            ],
+            "details": "Edit the `.github/workflows/ci.yml` file. Add a new job named `performance-budget-check` that runs after the build/deployment job. This job should use the `treo/lighthouse-ci-action@v11`. Configure the action to use the `lighthouserc.json` file. You will need to capture the preview deployment URL from the deployment step and pass it as an input to this action's `urls` parameter. Ensure the job is configured to fail if the Lighthouse assertions do not pass, thereby blocking PR merges that cause performance regressions.",
+            "status": "pending",
+            "testStrategy": "Create a test pull request. Verify that the `performance-budget-check` job runs successfully. Then, create another PR with a deliberate performance degradation (e.g., adding a large, unoptimized image) and verify that the job fails and blocks the merge."
+          },
+          {
+            "id": 4,
+            "title": "Update Sentry Configuration for RUM Tracing",
+            "description": "Enhance the Sentry configuration to enable performance monitoring (RUM) by setting an appropriate traces sample rate.",
+            "dependencies": [],
+            "details": "In both `sentry.client.config.js` and `sentry.server.config.js`, find the `Sentry.init` call. Add or modify the `tracesSampleRate` option, setting it to `0.2`. This will capture performance data for 20% of user transactions, providing a representative sample for RUM analysis without overwhelming the system. Ensure the `BrowserTracing` integration is present in the client configuration.",
+            "status": "pending",
+            "testStrategy": "After deploying the change, navigate through the application in the production environment. Go to the Sentry dashboard and verify that new performance transactions are appearing under the 'Performance' tab."
+          },
+          {
+            "id": 5,
+            "title": "Configure External Uptime Monitoring Service",
+            "description": "Set up an external monitoring service to periodically poll the `/api/health` endpoint and send alerts on failure.",
+            "dependencies": [
+              "49.1"
+            ],
+            "details": "Using a service like Better Uptime, UptimeRobot, or Sentry Cron Monitors, create a new HTTP(S) monitor. Configure the monitor to target the production URL of the health check endpoint (e.g., `https://<your-production-domain>/api/health`). Set the monitoring interval to every 2-5 minutes. Configure alerting to notify a designated Slack channel or email address if the endpoint returns a non-200 status code for two consecutive checks.",
+            "status": "pending",
+            "testStrategy": "Manually trigger a deployment that breaks the database connection to test the failure case. Verify that the uptime monitor detects the failure and sends an alert. After fixing the issue, verify that a recovery notification is sent."
+          },
+          {
+            "id": 6,
+            "title": "Create Core Web Vitals & RUM Dashboard in Sentry",
+            "description": "In the Sentry UI, create a dedicated dashboard to visualize key Real User Monitoring (RUM) metrics and Core Web Vitals.",
+            "dependencies": [
+              "49.4"
+            ],
+            "details": "Log in to the Sentry project dashboard. Navigate to the 'Dashboards' section and create a new dashboard named 'Core Performance Metrics'. Add widgets to display: p75 LCP, p75 FCP, p75 CLS, Apdex score, Failure Rate, and graphs for User Misery and Transaction Duration over time. Filter these widgets to focus on key pages like the homepage and adventure detail pages.",
+            "status": "pending",
+            "testStrategy": "Share the dashboard with the team. After a day of collecting data, review the dashboard to ensure all widgets are populated with meaningful data and accurately reflect user experience."
+          },
+          {
+            "id": 7,
+            "title": "Configure Performance Regression Alerts in Sentry",
+            "description": "Set up specific alert rules in Sentry to proactively notify the team about performance degradations.",
+            "dependencies": [
+              "49.4"
+            ],
+            "details": "In the Sentry project, navigate to 'Alerts' and create new performance alert rules. Configure the following: 1. An alert that triggers when the p75 of LCP for transactions on the homepage or adventure details pages exceeds 2.5 seconds. 2. An alert that triggers when the overall Apdex score for the project drops below 0.9 for a sustained period (e.g., 15 minutes). 3. An alert for a critical API transaction (e.g., `POST /api/bookings`) when its failure rate exceeds 5%. Route all alerts to the primary development Slack channel.",
+            "status": "pending",
+            "testStrategy": "Temporarily lower the threshold for one of the alerts (e.g., Apdex to 0.99) to confirm that it triggers correctly and sends a notification to the configured channel. Then, reset it to the correct threshold."
+          }
+        ]
+      },
+      {
+        "id": 50,
+        "title": "Production Security Hardening and Auditing",
+        "description": "Implement a multi-layered security strategy for the production environment, including Content Security Policy (CSP), secure headers, XSS protection, dependency vulnerability scanning, and enhanced security audit logging.",
+        "details": "This task builds upon previous security work (Tasks 19, 31, 34, 38) to implement a comprehensive security posture for the production application.\n\n1. **Secure Headers & Content Security Policy (CSP) Configuration:**\n   - In `next.config.js`, use the `headers` function to add security headers to all responses.\n   - Implement `Strict-Transport-Security` (HSTS): `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`.\n   - Add `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, and `Referrer-Policy: origin-when-cross-origin`.\n   - Define a strict `Content-Security-Policy`. Start with a restrictive policy and iteratively add sources as needed. The policy must allow scripts and styles from `'self'`, as well as from third-party services in use like Stripe (`js.stripe.com`), Sentry (`*.sentry.io`), and Mixpanel (`api.mixpanel.com`).\n   - Example CSP start: `default-src 'self'; script-src 'self' js.stripe.com *.sentry.io; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' *.supabase.co *.sentry.io api.mixpanel.com;`\n\n2. **XSS Protection (Content Sanitization):**\n   - Audit all components that render user-generated content (e.g., community posts from Task 11, user profiles from Task 3, vendor forum posts).\n   - Integrate `dompurify` to sanitize any content before it is rendered using `dangerouslySetInnerHTML`.\n   - Create a reusable utility function, e.g., `utils/sanitizeHtml.js`, that wraps `dompurify` with a standard configuration.\n\n3. **SQL Injection Prevention Audit:**\n   - The use of the Supabase client library provides primary protection. This step focuses on auditing areas where raw SQL might be used.\n   - Review all custom PostgreSQL functions created in Task 2 and reviewed in Task 43. Ensure they use `format()` with `%L` for literals or otherwise safely handle parameters, and do not use string concatenation to build queries from inputs.\n   - Verify that all calls to `supabase.rpc()` pass arguments as a JSON object, not as part of a concatenated string.\n\n4. **Rate Limiting & DDoS Protection Review:**\n   - Review the rate limiting rules implemented in Task 19. Ensure limits are appropriate for production traffic, with stricter limits on authentication (`/api/auth/*`) and payment endpoints (Task 10) versus general browsing.\n   - Investigate and enable the DDoS protection features provided by the hosting platform (e.g., Vercel Attack Challenge Mode, Cloudflare). This is a configuration task on the platform, not in the codebase.\n\n5. **Dependency Vulnerability Scanning:**\n   - Integrate automated dependency scanning into the CI/CD pipeline (e.g., GitHub Actions).\n   - Add a step that runs `npm audit --production --audit-level=high`. Configure the CI job to fail if it finds any high or critical severity vulnerabilities.\n   - Add Dependabot or Snyk to the repository to automatically create pull requests for vulnerable dependency updates.\n\n6. **Security Audit Logging:**\n   - Extend the logging infrastructure from Task 38 and Task 12 (Datadog/Sentry).\n   - Create specific audit logs for security-sensitive events. Events to log must include:\n     - Failed login attempts (from Task 3).\n     - Password reset requests and completions (from Task 3).\n     - User data export and account deletion requests (from Task 46).\n     - Changes to user roles or permissions.\n     - API key rotation events (from Task 34).\n   - Ensure each log entry contains a timestamp, the responsible user ID (if applicable), source IP address, and a clear description of the event.",
+        "testStrategy": "1. **Headers & CSP Verification:**\n   - Use browser developer tools' Network tab to inspect the response headers for pages and API calls, verifying the presence and correctness of `Content-Security-Policy`, `Strict-Transport-Security`, etc.\n   - Use an online scanner like Mozilla Observatory or SecurityHeaders.com against the staging environment to get an automated analysis and grade.\n   - Manually navigate the entire application in a staging environment. Check the browser's developer console for any CSP violation errors and adjust the policy as needed.\n\n2. **XSS Penetration Testing:**\n   - Manually attempt to inject XSS payloads (e.g., `<script>alert('xss')</script>`, `<img src=x onerror=alert(1)>`) into all user-input fields identified in the details section.\n   - Verify that the injected scripts are either sanitized (removed) or rendered as inert text and do not execute.\n\n3. **Dependency Scan Verification:**\n   - In a test branch, intentionally introduce a package with a known high-severity vulnerability (e.g., an old version of `express`).\n   - Push the branch and confirm that the CI pipeline job for `npm audit` fails as expected.\n\n4. **Audit Log Validation:**\n   - Perform a sequence of security-relevant actions: successfully log in, fail a login attempt, request a password reset, and (if possible) request a data export.\n   - Query the logging platform (Datadog/Sentry) to confirm that each of these actions generated a corresponding, correctly formatted audit log entry with the required metadata (user ID, IP, timestamp).\n\n5. **Rate Limit & DDoS Testing:**\n   - Use a tool like `k6` or a simple script to send a burst of requests to a rate-limited endpoint (e.g., login API).\n   - Verify that after the configured limit is exceeded, the server responds with HTTP status `429 Too Many Requests`.",
+        "status": "pending",
+        "dependencies": [
+          19,
+          31,
+          34,
+          38,
+          43,
+          44,
+          46
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Configure Secure Headers and Content Security Policy in next.config.js",
+            "description": "Implement a set of security-focused HTTP headers, including a Content Security Policy (CSP), to mitigate common web vulnerabilities like XSS and clickjacking.",
+            "dependencies": [],
+            "details": "In `next.config.js`, modify the `headers` async function to add the following headers to all responses: `Strict-Transport-Security`, `X-Content-Type-Options`, `X-Frame-Options`, and `Referrer-Policy`. Define a strict `Content-Security-Policy` that allows necessary external resources for services like Stripe, Sentry, and Supabase, while defaulting to `'self'`. This builds upon the existing Next.js configuration.",
+            "status": "pending",
+            "testStrategy": "Use browser developer tools to inspect response headers on various pages. Employ an online tool like securityheaders.com or Mozilla Observatory to scan the production URL and verify the headers are correctly implemented and scored."
+          },
+          {
+            "id": 2,
+            "title": "Create and Integrate a DOMPurify Sanitization Utility for User Content",
+            "description": "Develop a reusable utility to sanitize user-generated HTML content before rendering, preventing XSS attacks. Audit and apply this utility to components that display user content.",
+            "dependencies": [],
+            "details": "Create a new file `src/utils/sanitizeHtml.ts`. In this file, import `dompurify` and export a configured function that sanitizes HTML strings. Grep the codebase for `dangerouslySetInnerHTML` and identify components rendering user-provided content (e.g., post bodies, comments, user bios). Refactor these components to pass the content through the new sanitization utility before rendering.",
+            "status": "pending",
+            "testStrategy": "Write a unit test for the `sanitizeHtml` utility that asserts malicious strings (e.g., `<script>alert('xss')</script>`, `<img src=x onerror=alert(1)>`) are stripped of their harmful elements. Manually test a component by entering a script tag into a user input field and verifying it is not executed on the rendered page."
+          },
+          {
+            "id": 3,
+            "title": "Audit Custom PostgreSQL Functions and RPC Calls for SQL Injection Vulnerabilities",
+            "description": "Review all custom database functions and application code that calls them to ensure they are not vulnerable to SQL injection.",
+            "dependencies": [],
+            "details": "Using the `Read` tool, examine all SQL files in the `supabase/migrations/` directory, specifically focusing on the functions created in Task 2 and reviewed in Task 43. Ensure that any dynamic SQL uses the `format()` function with `%L` for literals and `%I` for identifiers. Grep the codebase for all `supabase.rpc()` calls and verify that arguments are passed as a single JSON object, not concatenated into the function name string.",
+            "status": "pending",
+            "testStrategy": "Perform a code review of all identified functions and RPC calls, specifically looking for string concatenation with user-controlled input. Document findings in a security audit report within the task."
+          },
+          {
+            "id": 4,
+            "title": "Review and Harden Production Rate Limiting Rules",
+            "description": "Analyze and adjust the existing rate limiting configuration to better protect sensitive endpoints in a production environment.",
+            "dependencies": [],
+            "details": "Locate the rate limiting logic implemented in Task 19, likely within `src/middleware.ts` using `@upstash/ratelimit`. Review the current limits. Implement stricter limits for authentication routes (`/api/auth/*`), password reset endpoints, and payment processing APIs (Task 10). Ensure general browsing endpoints have more lenient limits to avoid impacting user experience.",
+            "status": "pending",
+            "testStrategy": "Write an integration test or use a tool like `curl` or Postman in a staging environment to send rapid, repeated requests to a protected endpoint (e.g., login) and verify that a `429 Too Many Requests` response is received after the limit is exceeded."
+          },
+          {
+            "id": 5,
+            "title": "Integrate Dependency Vulnerability Scanning into CI Pipeline",
+            "description": "Add an automated security scan to the GitHub Actions workflow to detect and fail builds with high-severity vulnerabilities in project dependencies.",
+            "dependencies": [],
+            "details": "Modify the primary CI workflow file located at `.github/workflows/main.yml`. Add a new step to the main build/test job, after the `npm install` step. This step should run the command `npm audit --production --audit-level=high`. Configure the step to fail the workflow if the command returns a non-zero exit code, preventing vulnerable code from being deployed.",
+            "status": "pending",
+            "testStrategy": "Temporarily introduce a dependency with a known high-severity vulnerability. Push the change to a feature branch and verify that the CI pipeline fails at the `npm audit` step as expected. Revert the change afterward."
+          },
+          {
+            "id": 6,
+            "title": "Configure Dependabot for Automated Dependency Updates",
+            "description": "Set up Dependabot to automatically scan for outdated or insecure dependencies and create pull requests to update them.",
+            "dependencies": [],
+            "details": "Create a new configuration file at `.github/dependabot.yml`. Configure it to check for `npm` dependencies in the root directory (`/`). Set a schedule for daily or weekly checks. This will enable automated pull requests for version updates and security patches, streamlining the maintenance process.",
+            "status": "pending",
+            "testStrategy": "After merging the `dependabot.yml` file, navigate to the repository's 'Security' tab on GitHub and verify that Dependabot is configured and has started its initial scan. No PRs may be created immediately if all dependencies are up-to-date."
+          },
+          {
+            "id": 7,
+            "title": "Implement Audit Logging for Authentication and Account Security Events",
+            "description": "Enhance the logging system to create detailed audit trails for security-sensitive events related to user authentication and account management.",
+            "dependencies": [],
+            "details": "Locate the API routes responsible for user authentication (e.g., `src/app/api/auth/sign-in/route.ts`, `src/app/api/auth/reset-password/route.ts`). Using the structured logger established in Task 38, add log entries for: failed login attempts, password reset requests, and successful password changes. Each log must include a timestamp, the user's ID (if available), source IP address, and a clear event description.",
+            "status": "pending",
+            "testStrategy": "Trigger each event (e.g., attempt a login with a wrong password, request a password reset) in a local or staging environment. Check the log output (e.g., Sentry, Datadog, or console) to verify that the corresponding audit log with all required fields is generated correctly."
+          },
+          {
+            "id": 8,
+            "title": "Implement Audit Logging for Data Management and Access Control Events",
+            "description": "Create audit logs for critical events related to user data privacy, account deletion, and administrative permission changes.",
+            "dependencies": [],
+            "details": "Identify the API endpoints or server actions for user data export and account deletion (from Task 46), user role changes, and API key rotation (from Task 34). Integrate the structured logger to record these events. Ensure each log entry contains a timestamp, the ID of the user performing the action, the ID of the target user (if different), source IP, and a description of the event (e.g., 'user-role-changed from editor to admin').",
+            "status": "pending",
+            "testStrategy": "Execute each action (e.g., request a data export, delete an account) in a test environment. Verify in the logging system that a detailed audit log is created for each action, containing the correct user IDs, IP, and event details."
+          }
+        ]
+      },
+      {
+        "id": 51,
+        "title": "Domain Configuration and DNS Setup for trvlsocial.com",
+        "description": "Configure the trvlsocial.com domain's DNS records to connect to Vercel for production and staging, set up SSL, and establish email authentication records (SPF, DKIM, DMARC).",
+        "details": "This task involves configuring all DNS settings for the `trvlsocial.com` domain at the registrar level to point to the Vercel-hosted application environments and to authenticate email services.\n\n1.  **Vercel Production Domain Connection:**\n    *   In the Vercel project connected to the `main` branch, add `trvlsocial.com` (apex) and `www.trvlsocial.com` as domains.\n    *   Log into the domain registrar for `trvlsocial.com` and update the DNS records with the A and CNAME records provided by Vercel.\n    *   Within the Vercel project settings, configure a permanent redirect from the apex domain to the `www` subdomain (or vice-versa) to ensure a single canonical URL.\n\n2.  **Vercel Staging Subdomain Routing:**\n    *   As per Task 48, a Vercel project is linked to the `develop` branch for staging.\n    *   In that staging project's Vercel settings, add the domain `staging.trvlsocial.com`.\n    *   Add the CNAME record provided by Vercel for this subdomain to the registrar's DNS settings.\n\n3.  **SSL Certificate Management:**\n    *   Vercel automatically provisions and renews Let's Encrypt SSL certificates for all connected domains. This step is to verify that the process completes successfully after DNS propagation.\n    *   Ensure that traffic is forced to HTTPS, which is the default behavior on Vercel and a prerequisite for the HSTS headers in Task 50.\n\n4.  **Email Authentication Records (SPF, DKIM, DMARC):**\n    *   To ensure email deliverability and security for the `@trvlsocial.com` domain (standardized in Task 35), add the following TXT records at the registrar:\n    *   **SPF:** Create a TXT record specifying authorized mail servers (e.g., Google Workspace, SendGrid). Example: `v=spf1 include:_spf.google.com ~all`.\n    *   **DKIM:** Generate a key from the email provider and add the corresponding TXT record (e.g., `selector._domainkey.trvlsocial.com`) with the public key value.\n    *   **DMARC:** Add a `_dmarc` TXT record to define policy. Start with a monitoring policy: `v=DMARC1; p=none; rua=mailto:dmarc-reports@trvlsocial.com;`.\n\n5.  **CDN Configuration Verification:**\n    *   By pointing the domains to Vercel, the application will automatically use Vercel's Global Edge Network as a CDN. No extra configuration is needed, but this should be verified.",
+        "testStrategy": "1.  **DNS Propagation and Domain Verification:**\n    *   Use an online tool like `dnschecker.org` to confirm that the A/CNAME records for `trvlsocial.com`, `www.trvlsocial.com`, and `staging.trvlsocial.com` point to Vercel's infrastructure globally.\n    *   Access `https://www.trvlsocial.com` and `https://staging.trvlsocial.com` in a browser. Verify the production site (from `main` branch) and staging site (from `develop` branch) load correctly.\n\n2.  **SSL and Redirect Testing:**\n    *   Inspect the SSL certificate in the browser for all three domains/subdomains to ensure it is valid and issued by Let's Encrypt.\n    *   Attempt to access `http://trvlsocial.com` and verify it redirects to `https://www.trvlsocial.com` (or the chosen canonical version).\n\n3.  **Email Authentication Validation:**\n    *   Use a service like MXToolbox to perform a lookup on `trvlsocial.com` and verify that the SPF, DKIM, and DMARC records are correctly configured and valid.\n    *   Send a test email from an `@trvlsocial.com` address to a verification service (e.g., mail-tester.com) and confirm it passes all authentication checks.\n\n4.  **CDN Cache Verification:**\n    *   Open browser developer tools, navigate to the Network tab, and load the production site. Inspect the response headers for static assets (CSS, JS, images) and look for the `x-vercel-cache: HIT` header to confirm the CDN is working.",
+        "status": "pending",
+        "dependencies": [
+          35,
+          38,
+          48
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Configure A Record for Apex Domain and CNAME for 'www' Subdomain",
+            "description": "In the production Vercel project (main branch), add the domains `trvlsocial.com` and `www.trvlsocial.com`. Then, update the DNS records at the registrar with the A record for the apex domain and the CNAME record for the 'www' subdomain provided by Vercel.",
+            "dependencies": [],
+            "details": "Log into the domain registrar for `trvlsocial.com`. In the Vercel project settings, add both domains. Copy the A record value for the apex domain (`@`) and the CNAME value for the `www` subdomain. Create these records in the registrar's DNS management panel.",
+            "status": "pending",
+            "testStrategy": "Use a tool like `dnschecker.org` to verify that the A record for `trvlsocial.com` points to Vercel's IP and the CNAME for `www.trvlsocial.com` points to `cname.vercel-dns.com`."
+          },
+          {
+            "id": 2,
+            "title": "Set Up Canonical Domain Redirect in Vercel",
+            "description": "After connecting both the apex and 'www' domains, configure a permanent redirect in Vercel to enforce a single canonical URL for the production site, improving SEO and user experience.",
+            "dependencies": [
+              "51.1"
+            ],
+            "details": "Within the Vercel project's 'Domains' settings, choose whether `www.trvlsocial.com` or `trvlsocial.com` will be the canonical domain. Set the other to perform a permanent (308) redirect to the canonical version.",
+            "status": "pending",
+            "testStrategy": "Navigate to the non-canonical domain (e.g., `trvlsocial.com`) in a browser and verify it automatically redirects to the canonical version (e.g., `https://www.trvlsocial.com`)."
+          },
+          {
+            "id": 3,
+            "title": "Configure CNAME Record for 'staging.trvlsocial.com'",
+            "description": "Connect the `staging.trvlsocial.com` subdomain to the Vercel project linked to the `develop` branch, as established in Task 48, to create a stable environment for testing.",
+            "dependencies": [],
+            "details": "In the Vercel project for the `develop` branch, add `staging.trvlsocial.com` as a domain. Copy the provided CNAME record value and add it to the `trvlsocial.com` DNS settings at the registrar.",
+            "status": "pending",
+            "testStrategy": "Use `dnschecker.org` to confirm the CNAME record for `staging.trvlsocial.com` has propagated correctly. Accessing `https://staging.trvlsocial.com` should load the application deployed from the `develop` branch."
+          },
+          {
+            "id": 4,
+            "title": "Verify SSL Certificate Provisioning and HTTPS Enforcement",
+            "description": "Confirm that Vercel has automatically provisioned Let's Encrypt SSL certificates for all configured domains (`www`, apex, and staging) and that all HTTP traffic is forced to HTTPS.",
+            "dependencies": [
+              "51.2",
+              "51.3"
+            ],
+            "details": "After DNS propagation, check the Vercel dashboard for each project to ensure the domains show a 'Valid Configuration' status with a valid SSL certificate. This step is a prerequisite for implementing HSTS headers (Task 50). Vercel's Edge Network (CDN) will be active by default.",
+            "status": "pending",
+            "testStrategy": "Access `http://www.trvlsocial.com` and `http://staging.trvlsocial.com` and verify they redirect to their `https://` counterparts. Use browser developer tools to inspect the certificate details for validity."
+          },
+          {
+            "id": 5,
+            "title": "Implement SPF and DKIM Email Authentication Records",
+            "description": "Add Sender Policy Framework (SPF) and DomainKeys Identified Mail (DKIM) records to the DNS to authenticate emails sent from `@trvlsocial.com`, preventing spoofing and improving deliverability.",
+            "dependencies": [],
+            "details": "Create TXT records at the registrar. For SPF, add a record for the root domain (`@`) specifying all authorized mail servers (e.g., `v=spf1 include:_spf.google.com include:sendgrid.net ~all`). For DKIM, generate keys from your email providers (e.g., Google Workspace, SendGrid) and add the corresponding TXT records with the provided selector and public key.",
+            "status": "pending",
+            "testStrategy": "Use an online tool like MXToolbox to perform an SPF and DKIM record lookup for `trvlsocial.com` to ensure they are valid and correctly formatted."
+          },
+          {
+            "id": 6,
+            "title": "Establish DMARC Email Policy Record",
+            "description": "Create a Domain-based Message Authentication, Reporting, and Conformance (DMARC) record to define the policy for unauthenticated emails and enable reporting.",
+            "dependencies": [
+              "51.5"
+            ],
+            "details": "Add a TXT record for `_dmarc.trvlsocial.com`. Begin with a monitoring-only policy to gather data without affecting mail flow. Example: `v=DMARC1; p=none; rua=mailto:dmarc-reports@trvlsocial.com;`. This requires setting up the specified email address to receive reports.",
+            "status": "pending",
+            "testStrategy": "Use an online DMARC checker to validate the syntax and presence of the `_dmarc` record for `trvlsocial.com`. Monitor the `dmarc-reports@trvlsocial.com` inbox for incoming aggregate reports."
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-09-13T20:13:47.735Z",
-      "updated": "2025-09-23T14:02:39.462Z",
+      "updated": "2025-09-23T14:36:16.642Z",
       "description": "Tasks for master context"
     }
   }

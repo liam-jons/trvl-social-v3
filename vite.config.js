@@ -305,16 +305,14 @@ export default defineConfig({
               return 'editor';
             }
 
-            // Chart and visualization libraries - recharts needs React, so include it in react-core
-            if (id.includes('recharts')) {
+            // Chart and visualization libraries - recharts and its d3 dependencies need React
+            if (id.includes('recharts') || id.includes('victory') || id.includes('d3')) {
               return 'react-core';
             }
-            if (id.includes('chart') || id.includes('d3') || id.includes('vis-') || id.includes('canvas')) {
-              return 'charts';
-            }
+            // Canvas libraries go to media-processing (already handled by html2canvas rule below)
 
-            // Media and file processing
-            if (id.includes('html2canvas') || id.includes('jspdf') || id.includes('image-') || id.includes('pdf-') || id.includes('canvas-')) {
+            // Media and file processing (including all canvas libraries)
+            if (id.includes('html2canvas') || id.includes('canvas') || id.includes('jspdf') || id.includes('image-') || id.includes('pdf-')) {
               return 'media-processing';
             }
 
