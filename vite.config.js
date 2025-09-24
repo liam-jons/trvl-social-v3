@@ -277,13 +277,14 @@ export default defineConfig({
             return 'mapbox';
           }
 
-          // CRITICAL FIX: Bundle ALL UI components with React to prevent initialization errors
+          // CRITICAL FIX: Bundle ALL UI components AND STORES with React to prevent initialization errors
           // This must come BEFORE the node_modules check to ensure proper bundling
           if (id.includes('src/components/ui/') ||
               id.includes('src/components/common/') ||
               id.includes('src/components/layout/') ||
               id.includes('src/components/adventure/') ||  // Added adventure components
-              id.includes('src/components/wishlist/')) {   // Added wishlist components
+              id.includes('src/components/wishlist/') ||   // Added wishlist components
+              id.includes('src/stores/')) {                // CRITICAL: Bundle all stores with React
             return 'react-core';
           }
 
