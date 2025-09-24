@@ -296,13 +296,17 @@ export default defineConfig({
           if (id.includes('node_modules')) {
             // Core React ecosystem - keep together for fast initial load
             // COMPREHENSIVE: Include ALL React-related libraries to avoid initialization issues
-            if (id.includes('/react') || id.includes('/react-') || id.includes('/@react') ||
-                id.includes('framer-motion') || id.includes('recharts') || id.includes('zustand')) {
+            // Match: react, react-*, @react*, *react* to catch ALL React dependencies
+            if (id.includes('react') || id.includes('@heroicons') || id.includes('@headlessui') ||
+                id.includes('lucide') || id.includes('@radix-ui') || id.includes('@stripe') ||
+                id.includes('framer-motion') || id.includes('recharts') || id.includes('zustand') ||
+                id.includes('@tiptap')) {
               return 'react-core';
             }
 
-            // Heavy analytics and monitoring libraries
-            if (id.includes('@sentry') || id.includes('@datadog') || id.includes('mixpanel') || id.includes('analytics')) {
+            // Heavy analytics and monitoring libraries (excluding @sentry/react which goes with React)
+            if ((id.includes('@sentry') && !id.includes('@sentry/react')) ||
+                id.includes('@datadog') || id.includes('mixpanel') || id.includes('analytics')) {
               return 'monitoring';
             }
 
@@ -347,10 +351,8 @@ export default defineConfig({
               return 'forms';
             }
 
-            // UI component libraries - MOVED TO REACT-CORE TO PREVENT INITIALIZATION ISSUES
-            if (id.includes('@headlessui') || id.includes('@heroicons') || id.includes('lucide') || id.includes('@radix-ui')) {
-              return 'react-core';  // Changed from 'ui-components' to 'react-core'
-            }
+            // UI component libraries - NOW HANDLED IN MAIN REACT CHECK ABOVE
+            // Removed duplicate check - all these libraries are now caught by the main React condition
 
             // Utility libraries
             if (id.includes('lodash') || id.includes('date-fns') || id.includes('uuid') || id.includes('clsx') || id.includes('classnames')) {
