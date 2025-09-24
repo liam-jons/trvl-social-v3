@@ -266,6 +266,8 @@ export default defineConfig({
         return false;
       },
       output: {
+        manualChunks: undefined, // TEMPORARY: Let Vite handle chunking automatically
+        /* DISABLED DUE TO INITIALIZATION ISSUES
         manualChunks: (id) => {
           // TensorFlow.js - separate into its own chunk for lazy loading
           if (id.includes('@tensorflow/tfjs') || id.includes('tensorflow')) {
@@ -420,7 +422,7 @@ export default defineConfig({
           if (id.includes('src/pages/adventures/')) {
             return 'adventures';
           }
-        }
+        } */
       }
     }
   },
