@@ -277,6 +277,16 @@ export default defineConfig({
             return 'mapbox';
           }
 
+          // CRITICAL FIX: Bundle ALL UI components with React to prevent initialization errors
+          // This must come BEFORE the node_modules check to ensure proper bundling
+          if (id.includes('src/components/ui/') ||
+              id.includes('src/components/common/') ||
+              id.includes('src/components/layout/') ||
+              id.includes('src/components/adventure/') ||  // Added adventure components
+              id.includes('src/components/wishlist/')) {   // Added wishlist components
+            return 'react-core';
+          }
+
           // Large node_modules dependencies - split by category
           if (id.includes('node_modules')) {
             // Core React ecosystem - keep together for fast initial load
@@ -331,9 +341,9 @@ export default defineConfig({
               return 'forms';
             }
 
-            // UI component libraries
+            // UI component libraries - MOVED TO REACT-CORE TO PREVENT INITIALIZATION ISSUES
             if (id.includes('@headlessui') || id.includes('@heroicons') || id.includes('lucide') || id.includes('@radix-ui')) {
-              return 'ui-components';
+              return 'react-core';  // Changed from 'ui-components' to 'react-core'
             }
 
             // Utility libraries
@@ -351,23 +361,12 @@ export default defineConfig({
           }
 
           // Application code chunks - organize by feature for better caching
-
-          // CRITICAL: Bundle all React UI components with React to prevent initialization errors
-          // This includes all our custom UI components that use React features like forwardRef, hooks, etc.
-          if (id.includes('src/components/ui/') ||
-              id.includes('src/components/common/') ||
-              id.includes('src/components/layout/')) {
-            return 'react-core';
-          }
+          // NOTE: UI components are already handled above before node_modules check
 
           // Admin features - split into logical groups
           if (id.includes('src/pages/admin/AdminDashboardPage')) {
             return 'admin-dashboard';
           }
-          // Admin components moved to vendor-components to prevent initialization order issues
-          // if (id.includes('src/components/admin/')) {
-          //   return 'admin-components';
-          // }
 
           // Vendor features - split by functionality
           if (id.includes('src/pages/vendor/VendorDashboardPage')) {
@@ -379,7 +378,7 @@ export default defineConfig({
           if (id.includes('src/pages/vendor/AdventureManagementPage')) {
             return 'vendor-adventures';
           }
-          // Vendor components and admin components (moved here to prevent initialization order issues)
+          // Vendor components and admin components
           if (id.includes('src/components/vendor/') || id.includes('src/components/admin/')) {
             return 'vendor-components';
           }
@@ -391,8 +390,8 @@ export default defineConfig({
             return 'quiz-ml';
           }
 
-          // Search and filtering
-          if (id.includes('src/pages/SearchPage') || id.includes('FilterPanel') || id.includes('search')) {
+          // Search and filtering - excluding adventure components which are in react-core
+          if (id.includes('src/pages/SearchPage') || (id.includes('search') && !id.includes('src/components/'))) {
             return 'search';
           }
 
@@ -411,8 +410,8 @@ export default defineConfig({
             return 'community';
           }
 
-          // Adventure browsing
-          if (id.includes('adventure') && !id.includes('vendor')) {
+          // Adventure pages only (components are in react-core)
+          if (id.includes('src/pages/adventures/')) {
             return 'adventures';
           }
         }
