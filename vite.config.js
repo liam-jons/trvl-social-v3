@@ -277,14 +277,18 @@ export default defineConfig({
             return 'mapbox';
           }
 
-          // CRITICAL FIX: Bundle ALL UI components AND STORES with React to prevent initialization errors
+          // CRITICAL FIX: Bundle ALL UI components, STORES, AND VENDOR/ADMIN CODE with React to prevent initialization errors
           // This must come BEFORE the node_modules check to ensure proper bundling
           if (id.includes('src/components/ui/') ||
               id.includes('src/components/common/') ||
               id.includes('src/components/layout/') ||
               id.includes('src/components/adventure/') ||  // Added adventure components
               id.includes('src/components/wishlist/') ||   // Added wishlist components
-              id.includes('src/stores/')) {                // CRITICAL: Bundle all stores with React
+              id.includes('src/stores/') ||                // CRITICAL: Bundle all stores with React
+              id.includes('src/components/vendor/') ||     // Bundle all vendor components
+              id.includes('src/components/admin/') ||      // Bundle all admin components
+              id.includes('src/pages/vendor/') ||          // Bundle all vendor pages
+              id.includes('src/pages/admin/')) {           // Bundle all admin pages
             return 'react-core';
           }
 
@@ -364,25 +368,23 @@ export default defineConfig({
           // Application code chunks - organize by feature for better caching
           // NOTE: UI components are already handled above before node_modules check
 
-          // Admin features - split into logical groups
-          if (id.includes('src/pages/admin/AdminDashboardPage')) {
-            return 'admin-dashboard';
-          }
-
-          // Vendor features - split by functionality
-          if (id.includes('src/pages/vendor/VendorDashboardPage')) {
-            return 'vendor-dashboard';
-          }
-          if (id.includes('src/pages/vendor/PayoutManagementPage') || id.includes('src/pages/vendor/BidRequestsPage')) {
-            return 'vendor-financial';
-          }
-          if (id.includes('src/pages/vendor/AdventureManagementPage')) {
-            return 'vendor-adventures';
-          }
-          // Vendor components and admin components
-          if (id.includes('src/components/vendor/') || id.includes('src/components/admin/')) {
-            return 'vendor-components';
-          }
+          // Admin and Vendor features - NOW BUNDLED WITH REACT-CORE
+          // Commenting out to prevent conflicts since these are now in react-core
+          // if (id.includes('src/pages/admin/AdminDashboardPage')) {
+          //   return 'admin-dashboard';
+          // }
+          // if (id.includes('src/pages/vendor/VendorDashboardPage')) {
+          //   return 'vendor-dashboard';
+          // }
+          // if (id.includes('src/pages/vendor/PayoutManagementPage') || id.includes('src/pages/vendor/BidRequestsPage')) {
+          //   return 'vendor-financial';
+          // }
+          // if (id.includes('src/pages/vendor/AdventureManagementPage')) {
+          //   return 'vendor-adventures';
+          // }
+          // if (id.includes('src/components/vendor/') || id.includes('src/components/admin/')) {
+          //   return 'vendor-components';
+          // }
 
           // Quiz and personality assessment - lazy load this heavy feature
           if (id.includes('src/pages/quiz/') || id.includes('src/components/quiz/') ||
