@@ -290,8 +290,8 @@ export default defineConfig({
           // Large node_modules dependencies - split by category
           if (id.includes('node_modules')) {
             // Core React ecosystem - keep together for fast initial load
-            // Include framer-motion, @react-spring, and recharts with React to avoid context issues
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router') || id.includes('framer-motion') || id.includes('@react-spring') || id.includes('recharts')) {
+            // Include framer-motion, @react-spring, recharts, and zustand with React to avoid context issues
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router') || id.includes('framer-motion') || id.includes('@react-spring') || id.includes('recharts') || id.includes('zustand')) {
               return 'react-core';
             }
 
