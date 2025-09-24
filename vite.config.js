@@ -352,6 +352,14 @@ export default defineConfig({
 
           // Application code chunks - organize by feature for better caching
 
+          // CRITICAL: Bundle all React UI components with React to prevent initialization errors
+          // This includes all our custom UI components that use React features like forwardRef, hooks, etc.
+          if (id.includes('src/components/ui/') ||
+              id.includes('src/components/common/') ||
+              id.includes('src/components/layout/')) {
+            return 'react-core';
+          }
+
           // Admin features - split into logical groups
           if (id.includes('src/pages/admin/AdminDashboardPage')) {
             return 'admin-dashboard';
