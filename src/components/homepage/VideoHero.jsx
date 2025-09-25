@@ -9,52 +9,61 @@ const VideoHero = () => {
   const videoRef = useRef(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [hasVideoError, setHasVideoError] = useState(false);
-  // Start with local video for immediate availability
-  const [videoSource, setVideoSource] = useState('/vecteezy_tranquil-lake-landscape-with-blue-water-and-cloudy-sky-in_65688460.mp4');
+  // Use Supabase URL in production, local file in development
+  const isProduction = window.location.hostname !== 'localhost';
+  const defaultVideoUrl = isProduction
+    ? 'https://vhecnqaejsukulaktjob.supabase.co/storage/v1/object/public/videos/hero/vecteezy_tranquil-lake-landscape-with-blue-water-and-cloudy-sky-in_65688460.mp4'
+    : '/vecteezy_tranquil-lake-landscape-with-blue-water-and-cloudy-sky-in_65688460.mp4';
+  const [videoSource, setVideoSource] = useState(defaultVideoUrl);
   const [attemptedSupabase, setAttemptedSupabase] = useState(false);
 
   useEffect(() => {
-    // Try to upgrade to Supabase video after initial mount
-    const upgradeToSupabase = async () => {
-      // Only attempt once
-      if (attemptedSupabase) return;
+    // Log the video source for debugging
+    console.log('Video source initialized:', videoSource);
+    console.log('Is production:', isProduction);
 
-      try {
-        const supabaseVideoUrl = getHeroVideoUrl();
-        console.log('Checking Supabase video availability:', supabaseVideoUrl);
+    let timer;
 
-        // Create a test video element to check if Supabase URL works
-        const testVideo = document.createElement('video');
-        testVideo.src = supabaseVideoUrl;
+    // Only try to upgrade in development when using local file
+    if (!isProduction && !attemptedSupabase) {
+      const upgradeToSupabase = async () => {
+        try {
+          const supabaseVideoUrl = getHeroVideoUrl();
+          console.log('Checking Supabase video availability:', supabaseVideoUrl);
 
-        testVideo.onloadedmetadata = () => {
-          console.log('Supabase video available, upgrading source');
-          setVideoSource(supabaseVideoUrl);
+          // Create a test video element to check if Supabase URL works
+          const testVideo = document.createElement('video');
+          testVideo.src = supabaseVideoUrl;
+
+          testVideo.onloadedmetadata = () => {
+            console.log('Supabase video available, upgrading source');
+            setVideoSource(supabaseVideoUrl);
+            setAttemptedSupabase(true);
+          };
+
+          testVideo.onerror = () => {
+            console.log('Supabase video not available, keeping local video');
+            setAttemptedSupabase(true);
+          };
+
+          // Set a timeout for the test
+          setTimeout(() => {
+            testVideo.src = '';
+            setAttemptedSupabase(true);
+          }, 5000);
+        } catch (error) {
+          console.log('Error checking Supabase video, using local:', error);
           setAttemptedSupabase(true);
-        };
+        }
+      };
 
-        testVideo.onerror = () => {
-          console.log('Supabase video not available, keeping local video');
-          setAttemptedSupabase(true);
-        };
-
-        // Set a timeout for the test
-        setTimeout(() => {
-          testVideo.src = '';
-          setAttemptedSupabase(true);
-        }, 5000);
-      } catch (error) {
-        console.log('Error checking Supabase video, using local:', error);
-        setAttemptedSupabase(true);
-      }
-    };
-
-    // Attempt upgrade after a short delay to not block initial render
-    const timer = setTimeout(upgradeToSupabase, 1000);
+      // Attempt upgrade after a short delay to not block initial render
+      timer = setTimeout(upgradeToSupabase, 1000);
+    }
 
     // Cleanup function to reset video state when component unmounts
     return () => {
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
       if (videoRef.current) {
         videoRef.current.removeEventListener('timeupdate', handleTimeUpdate);
         videoRef.current.pause();
