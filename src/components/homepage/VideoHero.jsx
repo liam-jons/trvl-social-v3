@@ -9,36 +9,52 @@ const VideoHero = () => {
   const videoRef = useRef(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [hasVideoError, setHasVideoError] = useState(false);
-  // Try Supabase first, fall back to local
-  const [videoSource, setVideoSource] = useState(null);
+  // Start with local video for immediate availability
+  const [videoSource, setVideoSource] = useState('/vecteezy_tranquil-lake-landscape-with-blue-water-and-cloudy-sky-in_65688460.mp4');
+  const [attemptedSupabase, setAttemptedSupabase] = useState(false);
 
   useEffect(() => {
-    // Set video source immediately
-    const initVideo = async () => {
+    // Try to upgrade to Supabase video after initial mount
+    const upgradeToSupabase = async () => {
+      // Only attempt once
+      if (attemptedSupabase) return;
+
       try {
         const supabaseVideoUrl = getHeroVideoUrl();
+        console.log('Checking Supabase video availability:', supabaseVideoUrl);
 
-        // Try to use Supabase video first
-        console.log('Attempting to use Supabase video:', supabaseVideoUrl);
-        setVideoSource(supabaseVideoUrl);
+        // Create a test video element to check if Supabase URL works
+        const testVideo = document.createElement('video');
+        testVideo.src = supabaseVideoUrl;
 
-        // Set up fallback in case of error
+        testVideo.onloadedmetadata = () => {
+          console.log('Supabase video available, upgrading source');
+          setVideoSource(supabaseVideoUrl);
+          setAttemptedSupabase(true);
+        };
+
+        testVideo.onerror = () => {
+          console.log('Supabase video not available, keeping local video');
+          setAttemptedSupabase(true);
+        };
+
+        // Set a timeout for the test
         setTimeout(() => {
-          if (!isVideoLoaded && !videoSource?.includes('supabase')) {
-            console.log('Falling back to local video');
-            setVideoSource('/vecteezy_tranquil-lake-landscape-with-blue-water-and-cloudy-sky-in_65688460.mp4');
-          }
-        }, 3000);
+          testVideo.src = '';
+          setAttemptedSupabase(true);
+        }, 5000);
       } catch (error) {
-        console.log('Using local video file');
-        setVideoSource('/vecteezy_tranquil-lake-landscape-with-blue-water-and-cloudy-sky-in_65688460.mp4');
+        console.log('Error checking Supabase video, using local:', error);
+        setAttemptedSupabase(true);
       }
     };
 
-    initVideo();
+    // Attempt upgrade after a short delay to not block initial render
+    const timer = setTimeout(upgradeToSupabase, 1000);
 
     // Cleanup function to reset video state when component unmounts
     return () => {
+      clearTimeout(timer);
       if (videoRef.current) {
         videoRef.current.removeEventListener('timeupdate', handleTimeUpdate);
         videoRef.current.pause();
@@ -46,7 +62,7 @@ const VideoHero = () => {
         videoRef.current.load();
       }
     };
-  }, [isVideoLoaded]);
+  }, []); // Empty dependency array - only run once on mount
 
   const handleVideoLoad = () => {
     setIsVideoLoaded(true);
