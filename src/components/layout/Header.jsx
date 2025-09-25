@@ -111,7 +111,7 @@ const Header = () => {
               </>
             ) : (
               <>
-                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                   TRVL
                 </span>
                 <span className="text-lg font-light">Social</span>

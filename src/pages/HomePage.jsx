@@ -1,95 +1,54 @@
 import { Link } from 'react-router-dom';
 import { Globe, Handshake, Sparkles, Users } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
 import GlassCard from '../components/ui/GlassCard';
 import GlassButton from '../components/ui/GlassButton';
-import LiveStreamFeed from '../components/video/LiveStreamFeed';
+import { VideoHero, HomepageAdventuresGrid } from '../components/homepage';
 
 const HomePage = () => {
-  const { isAuthenticated } = useAuth();
-
   return (
-    <div className="space-y-20">
-      {/* Hero Section */}
-      <section className="relative min-h-[600px] flex items-center justify-center text-center px-4">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Discover Your Next Adventure
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8">
-            Connect with fellow travelers, find amazing experiences, and create unforgettable memories
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            {isAuthenticated ? (
-              <>
-                <Link to="/adventures">
-                  <GlassButton variant="primary" size="lg">
-                    Browse Adventures
-                  </GlassButton>
-                </Link>
-                <Link to="/community">
-                  <GlassButton variant="secondary" size="lg">
-                    Join Community
-                  </GlassButton>
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link to="/register">
-                  <GlassButton variant="primary" size="lg">
-                    Get Started Free
-                  </GlassButton>
-                </Link>
-                <Link to="/login">
-                  <GlassButton variant="ghost" size="lg">
-                    Sign In
-                  </GlassButton>
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </section>
+    <div className="space-y-16 sm:space-y-20">
+      {/* Video Hero Section */}
+      <VideoHero />
 
-      {/* Live Streams Section */}
-      <section className="container mx-auto px-4">
-        <LiveStreamFeed maxStreams={4} />
+      {/* Adventures Grid Section */}
+      <section className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <HomepageAdventuresGrid />
       </section>
 
       {/* Features Grid */}
-      <section className="container mx-auto px-4">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+      <section className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12">
           Everything You Need for Your Journey
         </h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <GlassCard className="text-center p-6">
-            <Globe className="w-12 h-12 mx-auto mb-4 text-blue-500" />
-            <h3 className="text-xl font-semibold mb-2">Global Adventures</h3>
-            <p className="text-gray-600 dark:text-gray-300">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <GlassCard className="text-center p-4 sm:p-6">
+            <Globe className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-blue-500" />
+            <h3 className="text-lg sm:text-xl font-semibold mb-2">Global Adventures</h3>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed">
               Explore experiences from local hidden gems to worldwide destinations
             </p>
           </GlassCard>
 
-          <GlassCard className="text-center p-6">
-            <Handshake className="w-12 h-12 mx-auto mb-4 text-green-500" />
-            <h3 className="text-xl font-semibold mb-2">Travel Groups</h3>
-            <p className="text-gray-600 dark:text-gray-300">
+          <GlassCard className="text-center p-4 sm:p-6">
+            <Handshake className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-green-500" />
+            <h3 className="text-lg sm:text-xl font-semibold mb-2">Travel Groups</h3>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed">
               Find compatible travel companions based on personality and interests
             </p>
           </GlassCard>
 
-          <GlassCard className="text-center p-6">
-            <Sparkles className="w-12 h-12 mx-auto mb-4 text-purple-500" />
-            <h3 className="text-xl font-semibold mb-2">Trusted Vendors</h3>
-            <p className="text-gray-600 dark:text-gray-300">
+          <GlassCard className="text-center p-4 sm:p-6">
+            <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-purple-500" />
+            <h3 className="text-lg sm:text-xl font-semibold mb-2">Trusted Vendors</h3>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed">
               Book with verified adventure providers and local experts
             </p>
           </GlassCard>
 
-          <GlassCard className="text-center p-6">
-            <Users className="w-12 h-12 mx-auto mb-4 text-orange-500" />
-            <h3 className="text-xl font-semibold mb-2">Vibrant Community</h3>
-            <p className="text-gray-600 dark:text-gray-300">
+          <GlassCard className="text-center p-4 sm:p-6">
+            <Users className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-orange-500" />
+            <h3 className="text-lg sm:text-xl font-semibold mb-2">Vibrant Community</h3>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed">
               Share experiences, get tips, and connect with fellow adventurers
             </p>
           </GlassCard>
@@ -97,12 +56,12 @@ const HomePage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="container mx-auto px-4">
-        <GlassCard className="text-center p-12 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+      <section className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <GlassCard className="text-center p-6 sm:p-8 md:p-12 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">
             Ready to Start Your Adventure?
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed">
             Join thousands of travelers discovering amazing experiences and making lifelong connections
           </p>
           <Link to="/register">

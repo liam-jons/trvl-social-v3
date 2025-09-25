@@ -45,7 +45,8 @@
     "test-email:custom": "node scripts/test-email.js",
     "test:cors": "node scripts/test-cors.js",
     "test:cors:production": "node scripts/test-cors.js production",
-    "test:cors:simple": "node scripts/test-cors-simple.js"
+    "test:cors:simple": "node scripts/test-cors-simple.js",
+    "setup:video-bucket": "node scripts/setup-video-bucket.js"
   },
   "dependencies": {
     "@daily-co/daily-js": "^0.67.0",
