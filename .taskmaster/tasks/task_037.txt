@@ -1,0 +1,55 @@
+# Task ID: 37
+# Title: Legal Documentation Finalization for Production
+# Status: done
+# Dependencies: 32, 35
+# Priority: high
+# Description: Update Terms of Service, Privacy Policy, and Cookie Policy with production information, current dates, and proper legal compliance requirements.
+# Details:
+1. Terms of Service Updates:
+   - Update effective date to production launch date
+   - Review and update company contact information
+   - Ensure compliance with latest legal requirements
+   - Add specific clauses for social features and user-generated content
+   - Include payment processing terms and refund policies
+   - Add dispute resolution and governing law clauses
+
+2. Privacy Policy Comprehensive Review:
+   - Update data collection practices to match application features
+   - Include third-party service data sharing (Stripe, analytics)
+   - Add cookie usage and tracking descriptions
+   - Include user rights under GDPR, CCPA, and other regulations
+   - Detail data retention and deletion policies
+   - Add contact information for privacy concerns
+
+3. Cookie Policy Implementation:
+   - Categorize all cookies used (essential, analytics, marketing)
+   - Implement cookie consent management system
+   - Provide clear opt-out mechanisms
+   - Document third-party cookies from integrations
+
+4. Legal Compliance Verification:
+   - Review against COPPA requirements for age verification
+   - Ensure accessibility compliance (ADA, WCAG)
+   - Validate international compliance requirements
+   - Add required disclosures for social platform features
+
+# Test Strategy:
+1. Legal Review Process:
+   - Have legal counsel review all updated documents
+   - Verify compliance with applicable regulations
+   - Check industry-specific requirements
+
+2. Document Accessibility Testing:
+   - Verify documents are readable and accessible
+   - Test document navigation and search functionality
+   - Validate mobile responsiveness of legal pages
+
+3. Cookie Consent Testing:
+   - Test cookie consent flow on first visit
+   - Verify opt-out mechanisms function correctly
+   - Check cookie categorization accuracy
+
+4. Compliance Verification:
+   - Audit data collection practices match policy
+   - Verify age verification compliance
+   - Test user rights request procedures

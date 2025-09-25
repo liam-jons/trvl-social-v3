@@ -1,0 +1,96 @@
+# Task ID: 43
+# Title: Production Database Migration and Validation
+# Status: pending
+# Dependencies: 38, 2, 42
+# Priority: high
+# Description: Complete the verification and migration of the Supabase production database, including schema validation, RLS policies review, stored functions review, execution of data migration scripts, and removal of legacy trvl-social v1 artifacts.
+# Details:
+1. **Schema and Policy Validation:**
+   - Connect to the production database using credentials configured in Task 38.
+   - Run `supabase db diff --schema-only` to generate a diff between the local schema (`supabase/migrations`) and the live production database.
+   - Analyze the diff to identify any discrepancies in tables, columns, types, or constraints. The goal is to resolve all unexpected differences.
+   - Extract all Row Level Security (RLS) policies and stored functions from the production database for a security review. Compare them against the definitions in the codebase to ensure they are up-to-date and correctly implemented as per Task 2.
+
+2. **Data Migration Scripting:**
+   - Create a new Supabase migration file (e.g., `supabase migration new migrate_v1_data`).
+   - Write SQL scripts to transform and move data from any existing v1 tables into the new v3 schema. Pay close attention to data type conversions, foreign key relationships, and default values.
+   - This script must be developed and tested against a clone of the production database in a staging environment.
+
+3. **Legacy Artifact Cleanup:**
+   - Create a separate migration file (e.g., `supabase migration new cleanup_v1_artifacts`) that will be run *after* successful data migration.
+   - This script should contain `DROP TABLE IF EXISTS...` and `DROP FUNCTION IF EXISTS...` statements to completely remove all database objects related to the v1 application.
+
+4. **Execution Plan:**
+   - Schedule a maintenance window for the migration.
+   - Perform a full backup of the production database using `pg_dump` before applying any changes.
+   - Apply the schema alignment, data migration, and cleanup migrations sequentially using `supabase db push` or `supabase migration up`.
+   - Perform a final post-migration backup.
+
+# Test Strategy:
+1. **Staging Environment Rehearsal:**
+   - Create a complete clone of the production database in a dedicated staging environment.
+   - Execute the entire migration plan (validation, data migration, cleanup) on the staging clone. This serves as a full dry run to identify potential issues.
+
+2. **Data Integrity Validation:**
+   - Before and after running the data migration script in staging, run a suite of validation queries. 
+   - Use `COUNT(*)` on source and destination tables to ensure no data loss.
+   - Spot-check a dozen critical records (e.g., users with bookings, vendors with adventures) to verify correct data transformation.
+
+3. **RLS and Function Testing:**
+   - Using the `supabase-js` client against the migrated staging database, write a test suite to verify RLS policies. Authenticate as different user roles and attempt to access/modify data to confirm policies are enforced correctly.
+   - Directly invoke migrated database functions with sample data to ensure they produce the expected results.
+
+4. **Production Smoke Testing:**
+   - Immediately after the production migration is complete, run a small, critical subset of the data integrity validation queries.
+   - Manually perform critical user flows: user login, viewing a profile, searching for an adventure, and initiating a booking.
+   - Closely monitor Sentry and Datadog dashboards (configured in Task 40) for any spike in database-related errors post-migration.
+
+# Subtasks:
+## 1. Create Production Database Backup and Staging Clone [pending]
+### Dependencies: None
+### Description: Before any migration activities, perform a full backup of the production Supabase database. Use the backup to create an isolated staging environment that is a 1-to-1 clone of production for safe testing.
+### Details:
+Use `pg_dump` with the production database connection string to create a complete SQL backup file. Store this file securely. Then, create a new Supabase project for staging and restore the production data into it using `psql`. Document the exact `pg_dump` and `psql` commands used.
+
+## 2. Analyze Schema, RLS, and Function Differences [pending]
+### Dependencies: 43.1
+### Description: Connect to the production database and run a diff against the local `supabase/migrations` to identify all schema, RLS policy, and function discrepancies. This is a discovery and analysis task.
+### Details:
+Using the Supabase CLI, execute `supabase db diff --schema-only -f prod_diff`. This will generate a `prod_diff.sql` file. Manually review this file to categorize differences into: 1) Expected v1 legacy objects, 2) Unexpected schema drift on v3 tables, 3) Missing or incorrect RLS policies/functions. Document all findings.
+
+## 3. Create Schema Alignment Migration [pending]
+### Dependencies: 43.2
+### Description: Based on the analysis from the diff, create a new migration file to resolve any unintended schema drift and align the production database with the v3 schema defined in the local migration history.
+### Details:
+Create a new migration using `supabase migration new align_prod_schema`. Copy the necessary DDL statements (e.g., `ALTER TABLE`, `CREATE POLICY`) from the `prod_diff.sql` analysis file into this new migration. This script should only contain changes to bring existing v3 tables and policies in line with the codebase, not remove v1 artifacts yet.
+
+## 4. Develop V1 to V3 Data Migration Script [pending]
+### Dependencies: 43.3
+### Description: Create a new migration script to transform and move data from legacy v1 tables into the new v3 schema tables. This script must handle data type conversions and foreign key relationships.
+### Details:
+Generate a new migration file: `supabase migration new migrate_v1_data`. Write idempotent SQL `INSERT ... SELECT` statements to transfer data. For example: `INSERT INTO v3_profiles (id, username) SELECT user_id, user_name FROM v1_users ON CONFLICT (id) DO NOTHING;`. Pay close attention to transforming data types and mapping old foreign keys to new ones.
+
+## 5. Develop Legacy Artifact Cleanup Script [pending]
+### Dependencies: 43.4
+### Description: Create a final migration script that safely removes all legacy v1 database objects, including tables, functions, and types, after the data has been successfully migrated.
+### Details:
+Generate a new migration file: `supabase migration new cleanup_v1_artifacts`. Add `DROP TABLE IF EXISTS ... CASCADE;`, `DROP FUNCTION IF EXISTS ...;`, and `DROP TYPE IF EXISTS ...;` statements for all identified v1 objects. The `CASCADE` option is important for removing dependent objects.
+
+## 6. Optimize Indexes for V3 Tables [pending]
+### Dependencies: 43.4
+### Description: Analyze and create necessary indexes on the newly populated v3 tables to ensure optimal query performance for production workloads. This is critical after a large data migration.
+### Details:
+Use `EXPLAIN ANALYZE` on common application queries against the staging database to identify performance bottlenecks or sequential scans on large tables. Create a new migration file `supabase migration new optimize_v3_indexes`. Add `CREATE INDEX CONCURRENTLY ...` statements for foreign key columns and columns frequently used in `WHERE` clauses.
+
+## 7. Configure and Verify Production Connection Pooling [pending]
+### Dependencies: None
+### Description: Enable and configure Supabase's connection pooler (PgBouncer) for the production database to manage connections efficiently and prevent exhaustion under load.
+### Details:
+In the Supabase Dashboard for the production project, navigate to Database settings and enable the Connection Pooler. Configure the pool mode (likely 'transaction') and pool size according to expected traffic. Update the application's database connection string to use the pooler-specific port and URI. Also, update `supabase/config.toml` with a `[db.pooler]` section for local development parity.
+
+## 8. Document and Rehearse Migration and Rollback Plan [pending]
+### Dependencies: 43.1, 43.3, 43.4, 43.5, 43.6
+### Description: Create a detailed, step-by-step execution plan for the production migration. Document the rollback procedure and perform a full end-to-end rehearsal on the staging environment.
+### Details:
+Create a markdown document (`MIGRATION_PLAN.md`) that lists the exact sequence of commands to be run during the maintenance window (e.g., enable maintenance mode, run `pg_dump`, apply migrations, disable maintenance mode). The rollback plan must detail how to restore the database from the backup. Execute this entire plan, including a simulated failure and rollback, on the staging clone.
+

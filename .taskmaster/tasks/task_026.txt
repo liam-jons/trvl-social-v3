@@ -1,0 +1,11 @@
+# Task ID: 26
+# Title: Download company logo from Supabase storage
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Download the 5Ccompany_logo_sm.webp file from Supabase storage and save locally
+# Details:
+
+
+# Test Strategy:
+

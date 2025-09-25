@@ -1,0 +1,110 @@
+# Task ID: 45
+# Title: CI/CD Pipeline with GitHub Actions
+# Status: pending
+# Dependencies: 44, 42, 38, 34
+# Priority: high
+# Description: Implement a comprehensive continuous integration and deployment pipeline with GitHub Actions including build verification, automated testing, staging deployment, and production deployment with approvals.
+# Details:
+Create a set of GitHub Actions workflows in the `.github/workflows/` directory to automate the build, test, and deployment lifecycle. The pipeline will have distinct jobs for different stages and environments, leveraging GitHub Environments and Secrets for configuration.
+
+1.  **CI Workflow (`ci.yml`):**
+    *   **Trigger:** On `pull_request` to the `main` and `develop` branches.
+    *   **Jobs:**
+        *   `lint`: Run `npm run lint` to enforce code style.
+        *   `unit-tests`: Run `npm run test` to execute Jest unit and integration tests.
+        *   `e2e-tests`: Run `npm run cypress:run` to execute the Cypress end-to-end test suite. This job must start a preview of the application.
+        *   `build-check`: Run `npm run build` to verify the Next.js application builds successfully without errors. It should use environment variables from `.env.example` as defined in Task 44.
+
+2.  **Staging Deployment Workflow (`deploy-staging.yml`):**
+    *   **Trigger:** On `push` to the `develop` branch.
+    *   **Environment:** Use a GitHub Environment named `staging`.
+    *   **Secrets:** Configure secrets for the staging environment (e.g., `STAGING_SUPABASE_URL`, `STAGING_SUPABASE_ANON_KEY`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `VERCEL_TOKEN`).
+    *   **Jobs:**
+        *   `deploy-staging`: Depends on the CI workflow passing for the commit.
+        *   **Step 1: DB Migration:** Run Supabase migrations against the staging database. Use the Supabase CLI: `npx supabase db push`.
+        *   **Step 2: Deploy to Vercel:** Deploy the application to the staging Vercel project. Use the Vercel CLI or the official Vercel GitHub Action.
+
+3.  **Production Deployment Workflow (`deploy-production.yml`):**
+    *   **Trigger:** On `push` to the `main` branch.
+    *   **Environment:** Use a GitHub Environment named `production` with a required approver.
+    *   **Secrets:** Use production-level secrets as established in Task 34 and Task 38.
+    *   **Jobs:**
+        *   `deploy-production`: This job will pause for manual approval before running.
+        *   **Step 1: DB Migration:** Run Supabase migrations against the production database as defined in Task 42. This is a critical step and must be idempotent.
+        *   **Step 2: Deploy to Vercel:** Deploy the application to the production Vercel project.
+
+4.  **Rollback Mechanism:**
+    *   Document the rollback procedure in `DEPLOYMENT.md`. For the application, this involves promoting a previous successful deployment via the Vercel dashboard. For the database, document the process for reverting migrations using the Supabase CLI, which should be reserved for critical emergencies.
+
+# Test Strategy:
+1.  **CI Validation:**
+    *   Create a pull request with a linting error; verify the `lint` job fails and blocks the PR.
+    *   Create a pull request with a failing unit test; verify the `unit-tests` job fails.
+    *   Create a pull request with a breaking change for an E2E test; verify the `e2e-tests` job fails.
+
+2.  **Staging Deployment Validation:**
+    *   Merge a feature branch into `develop`.
+    *   Confirm the `deploy-staging.yml` workflow is triggered automatically.
+    *   Verify that the Supabase migration step completes successfully by checking the staging database schema.
+    *   Access the staging URL to confirm the new feature is deployed and functional.
+
+3.  **Production Deployment Validation:**
+    *   Merge `develop` into `main`.
+    *   Verify the `deploy-production` workflow is triggered but pauses for approval.
+    *   As the designated approver, approve the deployment and confirm the job proceeds.
+    *   Verify the production site is updated and fully functional.
+    *   Perform a test where the approval is rejected and confirm the deployment does not proceed.
+
+4.  **Rollback Test (Staging):**
+    *   Manually trigger a rollback in the staging Vercel project by promoting the previously active deployment.
+    *   Verify the staging URL reverts to the previous version.
+
+# Subtasks:
+## 1. Create Foundational CI Workflow (`ci.yml`) [pending]
+### Dependencies: None
+### Description: Create the initial `.github/workflows/ci.yml` file. This workflow will trigger on pull requests to the `main` and `develop` branches. It should include basic setup steps like checking out the code, setting up Node.js, and caching npm dependencies.
+### Details:
+In `.github/workflows/`, create `ci.yml`. Configure the `on: pull_request` trigger for `branches: [main, develop]`. Define a base job structure that uses `actions/checkout@v4` and `actions/setup-node@v4` with a specified Node.js version (e.g., 20.x). Implement dependency caching using `actions/cache@v4` for the `.npm` directory and run `npm ci` to install dependencies.
+
+## 2. Add Lint and Unit Test Jobs to `ci.yml` [pending]
+### Dependencies: 45.1
+### Description: Extend the `ci.yml` workflow to include two parallel jobs: `lint` and `unit-tests`. These jobs will run the respective npm scripts to ensure code quality and test coverage.
+### Details:
+In `ci.yml`, add a `lint` job that runs the `npm run lint` command. Add a separate `unit-tests` job that runs `npm run test`. Both jobs should inherit the setup steps from the foundational workflow or repeat them. Ensure they run in parallel after the initial setup.
+
+## 3. Add Build Check and E2E Test Jobs to `ci.yml` [pending]
+### Dependencies: 45.1
+### Description: Add two more jobs to `ci.yml`: `build-check` to verify the Next.js application builds successfully, and `e2e-tests` to run the Cypress test suite against a preview of the application.
+### Details:
+Add a `build-check` job that runs `npm run build`. For the `e2e-tests` job, use a tool like `start-server-and-test` to build the app, start a preview server (`npm start`), and then run `npm run cypress:run`. This job will require environment variables; use the contents of `.env.example` for the preview build.
+
+## 4. Create Staging Deployment Workflow (`deploy-staging.yml`) [pending]
+### Dependencies: None
+### Description: Create a new workflow file `.github/workflows/deploy-staging.yml` that triggers on pushes to the `develop` branch. This workflow will handle database migrations and deploy the application to the Vercel staging environment.
+### Details:
+Create the workflow to trigger on `push: branches: [develop]`. Define a GitHub Environment named `staging`. The `deploy-staging` job will first install the Supabase CLI and run `npx supabase db push` using staging database secrets. Then, it will use the Vercel CLI (`vercel --token=$VERCEL_TOKEN --prod --yes`) or the official Vercel Action to deploy the project. Configure `STAGING_SUPABASE_URL`, `STAGING_SUPABASE_ANON_KEY`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, and `VERCEL_TOKEN` as secrets in the `staging` environment.
+
+## 5. Create Production Deployment Workflow with Approval (`deploy-production.yml`) [pending]
+### Dependencies: None
+### Description: Create `.github/workflows/deploy-production.yml` for deployments to the `main` branch. This workflow will require manual approval before running database migrations and deploying to the production Vercel project.
+### Details:
+Create the workflow to trigger on `push: branches: [main]`. Define a GitHub Environment named `production` and configure it to require an approver. The `deploy-production` job will use this environment. Once approved, the job will run `npx supabase db push` against the production database, followed by a Vercel deployment using production secrets. This ensures a human gate before production changes.
+
+## 6. Integrate Dependency Security Scanning into CI [pending]
+### Dependencies: 45.1
+### Description: Add a security scanning job to the `ci.yml` workflow to automatically check for vulnerabilities in project dependencies on every pull request.
+### Details:
+In `ci.yml`, add a new job named `security-scan`. This job will use the `actions/dependency-review-action` to check for vulnerable dependencies based on the GitHub Advisory Database. Configure it to fail the check if any vulnerabilities are found, preventing the merging of insecure code.
+
+## 7. Integrate Lighthouse Performance Checks into CI [pending]
+### Dependencies: 45.3
+### Description: Add a job to the `ci.yml` workflow that runs Lighthouse performance audits against the application preview generated during the E2E tests.
+### Details:
+In `ci.yml`, add a new job `lighthouse-check` that `needs: e2e-tests`. Since the E2E job already builds and serves the application, this job can run in parallel or after. Use the `treosh/lighthouse-ci-action` or a similar action. Configure it to run against the local server (`http://localhost:3000`) and set performance budgets. The action should upload the results as a build artifact and can be configured to comment on the PR.
+
+## 8. Document Rollback Procedures in `DEPLOYMENT.md` [pending]
+### Dependencies: None
+### Description: Create a `DEPLOYMENT.md` file in the project root to document the manual rollback procedures for both the Vercel application and the Supabase database.
+### Details:
+Create a new file named `DEPLOYMENT.md`. For Vercel, document the process of promoting a previous successful deployment to production via the Vercel dashboard. For Supabase, explain the emergency procedure for reverting a migration. This may involve using `supabase db diff --schema-only` to generate a revert script or restoring from a backup. Emphasize that database rollbacks are high-risk and for emergencies only.
+

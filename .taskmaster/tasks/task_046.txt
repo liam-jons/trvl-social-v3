@@ -1,0 +1,104 @@
+# Task ID: 46
+# Title: Implement GDPR/COPPA Data Portability and Erasure Features
+# Status: pending
+# Dependencies: 3, 2, 32, 12, 43
+# Priority: high
+# Description: Implement comprehensive data privacy features allowing users to export their personal data and permanently delete their accounts, ensuring compliance with GDPR 'Right to be Forgotten' and 'Right to Data Portability'.
+# Details:
+1. **UI Implementation in User Settings:**
+   - Create a new 'Data & Privacy' section within the user profile management area.
+   - Add a button to 'Request Data Export'. On click, this should trigger an API call and show a confirmation message that the export is being processed and will be emailed.
+   - Add a 'Delete Account' button. This must open a confirmation modal requiring the user to type their username or a specific phrase to confirm, preventing accidental deletion.
+   - Build a 'Consent Management' panel where users can granularly opt-in/out of analytics tracking (Mixpanel), marketing communications, and other data processing activities, building on the initial work in Task #12.
+
+2. **Data Export Functionality (Right to Portability):**
+   - Create a new Supabase Edge Function named `data-export-request`.
+   - This function, triggered from the UI, will queue a background job to prevent request timeouts. The job will query all user-related data from tables like `profiles`, `bookings`, `community_posts`, `reviews`, `trip_requests`, `community_connections`, etc., linked to the user's ID.
+   - The job must also gather URLs of user-uploaded files from Supabase Storage (e.g., avatars, post media).
+   - Consolidate all collected data into a single, machine-readable JSON file.
+   - Upload the generated JSON file to a secure, private Supabase Storage bucket.
+   - Generate a short-lived signed URL for the file and email it to the user.
+
+3. **Account Deletion Functionality (Right to be Forgotten/Erasure):**
+   - Create a new Supabase Edge Function named `account-deletion-request`, which requires re-authentication for security.
+   - **Primary Deletion:** The function will call `supabase.auth.admin.deleteUser(userId, shouldSoftDelete = false)` to permanently remove the user from `auth.users`.
+   - **Database Cascades & Anonymization:**
+      - Review and update the database schema (from Task #2) to ensure all foreign key constraints referencing `auth.users.id` are set to `ON DELETE CASCADE`. This will automatically delete most user-specific records (e.g., `profiles`, `bookings`).
+      - For user-generated content that should persist for community integrity (e.g., `community_posts`, `reviews`), create a database trigger on `auth.users` that runs `BEFORE DELETE`. This trigger will update the relevant records, setting the `user_id` to `NULL` or a dedicated 'anonymous_user' ID to anonymize the content instead of deleting it.
+   - **Third-Party Data Erasure:** The Edge Function must orchestrate deletion requests to integrated third-party services:
+      - **Stripe (Task #10):** Call the Stripe API to delete the corresponding Customer object.
+      - **Mixpanel (Task #12):** Call the Mixpanel API to delete the user's profile.
+      - **Sentry/Datadog (Task #12, #40):** Ensure user identifiers are disassociated from future error/performance reports.
+
+4. **Data Retention Policy Automation:**
+   - Formalize a data retention policy (e.g., delete accounts inactive for 24 months).
+   - Implement this policy using a `pg_cron` job within Supabase. The cron job will run a stored procedure monthly to identify accounts meeting the inactivity criteria and trigger the same `account-deletion-request` logic for each one.
+
+# Test Strategy:
+1. **Data Export Verification:**
+   - Write an integration test for the `data-export-request` function that mocks database queries and verifies a JSON file is generated and a signed URL is created.
+   - Manually trigger an export for a test user. Verify the email is received and the downloaded JSON file contains all expected data from profile, posts, bookings, etc.
+
+2. **Account Deletion E2E Test:**
+   - Create a test user and generate associated data: a profile, a community post, a booking, and a review.
+   - Initiate the account deletion flow through the UI, including the confirmation step.
+   - **Verification:**
+      - Attempt to log in as the deleted user; it must fail.
+      - Query the `auth.users` table; the user must be gone.
+      - Query related tables (`profiles`, `bookings`); the records must be deleted via `CASCADE`.
+      - Query the `community_posts` and `reviews` tables; the records should still exist but with the `user_id` field set to `NULL` (anonymized).
+      - Check the Stripe and Mixpanel dashboards (in a test environment) to confirm the corresponding customer/profile has been deleted.
+
+3. **Database and Policy Testing:**
+   - Write unit tests for the `BEFORE DELETE` trigger using the Supabase test framework to ensure it correctly anonymizes content.
+   - Manually execute the `pg_cron` job in a staging environment with back-dated user data to verify that it correctly identifies and deletes inactive accounts.
+
+# Subtasks:
+## 1. Create 'Data & Privacy' UI in User Settings [pending]
+### Dependencies: None
+### Description: Establish the user-facing interface for all data privacy features. This involves creating a new settings page and adding the necessary buttons and layout, which will be wired up in subsequent tasks.
+### Details:
+Modify `src/app/(app)/settings/layout.tsx` to add a new navigation link named 'Data & Privacy' pointing to `/settings/privacy`. Create the corresponding page file at `src/app/(app)/settings/privacy/page.tsx`. This page should include two sections with placeholder buttons: 'Request Data Export' under a 'Data Portability' heading, and 'Delete Account' under an 'Account Erasure' heading. Use existing UI components from `src/components/ui` for consistency.
+
+## 2. Implement 'Delete Account' Confirmation Modal [pending]
+### Dependencies: 46.1
+### Description: Build a secure confirmation modal to prevent accidental account deletion. This is a critical safety feature that requires explicit user confirmation.
+### Details:
+Create a new component, `DeleteAccountModal`, using the existing `Modal` component from `src/components/ui/modal.tsx`. The modal must contain a text input field where the user is required to type their username to enable the final 'Permanently Delete' button. The modal will be triggered by the 'Delete Account' button on the `/settings/privacy` page. The final delete button's `onClick` handler will initially log to the console, to be replaced later with an API call.
+
+## 3. Create `data-export-request` Edge Function for Data Aggregation [pending]
+### Dependencies: None
+### Description: Develop the backend function to gather all of a user's personal data from the database and Supabase Storage in preparation for export.
+### Details:
+Create a new Supabase Edge Function at `supabase/functions/data-export-request/index.ts`. This function must be authenticated. Using the admin client (`supabase/functions/shared/supabase-admin-client.ts`), query all data linked to the authenticated user's ID from tables such as `profiles`, `bookings`, `community_posts`, `reviews`, and `trip_requests`. Additionally, list all files associated with the user from Supabase Storage buckets. Consolidate all this information into a single structured JavaScript object.
+
+## 4. Implement Export File Generation and Email Notification [pending]
+### Dependencies: 46.3
+### Description: Complete the data export flow by packaging the aggregated data into a JSON file, uploading it, and notifying the user via email with a secure download link.
+### Details:
+Extend the `data-export-request` function. After aggregating the data, convert the object to a JSON string. Upload this JSON file to a new, private Supabase Storage bucket named `user-data-exports`. Generate a signed URL for the uploaded file with a short expiration (e.g., 24 hours). Finally, use an email service (e.g., Resend) to send an email to the user's address containing the secure, time-limited download link.
+
+## 5. Configure Database Schema for Content Anonymization [pending]
+### Dependencies: None
+### Description: Update database foreign key constraints to ensure that when a user is deleted, their personal records are removed while community-generated content is preserved but anonymized.
+### Details:
+Create a new database migration file in `supabase/migrations/`. Analyze tables with foreign keys referencing `public.profiles(id)` or `auth.users(id)`, such as `community_posts` and `reviews`. For tables where content should be anonymized rather than deleted, modify the foreign key constraint to use `ON DELETE SET NULL`. For tables containing direct personal data (e.g., `bookings`), ensure the constraint is `ON DELETE CASCADE`. Apply these changes using `ALTER TABLE` statements in the migration.
+
+## 6. Create `account-deletion-request` Edge Function [pending]
+### Dependencies: 46.2, 46.5
+### Description: Implement the core backend logic for permanently deleting a user from Supabase authentication and triggering cascaded data removal.
+### Details:
+Create a new Supabase Edge Function at `supabase/functions/account-deletion-request/index.ts`. This function must be authenticated. It should retrieve the user's ID from the JWT. For security, it should verify a recent sign-in or require re-authentication. Using the admin client, call `supabase.auth.admin.deleteUser(userId, shouldSoftDelete = false)`. Wire this function up to the 'Permanently Delete' button in the `DeleteAccountModal` component.
+
+## 7. Integrate Third-Party Data Erasure (Stripe, Mixpanel) [pending]
+### Dependencies: 46.6
+### Description: Extend the account deletion process to send erasure requests to integrated third-party services, ensuring full data removal across all platforms.
+### Details:
+Modify the `account-deletion-request` Edge Function. Before deleting the Supabase user, retrieve the user's `stripe_customer_id` from their profile. If it exists, call the Stripe API to delete the Customer object. Similarly, use the user's ID to call the Mixpanel API to delete their user profile, referencing the existing integration in `src/lib/analytics.ts`. Wrap these calls in try/catch blocks to prevent failure in one service from halting the entire deletion process.
+
+## 8. Build UI for Consent Management [pending]
+### Dependencies: 46.1
+### Description: Implement a user-facing panel for granularly managing consent for data processing activities like analytics and marketing communications.
+### Details:
+On the `/settings/privacy` page, create a 'Consent Management' section. Add UI controls (e.g., Switches) for options such as 'Allow Analytics Tracking' and 'Receive Marketing Emails'. These controls should read their initial state from corresponding boolean columns (e.g., `allow_analytics`, `allow_marketing`) on the user's `profiles` table. When a user toggles a switch, call a Supabase RPC function to update the value in their profile.
+

@@ -1,0 +1,11 @@
+# Task ID: 20
+# Title: Update PWA icons to use company logo
+# Status: done
+# Dependencies: 30
+# Priority: high
+# Description: Update PWA manifest and all icon references to use the company logo from Supabase storage (5Ccompany_logo_sm.webp)
+# Details:
+
+
+# Test Strategy:
+

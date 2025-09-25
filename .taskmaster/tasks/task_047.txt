@@ -1,0 +1,96 @@
+# Task ID: 47
+# Title: Unit Testing and Test Coverage Improvement
+# Status: pending
+# Dependencies: 45, 44, 12
+# Priority: high
+# Description: Systematically fix failing unit tests and increase overall test coverage from 65% to over 95% by enhancing unit, component, and integration tests, establishing an E2E testing suite, and implementing standardized mocking strategies.
+# Details:
+1. **Initial Analysis and Configuration:**
+   - Execute `npm test -- --coverage` to generate a baseline report and identify low-coverage areas.
+   - Systematically debug and fix all currently failing tests identified in the CI pipeline (from Task 45).
+   - Update `jest.config.js` to set a global coverage threshold: `coverageThreshold: { global: { branches: 95, functions: 95, lines: 95, statements: 95 } }`. This will enforce the quality standard on all future pull requests.
+
+2. **Standardize Mocking Strategies:**
+   - Integrate **Mock Service Worker (MSW)** to create a mock API layer. Create handlers in `src/mocks/handlers.js` for key API routes (e.g., auth, adventures, bookings) to ensure components can be tested in isolation.
+   - For Supabase client interactions in service-level unit tests, use `jest.mock('@supabase/supabase-js', ...)` to provide mock implementations. Create reusable data factories using `@faker-js/faker` for generating consistent test data (e.g., `userFactory`, `adventureFactory`).
+   - Document the new mocking strategy in a `TESTING.md` file in the project root.
+
+3. **Unit & Integration Test Expansion (Jest & React Testing Library):**
+   - Prioritize writing tests for critical business logic in `src/services/` and `src/lib/`, such as the age verification service (Task 32), data portability functions (Task 46), and ML-related services (Task 39).
+   - Write integration tests for all Next.js API routes in `src/pages/api/`. Use a library like `next-test-api-route-handler` to test request validation, business logic, and response status codes.
+   - Increase component test coverage using `@testing-library/react` and `@testing-library/user-event`. Focus on components with complex user interaction, such as forms, modals, and data-dependent UI from tasks like the user settings (Task 46) and registration (Task 3).
+
+4. **End-to-End (E2E) Test Suite Implementation (Cypress):**
+   - Formalize the E2E test setup from Task 45. Configure `cypress.config.ts` with a `baseUrl` and environment variables for testing.
+   - Create custom Cypress commands in `cypress/support/commands.ts` for common actions like `cy.login()` and `cy.logout()` to streamline test authoring.
+   - Implement E2E tests for critical user flows: User Registration, Login/Logout, Profile Management, Adventure Search and Booking, and Data Privacy actions (Export/Delete Account from Task 46).
+
+5. **Continuous Test Monitoring and Reporting:**
+   - Integrate **Codecov** (or a similar service) into the `ci.yml` workflow from Task 45. Configure it to upload coverage reports on each run.
+   - Configure the Codecov GitHub App to post coverage reports as comments on pull requests, highlighting coverage changes and blocking merges if coverage drops below the defined threshold.
+
+# Test Strategy:
+1. **CI/CD Integration Verification:**
+   - Create a PR that introduces code with insufficient test coverage; verify the Codecov check fails and blocks the merge.
+   - Create a PR with a failing E2E test; verify the `e2e-tests` job in GitHub Actions fails and correctly uploads video/screenshot artifacts for debugging.
+
+2. **Mocking Strategy Validation:**
+   - Run the component test suite while the local development server is offline. Verify that tests relying on MSW still pass, confirming API requests are being correctly intercepted.
+   - In a service unit test, assert that the mocked Supabase client function was called, confirming module-level mocking is working as expected.
+
+3. **E2E Suite Validation:**
+   - Execute the full Cypress suite locally via `npx cypress open`. Verify that all critical user flow tests pass against a running instance of the application.
+
+4. **Coverage Goal Confirmation:**
+   - After merging several PRs with new tests, check the project's dashboard on Codecov to confirm the overall coverage is trending towards and has met the 95% target.
+   - Locally, run `npm test -- --coverage` and inspect the generated HTML report in `coverage/lcov-report/index.html` to manually audit any remaining untested files or code branches.
+
+# Subtasks:
+## 1. Analyze Test Failures, Generate Baseline Coverage, and Configure Threshold [pending]
+### Dependencies: None
+### Description: Execute the test suite to identify all failing tests. Generate an initial code coverage report to establish a baseline and identify areas with the lowest coverage. Update the Jest configuration to enforce a strict 95% coverage threshold.
+### Details:
+Run `npm test -- --coverage` to get a list of failing tests and a baseline coverage report. In `jest.config.js`, add the `coverageThreshold` object: `coverageThreshold: { global: { branches: 95, functions: 95, lines: 95, statements: 95 } }`. This will cause the test runner to fail if coverage drops below the target, enforcing the new standard.
+
+## 2. Fix Failing React Component and Hook Tests [pending]
+### Dependencies: 47.1
+### Description: Systematically debug and resolve failures in existing React component (`*.test.tsx`) and hook (`*.test.ts`) tests. Failures are likely due to missing mock providers (React Query, Auth Context) or incorrect asynchronous handling.
+### Details:
+Create a reusable `test-utils.tsx` file that exports a custom `render` function. This function should wrap the tested component with all necessary context providers (e.g., `QueryClientProvider`, `AuthProvider`). Refactor failing tests to use this new utility to ensure a consistent and correct rendering environment.
+
+## 3. Standardize API and Supabase Mocking Strategy [pending]
+### Dependencies: None
+### Description: Implement a standardized mocking strategy. Use Mock Service Worker (MSW) for API requests in component/integration tests and `jest.mock` for the Supabase client in service-level unit tests.
+### Details:
+Populate `src/mocks/handlers.js` with MSW handlers for key API endpoints like `/api/auth/user`, `/api/adventures`, and `/api/bookings`. For service tests (e.g., `auth.service.test.ts`), use `jest.mock('@supabase/supabase-js', ...)` to create a mock Supabase client, allowing for precise control over database responses without making network requests.
+
+## 4. Increase Test Coverage for Services and Libraries [pending]
+### Dependencies: 47.3
+### Description: Write comprehensive unit tests for critical business logic located in `src/services/` and `src/lib/`. Focus on achieving near-100% coverage for these modules.
+### Details:
+Using the standardized Supabase mock from the previous subtask, write unit tests for all functions in `src/services/`. Prioritize services related to recent features, such as the age verification service (Task 32), data portability functions (Task 46), and any ML-related services (Task 39). Ensure all logical branches and error states are tested.
+
+## 5. Implement Integration Tests for Next.js API Routes [pending]
+### Dependencies: 47.3
+### Description: Create integration tests for all API routes in `src/pages/api/` to validate request handling, business logic execution, and response accuracy.
+### Details:
+Install `next-test-api-route-handler`. For each file in `src/pages/api/`, create a corresponding `*.test.ts` file. Write tests that simulate different HTTP methods (GET, POST, etc.) and payloads to test input validation (Zod schemas), successful logic execution, and correct HTTP status codes and response bodies for both success and error cases.
+
+## 6. Establish E2E Test Suite with Cypress for Critical User Flows [pending]
+### Dependencies: None
+### Description: Configure and implement an end-to-end (E2E) test suite using Cypress to validate critical user journeys from the user's perspective.
+### Details:
+In `cypress.config.ts`, set the `baseUrl` to `http://localhost:3000`. In `cypress/support/commands.ts`, create a custom `cy.login()` command that programmatically authenticates a test user to speed up tests. Implement E2E test files (`*.cy.ts`) for: User Registration, Login/Logout, Profile Update, Adventure Search, and the Account Data Export/Delete flow from Task 46.
+
+## 7. Integrate Codecov Reporting and Merge Gates in CI [pending]
+### Dependencies: 47.1
+### Description: Enhance the GitHub Actions workflow to upload coverage reports to Codecov and configure Codecov to block pull requests that decrease coverage or fail to meet the 95% threshold.
+### Details:
+In `.github/workflows/ci.yml`, ensure the `codecov/codecov-action` step is correctly configured with a `CODECOV_TOKEN` secret. In the Codecov web UI for the repository, configure the GitHub App integration to post a comment on pull requests detailing coverage changes. Set up a status check that fails if coverage drops or is below the 95% global target, and make this a required check for merging to the main branch.
+
+## 8. Final Coverage Push and Create TESTING.md [pending]
+### Dependencies: 47.2, 47.4, 47.5
+### Description: Address remaining low-coverage areas, particularly in UI components, to surpass the 95% total coverage goal. Document the established testing and mocking strategies in a new `TESTING.md` file.
+### Details:
+Run `npm test -- --coverage` one last time and analyze the report. Write simple render tests for presentational components in `src/components/ui/` that are still below the threshold. Once the 95% goal is achieved across the board, create a `TESTING.md` file in the project root. Document the purpose of Jest/RTL, MSW, and Cypress, and provide clear instructions on how to write new tests using the `test-utils.tsx` helper and mock handlers.
+

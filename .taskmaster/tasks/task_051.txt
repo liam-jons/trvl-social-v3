@@ -1,0 +1,85 @@
+# Task ID: 51
+# Title: Domain Configuration and DNS Setup for trvlsocial.com
+# Status: pending
+# Dependencies: 35, 38, 48
+# Priority: high
+# Description: Configure the trvlsocial.com domain's DNS records to connect to Vercel for production and staging, set up SSL, and establish email authentication records (SPF, DKIM, DMARC).
+# Details:
+This task involves configuring all DNS settings for the `trvlsocial.com` domain at the registrar level to point to the Vercel-hosted application environments and to authenticate email services.
+
+1.  **Vercel Production Domain Connection:**
+    *   In the Vercel project connected to the `main` branch, add `trvlsocial.com` (apex) and `www.trvlsocial.com` as domains.
+    *   Log into the domain registrar for `trvlsocial.com` and update the DNS records with the A and CNAME records provided by Vercel.
+    *   Within the Vercel project settings, configure a permanent redirect from the apex domain to the `www` subdomain (or vice-versa) to ensure a single canonical URL.
+
+2.  **Vercel Staging Subdomain Routing:**
+    *   As per Task 48, a Vercel project is linked to the `develop` branch for staging.
+    *   In that staging project's Vercel settings, add the domain `staging.trvlsocial.com`.
+    *   Add the CNAME record provided by Vercel for this subdomain to the registrar's DNS settings.
+
+3.  **SSL Certificate Management:**
+    *   Vercel automatically provisions and renews Let's Encrypt SSL certificates for all connected domains. This step is to verify that the process completes successfully after DNS propagation.
+    *   Ensure that traffic is forced to HTTPS, which is the default behavior on Vercel and a prerequisite for the HSTS headers in Task 50.
+
+4.  **Email Authentication Records (SPF, DKIM, DMARC):**
+    *   To ensure email deliverability and security for the `@trvlsocial.com` domain (standardized in Task 35), add the following TXT records at the registrar:
+    *   **SPF:** Create a TXT record specifying authorized mail servers (e.g., Google Workspace, SendGrid). Example: `v=spf1 include:_spf.google.com ~all`.
+    *   **DKIM:** Generate a key from the email provider and add the corresponding TXT record (e.g., `selector._domainkey.trvlsocial.com`) with the public key value.
+    *   **DMARC:** Add a `_dmarc` TXT record to define policy. Start with a monitoring policy: `v=DMARC1; p=none; rua=mailto:dmarc-reports@trvlsocial.com;`.
+
+5.  **CDN Configuration Verification:**
+    *   By pointing the domains to Vercel, the application will automatically use Vercel's Global Edge Network as a CDN. No extra configuration is needed, but this should be verified.
+
+# Test Strategy:
+1.  **DNS Propagation and Domain Verification:**
+    *   Use an online tool like `dnschecker.org` to confirm that the A/CNAME records for `trvlsocial.com`, `www.trvlsocial.com`, and `staging.trvlsocial.com` point to Vercel's infrastructure globally.
+    *   Access `https://www.trvlsocial.com` and `https://staging.trvlsocial.com` in a browser. Verify the production site (from `main` branch) and staging site (from `develop` branch) load correctly.
+
+2.  **SSL and Redirect Testing:**
+    *   Inspect the SSL certificate in the browser for all three domains/subdomains to ensure it is valid and issued by Let's Encrypt.
+    *   Attempt to access `http://trvlsocial.com` and verify it redirects to `https://www.trvlsocial.com` (or the chosen canonical version).
+
+3.  **Email Authentication Validation:**
+    *   Use a service like MXToolbox to perform a lookup on `trvlsocial.com` and verify that the SPF, DKIM, and DMARC records are correctly configured and valid.
+    *   Send a test email from an `@trvlsocial.com` address to a verification service (e.g., mail-tester.com) and confirm it passes all authentication checks.
+
+4.  **CDN Cache Verification:**
+    *   Open browser developer tools, navigate to the Network tab, and load the production site. Inspect the response headers for static assets (CSS, JS, images) and look for the `x-vercel-cache: HIT` header to confirm the CDN is working.
+
+# Subtasks:
+## 1. Configure A Record for Apex Domain and CNAME for 'www' Subdomain [pending]
+### Dependencies: None
+### Description: In the production Vercel project (main branch), add the domains `trvlsocial.com` and `www.trvlsocial.com`. Then, update the DNS records at the registrar with the A record for the apex domain and the CNAME record for the 'www' subdomain provided by Vercel.
+### Details:
+Log into the domain registrar for `trvlsocial.com`. In the Vercel project settings, add both domains. Copy the A record value for the apex domain (`@`) and the CNAME value for the `www` subdomain. Create these records in the registrar's DNS management panel.
+
+## 2. Set Up Canonical Domain Redirect in Vercel [pending]
+### Dependencies: 51.1
+### Description: After connecting both the apex and 'www' domains, configure a permanent redirect in Vercel to enforce a single canonical URL for the production site, improving SEO and user experience.
+### Details:
+Within the Vercel project's 'Domains' settings, choose whether `www.trvlsocial.com` or `trvlsocial.com` will be the canonical domain. Set the other to perform a permanent (308) redirect to the canonical version.
+
+## 3. Configure CNAME Record for 'staging.trvlsocial.com' [pending]
+### Dependencies: None
+### Description: Connect the `staging.trvlsocial.com` subdomain to the Vercel project linked to the `develop` branch, as established in Task 48, to create a stable environment for testing.
+### Details:
+In the Vercel project for the `develop` branch, add `staging.trvlsocial.com` as a domain. Copy the provided CNAME record value and add it to the `trvlsocial.com` DNS settings at the registrar.
+
+## 4. Verify SSL Certificate Provisioning and HTTPS Enforcement [pending]
+### Dependencies: 51.2, 51.3
+### Description: Confirm that Vercel has automatically provisioned Let's Encrypt SSL certificates for all configured domains (`www`, apex, and staging) and that all HTTP traffic is forced to HTTPS.
+### Details:
+After DNS propagation, check the Vercel dashboard for each project to ensure the domains show a 'Valid Configuration' status with a valid SSL certificate. This step is a prerequisite for implementing HSTS headers (Task 50). Vercel's Edge Network (CDN) will be active by default.
+
+## 5. Implement SPF and DKIM Email Authentication Records [pending]
+### Dependencies: None
+### Description: Add Sender Policy Framework (SPF) and DomainKeys Identified Mail (DKIM) records to the DNS to authenticate emails sent from `@trvlsocial.com`, preventing spoofing and improving deliverability.
+### Details:
+Create TXT records at the registrar. For SPF, add a record for the root domain (`@`) specifying all authorized mail servers (e.g., `v=spf1 include:_spf.google.com include:sendgrid.net ~all`). For DKIM, generate keys from your email providers (e.g., Google Workspace, SendGrid) and add the corresponding TXT records with the provided selector and public key.
+
+## 6. Establish DMARC Email Policy Record [pending]
+### Dependencies: 51.5
+### Description: Create a Domain-based Message Authentication, Reporting, and Conformance (DMARC) record to define the policy for unauthenticated emails and enable reporting.
+### Details:
+Add a TXT record for `_dmarc.trvlsocial.com`. Begin with a monitoring-only policy to gather data without affecting mail flow. Example: `v=DMARC1; p=none; rua=mailto:dmarc-reports@trvlsocial.com;`. This requires setting up the specified email address to receive reports.
+

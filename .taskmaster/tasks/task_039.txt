@@ -1,0 +1,93 @@
+# Task ID: 39
+# Title: Optimize Bundle Size and Performance
+# Status: done
+# Dependencies: 36
+# Priority: medium
+# Description: Continue optimizing bundle size, building on successful reduction from 31MB to 20MB, with focus on resolving remaining static import issues and implementing remaining optimization strategies.
+# Details:
+1. Completed TensorFlow.js Optimization:
+   - Implemented lazy-ml-loader.js for on-demand loading
+   - Separated TensorFlow into own chunk (285KB gzipped)
+   - Created lazy-assessment-service.js wrapper
+   - Added ML availability detection and fallbacks
+
+2. Remaining Static Import Resolution:
+   - Refactor assessment-service.js in onboarding-service.js
+   - Decouple ML services in ml-service.js
+   - Optimize demo component imports
+   - Implement TensorFlow.js Lite migration
+
+3. Image Optimization Rollout:
+   - Deploy OptimizedImage.jsx component across app
+   - Complete WebP conversion for remaining assets
+   - Finalize CDN integration configuration
+   - Implement remaining responsive image patterns
+
+4. Performance Monitoring Implementation:
+   - Integrate performance-monitoring.js into main app
+   - Set up Core Web Vitals tracking
+   - Configure bundle loading metrics
+   - Implement performance budget alerts
+
+5. Additional Optimizations:
+   - Complete tree shaking optimization
+   - Finalize external dependency configuration
+   - Implement remaining compression strategies
+   - Configure service worker caching
+
+# Test Strategy:
+1. Bundle Size Verification:
+   - Confirm maintenance of 20MB total bundle size
+   - Verify TensorFlow.js chunk size (285KB target)
+   - Test lazy loading triggers
+   - Monitor chunk distribution
+
+2. Performance Metrics:
+   - Track Core Web Vitals improvements
+   - Measure lazy loading effectiveness
+   - Verify performance budget compliance
+   - Test real user scenarios
+
+3. Integration Testing:
+   - Verify OptimizedImage component implementation
+   - Test static import refactoring
+   - Validate service worker functionality
+   - Check CDN integration
+
+4. User Experience Validation:
+   - Test ML feature availability detection
+   - Verify image loading improvements
+   - Measure perceived performance
+   - Validate graceful fallbacks
+
+# Subtasks:
+## 1. Resolve Static Import Issues [done]
+### Dependencies: None
+### Description: Refactor remaining static imports to enable full lazy loading benefits
+### Details:
+
+
+## 2. Complete OptimizedImage Implementation [done]
+### Dependencies: None
+### Description: Roll out OptimizedImage component across all applicable areas of the app
+### Details:
+
+
+## 3. Integrate Performance Monitoring [done]
+### Dependencies: None
+### Description: Add performance-monitoring.js to main app initialization and configure metrics
+### Details:
+
+
+## 4. Implement TensorFlow.js Lite [done]
+### Dependencies: None
+### Description: Evaluate and implement TensorFlow.js Lite for further bundle size reduction
+### Details:
+
+
+## 5. Finalize Build Optimizations [done]
+### Dependencies: None
+### Description: Complete remaining tree shaking and compression optimizations
+### Details:
+
+

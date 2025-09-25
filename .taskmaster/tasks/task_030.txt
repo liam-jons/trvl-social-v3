@@ -1,0 +1,11 @@
+# Task ID: 30
+# Title: Test PWA installation with new icons
+# Status: done
+# Dependencies: 28, 29
+# Priority: high
+# Description: Test PWA installation on mobile and desktop to verify new company logo icons appear correctly
+# Details:
+
+
+# Test Strategy:
+

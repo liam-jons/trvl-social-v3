@@ -1,0 +1,93 @@
+# Task ID: 49
+# Title: Implement Health Checks, Performance Budgets, and Advanced Monitoring
+# Status: pending
+# Dependencies: 40, 38, 45, 2
+# Priority: medium
+# Description: Enhance the existing monitoring solution by adding a dedicated health check endpoint, integrating performance budgets into the CI/CD pipeline, and configuring advanced Real User Monitoring (RUM) and alerting.
+# Details:
+Building on the existing Sentry implementation from Task 40, this task will add critical monitoring components for production stability and performance.
+
+1. **Health Check Endpoint Implementation:**
+   - Create a new API route at `src/pages/api/health.ts`.
+   - The endpoint must perform a lightweight check on critical dependencies. It should execute a simple query against the Supabase database (e.g., `SELECT 1`) to verify connectivity. Use the existing Supabase client setup.
+   - On success, it should return a `200 OK` status with a JSON body: `{ "status": "ok", "timestamp": "<ISO_DATE_STRING>", "dependencies": { "database": "ok" } }`.
+   - If the database check fails, it must return a `503 Service Unavailable` status with a body detailing the failure: `{ "status": "error", "timestamp": "...", "dependencies": { "database": "unavailable" } }`.
+
+2. **External Uptime Monitoring:**
+   - Configure an external monitoring service (e.g., Better Uptime, UptimeRobot, or Sentry Cron Monitors) to poll the production `/api/health` endpoint every 2-5 minutes.
+   - Set up alerting within this service to notify the development team via a designated Slack channel or email if the endpoint returns a non-200 status code for two consecutive checks.
+
+3. **Performance Budget Integration into CI/CD:**
+   - In the project root, create a `lighthouserc.json` configuration file to define performance budgets.
+   - Set budgets for key metrics like Performance Score (>85), Largest Contentful Paint (<2.5s), and Total Blocking Time (<200ms).
+   - Modify the GitHub Actions workflow from Task 45 (`.github/workflows/ci.yml`) to add a new job named `performance-budget-check` that runs on pull requests targeting the `main` branch.
+   - This job will use the `treo/lighthouse-ci-action` to run Lighthouse against the preview deployment URL and assert that the configured budgets are met. The job must fail if any budget is exceeded, blocking the PR.
+
+4. **Advanced Real User Monitoring (RUM) and Alerting:**
+   - Enhance the Sentry configuration in `sentry.client.config.js` and `sentry.server.config.js` to ensure `tracesSampleRate` is set to an appropriate value for production (e.g., `0.2`) to capture a representative sample of user interactions.
+   - In the Sentry dashboard, create a new dashboard dedicated to Core Web Vitals and RUM.
+   - Configure Sentry alerts to trigger for performance regressions:
+     - When the p75 of LCP on key pages (e.g., homepage, adventure details) exceeds 2.5 seconds.
+     - When the Apdex score drops below 0.9.
+     - When the failure rate of a critical API transaction (e.g., `POST /api/bookings`) exceeds 5%.
+
+# Test Strategy:
+1. **Health Check Verification:**
+   - Write an integration test using a library like `supertest` to call the `/api/health` endpoint. Assert a `200 OK` response and the correct JSON structure.
+   - Modify the test to mock a Supabase client failure and assert that the endpoint correctly returns a `503 Service Unavailable` status.
+   - Manually access the endpoint on a staging deployment to confirm it's publicly accessible and functioning.
+
+2. **Uptime Monitor Test:**
+   - Once configured, manually trigger a failure by deploying a broken version of the health check to staging. Verify that the uptime monitor detects the failure and sends an alert to the correct channel within the expected timeframe.
+
+3. **Performance Budget CI Test:**
+   - Create a test pull request that intentionally introduces a large, un-treeshaken library to a page. Verify that the `performance-budget-check` job in GitHub Actions fails and blocks the PR from being merged.
+   - In a separate PR, add a CPU-intensive script and verify the Lighthouse check for Total Blocking Time fails.
+
+4. **RUM and Alerting Validation:**
+   - After deploying to production, navigate the site and confirm that your session's performance data (transactions, LCP, etc.) appears in the Sentry dashboard.
+   - Temporarily lower an alert threshold in Sentry for a staging environment (e.g., LCP > 1ms) and navigate the staging site to confirm the alert is triggered and delivered.
+
+# Subtasks:
+## 1. Create Health Check API Endpoint [pending]
+### Dependencies: None
+### Description: Create a new API route at `src/pages/api/health.ts` to perform a lightweight check on critical dependencies, primarily the Supabase database.
+### Details:
+Implement an API handler in `src/pages/api/health.ts`. Use the server-side Supabase client (likely from `src/lib/supabase/server.ts`) to execute a simple query like `supabase.rpc('echo', { message: 'ok' })` or a direct `SELECT 1`. If the query succeeds, return a 200 OK status with the JSON body: `{ "status": "ok", "timestamp": "<ISO_DATE_STRING>", "dependencies": { "database": "ok" } }`. If it fails, catch the error and return a 503 Service Unavailable status with the body: `{ "status": "error", "timestamp": "...", "dependencies": { "database": "unavailable" } }`.
+
+## 2. Configure Lighthouse CI Budget File [pending]
+### Dependencies: None
+### Description: Create a `lighthouserc.json` file in the project root to define performance budgets for Lighthouse CI.
+### Details:
+In the root of the project, create a new file named `lighthouserc.json`. Configure it with a `ci` block. Under `ci.assert.budgets`, define budgets for key performance metrics. Set `performance` to have a minScore of 0.85, `metrics/largest-contentful-paint` to have a max of 2500ms, and `metrics/total-blocking-time` to have a max of 200ms. This file will be used by the GitHub Action in a subsequent step.
+
+## 3. Integrate Lighthouse CI into GitHub Actions Workflow [pending]
+### Dependencies: 49.2
+### Description: Modify the `.github/workflows/ci.yml` file to add a new job that runs Lighthouse CI against preview deployments on pull requests.
+### Details:
+Edit the `.github/workflows/ci.yml` file. Add a new job named `performance-budget-check` that runs after the build/deployment job. This job should use the `treo/lighthouse-ci-action@v11`. Configure the action to use the `lighthouserc.json` file. You will need to capture the preview deployment URL from the deployment step and pass it as an input to this action's `urls` parameter. Ensure the job is configured to fail if the Lighthouse assertions do not pass, thereby blocking PR merges that cause performance regressions.
+
+## 4. Update Sentry Configuration for RUM Tracing [pending]
+### Dependencies: None
+### Description: Enhance the Sentry configuration to enable performance monitoring (RUM) by setting an appropriate traces sample rate.
+### Details:
+In both `sentry.client.config.js` and `sentry.server.config.js`, find the `Sentry.init` call. Add or modify the `tracesSampleRate` option, setting it to `0.2`. This will capture performance data for 20% of user transactions, providing a representative sample for RUM analysis without overwhelming the system. Ensure the `BrowserTracing` integration is present in the client configuration.
+
+## 5. Configure External Uptime Monitoring Service [pending]
+### Dependencies: 49.1
+### Description: Set up an external monitoring service to periodically poll the `/api/health` endpoint and send alerts on failure.
+### Details:
+Using a service like Better Uptime, UptimeRobot, or Sentry Cron Monitors, create a new HTTP(S) monitor. Configure the monitor to target the production URL of the health check endpoint (e.g., `https://<your-production-domain>/api/health`). Set the monitoring interval to every 2-5 minutes. Configure alerting to notify a designated Slack channel or email address if the endpoint returns a non-200 status code for two consecutive checks.
+
+## 6. Create Core Web Vitals & RUM Dashboard in Sentry [pending]
+### Dependencies: 49.4
+### Description: In the Sentry UI, create a dedicated dashboard to visualize key Real User Monitoring (RUM) metrics and Core Web Vitals.
+### Details:
+Log in to the Sentry project dashboard. Navigate to the 'Dashboards' section and create a new dashboard named 'Core Performance Metrics'. Add widgets to display: p75 LCP, p75 FCP, p75 CLS, Apdex score, Failure Rate, and graphs for User Misery and Transaction Duration over time. Filter these widgets to focus on key pages like the homepage and adventure detail pages.
+
+## 7. Configure Performance Regression Alerts in Sentry [pending]
+### Dependencies: 49.4
+### Description: Set up specific alert rules in Sentry to proactively notify the team about performance degradations.
+### Details:
+In the Sentry project, navigate to 'Alerts' and create new performance alert rules. Configure the following: 1. An alert that triggers when the p75 of LCP for transactions on the homepage or adventure details pages exceeds 2.5 seconds. 2. An alert that triggers when the overall Apdex score for the project drops below 0.9 for a sustained period (e.g., 15 minutes). 3. An alert for a critical API transaction (e.g., `POST /api/bookings`) when its failure rate exceeds 5%. Route all alerts to the primary development Slack channel.
+

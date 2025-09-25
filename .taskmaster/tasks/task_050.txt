@@ -1,0 +1,116 @@
+# Task ID: 50
+# Title: Production Security Hardening and Auditing
+# Status: pending
+# Dependencies: 19, 31, 34, 38, 43, 44, 46
+# Priority: high
+# Description: Implement a multi-layered security strategy for the production environment, including Content Security Policy (CSP), secure headers, XSS protection, dependency vulnerability scanning, and enhanced security audit logging.
+# Details:
+This task builds upon previous security work (Tasks 19, 31, 34, 38) to implement a comprehensive security posture for the production application.
+
+1. **Secure Headers & Content Security Policy (CSP) Configuration:**
+   - In `next.config.js`, use the `headers` function to add security headers to all responses.
+   - Implement `Strict-Transport-Security` (HSTS): `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`.
+   - Add `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, and `Referrer-Policy: origin-when-cross-origin`.
+   - Define a strict `Content-Security-Policy`. Start with a restrictive policy and iteratively add sources as needed. The policy must allow scripts and styles from `'self'`, as well as from third-party services in use like Stripe (`js.stripe.com`), Sentry (`*.sentry.io`), and Mixpanel (`api.mixpanel.com`).
+   - Example CSP start: `default-src 'self'; script-src 'self' js.stripe.com *.sentry.io; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' *.supabase.co *.sentry.io api.mixpanel.com;`
+
+2. **XSS Protection (Content Sanitization):**
+   - Audit all components that render user-generated content (e.g., community posts from Task 11, user profiles from Task 3, vendor forum posts).
+   - Integrate `dompurify` to sanitize any content before it is rendered using `dangerouslySetInnerHTML`.
+   - Create a reusable utility function, e.g., `utils/sanitizeHtml.js`, that wraps `dompurify` with a standard configuration.
+
+3. **SQL Injection Prevention Audit:**
+   - The use of the Supabase client library provides primary protection. This step focuses on auditing areas where raw SQL might be used.
+   - Review all custom PostgreSQL functions created in Task 2 and reviewed in Task 43. Ensure they use `format()` with `%L` for literals or otherwise safely handle parameters, and do not use string concatenation to build queries from inputs.
+   - Verify that all calls to `supabase.rpc()` pass arguments as a JSON object, not as part of a concatenated string.
+
+4. **Rate Limiting & DDoS Protection Review:**
+   - Review the rate limiting rules implemented in Task 19. Ensure limits are appropriate for production traffic, with stricter limits on authentication (`/api/auth/*`) and payment endpoints (Task 10) versus general browsing.
+   - Investigate and enable the DDoS protection features provided by the hosting platform (e.g., Vercel Attack Challenge Mode, Cloudflare). This is a configuration task on the platform, not in the codebase.
+
+5. **Dependency Vulnerability Scanning:**
+   - Integrate automated dependency scanning into the CI/CD pipeline (e.g., GitHub Actions).
+   - Add a step that runs `npm audit --production --audit-level=high`. Configure the CI job to fail if it finds any high or critical severity vulnerabilities.
+   - Add Dependabot or Snyk to the repository to automatically create pull requests for vulnerable dependency updates.
+
+6. **Security Audit Logging:**
+   - Extend the logging infrastructure from Task 38 and Task 12 (Datadog/Sentry).
+   - Create specific audit logs for security-sensitive events. Events to log must include:
+     - Failed login attempts (from Task 3).
+     - Password reset requests and completions (from Task 3).
+     - User data export and account deletion requests (from Task 46).
+     - Changes to user roles or permissions.
+     - API key rotation events (from Task 34).
+   - Ensure each log entry contains a timestamp, the responsible user ID (if applicable), source IP address, and a clear description of the event.
+
+# Test Strategy:
+1. **Headers & CSP Verification:**
+   - Use browser developer tools' Network tab to inspect the response headers for pages and API calls, verifying the presence and correctness of `Content-Security-Policy`, `Strict-Transport-Security`, etc.
+   - Use an online scanner like Mozilla Observatory or SecurityHeaders.com against the staging environment to get an automated analysis and grade.
+   - Manually navigate the entire application in a staging environment. Check the browser's developer console for any CSP violation errors and adjust the policy as needed.
+
+2. **XSS Penetration Testing:**
+   - Manually attempt to inject XSS payloads (e.g., `<script>alert('xss')</script>`, `<img src=x onerror=alert(1)>`) into all user-input fields identified in the details section.
+   - Verify that the injected scripts are either sanitized (removed) or rendered as inert text and do not execute.
+
+3. **Dependency Scan Verification:**
+   - In a test branch, intentionally introduce a package with a known high-severity vulnerability (e.g., an old version of `express`).
+   - Push the branch and confirm that the CI pipeline job for `npm audit` fails as expected.
+
+4. **Audit Log Validation:**
+   - Perform a sequence of security-relevant actions: successfully log in, fail a login attempt, request a password reset, and (if possible) request a data export.
+   - Query the logging platform (Datadog/Sentry) to confirm that each of these actions generated a corresponding, correctly formatted audit log entry with the required metadata (user ID, IP, timestamp).
+
+5. **Rate Limit & DDoS Testing:**
+   - Use a tool like `k6` or a simple script to send a burst of requests to a rate-limited endpoint (e.g., login API).
+   - Verify that after the configured limit is exceeded, the server responds with HTTP status `429 Too Many Requests`.
+
+# Subtasks:
+## 1. Configure Secure Headers and Content Security Policy in next.config.js [pending]
+### Dependencies: None
+### Description: Implement a set of security-focused HTTP headers, including a Content Security Policy (CSP), to mitigate common web vulnerabilities like XSS and clickjacking.
+### Details:
+In `next.config.js`, modify the `headers` async function to add the following headers to all responses: `Strict-Transport-Security`, `X-Content-Type-Options`, `X-Frame-Options`, and `Referrer-Policy`. Define a strict `Content-Security-Policy` that allows necessary external resources for services like Stripe, Sentry, and Supabase, while defaulting to `'self'`. This builds upon the existing Next.js configuration.
+
+## 2. Create and Integrate a DOMPurify Sanitization Utility for User Content [pending]
+### Dependencies: None
+### Description: Develop a reusable utility to sanitize user-generated HTML content before rendering, preventing XSS attacks. Audit and apply this utility to components that display user content.
+### Details:
+Create a new file `src/utils/sanitizeHtml.ts`. In this file, import `dompurify` and export a configured function that sanitizes HTML strings. Grep the codebase for `dangerouslySetInnerHTML` and identify components rendering user-provided content (e.g., post bodies, comments, user bios). Refactor these components to pass the content through the new sanitization utility before rendering.
+
+## 3. Audit Custom PostgreSQL Functions and RPC Calls for SQL Injection Vulnerabilities [pending]
+### Dependencies: None
+### Description: Review all custom database functions and application code that calls them to ensure they are not vulnerable to SQL injection.
+### Details:
+Using the `Read` tool, examine all SQL files in the `supabase/migrations/` directory, specifically focusing on the functions created in Task 2 and reviewed in Task 43. Ensure that any dynamic SQL uses the `format()` function with `%L` for literals and `%I` for identifiers. Grep the codebase for all `supabase.rpc()` calls and verify that arguments are passed as a single JSON object, not concatenated into the function name string.
+
+## 4. Review and Harden Production Rate Limiting Rules [pending]
+### Dependencies: None
+### Description: Analyze and adjust the existing rate limiting configuration to better protect sensitive endpoints in a production environment.
+### Details:
+Locate the rate limiting logic implemented in Task 19, likely within `src/middleware.ts` using `@upstash/ratelimit`. Review the current limits. Implement stricter limits for authentication routes (`/api/auth/*`), password reset endpoints, and payment processing APIs (Task 10). Ensure general browsing endpoints have more lenient limits to avoid impacting user experience.
+
+## 5. Integrate Dependency Vulnerability Scanning into CI Pipeline [pending]
+### Dependencies: None
+### Description: Add an automated security scan to the GitHub Actions workflow to detect and fail builds with high-severity vulnerabilities in project dependencies.
+### Details:
+Modify the primary CI workflow file located at `.github/workflows/main.yml`. Add a new step to the main build/test job, after the `npm install` step. This step should run the command `npm audit --production --audit-level=high`. Configure the step to fail the workflow if the command returns a non-zero exit code, preventing vulnerable code from being deployed.
+
+## 6. Configure Dependabot for Automated Dependency Updates [pending]
+### Dependencies: None
+### Description: Set up Dependabot to automatically scan for outdated or insecure dependencies and create pull requests to update them.
+### Details:
+Create a new configuration file at `.github/dependabot.yml`. Configure it to check for `npm` dependencies in the root directory (`/`). Set a schedule for daily or weekly checks. This will enable automated pull requests for version updates and security patches, streamlining the maintenance process.
+
+## 7. Implement Audit Logging for Authentication and Account Security Events [pending]
+### Dependencies: None
+### Description: Enhance the logging system to create detailed audit trails for security-sensitive events related to user authentication and account management.
+### Details:
+Locate the API routes responsible for user authentication (e.g., `src/app/api/auth/sign-in/route.ts`, `src/app/api/auth/reset-password/route.ts`). Using the structured logger established in Task 38, add log entries for: failed login attempts, password reset requests, and successful password changes. Each log must include a timestamp, the user's ID (if available), source IP address, and a clear event description.
+
+## 8. Implement Audit Logging for Data Management and Access Control Events [pending]
+### Dependencies: None
+### Description: Create audit logs for critical events related to user data privacy, account deletion, and administrative permission changes.
+### Details:
+Identify the API endpoints or server actions for user data export and account deletion (from Task 46), user role changes, and API key rotation (from Task 34). Integrate the structured logger to record these events. Ensure each log entry contains a timestamp, the ID of the user performing the action, the ID of the target user (if different), source IP, and a description of the event (e.g., 'user-role-changed from editor to admin').
+

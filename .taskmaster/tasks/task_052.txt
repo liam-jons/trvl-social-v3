@@ -1,0 +1,114 @@
+# Task ID: 52
+# Title: Homepage Aesthetic Redesign - Video Hero & Adventures Grid
+# Status: pending
+# Dependencies: 41
+# Priority: high
+# Description: Complete redesign of homepage aesthetics including video hero section, typography updates, and content reorganization based on client specifications
+# Details:
+
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Set up Supabase video storage bucket [pending]
+### Dependencies: None
+### Description: Create a dedicated Supabase storage bucket for video assets. Configure appropriate CORS settings, size limits, and access policies for public video streaming. Upload the existing hero video file (vecteezy_tranquil-lake-landscape) to the new bucket.
+### Details:
+1. Access Supabase dashboard and create new public bucket named 'videos'
+2. Configure CORS policy for video streaming
+3. Set appropriate file size limits (considering video files can be large)
+4. Upload the existing MP4 video from project root to the bucket
+5. Generate and store the public URL for the video
+6. Test video streaming directly from Supabase URL
+
+## 2. Implement video hero component with seamless loop [pending]
+### Dependencies: 52.1
+### Description: Create a new video hero component that replaces the current hero section. Implement seamless video looping similar to the 'Dream Backgrounds' reference site, with proper fallbacks and loading states.
+### Details:
+1. Create new VideoHero component in components/homepage/
+2. Implement HTML5 video element with autoplay, loop, muted, and playsinline attributes
+3. Add poster image for initial load state
+4. Implement lazy loading strategy for video
+5. Add overlay for hero text content
+6. Ensure video covers full viewport height
+7. Add fallback for browsers that don't support video
+8. Test seamless looping across browsers
+
+## 3. Update typography and remove gradient styling [pending]
+### Dependencies: None
+### Description: Replace all gradient text effects with solid colors throughout the homepage. Update logo and hero text typography to match the 'Voyage' reference site styling.
+### Details:
+1. Audit current gradient text usage in hero section
+2. Replace gradient CSS with solid color definitions
+3. Update logo font to match 'Voyage' site aesthetic
+4. Adjust hero text font sizes and weights
+5. Update color variables in CSS/Tailwind configuration
+6. Ensure text remains readable over video background
+7. Apply consistent typography across all hero text elements
+8. Test text visibility in different lighting conditions of video
+
+## 4. Remove live feeds component from homepage [pending]
+### Dependencies: None
+### Description: Remove the placeholder live feeds component from below the fold on the homepage, preparing the space for the new adventures grid display.
+### Details:
+1. Locate and identify the live feeds component in homepage code
+2. Remove component imports and references
+3. Clean up any associated styles and dependencies
+4. Remove any API calls or data fetching for live feeds
+5. Ensure no broken references remain
+6. Update page layout to accommodate removal
+7. Test that removal doesn't break other components
+
+## 5. Implement adventures display grid below fold [pending]
+### Dependencies: 52.4
+### Description: Create and implement a new adventures display grid component to replace the removed live feeds section, showcasing adventure content in an engaging grid layout.
+### Details:
+1. Create new AdventuresGrid component
+2. Design grid layout matching reference aesthetic
+3. Fetch adventure data from existing API/database
+4. Implement responsive grid with proper breakpoints
+5. Add hover effects and interactions
+6. Ensure smooth scrolling from hero to adventures section
+7. Implement lazy loading for adventure cards
+8. Add proper spacing and visual hierarchy
+
+## 6. Ensure responsive design across all breakpoints [pending]
+### Dependencies: 52.2, 52.3, 52.5
+### Description: Test and adjust all new homepage components to ensure perfect responsive behavior across mobile, tablet, and desktop breakpoints.
+### Details:
+1. Test video hero on mobile devices (portrait and landscape)
+2. Adjust video aspect ratio handling for different screens
+3. Ensure text remains readable on all screen sizes
+4. Test adventures grid on various breakpoints
+5. Optimize touch interactions for mobile
+6. Verify header behavior with new hero section
+7. Test on actual devices (iPhone, iPad, Android)
+8. Fine-tune spacing and padding for each breakpoint
+
+## 7. Optimize video performance and loading strategy [pending]
+### Dependencies: 52.1, 52.2
+### Description: Implement performance optimizations for the video hero section including compression, lazy loading, and bandwidth-aware loading strategies.
+### Details:
+1. Compress video file for optimal web delivery
+2. Create multiple video quality versions (SD, HD, Full HD)
+3. Implement adaptive bitrate streaming if needed
+4. Add preload='metadata' for faster initial load
+5. Implement intersection observer for lazy loading
+6. Add loading skeleton/placeholder
+7. Monitor and optimize Core Web Vitals impact
+8. Test on slow network connections (3G, slow 4G)
+
+## 8. Cross-browser testing and final adjustments [pending]
+### Dependencies: 52.6, 52.7
+### Description: Perform comprehensive testing across all major browsers and devices, fixing any compatibility issues and ensuring consistent experience.
+### Details:
+1. Test on Chrome, Firefox, Safari, Edge
+2. Verify video autoplay policies compliance
+3. Test on iOS Safari (special video requirements)
+4. Check Android Chrome video playback
+5. Validate all functionality on older browser versions
+6. Document any browser-specific workarounds needed
+7. Final visual QA against reference designs
+8. Performance testing and optimization verification
+

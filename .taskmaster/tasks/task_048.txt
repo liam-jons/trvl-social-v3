@@ -1,0 +1,93 @@
+# Task ID: 48
+# Title: Staging Environment Setup and Configuration
+# Status: pending
+# Dependencies: 38, 44, 31, 36
+# Priority: high
+# Description: Set up a complete staging environment on Vercel, mirroring production, with automated deployments from the 'develop' branch, a dedicated Supabase database, and staging-specific configurations.
+# Details:
+1. **Vercel Project and Git Integration:**
+   - Create a new Vercel project linked to the existing GitHub repository.
+   - Configure the Git integration: set the "Production Branch" to `main`.
+   - Add a new domain for staging (e.g., `trvl-social-staging.vercel.app`) and link it to the `develop` branch.
+   - Enable automatic deployments for all pushes and merges to the `develop` branch.
+
+2. **Supabase Staging Project Setup:**
+   - In the Supabase dashboard, create a new project named `trvl-social-v3-staging`.
+   - Apply all existing database migrations from the `supabase/migrations` directory to the new staging project to replicate the schema defined in Task 2.
+   - Consider creating a database seeding script (`supabase/seed.sql`) to populate the staging database with realistic, non-sensitive test data for features like users, posts, and adventures. This will facilitate better testing.
+
+3. **Staging Environment Variable Configuration:**
+   - In the Vercel project settings, navigate to the Environment Variables section.
+   - Add all variables from the `.env.example` file (established in Task 44), but scoped specifically to the Staging environment (the `develop` branch).
+   - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Use the API URL and anon key from the new `trvl-social-v3-staging` Supabase project.
+   - `SUPABASE_SERVICE_ROLE_KEY`: Use the service role key from the staging Supabase project.
+   - `STRIPE_SECRET_KEY` & `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`: Use Stripe **test mode** API keys to avoid real charges (related to Task 10).
+   - `ALLOWED_ORIGINS`: Add the Vercel staging URL to the list of allowed origins to ensure CORS is configured correctly (as per the pattern in Task 31).
+   - For services like Sentry or Mixpanel (Task 12), create staging-specific projects or use an `ENVIRONMENT=staging` variable to segment data.
+
+4. **Automated Deployment and Parity Validation:**
+   - Confirm the Vercel build command (`npm run build`) and output directory are configured correctly.
+   - Create a checklist or document to periodically compare Vercel settings (Node.js version, build settings, etc.) between the Production (`main`) and Staging (`develop`) environments to ensure parity and prevent configuration drift.
+
+# Test Strategy:
+1. **Deployment Verification:**
+   - Push a minor, visible change (e.g., text update on the homepage) to a feature branch and merge it into `develop`.
+   - Verify that a Vercel deployment is automatically triggered for the `develop` branch and completes successfully.
+   - Access the staging URL and confirm the change is live.
+
+2. **Environment Isolation Testing:**
+   - On the staging website, perform a user registration (Task 3). Log into the `trvl-social-v3-staging` Supabase project and verify the new user record exists there.
+   - Check the production database to ensure no new data was added, confirming environment isolation.
+   - Use browser developer tools to inspect network requests and confirm all API calls are directed to the staging Supabase URL.
+
+3. **Configuration and Integration Validation:**
+   - Execute a test payment flow. Verify in the Stripe dashboard that the transaction appears in **test mode**.
+   - Intentionally trigger a client-side or server-side error. Verify the error is captured in the designated staging project/environment in Sentry (Task 12).
+   - Attempt to make an API call from the browser console on an unrelated website to the staging API. Verify the request is blocked due to CORS policy (Task 31).
+
+4. **Core Functionality Smoke Test:**
+   - Perform a high-level walkthrough of all critical user flows on the staging environment as defined in Task 36, including registration, login, creating a post (Task 11), and initiating a booking.
+
+# Subtasks:
+## 1. Create and Push 'develop' Git Branch [pending]
+### Dependencies: None
+### Description: Create a new local branch named 'develop' from the 'main' branch to serve as the integration branch for staging. Push this branch to the remote GitHub repository.
+### Details:
+Execute the following git commands: `git checkout main`, `git pull origin main`, `git checkout -b develop`, `git push -u origin develop`. This branch will be the source for all automated staging deployments on Vercel.
+
+## 2. Configure Vercel Project for Staging Deployments [pending]
+### Dependencies: 48.1
+### Description: In the Vercel dashboard for the project, configure the Git integration settings. Set the 'Production Branch' to 'main'. Add and assign a new domain (e.g., `staging.trvlsocial.com` or the default Vercel URL) to the 'develop' branch.
+### Details:
+Navigate to Project Settings > Git. Ensure 'main' is the Production Branch. In Project Settings > Domains, add a new domain and assign it specifically to the 'develop' branch. This will ensure pushes to 'develop' deploy to the staging URL.
+
+## 3. Create a Dedicated Staging Supabase Project [pending]
+### Dependencies: None
+### Description: In the Supabase dashboard, create a new project named 'trvl-social-v3-staging'. Securely store the new project's API URL, anon key, and service role key for use in the next steps.
+### Details:
+Log into app.supabase.com and create a new project. Choose a strong password for the database. Once created, navigate to Project Settings > API to find the required keys and URL. These will be used for the staging environment variables.
+
+## 4. Apply Database Migrations to Staging Supabase [pending]
+### Dependencies: 48.3
+### Description: Use the Supabase CLI to apply all existing database migrations from the `supabase/migrations` directory to the new 'trvl-social-v3-staging' database to replicate the production schema.
+### Details:
+Link the Supabase CLI to the new staging project using `supabase link --project-ref <staging-project-ref>`. Then, run `supabase db push` to execute all migration files in the `supabase/migrations` directory against the staging database. This ensures schema parity.
+
+## 5. Configure Staging Environment Variables in Vercel [pending]
+### Dependencies: 48.2, 48.3
+### Description: In the Vercel project settings, add all environment variables from `.env.example` but scope them to the 'Staging' environment (the 'develop' branch). Use the credentials from the new staging Supabase project and Stripe test keys.
+### Details:
+Navigate to Project Settings > Environment Variables. For each variable in `.env.example`, add it with the correct staging value. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from the staging Supabase project. Use Stripe **test mode** keys. Add the staging Vercel URL to `ALLOWED_ORIGINS`.
+
+## 6. Create Database Seeding Script for Staging Data [pending]
+### Dependencies: 48.4
+### Description: Create a new file `supabase/seed.sql`. Populate this script with SQL INSERT statements to add realistic, non-sensitive test data for users, posts, adventures, and other core features.
+### Details:
+The `seed.sql` file will be automatically run by Supabase when the database is reset. Create sample users, at least 10-15 posts, and a few adventures with associated vendors. Use placeholder data for PII. This data is crucial for testing features in the staging environment.
+
+## 7. Trigger Initial Staging Deployment and Verify Full Integration [pending]
+### Dependencies: 48.2, 48.5, 48.6
+### Description: Make a minor, visible code change (e.g., update text on the homepage) and push it to the 'develop' branch to trigger an automated Vercel deployment. Verify the deployment succeeds and the staging site is fully functional.
+### Details:
+Push a commit to the 'develop' branch. Monitor the deployment in the Vercel dashboard. Once complete, access the staging URL. Verify the code change is visible. Check that the site loads data from the staging database (i.e., the seeded data is present). Create a basic checklist in project documentation to periodically verify parity between staging and production Vercel settings.
+

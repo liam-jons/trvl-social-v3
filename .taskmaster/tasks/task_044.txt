@@ -1,0 +1,99 @@
+# Task ID: 44
+# Title: Establish Comprehensive Environment Variable and Configuration Management
+# Status: pending
+# Dependencies: 38, 34, 33
+# Priority: high
+# Description: Formalize the management of environment variables across all environments by creating standardized templates, implementing a robust feature flag system, documenting the secrets rotation strategy, and adding build-time validation.
+# Details:
+1. **Create `.env.example` Template:**
+   - Create a definitive `.env.example` file in the project root. This file must be committed to version control.
+   - Document every environment variable required for the application to run, including those for Supabase (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`), Stripe, and any other third-party services identified in tasks 10 and 12.
+   - Use clear comments to explain the purpose of each variable and where to obtain its value.
+   - Example: `# The public URL for your Supabase project. Found in your Supabase dashboard.
+NEXT_PUBLIC_SUPABASE_URL=
+`
+
+2. **Implement Environment Variable Validation:**
+   - Integrate a library like `@t3-oss/env-nextjs` to provide build-time validation and type-safety for environment variables.
+   - Create a schema file (e.g., `src/env.mjs`) that defines all server-side and client-side (`NEXT_PUBLIC_`) variables using Zod.
+   - This will ensure that the application fails to build if a required variable is missing, preventing runtime errors in production.
+
+3. **Formalize Feature Flag System:**
+   - Establish a convention for feature flags using environment variables, prefixed with `NEXT_PUBLIC_FEATURE_`.
+   - Example: `NEXT_PUBLIC_FEATURE_VENDOR_FORUM_V2=true`.
+   - Document this convention in the main `README.md` or a new `CONTRIBUTING.md` file.
+   - The documentation should include instructions on how to add a new flag and how to consume it in the Next.js application.
+
+4. **Document Secrets Rotation Strategy:**
+   - Create a new markdown file named `SECRETS_MANAGEMENT.md`.
+   - This document will serve as the official guide for secrets management, building upon the system implemented in Task 34.
+   - Detail the step-by-step process for rotating critical secrets (e.g., `SUPABASE_SERVICE_ROLE_KEY`, Stripe API keys, database passwords).
+   - Include instructions for updating secrets in the production hosting environment (e.g., Vercel, AWS Secrets Manager) and the required deployment/restart procedures.
+
+5. **Define Environment-Specific Configurations:**
+   - Clarify the hierarchy and usage of `.env.*` files (`.env.local` for local overrides, `.env.development` for development defaults, `.env.production` for production defaults).
+   - Ensure sensitive production keys are *not* in these files but are managed exclusively through the hosting provider's secret management interface, as configured in Task 38.
+
+# Test Strategy:
+1. **Template Validation:**
+   - A new developer should be able to clone the repository, copy `.env.example` to `.env.local`, fill in the values, and successfully run the application locally (`npm run dev`).
+
+2. **Schema Validation Test:**
+   - In a local environment, comment out a required variable in `.env.local` (e.g., `SUPABASE_SERVICE_ROLE_KEY`).
+   - Run the build command (`npm run build`). The build must fail with a clear Zod error message identifying the missing variable.
+
+3. **Feature Flag Test:**
+   - Implement a temporary UI element that is conditionally rendered based on a new test feature flag.
+   - Verify that the element is not visible when the flag is set to `false` or is absent.
+   - Set the flag to `true` in `.env.local` and confirm the UI element appears without requiring a server restart (due to Next.js hot-reloading).
+
+4. **Secrets Documentation Review:**
+   - Conduct a peer review of the `SECRETS_MANAGEMENT.md` document.
+   - Perform a dry-run of a key rotation process in a staging environment by following the documentation. The process must be successful and the documentation should be clear enough to follow without assistance.
+
+5. **Production Build Verification:**
+   - Verify that the production build process correctly sources variables from the hosting environment's secrets and that no sensitive information is exposed in the client-side bundle.
+
+# Subtasks:
+## 1. Create and Populate `.env.example` Template [pending]
+### Dependencies: None
+### Description: Create a definitive `.env.example` file in the project root to serve as a template for all required environment variables. This file will be committed to version control.
+### Details:
+Create the `.env.example` file. Based on codebase analysis and task requirements, add placeholders and descriptive comments for all necessary variables, including `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY`, and `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`. Comments should explain each variable's purpose and where to find its value.
+
+## 2. Install and Configure `@t3-oss/env-nextjs` for Validation [pending]
+### Dependencies: None
+### Description: Integrate `@t3-oss/env-nextjs` to provide build-time validation and type-safety for all environment variables.
+### Details:
+Run `npm install @t3-oss/env-nextjs zod`. Create a new file at `src/env.mjs`. In this file, use `createEnv` to define a Zod schema that validates all variables listed in `.env.example`. Separate variables into `server` and `client` properties, ensuring client variables are prefixed with `NEXT_PUBLIC_`.
+
+## 3. Integrate Environment Schema into Next.js Build Process [pending]
+### Dependencies: 44.2
+### Description: Ensure the environment validation schema is checked at the very start of any build or development server process.
+### Details:
+Modify the `next.config.mjs` file. At the top of the file, add `import '@/env.mjs';`. This simple import will trigger the validation logic from `@t3-oss/env-nextjs` before the Next.js build configuration is processed, causing the build to fail early if the environment is misconfigured.
+
+## 4. Refactor Application to Use Type-Safe Environment Variables [pending]
+### Dependencies: 44.2
+### Description: Update all existing code that uses `process.env` to instead import and use the new type-safe `env` object.
+### Details:
+Perform a global search for `process.env`. In every file where an environment variable is accessed, remove the `process.env` call and add `import { env } from '@/env.mjs';`. Update the code to use the imported object, for example, changing `process.env.NEXT_PUBLIC_SUPABASE_URL` to `env.NEXT_PUBLIC_SUPABASE_URL`.
+
+## 5. Formalize and Document the Feature Flag System [pending]
+### Dependencies: None
+### Description: Establish a clear convention for feature flags and document it for all developers.
+### Details:
+Create a `CONTRIBUTING.md` file in the project root if one does not exist. Add a section titled "Feature Flags". Document the convention that all feature flags must be prefixed with `NEXT_PUBLIC_FEATURE_`. Provide an example like `NEXT_PUBLIC_FEATURE_GROUP_CHAT=true` and include a code snippet showing how to use it within a React component: `if (env.NEXT_PUBLIC_FEATURE_GROUP_CHAT) { ... }`.
+
+## 6. Create `SECRETS_MANAGEMENT.md` for Rotation Strategy [pending]
+### Dependencies: None
+### Description: Document the official process for rotating critical secrets to enhance security and provide a clear guide for emergency situations.
+### Details:
+Create a new markdown file named `SECRETS_MANAGEMENT.md` in the project root. Detail the step-by-step process for rotating `SUPABASE_SERVICE_ROLE_KEY` and `STRIPE_SECRET_KEY`. The guide should include: 1. How to generate a new key from the service's dashboard. 2. Where to update the key in the Vercel project settings (for Production, Preview, and Development environments). 3. The required deployment or restart procedures after updating a secret.
+
+## 7. Document Environment Hierarchy and Vercel Configuration in README [pending]
+### Dependencies: None
+### Description: Clarify the usage of `.env.*` files and the procedure for managing production variables in the main project documentation.
+### Details:
+Add a new section named "Environment Configuration" to the `README.md` file. Explain the Next.js environment file hierarchy, specifically stating that `.env.local` is used for local development and is git-ignored. Emphasize that no sensitive production keys should be committed, and all production/preview variables must be configured exclusively through the Vercel project's Environment Variables settings. Provide a link to the `SECRETS_MANAGEMENT.md` document for handling sensitive keys.
+

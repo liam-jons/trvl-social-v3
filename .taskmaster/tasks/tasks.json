@@ -3232,11 +3232,111 @@
             "testStrategy": "Use an online DMARC checker to validate the syntax and presence of the `_dmarc` record for `trvlsocial.com`. Monitor the `dmarc-reports@trvlsocial.com` inbox for incoming aggregate reports."
           }
         ]
+      },
+      {
+        "id": 52,
+        "title": "Homepage Aesthetic Redesign - Video Hero & Adventures Grid",
+        "description": "Complete redesign of homepage aesthetics including video hero section, typography updates, and content reorganization based on client specifications",
+        "details": "",
+        "testStrategy": "",
+        "status": "done",
+        "dependencies": [
+          41
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up Supabase video storage bucket",
+            "description": "Create a dedicated Supabase storage bucket for video assets. Configure appropriate CORS settings, size limits, and access policies for public video streaming. Upload the existing hero video file (vecteezy_tranquil-lake-landscape) to the new bucket.",
+            "details": "1. Access Supabase dashboard and create new public bucket named 'videos'\n2. Configure CORS policy for video streaming\n3. Set appropriate file size limits (considering video files can be large)\n4. Upload the existing MP4 video from project root to the bucket\n5. Generate and store the public URL for the video\n6. Test video streaming directly from Supabase URL",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 52
+          },
+          {
+            "id": 2,
+            "title": "Implement video hero component with seamless loop",
+            "description": "Create a new video hero component that replaces the current hero section. Implement seamless video looping similar to the 'Dream Backgrounds' reference site, with proper fallbacks and loading states.",
+            "details": "1. Create new VideoHero component in components/homepage/\n2. Implement HTML5 video element with autoplay, loop, muted, and playsinline attributes\n3. Add poster image for initial load state\n4. Implement lazy loading strategy for video\n5. Add overlay for hero text content\n6. Ensure video covers full viewport height\n7. Add fallback for browsers that don't support video\n8. Test seamless looping across browsers",
+            "status": "done",
+            "dependencies": [
+              "52.1"
+            ],
+            "parentTaskId": 52
+          },
+          {
+            "id": 3,
+            "title": "Update typography and remove gradient styling",
+            "description": "Replace all gradient text effects with solid colors throughout the homepage. Update logo and hero text typography to match the 'Voyage' reference site styling.",
+            "details": "1. Audit current gradient text usage in hero section\n2. Replace gradient CSS with solid color definitions\n3. Update logo font to match 'Voyage' site aesthetic\n4. Adjust hero text font sizes and weights\n5. Update color variables in CSS/Tailwind configuration\n6. Ensure text remains readable over video background\n7. Apply consistent typography across all hero text elements\n8. Test text visibility in different lighting conditions of video",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 52
+          },
+          {
+            "id": 4,
+            "title": "Remove live feeds component from homepage",
+            "description": "Remove the placeholder live feeds component from below the fold on the homepage, preparing the space for the new adventures grid display.",
+            "details": "1. Locate and identify the live feeds component in homepage code\n2. Remove component imports and references\n3. Clean up any associated styles and dependencies\n4. Remove any API calls or data fetching for live feeds\n5. Ensure no broken references remain\n6. Update page layout to accommodate removal\n7. Test that removal doesn't break other components",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 52
+          },
+          {
+            "id": 5,
+            "title": "Implement adventures display grid below fold",
+            "description": "Create and implement a new adventures display grid component to replace the removed live feeds section, showcasing adventure content in an engaging grid layout.",
+            "details": "1. Create new AdventuresGrid component\n2. Design grid layout matching reference aesthetic\n3. Fetch adventure data from existing API/database\n4. Implement responsive grid with proper breakpoints\n5. Add hover effects and interactions\n6. Ensure smooth scrolling from hero to adventures section\n7. Implement lazy loading for adventure cards\n8. Add proper spacing and visual hierarchy",
+            "status": "done",
+            "dependencies": [
+              "52.4"
+            ],
+            "parentTaskId": 52
+          },
+          {
+            "id": 6,
+            "title": "Ensure responsive design across all breakpoints",
+            "description": "Test and adjust all new homepage components to ensure perfect responsive behavior across mobile, tablet, and desktop breakpoints.",
+            "details": "1. Test video hero on mobile devices (portrait and landscape)\n2. Adjust video aspect ratio handling for different screens\n3. Ensure text remains readable on all screen sizes\n4. Test adventures grid on various breakpoints\n5. Optimize touch interactions for mobile\n6. Verify header behavior with new hero section\n7. Test on actual devices (iPhone, iPad, Android)\n8. Fine-tune spacing and padding for each breakpoint",
+            "status": "done",
+            "dependencies": [
+              "52.2",
+              "52.3",
+              "52.5"
+            ],
+            "parentTaskId": 52
+          },
+          {
+            "id": 7,
+            "title": "Optimize video performance and loading strategy",
+            "description": "Implement performance optimizations for the video hero section including compression, lazy loading, and bandwidth-aware loading strategies.",
+            "details": "1. Compress video file for optimal web delivery\n2. Create multiple video quality versions (SD, HD, Full HD)\n3. Implement adaptive bitrate streaming if needed\n4. Add preload='metadata' for faster initial load\n5. Implement intersection observer for lazy loading\n6. Add loading skeleton/placeholder\n7. Monitor and optimize Core Web Vitals impact\n8. Test on slow network connections (3G, slow 4G)",
+            "status": "done",
+            "dependencies": [
+              "52.1",
+              "52.2"
+            ],
+            "parentTaskId": 52
+          },
+          {
+            "id": 8,
+            "title": "Cross-browser testing and final adjustments",
+            "description": "Perform comprehensive testing across all major browsers and devices, fixing any compatibility issues and ensuring consistent experience.",
+            "details": "1. Test on Chrome, Firefox, Safari, Edge\n2. Verify video autoplay policies compliance\n3. Test on iOS Safari (special video requirements)\n4. Check Android Chrome video playback\n5. Validate all functionality on older browser versions\n6. Document any browser-specific workarounds needed\n7. Final visual QA against reference designs\n8. Performance testing and optimization verification",
+            "status": "done",
+            "dependencies": [
+              "52.6",
+              "52.7"
+            ],
+            "parentTaskId": 52
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-09-13T20:13:47.735Z",
-      "updated": "2025-09-23T14:36:16.642Z",
+      "updated": "2025-09-25T08:34:31.737Z",
       "description": "Tasks for master context"
     }
   }
