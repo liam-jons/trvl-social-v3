@@ -18,7 +18,7 @@ const VideoHero = () => {
         {/* VideoText Hero Title */}
         <div className="flex flex-col items-center mb-8 sm:mb-12">
           {/* TRVL with video text effect */}
-          <div className="mb-4" id="trvl-container">
+          <div className="mb-2" id="trvl-container">
             <VideoText
               src={videoUrl}
               className="text-8xl sm:text-9xl md:text-[10rem] lg:text-[12rem] xl:text-[14rem] font-black tracking-wider"
@@ -27,15 +27,14 @@ const VideoHero = () => {
             </VideoText>
           </div>
 
-          {/* social text below with controlled letter spacing */}
+          {/* SOCIAL text below with controlled letter spacing */}
           <div
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-gray-900 dark:text-white"
             style={{
               letterSpacing: '0.35em',
-              textTransform: 'lowercase',
             }}
           >
-            social
+            SOCIAL
           </div>
         </div>
 
