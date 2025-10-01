@@ -29,9 +29,9 @@ const VideoHero = () => {
 
           {/* social text below with controlled letter spacing */}
           <div
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-gray-900"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-gray-900 dark:text-white"
             style={{
-              letterSpacing: '0.5em',
+              letterSpacing: '0.35em',
               textTransform: 'lowercase',
             }}
           >
@@ -40,11 +40,11 @@ const VideoHero = () => {
         </div>
 
         {/* Subtitle and description */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 sm:p-8 md:p-12 lg:p-16 mt-8 shadow-lg border border-gray-100">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-gray-900 leading-tight">
+        <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl p-6 sm:p-8 md:p-12 lg:p-16 mt-8 shadow-lg border border-gray-100 dark:border-gray-700">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-gray-900 dark:text-white leading-tight">
             Discover Your Next Adventure
           </h2>
-          <p className="text-lg sm:text-xl md:text-2xl text-gray-700 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl md:text-2xl text-gray-700 dark:text-gray-300 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed">
             Connect with fellow travelers, find amazing experiences, and create unforgettable memories
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
