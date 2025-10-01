@@ -7,20 +7,18 @@ import { VideoText } from '../ui/VideoText';
 const VideoHero = () => {
   const { isAuthenticated } = useAuth();
 
-  // Use Supabase video URL for the VideoText component
-  const videoUrl = 'https://vhecnqaejsukulaktjob.supabase.co/storage/v1/object/public/videos/hero/vecteezy_tranquil-lake-landscape-with-blue-water-and-cloudy-sky-in_65688460.mp4';
+  // Use MagicUI ocean video
+  const videoUrl = 'https://cdn.magicui.design/ocean-small.webm';
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-slate-600 via-cyan-700 to-slate-900">
-      {/* Background overlay */}
-      <div className="absolute inset-0 bg-black/20 z-0" />
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-white">
 
       {/* Main Content */}
       <div className="relative z-20 text-center px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
         {/* VideoText Hero Title */}
         <div className="flex flex-col items-center mb-8 sm:mb-12">
           {/* TRVL with video text effect */}
-          <div className="mb-4">
+          <div className="mb-4" id="trvl-container">
             <VideoText
               src={videoUrl}
               className="text-8xl sm:text-9xl md:text-[10rem] lg:text-[12rem] xl:text-[14rem] font-black tracking-wider"
@@ -29,18 +27,28 @@ const VideoHero = () => {
             </VideoText>
           </div>
 
-          {/* Social text below, matching TRVL width */}
-          <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white drop-shadow-lg tracking-wider">
-            Social
+          {/* Social text below, matching TRVL width with letter spacing */}
+          <div
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-black flex justify-between"
+            style={{
+              width: '100%',
+            }}
+          >
+            <span>S</span>
+            <span>o</span>
+            <span>c</span>
+            <span>i</span>
+            <span>a</span>
+            <span>l</span>
           </div>
         </div>
 
         {/* Subtitle and description */}
-        <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-6 sm:p-8 md:p-12 lg:p-16 mt-8">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-white drop-shadow-lg leading-tight">
+        <div className="rounded-2xl p-6 sm:p-8 md:p-12 lg:p-16 mt-8">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-gray-900 leading-tight">
             Discover Your Next Adventure
           </h2>
-          <p className="text-lg sm:text-xl md:text-2xl text-white/90 drop-shadow-md mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl md:text-2xl text-gray-700 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed">
             Connect with fellow travelers, find amazing experiences, and create unforgettable memories
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
@@ -74,9 +82,6 @@ const VideoHero = () => {
           </div>
         </div>
       </div>
-
-      {/* Gradient overlay for better text readability */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 z-10" />
     </section>
   );
 };
