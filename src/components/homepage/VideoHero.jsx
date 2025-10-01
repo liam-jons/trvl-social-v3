@@ -11,7 +11,7 @@ const VideoHero = () => {
   const videoUrl = 'https://cdn.magicui.design/ocean-small.webm';
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-white">
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-transparent">
 
       {/* Main Content */}
       <div className="relative z-20 text-center px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
@@ -27,24 +27,20 @@ const VideoHero = () => {
             </VideoText>
           </div>
 
-          {/* Social text below, matching TRVL width with letter spacing */}
+          {/* social text below with controlled letter spacing */}
           <div
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-black flex justify-between"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-gray-900"
             style={{
-              width: '100%',
+              letterSpacing: '0.5em',
+              textTransform: 'lowercase',
             }}
           >
-            <span>S</span>
-            <span>o</span>
-            <span>c</span>
-            <span>i</span>
-            <span>a</span>
-            <span>l</span>
+            social
           </div>
         </div>
 
         {/* Subtitle and description */}
-        <div className="rounded-2xl p-6 sm:p-8 md:p-12 lg:p-16 mt-8">
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 sm:p-8 md:p-12 lg:p-16 mt-8 shadow-lg border border-gray-100">
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-gray-900 leading-tight">
             Discover Your Next Adventure
           </h2>
