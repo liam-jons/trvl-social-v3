@@ -90,7 +90,7 @@ class ComplianceLogger {
       calculated_age: calculatedAge,
       error_code: errorCode,
       was_encrypted: wasEncrypted,
-      is_underage: calculatedAge !== null && calculatedAge < 13
+      is_underage: calculatedAge !== null && calculatedAge < 18
     };
 
     const metadata = {

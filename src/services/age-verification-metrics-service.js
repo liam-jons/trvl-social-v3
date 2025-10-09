@@ -170,7 +170,7 @@ class AgeVerificationMetricsService {
     // Weighted scoring system
     const weights = {
       successRate: 0.3,      // 30% - How well the system works
-      underageBlocking: 0.4, // 40% - Most critical for COPPA
+      underageBlocking: 0.4, // 40% - Most critical for age verification compliance
       systemUptime: 0.2,     // 20% - System reliability
       dataIntegrity: 0.1     // 10% - Data quality
     };
@@ -226,7 +226,6 @@ class AgeVerificationMetricsService {
    */
   calculateAgeDistribution(rawLogs) {
     const ageGroups = {
-      '13-17': 0,
       '18-24': 0,
       '25-34': 0,
       '35-44': 0,
@@ -237,8 +236,7 @@ class AgeVerificationMetricsService {
     rawLogs.forEach(log => {
       if (log.event_data?.result === 'success' && log.event_data?.calculated_age) {
         const age = parseInt(log.event_data.calculated_age);
-        if (age >= 13 && age <= 17) ageGroups['13-17']++;
-        else if (age >= 18 && age <= 24) ageGroups['18-24']++;
+        if (age >= 18 && age <= 24) ageGroups['18-24']++;
         else if (age >= 25 && age <= 34) ageGroups['25-34']++;
         else if (age >= 35 && age <= 44) ageGroups['35-44']++;
         else if (age >= 45 && age <= 54) ageGroups['45-54']++;
@@ -443,7 +441,7 @@ class AgeVerificationMetricsService {
       const metrics = await this.getVerificationMetrics(dateRange);
 
       return {
-        reportId: `COPPA-${Date.now()}`,
+        reportId: `AGE-VERIFY-${Date.now()}`,
         generatedAt: new Date().toISOString(),
         period: dateRange,
         metrics,

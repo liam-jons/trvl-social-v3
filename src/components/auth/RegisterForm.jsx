@@ -32,7 +32,7 @@ const RegisterForm = () => {
   // Create debounced validation function for real-time age validation
   const debouncedAgeValidation = useCallback(
     debounceValidation((dateValue) => {
-      const ageValidation = validateAge(dateValue, 13);
+      const ageValidation = validateAge(dateValue, 18);
       if (!ageValidation.isValid && dateValue) {
         setErrors(prev => ({ ...prev, dateOfBirth: ageValidation.error }));
       } else if (ageValidation.isValid) {
@@ -69,7 +69,7 @@ const RegisterForm = () => {
       newErrors.fullName = 'Please enter your full name';
     }
     // Enhanced date of birth validation using age-verification utility
-    const ageValidation = validateAge(formData.dateOfBirth, 13);
+    const ageValidation = validateAge(formData.dateOfBirth, 18);
     if (!ageValidation.isValid) {
       newErrors.dateOfBirth = ageValidation.error;
     }
@@ -103,7 +103,7 @@ const RegisterForm = () => {
     const { name, value } = e.target;
 
     if (name === 'dateOfBirth' && value) {
-      const ageValidation = validateAge(value, 13);
+      const ageValidation = validateAge(value, 18);
       if (!ageValidation.isValid) {
         setErrors(prev => ({ ...prev, dateOfBirth: ageValidation.error }));
       } else {
@@ -144,8 +144,7 @@ const RegisterForm = () => {
       }
 
       // Handle different types of errors
-      if (result.code === ERROR_CODES.COPPA_AGE_RESTRICTION ||
-          result.code === ERROR_CODES.AGE_VERIFICATION_FAILED ||
+      if (result.code === ERROR_CODES.AGE_VERIFICATION_FAILED ||
           result.code === ERROR_CODES.INVALID_DATE_FORMAT) {
         // Age verification errors - don't retry
         setErrors(prev => ({
@@ -279,7 +278,7 @@ const RegisterForm = () => {
             </div>
           </div>
           <p className="text-xs text-gray-500 mt-1">
-            You must be 13 or older to use TRVL Social
+            You must be 18 or older to use TRVL Social
           </p>
           {errors.dateOfBirth && (
             <p className="text-red-500 text-xs mt-1">{errors.dateOfBirth}</p>

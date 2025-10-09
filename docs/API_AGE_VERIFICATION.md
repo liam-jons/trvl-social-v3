@@ -1,8 +1,11 @@
 # Age Verification API Documentation
 
+> **UPDATE (October 2025):** The TRVL Social platform now requires users to be **18 years or older**.
+> All examples and error codes in this document have been updated to reflect the 18+ age requirement.
+
 ## Overview
 
-The TRVL Social age verification system implements COPPA compliance by validating user ages through a multi-layered approach combining client-side and server-side validation with encrypted birth date storage.
+The TRVL Social age verification system implements age verification requirements by validating user ages through a multi-layered approach combining client-side and server-side validation with encrypted birth date storage.
 
 ## Architecture
 
@@ -25,7 +28,7 @@ Validation    Server Validation    Encryption/Decryption  Storage
   "dateOfBirth": "1995-06-15",          // Plain text date (YYYY-MM-DD)
   "encryptedBirthDate": "base64string", // Alternative: encrypted birth date
   "userEmail": "user@example.com",      // Required for encrypted dates
-  "minAge": 13                          // Minimum age requirement (default: 13)
+  "minAge": 18                          // Minimum age requirement (default: 18)
 }
 ```
 
@@ -46,10 +49,10 @@ Validation    Server Validation    Encryption/Decryption  Storage
 ```json
 {
   "success": false,
-  "error": "COPPA_AGE_RESTRICTION",
-  "message": "You must be at least 13 years old to create an account",
+  "error": "AGE_VERIFICATION_FAILED",
+  "message": "You must be at least 18 years old to create an account",
   "code": "AGE_VERIFICATION_FAILED",
-  "age": 12
+  "age": 17
 }
 ```
 
@@ -81,8 +84,7 @@ Validation    Server Validation    Encryption/Decryption  Storage
 
 | Code | Description | Retryable | User Action |
 |------|-------------|-----------|-------------|
-| `COPPA_AGE_RESTRICTION` | User is under minimum age | No | Show age requirement message |
-| `AGE_VERIFICATION_FAILED` | General age verification failure | No | Check date of birth |
+| `AGE_VERIFICATION_FAILED` | User is under minimum age or general verification failure | No | Show age requirement message |
 | `INVALID_DATE_FORMAT` | Invalid date format provided | No | Fix date format |
 | `MISSING_BIRTH_DATE` | No birth date provided | No | Provide birth date |
 | `AGE_CALCULATION_FAILED` | Cannot calculate age | No | Check date validity |
@@ -110,7 +112,7 @@ Validation    Server Validation    Encryption/Decryption  Storage
 ```javascript
 import { comprehensiveAgeVerification } from '../services/age-verification-service';
 
-const result = await comprehensiveAgeVerification('1995-06-15', 13);
+const result = await comprehensiveAgeVerification('1995-06-15', 18);
 
 if (result.success) {
   console.log('User age:', result.age);
@@ -131,7 +133,7 @@ const handleAgeVerification = async (dateOfBirth, maxRetries = 3) => {
 
   while (attempts < maxRetries) {
     try {
-      const result = await comprehensiveAgeVerification(dateOfBirth, 13);
+      const result = await comprehensiveAgeVerification(dateOfBirth, 18);
 
       if (result.success) {
         return result;
@@ -177,7 +179,7 @@ const handleSubmit = async (formData) => {
       setRegistrationSuccess(true);
     } else {
       // Handle specific error types
-      if (result.code === 'COPPA_AGE_RESTRICTION') {
+      if (result.code === 'AGE_VERIFICATION_FAILED') {
         setErrors(prev => ({ ...prev, ageError: result.error }));
       } else if (isRetryableError(result.code)) {
         setErrors(prev => ({ ...prev, networkError: result.error }));
@@ -198,7 +200,7 @@ const handleSubmit = async (formData) => {
 
 ### Logged Events
 
-The system automatically logs the following events for COPPA compliance:
+The system automatically logs the following events for age verification compliance:
 
 1. **Age Verification Attempts**
    - Successful verifications
@@ -219,7 +221,7 @@ The system automatically logs the following events for COPPA compliance:
   "event_data": {
     "result": "success|failure",
     "calculated_age": 28,
-    "error_code": "COPPA_AGE_RESTRICTION",
+    "error_code": "AGE_VERIFICATION_FAILED",
     "was_encrypted": true,
     "is_underage": false
   },
@@ -245,40 +247,40 @@ The system automatically logs the following events for COPPA compliance:
 ### 1. Valid Age Testing
 
 ```javascript
-// Test user over 13
-const result = await verifyAge('1995-06-15', 13);
+// Test user over 18
+const result = await verifyAge('1995-06-15', 18);
 expect(result.success).toBe(true);
-expect(result.age).toBeGreaterThanOrEqual(13);
+expect(result.age).toBeGreaterThanOrEqual(18);
 
-// Test user exactly 13
+// Test user exactly 18
 const birthDate = new Date();
-birthDate.setFullYear(birthDate.getFullYear() - 13);
-const result = await verifyAge(birthDate.toISOString().split('T')[0], 13);
+birthDate.setFullYear(birthDate.getFullYear() - 18);
+const result = await verifyAge(birthDate.toISOString().split('T')[0], 18);
 expect(result.success).toBe(true);
 ```
 
 ### 2. Underage Testing
 
 ```javascript
-// Test user under 13
-const result = await verifyAge('2015-06-15', 13);
+// Test user under 18
+const result = await verifyAge('2015-06-15', 18);
 expect(result.success).toBe(false);
-expect(result.error).toBe('COPPA_AGE_RESTRICTION');
-expect(result.age).toBeLessThan(13);
+expect(result.error).toBe('AGE_VERIFICATION_FAILED');
+expect(result.age).toBeLessThan(18);
 ```
 
 ### 3. Invalid Date Testing
 
 ```javascript
 // Test invalid date format
-const result = await verifyAge('invalid-date', 13);
+const result = await verifyAge('invalid-date', 18);
 expect(result.success).toBe(false);
 expect(result.error).toBe('INVALID_DATE_FORMAT');
 
 // Test future date
 const futureDate = new Date();
 futureDate.setFullYear(futureDate.getFullYear() + 1);
-const result = await verifyAge(futureDate.toISOString().split('T')[0], 13);
+const result = await verifyAge(futureDate.toISOString().split('T')[0], 18);
 expect(result.success).toBe(false);
 ```
 
@@ -287,7 +289,7 @@ expect(result.success).toBe(false);
 ```javascript
 // Test encrypted birth date verification
 const encrypted = await encryptBirthDate('1995-06-15', 'user@example.com');
-const result = await verifyAge(null, 13, encrypted, 'user@example.com');
+const result = await verifyAge(null, 18, encrypted, 'user@example.com');
 expect(result.success).toBe(true);
 ```
 
@@ -296,7 +298,7 @@ expect(result.success).toBe(true);
 ```javascript
 // Simulate network failure
 jest.spyOn(global, 'fetch').mockRejectedValue(new Error('Network error'));
-const result = await verifyAge('1995-06-15', 13);
+const result = await verifyAge('1995-06-15', 18);
 expect(result.success).toBe(false);
 expect(result.error).toBe('NETWORK_ERROR');
 ```

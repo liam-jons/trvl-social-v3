@@ -1,3 +1,9 @@
+> **ARCHIVAL NOTE (October 2025):** This document contains historical references to COPPA compliance
+> and age-13 requirements. The platform now requires users to be **18 years or older** as implemented
+> in Task 53. COPPA compliance is no longer applicable to this platform.
+
+---
+
 # Critical Production Tasks for TRVL Social v3
 
 **Status Update**: Database is fully deployed (106 tables exist) - no migration crisis!
