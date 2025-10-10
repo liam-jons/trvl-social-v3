@@ -13,6 +13,7 @@
  */
 
 import { supabase } from '../lib/supabase.js';
+import { env } from '../env.js';
 
 class SecureCredentialsService {
   constructor() {
@@ -43,9 +44,10 @@ class SecureCredentialsService {
         credential = await this.getFromVault(keyName);
       }
 
-      // Development: Use environment variables
+      // Development: Use type-safe environment variables
       if (!credential && this.isDevelopment && envFallback) {
-        credential = import.meta.env[envFallback] || process.env[envFallback];
+        // Use the validated env object instead of direct import.meta.env access
+        credential = env[envFallback];
       }
 
       // Cache the result (only cache non-null values)

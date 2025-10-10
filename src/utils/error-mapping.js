@@ -8,7 +8,6 @@
  */
 export const ERROR_CODES = {
   // Age Verification Errors
-  COPPA_AGE_RESTRICTION: 'COPPA_AGE_RESTRICTION',
   AGE_VERIFICATION_FAILED: 'AGE_VERIFICATION_FAILED',
   INVALID_DATE_FORMAT: 'INVALID_DATE_FORMAT',
   MISSING_BIRTH_DATE: 'MISSING_BIRTH_DATE',
@@ -53,8 +52,7 @@ export const ERROR_CODES = {
  */
 const ERROR_MESSAGES = {
   // Age Verification Messages
-  [ERROR_CODES.COPPA_AGE_RESTRICTION]: 'You must be at least 13 years old to create an account',
-  [ERROR_CODES.AGE_VERIFICATION_FAILED]: 'Age verification failed. Please check your date of birth',
+  [ERROR_CODES.AGE_VERIFICATION_FAILED]: 'You must be at least 18 years old to create an account',
   [ERROR_CODES.INVALID_DATE_FORMAT]: 'Please enter a valid date of birth',
   [ERROR_CODES.MISSING_BIRTH_DATE]: 'Date of birth is required',
   [ERROR_CODES.MISSING_USER_EMAIL]: 'User email is required for verification',
@@ -216,7 +214,6 @@ export const isRetryableError = (error) => {
  */
 export const isAgeVerificationError = (error) => {
   const ageErrorCodes = [
-    ERROR_CODES.COPPA_AGE_RESTRICTION,
     ERROR_CODES.AGE_VERIFICATION_FAILED,
     ERROR_CODES.INVALID_DATE_FORMAT,
     ERROR_CODES.MISSING_BIRTH_DATE,

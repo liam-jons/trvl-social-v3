@@ -257,7 +257,7 @@ const ComplianceDashboard = () => {
         <TabsContent value="age-verification" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">COPPA Age Verification Status</h3>
+              <h3 className="text-lg font-semibold mb-4">Age Verification Status (18+)</h3>
               <div className="space-y-4">
                 <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                   <div className="flex items-center gap-2 mb-2">
@@ -265,7 +265,7 @@ const ComplianceDashboard = () => {
                     <span className="font-medium text-green-800">Age Verification Enabled</span>
                   </div>
                   <p className="text-sm text-green-700">
-                    All user registrations are being verified for COPPA compliance
+                    All user registrations are being verified for age verification compliance
                   </p>
                 </div>
 
@@ -314,7 +314,7 @@ const ComplianceDashboard = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-medium">Generate Compliance Report</div>
-                      <div className="text-sm text-gray-600">Export COPPA compliance documentation</div>
+                      <div className="text-sm text-gray-600">Export age verification compliance documentation</div>
                     </div>
                     <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

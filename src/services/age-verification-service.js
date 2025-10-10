@@ -1,6 +1,6 @@
 /**
  * Server-Side Age Verification Service
- * Handles COPPA compliance by validating age on the server
+ * Handles age validation on the server (18+ requirement)
  */
 
 import { supabase } from '../lib/supabase';
@@ -8,10 +8,10 @@ import { supabase } from '../lib/supabase';
 /**
  * Calls the server-side age verification Edge Function
  * @param {string} dateOfBirth - Date of birth in YYYY-MM-DD format
- * @param {number} minAge - Minimum age requirement (default: 13)
+ * @param {number} minAge - Minimum age requirement (default: 18)
  * @returns {Promise<{success: boolean, age?: number, error?: string, message?: string}>}
  */
-export const verifyAgeServerSide = async (dateOfBirth, minAge = 13) => {
+export const verifyAgeServerSide = async (dateOfBirth, minAge = 18) => {
   try {
     const { data, error } = await supabase.functions.invoke('verify-age', {
       body: {
@@ -47,7 +47,7 @@ export const verifyAgeServerSide = async (dateOfBirth, minAge = 13) => {
  * @param {number} maxRetries - Maximum number of retries (default: 3)
  * @returns {Promise<{success: boolean, age?: number, error?: string, message?: string}>}
  */
-export const verifyAgeWithRetry = async (dateOfBirth, minAge = 13, maxRetries = 3) => {
+export const verifyAgeWithRetry = async (dateOfBirth, minAge = 18, maxRetries = 3) => {
   let lastError = null;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -55,7 +55,7 @@ export const verifyAgeWithRetry = async (dateOfBirth, minAge = 13, maxRetries = 
       const result = await verifyAgeServerSide(dateOfBirth, minAge);
 
       // If verification succeeded or failed for age reasons (not server error), return immediately
-      if (result.success || result.error === 'COPPA_AGE_RESTRICTION' || result.error === 'AGE_VERIFICATION_FAILED') {
+      if (result.success || result.error === 'AGE_VERIFICATION_FAILED') {
         return result;
       }
 
@@ -99,7 +99,7 @@ export const verifyAgeWithRetry = async (dateOfBirth, minAge = 13, maxRetries = 
  * @param {number} minAge - Minimum age requirement
  * @returns {Promise<{success: boolean, age?: number, error?: string, message?: string, clientValid?: boolean, serverValid?: boolean}>}
  */
-export const comprehensiveAgeVerification = async (dateOfBirth, minAge = 13) => {
+export const comprehensiveAgeVerification = async (dateOfBirth, minAge = 18) => {
   // Import client-side validation
   const { validateAge: clientValidateAge } = await import('../utils/age-verification');
 
@@ -137,7 +137,6 @@ export const comprehensiveAgeVerification = async (dateOfBirth, minAge = 13) => 
  */
 export const getAgeVerificationErrorMessage = (errorCode, message) => {
   switch (errorCode) {
-    case 'COPPA_AGE_RESTRICTION':
     case 'AGE_VERIFICATION_FAILED':
       return message; // Server provides specific age-related message
 

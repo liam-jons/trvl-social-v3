@@ -22,8 +22,7 @@ TravelSocial is committed to maintaining the highest standards of security and p
 
 ### 2. User Privacy
 
-- **COPPA Compliance**: Full compliance with Children's Online Privacy Protection Act
-- **Age Verification**: Mandatory age verification for all users
+- **Age Verification**: Mandatory age verification for all users (18+ requirement)
 - **Data Minimization**: Collection of only necessary user information
 - **Consent Management**: Granular privacy controls and consent tracking
 
@@ -121,7 +120,6 @@ If you discover a security vulnerability, please report it to:
 
 ### Regulatory Compliance
 
-- **COPPA**: Children's Online Privacy Protection Act
 - **CCPA**: California Consumer Privacy Act
 - **GDPR**: General Data Protection Regulation (for EU users)
 - **PCI DSS**: Payment Card Industry Data Security Standard

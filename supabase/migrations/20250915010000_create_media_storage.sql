@@ -1,21 +1,18 @@
 -- Create community-media bucket for storing user uploaded media
-INSERT INTO storage.buckets (id, name, public, avif_autodetection, allowed_mime_types, file_size_limit)
-VALUES (
-  'community-media',
-  'community-media',
-  true,
-  false,
-  ARRAY[
-    'image/jpeg',
-    'image/png',
-    'image/webp',
-    'image/gif',
-    'video/mp4',
-    'video/webm',
-    'video/quicktime'
-  ],
-  104857600 -- 100MB limit
-);
+-- Note: Due to storage schema variations across Supabase versions,
+-- bucket creation should be done via the Supabase Dashboard or API
+-- Navigate to Storage > Create a new bucket with these settings:
+-- - Name: community-media
+-- - Public: true
+-- - File size limit: 100MB (104857600 bytes)
+-- - Allowed MIME types: image/jpeg, image/png, image/webp, image/gif, video/mp4, video/webm, video/quicktime
+--
+-- Alternatively, use the Supabase JavaScript client:
+-- supabase.storage.createBucket('community-media', {
+--   public: true,
+--   fileSizeLimit: '100MB',
+--   allowedMimeTypes: ['image/*', 'video/mp4', 'video/webm', 'video/quicktime']
+-- });
 
 -- Create RLS policies for community-media bucket
 

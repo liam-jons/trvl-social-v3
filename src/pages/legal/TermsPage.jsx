@@ -52,16 +52,16 @@ const TermsPage = () => {
         {/* User Accounts */}
         <section>
           <h2 className="text-2xl font-bold mb-4">3. User Accounts and Responsibilities</h2>
-          <h3 className="text-lg font-semibold mb-3">3.1 Age Requirements and COPPA Compliance</h3>
+          <h3 className="text-lg font-semibold mb-3">3.1 Age Requirements</h3>
           <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg mb-4">
             <p className="mb-3 font-semibold text-amber-800 dark:text-amber-200">
-              IMPORTANT: You must be at least 13 years old to use TRVL Social.
+              IMPORTANT: You must be at least 18 years old to use TRVL Social.
             </p>
             <p className="mb-3">
-              By creating an account, you represent and warrant that you are at least 13 years of age. We comply with the Children's Online Privacy Protection Act (COPPA) and do not knowingly collect personal information from children under 13.
+              By creating an account, you represent and warrant that you are at least 18 years of age. This age requirement ensures platform safety and compliance with applicable laws.
             </p>
             <p className="mb-3">
-              If we discover that we have collected personal information from a child under 13, we will immediately delete such information from our servers. If you are a parent or guardian and believe your child under 13 has provided us with personal information, please contact us immediately at privacy@trvlsocial.com.
+              If we discover that a user is under 18 years of age, we will immediately suspend their account and delete all associated personal information.
             </p>
             <p>
               Providing false information about your age is a violation of these Terms and may result in immediate account termination. We reserve the right to request additional verification of your age at any time.
@@ -80,7 +80,7 @@ const TermsPage = () => {
 
           <h3 className="text-lg font-semibold mb-3">3.4 Identity Verification</h3>
           <p className="mb-4">
-            All users must complete our identity verification process, which may include providing government-issued identification, phone verification, and social media authentication. Age verification is part of this process and is required for COPPA compliance.
+            All users must complete our identity verification process, which may include providing government-issued identification, phone verification, and social media authentication. Age verification is part of this process and ensures platform safety and compliance.
           </p>
         </section>
 

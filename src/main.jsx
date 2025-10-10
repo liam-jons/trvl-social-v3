@@ -2,6 +2,11 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
+
+// Validate environment variables at application startup
+// This MUST be imported before any code that uses environment variables
+import { env } from './env.js'
+
 import monitoringManager from './services/monitoring-manager.js'
 
 // Initialize monitoring system early

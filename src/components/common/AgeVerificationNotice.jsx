@@ -46,11 +46,11 @@ const AgeVerificationNotice = ({ variant = 'default', className = '' }) => {
             Age Requirement
           </h3>
           <p className={`text-sm ${currentVariant.text} mb-3`}>
-            You must be 13 or older to use TRVL Social. We comply with the Children's Online Privacy Protection Act (COPPA).
+            You must be 18 or older to use TRVL Social. Age verification is required to ensure platform safety and security.
           </p>
           <div className={`text-xs ${currentVariant.text} space-y-1`}>
             <p>
-              <strong>Why age verification is required:</strong> To protect children's privacy and comply with federal regulations.
+              <strong>Why age verification is required:</strong> To ensure platform safety and protect user privacy.
             </p>
             <p>
               Learn more about our{' '}
@@ -91,7 +91,7 @@ export const AgeVerificationBadge = ({ className = '' }) => (
     <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
-    13+ Required
+    18+ Required
   </div>
 );
 

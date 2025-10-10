@@ -2,7 +2,7 @@
 
 ## Overview
 
-This implementation provides robust server-side age verification for COPPA compliance, ensuring users are at least 13 years old before account creation. The system includes multiple layers of protection to prevent client-side bypass attempts.
+This implementation provides robust server-side age verification, ensuring users are at least 18 years old before account creation. The system includes multiple layers of protection to prevent client-side bypass attempts.
 
 ## Architecture
 
@@ -23,7 +23,7 @@ This implementation provides robust server-side age verification for COPPA compl
 ```json
 {
   "dateOfBirth": "YYYY-MM-DD",
-  "minAge": 13
+  "minAge": 18
 }
 ```
 
@@ -39,7 +39,7 @@ This implementation provides robust server-side age verification for COPPA compl
 ```
 
 **Error Codes**:
-- `COPPA_AGE_RESTRICTION`: User is under minimum age
+- `AGE_VERIFICATION_FAILED`: User is under minimum age
 - `INVALID_DATE_FORMAT`: Invalid date provided
 - `VALIDATION_ERROR`: General validation failure
 - `SERVER_ERROR`: Internal server error
@@ -151,9 +151,9 @@ const signUp = async (userData) => {
 
 ### Test Coverage
 
-- ✅ Valid age verification (13+)
-- ✅ Underage rejection (< 13)
-- ✅ Edge cases (exactly 13, leap years)
+- ✅ Valid age verification (18+)
+- ✅ Underage rejection (< 18)
+- ✅ Edge cases (exactly 18, leap years)
 - ✅ Invalid date formats
 - ✅ Network failure retry logic
 - ✅ Server error handling
@@ -161,9 +161,9 @@ const signUp = async (userData) => {
 
 ### Manual Testing Scenarios
 
-1. **Valid Registration**: Birth date > 13 years ago
-2. **Underage Rejection**: Birth date < 13 years ago
-3. **Edge Case**: Exactly 13 years old today
+1. **Valid Registration**: Birth date > 18 years ago
+2. **Underage Rejection**: Birth date < 18 years ago
+3. **Edge Case**: Exactly 18 years old today
 4. **Invalid Dates**: Future dates, invalid formats
 5. **Leap Years**: February 29th on leap/non-leap years
 6. **Server Bypass Attempts**: Direct API calls, client manipulation
@@ -255,23 +255,23 @@ Consider setting up alerts for:
 
 ## Compliance Notes
 
-### COPPA Compliance
+### Age Verification Compliance
 
 - ✅ Server-side age verification prevents client bypass
-- ✅ Minimum age of 13 enforced at multiple layers
+- ✅ Minimum age of 18 enforced at multiple layers
 - ✅ Verification attempts logged for audit trails
 - ✅ No collection of personal data for underage users
 
 ### Privacy Considerations
 
-- Date of birth stored securely in database
+- Date of birth stored securely with encryption in database
 - Verification logs don't contain actual birth dates
 - User-friendly error messages without exposing system details
 - Compliance with data retention policies
 
 ### Legal Requirements
 
-- Clear disclosure of age requirements in UI
+- Clear disclosure of age requirements in UI (18+)
 - Terms of service updated to reflect age restrictions
 - Privacy policy covers age verification process
 - Data handling procedures documented

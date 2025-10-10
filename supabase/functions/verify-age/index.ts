@@ -1,5 +1,5 @@
 // Age Verification Edge Function
-// COPPA Compliance - Server-Side Age Verification with Encrypted Birth Date Support
+// Server-Side Age Verification with Encrypted Birth Date Support (18+ requirement)
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { withCors } from "../../../src/utils/cors-config.ts"
 
@@ -243,7 +243,7 @@ serve(withCors(async (req) => {
   }
 
   try {
-    const { dateOfBirth, encryptedBirthDate, userEmail, minAge = 13 }: AgeVerificationRequest = await req.json();
+    const { dateOfBirth, encryptedBirthDate, userEmail, minAge = 18 }: AgeVerificationRequest = await req.json();
 
     let actualBirthDate: string;
     let isEncrypted = false;
@@ -379,7 +379,7 @@ serve(withCors(async (req) => {
       return new Response(
         JSON.stringify({
           success: false,
-          error: 'COPPA_AGE_RESTRICTION',
+          error: 'AGE_VERIFICATION_FAILED',
           message,
           code: 'AGE_VERIFICATION_FAILED',
           age

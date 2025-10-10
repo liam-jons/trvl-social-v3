@@ -168,18 +168,18 @@ describe('Age Calculation from Encrypted Data', () => {
     const birthDate25 = new Date(today.getFullYear() - 25, today.getMonth(), today.getDate()).toISOString().split('T')[0];
     const encrypted25 = await encryptBirthDate(birthDate25, 'adult@example.com');
 
-    const validation25 = await validateEncryptedBirthDateAge(encrypted25, 'adult@example.com', 13);
+    const validation25 = await validateEncryptedBirthDateAge(encrypted25, 'adult@example.com', 18);
     expect(validation25.isValid).toBe(true);
     expect(validation25.age).toBe(25);
 
-    // Test with someone who is 10 (should fail 13+ requirement)
-    const birthDate10 = new Date(today.getFullYear() - 10, today.getMonth(), today.getDate()).toISOString().split('T')[0];
-    const encrypted10 = await encryptBirthDate(birthDate10, 'child@example.com');
+    // Test with someone who is 17 (should fail 18+ requirement)
+    const birthDate17 = new Date(today.getFullYear() - 17, today.getMonth(), today.getDate()).toISOString().split('T')[0];
+    const encrypted17 = await encryptBirthDate(birthDate17, 'minor@example.com');
 
-    const validation10 = await validateEncryptedBirthDateAge(encrypted10, 'child@example.com', 13);
-    expect(validation10.isValid).toBe(false);
-    expect(validation10.age).toBeUndefined(); // Age not returned for failed validation
-    expect(validation10.error).toContain('at least 13 years old');
+    const validation17 = await validateEncryptedBirthDateAge(encrypted17, 'minor@example.com', 18);
+    expect(validation17.isValid).toBe(false);
+    expect(validation17.age).toBeUndefined(); // Age not returned for failed validation
+    expect(validation17.error).toContain('at least 18 years old');
   });
 });
 

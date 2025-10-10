@@ -182,9 +182,15 @@ ADD COLUMN IF NOT EXISTS refund_request_id UUID REFERENCES refund_requests(id) O
 CREATE INDEX IF NOT EXISTS idx_payment_refunds_refund_request_id ON payment_refunds(refund_request_id);
 
 -- Create storage bucket for dispute evidence files
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('dispute-evidence', 'dispute-evidence', false)
-ON CONFLICT (id) DO NOTHING;
+-- Note: Due to storage schema variations across Supabase versions,
+-- bucket creation should be done via the Supabase Dashboard or API
+-- Navigate to Storage > Create a new bucket with these settings:
+-- - Name: dispute-evidence
+-- - Public: false (private bucket for admin-only access)
+-- - File size limit: 10MB recommended
+--
+-- Alternatively, use the Supabase JavaScript client:
+-- supabase.storage.createBucket('dispute-evidence', { public: false });
 
 -- RLS policy for dispute evidence storage
 CREATE POLICY "Admins can upload dispute evidence"

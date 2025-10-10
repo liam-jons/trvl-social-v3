@@ -21,7 +21,7 @@ import { useAgeVerificationMetrics } from '../../hooks/useAgeVerificationMetrics
 
 /**
  * Age Verification Analytics and Compliance Reporting Dashboard
- * Provides comprehensive monitoring of COPPA compliance and age verification metrics
+ * Provides comprehensive monitoring of age verification metrics (18+ requirement)
  */
 const AgeVerificationDashboard = ({ className = "" }) => {
   const { user } = useAuth();
@@ -168,7 +168,7 @@ const AgeVerificationDashboard = ({ className = "" }) => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Age Verification Compliance</h1>
           <p className="text-gray-600 mt-2">
-            COPPA compliance monitoring and age verification analytics
+            Age verification monitoring and analytics (18+ requirement)
           </p>
           <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
             <Clock className="w-4 h-4" />
@@ -552,10 +552,10 @@ const AnalyticsTab = ({ metrics }) => (
 const ComplianceTab = ({ metrics }) => (
   <div className="space-y-6">
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* COPPA Compliance Status */}
+      {/* Age Verification Compliance Status */}
       <Card>
         <CardHeader>
-          <CardTitle>COPPA Compliance Status</CardTitle>
+          <CardTitle>Age Verification Compliance Status</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -565,7 +565,7 @@ const ComplianceTab = ({ metrics }) => (
                 <span className="font-medium text-green-800">Age Verification Active</span>
               </div>
               <p className="text-sm text-green-700">
-                All registration attempts are being verified for COPPA compliance
+                All registration attempts are being verified for age verification compliance
               </p>
             </div>
 
@@ -708,7 +708,7 @@ const ReportsTab = ({ metrics, onExportPDF, csvData, dateRange }) => (
             <div className="border-t pt-4">
               <h4 className="font-medium mb-2">Regulatory Compliance</h4>
               <p className="text-sm text-gray-600 mb-3">
-                Pre-formatted report for regulatory submission (COPPA compliance).
+                Pre-formatted report for regulatory submission (age verification compliance).
               </p>
               <Button variant="outline" className="w-full">
                 <Shield className="w-4 h-4 mr-2" />
@@ -795,7 +795,7 @@ const ReportsTab = ({ metrics, onExportPDF, csvData, dateRange }) => (
           <h5 className="font-medium mb-2">Key Insights</h5>
           <ul className="text-sm text-gray-600 space-y-1">
             <li>• Age verification system is operating within normal parameters</li>
-            <li>• No COPPA compliance violations detected this period</li>
+            <li>• No age verification compliance violations detected this period</li>
             <li>• All underage registration attempts successfully blocked</li>
             <li>• System performance meets SLA requirements</li>
           </ul>

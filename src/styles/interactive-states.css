@@ -1,0 +1,671 @@
+/* ========================================
+   STANDARDIZED INTERACTIVE STATES SYSTEM
+   Consistent hover, focus, and active states
+   Task 41.9: Standardize Interactive States
+   ======================================== */
+
+@layer base {
+  :root {
+    /* ========== INTERACTIVE STATE TOKENS ========== */
+
+    /* Transition Durations */
+    --transition-instant: 100ms;
+    --transition-fast: 150ms;
+    --transition-normal: 200ms;
+    --transition-moderate: 300ms;
+    --transition-slow: 500ms;
+
+    /* Transition Easing Functions */
+    --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --ease-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    /* Focus Ring Colors */
+    --focus-ring-primary: rgb(var(--color-primary-500) / 0.4);
+    --focus-ring-secondary: rgb(var(--color-secondary-500) / 0.4);
+    --focus-ring-accent: rgb(var(--color-accent-500) / 0.4);
+    --focus-ring-success: rgb(var(--color-success-500) / 0.4);
+    --focus-ring-warning: rgb(var(--color-warning-500) / 0.4);
+    --focus-ring-error: rgb(var(--color-error-500) / 0.4);
+
+    /* Focus Ring Widths */
+    --focus-ring-width-thin: 2px;
+    --focus-ring-width-normal: 3px;
+    --focus-ring-width-thick: 4px;
+
+    /* Hover Effects */
+    --hover-brightness: 1.1;
+    --hover-contrast: 1.05;
+    --hover-scale: 1.02;
+    --hover-translate-y: -2px;
+    --hover-shadow-spread: 4px;
+
+    /* Active/Pressed Effects */
+    --active-scale: 0.98;
+    --active-brightness: 0.95;
+    --active-translate-y: 0;
+
+    /* Disabled State */
+    --disabled-opacity: 0.5;
+    --disabled-cursor: not-allowed;
+  }
+
+  .dark {
+    /* Dark mode adjustments */
+    --hover-brightness: 1.2;
+    --hover-contrast: 1.1;
+    --active-brightness: 0.9;
+  }
+}
+
+@layer components {
+  /* ========== BUTTON INTERACTIVE STATES ========== */
+
+  /* Base button interaction */
+  .btn-interactive {
+    position: relative;
+    transition-property: transform, box-shadow, background-color, border-color, color;
+    transition-duration: var(--transition-normal);
+    transition-timing-function: var(--ease-smooth);
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Primary button states */
+  .btn-primary {
+    @apply btn-interactive;
+    background-color: rgb(var(--color-primary-500));
+    color: white;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background-color: rgb(var(--color-primary-600));
+    transform: translateY(var(--hover-translate-y));
+    box-shadow: 0 4px 12px rgb(var(--color-primary-500) / 0.3);
+  }
+
+  .btn-primary:active:not(:disabled) {
+    background-color: rgb(var(--color-primary-700));
+    transform: scale(var(--active-scale));
+    box-shadow: 0 2px 4px rgb(var(--color-primary-500) / 0.2);
+  }
+
+  .btn-primary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 var(--focus-ring-width-normal) var(--focus-ring-primary);
+  }
+
+  .btn-primary:disabled {
+    opacity: var(--disabled-opacity);
+    cursor: var(--disabled-cursor);
+  }
+
+  /* Secondary button states */
+  .btn-secondary {
+    @apply btn-interactive;
+    background-color: rgb(var(--color-secondary-100));
+    color: rgb(var(--color-secondary-700));
+    border: 1px solid rgb(var(--color-secondary-300));
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background-color: rgb(var(--color-secondary-200));
+    border-color: rgb(var(--color-secondary-400));
+    transform: translateY(var(--hover-translate-y));
+  }
+
+  .btn-secondary:active:not(:disabled) {
+    background-color: rgb(var(--color-secondary-300));
+    transform: scale(var(--active-scale));
+  }
+
+  .btn-secondary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 var(--focus-ring-width-normal) var(--focus-ring-secondary);
+  }
+
+  /* Ghost button states */
+  .btn-ghost {
+    @apply btn-interactive;
+    background-color: transparent;
+    color: rgb(var(--color-text-primary));
+  }
+
+  .btn-ghost:hover:not(:disabled) {
+    background-color: rgb(var(--color-secondary-100) / 0.5);
+    transform: translateY(calc(var(--hover-translate-y) * 0.5));
+  }
+
+  .btn-ghost:active:not(:disabled) {
+    background-color: rgb(var(--color-secondary-200) / 0.5);
+    transform: scale(var(--active-scale));
+  }
+
+  .btn-ghost:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 var(--focus-ring-width-normal) var(--focus-ring-secondary);
+  }
+
+  /* ========== INPUT INTERACTIVE STATES ========== */
+
+  /* Base input interaction */
+  .input-interactive {
+    transition-property: border-color, box-shadow, background-color;
+    transition-duration: var(--transition-fast);
+    transition-timing-function: var(--ease-smooth);
+    border: 1px solid rgb(var(--color-border-base));
+    background-color: rgb(var(--color-surface-base));
+  }
+
+  .input-interactive:hover:not(:disabled):not(:focus) {
+    border-color: rgb(var(--color-border-strong));
+    background-color: rgb(var(--color-surface-raised));
+  }
+
+  .input-interactive:focus {
+    outline: none;
+    border-color: rgb(var(--color-primary-500));
+    box-shadow: 0 0 0 var(--focus-ring-width-thin) var(--focus-ring-primary);
+  }
+
+  .input-interactive:disabled {
+    opacity: var(--disabled-opacity);
+    cursor: var(--disabled-cursor);
+    background-color: rgb(var(--color-secondary-100));
+  }
+
+  /* Error state */
+  .input-error {
+    border-color: rgb(var(--color-error-500));
+  }
+
+  .input-error:focus {
+    box-shadow: 0 0 0 var(--focus-ring-width-thin) var(--focus-ring-error);
+  }
+
+  /* Success state */
+  .input-success {
+    border-color: rgb(var(--color-success-500));
+  }
+
+  .input-success:focus {
+    box-shadow: 0 0 0 var(--focus-ring-width-thin) var(--focus-ring-success);
+  }
+
+  /* ========== CARD INTERACTIVE STATES ========== */
+
+  /* Interactive card */
+  .card-interactive {
+    transition-property: transform, box-shadow, border-color;
+    transition-duration: var(--transition-normal);
+    transition-timing-function: var(--ease-smooth);
+    cursor: pointer;
+  }
+
+  .card-interactive:hover {
+    transform: translateY(var(--hover-translate-y));
+    box-shadow: var(--shadow-lg);
+  }
+
+  .card-interactive:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-md);
+  }
+
+  .card-interactive:focus-visible {
+    outline: none;
+    box-shadow:
+      var(--shadow-lg),
+      0 0 0 var(--focus-ring-width-normal) var(--focus-ring-primary);
+  }
+
+  /* ========== LINK INTERACTIVE STATES ========== */
+
+  /* Base link interaction */
+  .link-interactive {
+    position: relative;
+    color: rgb(var(--color-primary-600));
+    text-decoration: none;
+    transition-property: color, opacity;
+    transition-duration: var(--transition-fast);
+    transition-timing-function: var(--ease-smooth);
+  }
+
+  .link-interactive::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform var(--transition-normal) var(--ease-smooth);
+  }
+
+  .link-interactive:hover {
+    color: rgb(var(--color-primary-700));
+  }
+
+  .link-interactive:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  .link-interactive:active {
+    opacity: 0.8;
+  }
+
+  .link-interactive:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 var(--focus-ring-width-normal) var(--focus-ring-primary);
+    border-radius: 2px;
+  }
+
+  /* ========== CHECKBOX & RADIO INTERACTIVE STATES ========== */
+
+  /* Custom checkbox/radio wrapper */
+  .check-interactive {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .check-interactive input[type="checkbox"],
+  .check-interactive input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  /* Custom checkbox/radio indicator */
+  .check-indicator {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgb(var(--color-border-strong));
+    background-color: rgb(var(--color-surface-base));
+    transition: all var(--transition-fast) var(--ease-smooth);
+  }
+
+  .check-interactive input[type="checkbox"] ~ .check-indicator {
+    border-radius: var(--radius-base);
+  }
+
+  .check-interactive input[type="radio"] ~ .check-indicator {
+    border-radius: var(--radius-full);
+  }
+
+  /* Hover state */
+  .check-interactive:hover .check-indicator {
+    border-color: rgb(var(--color-primary-400));
+    background-color: rgb(var(--color-primary-50));
+  }
+
+  /* Checked state */
+  .check-interactive input:checked ~ .check-indicator {
+    background-color: rgb(var(--color-primary-500));
+    border-color: rgb(var(--color-primary-500));
+  }
+
+  /* Focus state */
+  .check-interactive input:focus-visible ~ .check-indicator {
+    box-shadow: 0 0 0 var(--focus-ring-width-normal) var(--focus-ring-primary);
+  }
+
+  /* Disabled state */
+  .check-interactive input:disabled ~ .check-indicator {
+    opacity: var(--disabled-opacity);
+    cursor: var(--disabled-cursor);
+  }
+
+  /* ========== TOGGLE SWITCH INTERACTIVE STATES ========== */
+
+  .toggle-interactive {
+    position: relative;
+    display: inline-flex;
+    width: 48px;
+    height: 24px;
+    cursor: pointer;
+  }
+
+  .toggle-track {
+    position: absolute;
+    inset: 0;
+    background-color: rgb(var(--color-secondary-300));
+    border-radius: var(--radius-full);
+    transition: background-color var(--transition-fast) var(--ease-smooth);
+  }
+
+  .toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-normal) var(--ease-smooth);
+  }
+
+  .toggle-interactive input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  /* Hover state */
+  .toggle-interactive:hover .toggle-track {
+    background-color: rgb(var(--color-secondary-400));
+  }
+
+  /* Checked state */
+  .toggle-interactive input:checked ~ .toggle-track {
+    background-color: rgb(var(--color-primary-500));
+  }
+
+  .toggle-interactive input:checked ~ .toggle-thumb {
+    transform: translateX(24px);
+  }
+
+  /* Focus state */
+  .toggle-interactive input:focus-visible ~ .toggle-track {
+    box-shadow: 0 0 0 var(--focus-ring-width-normal) var(--focus-ring-primary);
+  }
+
+  /* Disabled state */
+  .toggle-interactive input:disabled ~ .toggle-track {
+    opacity: var(--disabled-opacity);
+    cursor: var(--disabled-cursor);
+  }
+
+  /* ========== DROPDOWN INTERACTIVE STATES ========== */
+
+  .dropdown-item {
+    padding: 8px 12px;
+    transition: background-color var(--transition-instant) var(--ease-smooth);
+    cursor: pointer;
+  }
+
+  .dropdown-item:hover {
+    background-color: rgb(var(--color-primary-50));
+  }
+
+  .dropdown-item:active {
+    background-color: rgb(var(--color-primary-100));
+  }
+
+  .dropdown-item:focus-visible {
+    outline: none;
+    background-color: rgb(var(--color-primary-50));
+    box-shadow: inset 3px 0 0 rgb(var(--color-primary-500));
+  }
+
+  .dropdown-item[aria-selected="true"] {
+    background-color: rgb(var(--color-primary-100));
+    font-weight: 600;
+  }
+
+  /* ========== TAB INTERACTIVE STATES ========== */
+
+  .tab-interactive {
+    position: relative;
+    padding: 12px 16px;
+    color: rgb(var(--color-text-secondary));
+    transition: color var(--transition-fast) var(--ease-smooth);
+    cursor: pointer;
+  }
+
+  .tab-interactive::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: transparent;
+    transition: background-color var(--transition-normal) var(--ease-smooth);
+  }
+
+  .tab-interactive:hover {
+    color: rgb(var(--color-text-primary));
+  }
+
+  .tab-interactive[aria-selected="true"] {
+    color: rgb(var(--color-primary-600));
+  }
+
+  .tab-interactive[aria-selected="true"]::after {
+    background-color: rgb(var(--color-primary-500));
+  }
+
+  .tab-interactive:focus-visible {
+    outline: none;
+    background-color: rgb(var(--color-primary-50) / 0.5);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+  }
+}
+
+@layer utilities {
+  /* ========== INTERACTIVE STATE UTILITIES ========== */
+
+  /* Ripple effect for Material Design style interactions */
+  .ripple {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ripple::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background-color: currentColor;
+    opacity: 0.2;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  .ripple:active::before {
+    width: 300px;
+    height: 300px;
+  }
+
+  /* Pulse animation for attention */
+  .pulse-hover:hover {
+    animation: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+  }
+
+  /* Shake animation for errors */
+  .shake-error {
+    animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  }
+
+  @keyframes shake {
+    10%, 90% {
+      transform: translateX(-1px);
+    }
+    20%, 80% {
+      transform: translateX(2px);
+    }
+    30%, 50%, 70% {
+      transform: translateX(-4px);
+    }
+    40%, 60% {
+      transform: translateX(4px);
+    }
+  }
+
+  /* Loading states */
+  .loading-spinner {
+    border: 2px solid rgb(var(--color-secondary-200));
+    border-top-color: rgb(var(--color-primary-500));
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Skeleton loading */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      rgb(var(--color-secondary-200)),
+      rgb(var(--color-secondary-100)),
+      rgb(var(--color-secondary-200))
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+  }
+
+  @keyframes skeleton-loading {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  /* Focus trap for accessibility */
+  .focus-trap:focus {
+    outline: none;
+  }
+
+  /* Skip link for keyboard navigation */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: rgb(var(--color-primary-500));
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    z-index: var(--z-skiplink);
+    border-radius: 0 0 var(--radius-md) 0;
+  }
+
+  .skip-link:focus {
+    top: 0;
+  }
+
+  /* Disabled state utility */
+  .disabled {
+    opacity: var(--disabled-opacity);
+    cursor: var(--disabled-cursor);
+    pointer-events: none;
+  }
+
+  /* Loading state utility */
+  .loading {
+    position: relative;
+    color: transparent;
+    pointer-events: none;
+  }
+
+  .loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin-top: -8px;
+    margin-left: -8px;
+    border: 2px solid rgb(var(--color-secondary-300));
+    border-top-color: rgb(var(--color-primary-500));
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+
+  /* Interactive feedback utilities */
+  .hover-lift:hover {
+    transform: translateY(var(--hover-translate-y));
+  }
+
+  .hover-grow:hover {
+    transform: scale(var(--hover-scale));
+  }
+
+  .hover-shadow:hover {
+    box-shadow: var(--shadow-lg);
+  }
+
+  .hover-bright:hover {
+    filter: brightness(var(--hover-brightness));
+  }
+
+  .active-shrink:active {
+    transform: scale(var(--active-scale));
+  }
+
+  .active-dim:active {
+    filter: brightness(var(--active-brightness));
+  }
+
+  /* Transition utilities */
+  .transition-instant {
+    transition-duration: var(--transition-instant);
+  }
+
+  .transition-fast {
+    transition-duration: var(--transition-fast);
+  }
+
+  .transition-normal {
+    transition-duration: var(--transition-normal);
+  }
+
+  .transition-moderate {
+    transition-duration: var(--transition-moderate);
+  }
+
+  .transition-slow {
+    transition-duration: var(--transition-slow);
+  }
+
+  /* Focus ring utilities */
+  .focus-ring-primary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 var(--focus-ring-width-normal) var(--focus-ring-primary);
+  }
+
+  .focus-ring-secondary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 var(--focus-ring-width-normal) var(--focus-ring-secondary);
+  }
+
+  .focus-ring-accent:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 var(--focus-ring-width-normal) var(--focus-ring-accent);
+  }
+
+  /* Remove focus ring for mouse users */
+  .focus-visible-only:focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
+  }
+}

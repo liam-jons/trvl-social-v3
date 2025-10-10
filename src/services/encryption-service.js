@@ -243,10 +243,10 @@ export async function getAgeFromEncryptedBirthDate(encryptedBirthDate, userId) {
  * Audit-safe birth date validation (doesn't log actual dates)
  * @param {string} encryptedBirthDate - Encrypted birth date
  * @param {string} userId - User ID for decryption
- * @param {number} minAge - Minimum required age (default: 13)
+ * @param {number} minAge - Minimum required age (default: 18)
  * @returns {Promise<{isValid: boolean, age?: number, error?: string}>}
  */
-export async function validateEncryptedBirthDateAge(encryptedBirthDate, userId, minAge = 13) {
+export async function validateEncryptedBirthDateAge(encryptedBirthDate, userId, minAge = 18) {
   try {
     if (!validateEncryptedData(encryptedBirthDate)) {
       return { isValid: false, error: 'Invalid encrypted data format' };

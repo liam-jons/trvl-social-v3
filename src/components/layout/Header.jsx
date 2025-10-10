@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useHeaderVisibility } from '../../hooks/useHeaderVisibility';
+import { useDropdown } from '../../hooks/useDropdown';
 import GlassCard from '../ui/GlassCard';
 import GlassButton from '../ui/GlassButton';
 import NotificationDropdown from '../notifications/NotificationDropdown';
@@ -20,13 +22,17 @@ import useNotificationStore from '../../stores/notificationStore';
 import { supabase } from '../../lib/supabase';
 
 const Header = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isNotificationDropdownOpen, setIsNotificationDropdownOpen] = useState(false);
   const { user, isAuthenticated, signOut } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const { unreadCount, initialize } = useNotificationStore();
+  const { isVisible, headerRef } = useHeaderVisibility();
   const location = useLocation();
+
+  // Dropdown management with standardized behavior
+  const mobileMenu = useDropdown({ closeOnRouteChange: true });
+  const profileDropdown = useDropdown({ closeOnRouteChange: true });
+  const notificationDropdown = useDropdown({ closeOnRouteChange: true });
 
   // Get logo URL from Supabase storage
   const { data: logoUrlData } = supabase.storage
@@ -43,10 +49,11 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile menu on route change
+  // Close dropdowns on route change
   useEffect(() => {
-    setIsMobileMenuOpen(false);
-    setIsNotificationDropdownOpen(false);
+    mobileMenu.close();
+    profileDropdown.close();
+    notificationDropdown.close();
   }, [location]);
 
   // Initialize notifications when user is authenticated
@@ -71,25 +78,26 @@ const Header = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    setIsMobileMenuOpen(false);
-    setIsNotificationDropdownOpen(false);
-  };
-
-  const toggleNotificationDropdown = () => {
-    setIsNotificationDropdownOpen(!isNotificationDropdownOpen);
-  };
-
-  const closeNotificationDropdown = () => {
-    setIsNotificationDropdownOpen(false);
+    mobileMenu.close();
+    profileDropdown.close();
+    notificationDropdown.close();
   };
 
   return (
     <header
+      ref={headerRef}
       className={`fixed top-0 left-0 right-0 z-sticky transition-all duration-normal ${
         isScrolled ? 'py-2' : 'py-4'
       }`}
+      style={{
+        transform: isVisible ? 'translateY(0)' : 'translateY(-100%)',
+        willChange: 'transform',
+        contain: 'layout style paint',
+        paddingTop: 'max(env(safe-area-inset-top, 0), 0.5rem)',
+      }}
       role="banner"
       aria-label="Site header"
+      aria-hidden={!isVisible}
     >
       <GlassCard
         className={`container mx-auto px-4 ${
@@ -134,14 +142,14 @@ const Header = () => {
                   key={item.path}
                   to={item.path}
                   className={({ isActive }) =>
-                    `px-4 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2 min-h-[2.75rem] ${
+                    `px-4 py-3 rounded-lg flex items-center space-x-2 min-h-[2.75rem] transition-normal focus-ring-primary ${
                       isActive
                         ? 'bg-glass-heavy text-blue-600 dark:text-blue-400'
-                        : 'hover:bg-glass-light'
+                        : 'hover:bg-glass-light active-shrink'
                     }`
                   }
                 >
-                  <item.icon className="w-4 h-4" />
+                  <item.icon className="w-4 h-4" aria-hidden="true" />
                   <span>{item.label}</span>
                 </NavLink>
               );
@@ -153,15 +161,16 @@ const Header = () => {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="touch-target-sm p-3 rounded-lg hover:bg-glass-light transition-colors flex items-center justify-center"
-              aria-label="Toggle theme"
+              className="touch-target-sm p-3 rounded-lg hover:bg-glass-light active-shrink transition-fast focus-ring-primary flex items-center justify-center"
+              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-pressed={isDarkMode}
             >
               {isDarkMode ? (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
               ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
               )}
@@ -172,60 +181,86 @@ const Header = () => {
                 {/* Notifications */}
                 <div className="relative">
                   <button
-                    onClick={toggleNotificationDropdown}
-                    className="relative touch-target-sm p-3 rounded-lg hover:bg-glass-light transition-colors flex items-center justify-center"
+                    {...notificationDropdown.triggerProps}
+                    className="relative touch-target-sm p-3 rounded-lg hover:bg-glass-light active-shrink transition-fast focus-ring-primary flex items-center justify-center"
                     aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
                     {unreadCount > 0 && (
-                      <span className="absolute top-1 right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                      <span
+                        className="absolute top-1 right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium"
+                        aria-label={`${unreadCount} unread notifications`}
+                      >
                         {unreadCount > 99 ? '99+' : unreadCount}
                       </span>
                     )}
                   </button>
 
                   <NotificationDropdown
-                    isOpen={isNotificationDropdownOpen}
-                    onToggle={toggleNotificationDropdown}
-                    onClose={closeNotificationDropdown}
+                    isOpen={notificationDropdown.isOpen}
+                    onToggle={notificationDropdown.toggle}
+                    onClose={notificationDropdown.close}
                   />
                 </div>
 
                 {/* Profile Dropdown */}
-                <div className="relative group">
+                <div className="relative">
                   <button
-                    className="flex items-center space-x-2 p-2 rounded-lg hover:bg-glass-light transition-colors"
+                    {...profileDropdown.triggerProps}
+                    className="flex items-center space-x-2 p-2 rounded-lg hover:bg-glass-light active-shrink transition-fast focus-ring-primary"
                     aria-label="User menu"
-                    aria-expanded="false"
-                    aria-haspopup="true"
                   >
                     <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
                       {user?.email?.charAt(0).toUpperCase()}
                     </div>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg
+                      className="w-4 h-4 transition-transform"
+                      style={{ transform: profileDropdown.isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
-                  
-                  <div className="absolute right-0 mt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                    <GlassCard className="py-2">
-                      <Link to="/profile" className="block px-4 py-2 hover:bg-glass-light transition-colors">
-                        Profile
-                      </Link>
-                      <Link to="/settings" className="block px-4 py-2 hover:bg-glass-light transition-colors">
-                        Settings
-                      </Link>
-                      <hr className="my-2 border-glass" />
-                      <button
-                        onClick={handleSignOut}
-                        className="w-full text-left px-4 py-2 hover:bg-glass-light transition-colors text-red-600 dark:text-red-400"
-                      >
-                        Sign Out
-                      </button>
-                    </GlassCard>
-                  </div>
+
+                  {profileDropdown.isOpen && (
+                    <div
+                      {...profileDropdown.dropdownProps}
+                      className="absolute right-0 mt-2 w-48 transition-fast"
+                      style={{
+                        animation: 'fadeIn 150ms ease-out',
+                      }}
+                    >
+                      <GlassCard className="py-2">
+                        <Link
+                          to="/profile"
+                          className="dropdown-item block px-4 py-2 transition-fast focus-ring-primary"
+                          role="menuitem"
+                        >
+                          Profile
+                        </Link>
+                        <Link
+                          to="/settings"
+                          className="dropdown-item block px-4 py-2 transition-fast focus-ring-primary"
+                          role="menuitem"
+                        >
+                          Settings
+                        </Link>
+                        <hr className="my-2 border-glass" />
+                        <button
+                          onClick={handleSignOut}
+                          className="dropdown-item w-full text-left px-4 py-2 transition-fast focus-ring-primary text-red-600 dark:text-red-400"
+                          role="menuitem"
+                        >
+                          Sign Out
+                        </button>
+                      </GlassCard>
+                    </div>
+                  )}
                 </div>
               </>
             ) : (
@@ -246,16 +281,16 @@ const Header = () => {
 
           {/* Mobile Menu Button */}
           <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden touch-target-sm p-3 rounded-lg hover:bg-glass-light transition-colors flex items-center justify-center"
-            aria-label="Toggle mobile menu"
+            {...mobileMenu.triggerProps}
+            className="md:hidden touch-target-sm p-3 rounded-lg hover:bg-glass-light active-shrink transition-fast focus-ring-primary flex items-center justify-center"
+            aria-label={mobileMenu.isOpen ? 'Close menu' : 'Open menu'}
           >
-            {isMobileMenuOpen ? (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {mobileMenu.isOpen ? (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             ) : (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             )}
@@ -263,16 +298,19 @@ const Header = () => {
         </div>
 
         {/* Mobile Menu */}
-        <div
-          className={`md:hidden overflow-hidden transition-all duration-300 ${
-            isMobileMenuOpen ? 'max-h-96 mt-4' : 'max-h-0'
-          }`}
-        >
-          <nav
-            className="space-y-2 pb-4"
-            role="navigation"
-            aria-label="Mobile navigation"
+        {mobileMenu.isOpen && (
+          <div
+            {...mobileMenu.dropdownProps}
+            className="md:hidden mt-4 transition-moderate"
+            style={{
+              animation: 'slideDown 300ms ease-out',
+            }}
           >
+            <nav
+              className="space-y-2 pb-4"
+              role="navigation"
+              aria-label="Mobile navigation"
+            >
             {navItems.map((item) => {
               // Skip auth-required items if user is not authenticated
               if (item.requiresAuth && !isAuthenticated) return null;
@@ -282,38 +320,42 @@ const Header = () => {
                   key={item.path}
                   to={item.path}
                   className={({ isActive }) =>
-                    `block px-4 py-2 rounded-lg transition-all duration-200 flex items-center ${
+                    `dropdown-item block px-4 py-2 rounded-lg transition-fast flex items-center focus-ring-primary ${
                       isActive
                         ? 'bg-glass-heavy text-blue-600 dark:text-blue-400'
-                        : 'hover:bg-glass-light'
+                        : ''
                     }`
                   }
+                  role="menuitem"
                 >
-                  <item.icon className="w-4 h-4 mr-2" />
+                  <item.icon className="w-4 h-4 mr-2" aria-hidden="true" />
                   {item.label}
                 </NavLink>
               );
             })}
-            
+
             <hr className="my-2 border-glass" />
-            
+
             {isAuthenticated ? (
               <>
                 <Link
                   to="/profile"
-                  className="block px-4 py-2 rounded-lg hover:bg-glass-light transition-colors"
+                  className="dropdown-item block px-4 py-2 rounded-lg transition-fast focus-ring-primary"
+                  role="menuitem"
                 >
                   Profile
                 </Link>
                 <Link
                   to="/settings"
-                  className="block px-4 py-2 rounded-lg hover:bg-glass-light transition-colors"
+                  className="dropdown-item block px-4 py-2 rounded-lg transition-fast focus-ring-primary"
+                  role="menuitem"
                 >
                   Settings
                 </Link>
                 <button
                   onClick={handleSignOut}
-                  className="w-full text-left px-4 py-2 rounded-lg hover:bg-glass-light transition-colors text-red-600 dark:text-red-400"
+                  className="dropdown-item w-full text-left px-4 py-2 rounded-lg transition-fast focus-ring-primary text-red-600 dark:text-red-400"
+                  role="menuitem"
                 >
                   Sign Out
                 </button>
@@ -332,8 +374,9 @@ const Header = () => {
                 </Link>
               </div>
             )}
-          </nav>
-        </div>
+            </nav>
+          </div>
+        )}
       </GlassCard>
     </header>
   );

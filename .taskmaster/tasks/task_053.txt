@@ -1,0 +1,190 @@
+# Task ID: 53
+# Title: Remove COPPA Compliance and Implement 18+ Age Requirement
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Remove unnecessary COPPA (Children's Online Privacy Protection Act) compliance code and replace with standard 18+ age requirement. COPPA protects children under 13, but the platform requires users to be 18+, making COPPA implementation unnecessary and legally incorrect.
+# Details:
+Current State:
+- 38 files contain COPPA references
+- Minimum age set to 13 (COPPA requirement)
+- Extensive COPPA-specific error handling, compliance monitoring, and legal disclosures
+- Storage bucket encryption and audit logging (keep these - good security practices)
+
+Required Changes:
+1. Update all age constants from 13 to 18
+2. Remove COPPA error codes (replace with generic age verification codes)
+3. Update database constraints and validation functions
+4. Rewrite Privacy Policy and Terms of Service sections
+5. Update UI components and error messages
+6. Keep encryption and audit logging (general security, not COPPA-specific)
+7. Comprehensive testing of updated age verification flow
+
+Impact:
+- Existing users aged 13-17 will need to be handled (policy decision required)
+- API error codes will change (may need versioning or backward compatibility)
+- Legal documents significantly updated
+
+Dependencies:
+- Requires legal review of age requirement change
+- Database audit needed for existing underage users (13-17 age range)
+
+# Test Strategy:
+1. Unit Tests:
+   - Update age verification service tests (change 13 to 18)
+   - Test edge cases (exactly 18, 17 years 364 days, etc.)
+   - Verify error messages show "18" not "13"
+
+2. Integration Tests:
+   - Registration flow with underage user (should fail)
+   - Registration flow with 18+ user (should succeed)
+   - Database constraint validation
+   - Edge function age verification
+
+3. E2E Tests:
+   - Complete registration journey for 18+ user
+   - Error handling for underage users
+   - UI displays correct age requirement messaging
+
+4. Manual Testing:
+   - Verify no COPPA references in UI
+   - Check all legal documents updated
+   - Test dark mode compatibility
+   - Screen reader accessibility for error messages
+
+5. Security Testing:
+   - Verify RLS policies enforce age requirements
+   - Test encrypted birth date storage still works
+   - Audit logging captures age verification attempts
+
+# Subtasks:
+## 1. Database Audit for Existing Underage Users (13-17) [pending]
+### Dependencies: None
+### Description: Query production database to identify any existing users aged 13-17. Determine policy for handling these users (grandfather in, require account deletion, or age gate). Work with legal to decide approach.
+### Details:
+SQL Query:
+SELECT COUNT(*), date_part('year', age(date_of_birth)) as age_years
+FROM profiles
+WHERE date_of_birth IS NOT NULL
+GROUP BY age_years
+ORDER BY age_years;
+
+Decision Points:
+- How many users aged 13-17 exist?
+- Legal implications of changing age requirement
+- User communication strategy
+- Data retention policy
+
+## 2. Update Age Constants and Validation Logic (13→18) [pending]
+### Dependencies: None
+### Description: Change all age verification logic from 13 to 18 years old across client and server code.
+### Details:
+Files to modify:
+- src/utils/age-verification.js (lines 46, 232, 263)
+- supabase/functions/verify-age/index.ts (line 246)
+- src/services/age-verification-service.js
+- src/components/common/AgeVerificationNotice.jsx (line 49)
+
+Changes:
+- Update minAge default from 13 to 18
+- Update getMaxAllowedDate() calculation
+- Update error messages to reflect 18+ requirement
+- Remove COPPA-specific comments
+
+## 3. Create and Apply Database Migration [pending]
+### Dependencies: 53.1
+### Description: Create migration to update database constraints from 13 to 18, update validation functions, and remove COPPA references from comments.
+### Details:
+Create: supabase/migrations/YYYYMMDDHHMMSS_remove_coppa_update_age_requirement.sql
+
+Updates needed:
+- DROP and recreate check_minimum_age constraint (13→18)
+- Update validate_age_on_update() function
+- Update function/table comments to remove COPPA references
+- Change COPPA_VIOLATION error to AGE_RESTRICTION
+- Update age_verification_logs table comments
+
+## 4. Update Legal Documents (Privacy Policy & Terms) [pending]
+### Dependencies: None
+### Description: Remove COPPA compliance sections from legal documents and replace with simple 18+ age requirement.
+### Details:
+Files to modify:
+- src/components/legal/PrivacyPolicy.jsx (remove lines 196-260)
+- src/pages/legal/TermsPage.jsx (update lines 55-69)
+
+Changes:
+- Remove entire COPPA section from Privacy Policy
+- Simplify age requirement to "18 years of age"
+- Remove parental consent language
+- Update any references to "13 or older" to "18 or older"
+
+## 5. Update UI Components and Error Messages [pending]
+### Dependencies: None
+### Description: Update all user-facing components to reflect 18+ requirement and remove COPPA references.
+### Details:
+Files to modify:
+- src/components/common/AgeVerificationNotice.jsx
+- src/components/admin/AgeVerificationDashboard.jsx
+- src/components/admin/ComplianceDashboard.jsx
+- All registration/onboarding components
+
+Changes:
+- Update all "13 or older" text to "18 or older"
+- Remove COPPA mentions from UI copy
+- Update badge text from "13+ Required" to "18+ Required"
+- Update dashboard metrics terminology
+
+## 6. Replace COPPA Error Codes with Generic Codes [pending]
+### Dependencies: None
+### Description: Remove COPPA_AGE_RESTRICTION error code and replace with generic AGE_VERIFICATION_FAILED across all services.
+### Details:
+Files to modify:
+- src/utils/error-mapping.js
+- supabase/functions/verify-age/index.ts (line 382)
+- src/services/age-verification-service.js (lines 58, 140)
+- All service files handling age verification errors
+
+Changes:
+- Remove COPPA_AGE_RESTRICTION
+- Add AGE_VERIFICATION_FAILED or UNDERAGE_USER
+- Update error message mappings
+- Consider API versioning for backward compatibility
+
+## 7. Update Documentation and Remove COPPA References [pending]
+### Dependencies: None
+### Description: Update all documentation to remove COPPA references and reflect 18+ age requirement.
+### Details:
+Files to update:
+- Remove: COPPA_ENCRYPTION_IMPLEMENTATION.md
+- Create: AGE_VERIFICATION_ENCRYPTION.md (generic version)
+- Update: docs/AGE_VERIFICATION_IMPLEMENTATION.md
+- Update: README.md, SECURITY.md, DEPLOYMENT.md
+- Update: All task-related documentation
+
+Changes:
+- Replace "COPPA compliance" with "Age verification"
+- Update all references from 13 to 18
+- Remove COPPA-specific implementation notes
+- Keep encryption documentation (good security practice)
+
+## 8. Comprehensive Testing of 18+ Age Verification [pending]
+### Dependencies: 53.2, 53.3, 53.4, 53.5, 53.6
+### Description: Update and execute complete test suite for age verification with 18+ requirement.
+### Details:
+Test files to update:
+- src/services/__tests__/age-verification-service.test.js
+- src/services/__tests__/encryption-service.test.js
+- src/services/__tests__/age-verification-metrics-service.test.js
+
+Test cases:
+1. Registration with age < 18 (should fail with AGE_VERIFICATION_FAILED)
+2. Registration with age = 18 exactly (should succeed)
+3. Registration with age > 18 (should succeed)
+4. Edge case: 17 years 364 days (should fail)
+5. Database constraint validation
+6. Error message verification (no "13", shows "18")
+7. UI displays correct messaging
+8. Dark mode compatibility
+9. Encryption still works
+10. Audit logging captures attempts
+

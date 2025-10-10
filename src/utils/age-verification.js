@@ -1,6 +1,6 @@
 /**
  * Age Verification Utility
- * Handles COPPA compliance and client-side age validation
+ * Handles client-side age validation (18+ requirement)
  */
 
 /**
@@ -40,10 +40,10 @@ export const calculateAge = (birthDate) => {
 /**
  * Checks if a user meets the minimum age requirement
  * @param {string|Date} birthDate - The birth date
- * @param {number} minAge - Minimum age requirement (default: 13 for COPPA)
+ * @param {number} minAge - Minimum age requirement (default: 18)
  * @returns {boolean} - True if user is old enough
  */
-export const isUserOldEnough = (birthDate, minAge = 13) => {
+export const isUserOldEnough = (birthDate, minAge = 18) => {
   const age = calculateAge(birthDate);
   return age !== null && age >= minAge;
 };
@@ -175,7 +175,7 @@ const isInvalidLeapYearDate = (dateString) => {
  * @param {number} minAge - Minimum age requirement
  * @returns {string|null} - Error message or null if valid
  */
-export const getAgeVerificationError = (birthDate, minAge = 13) => {
+export const getAgeVerificationError = (birthDate, minAge = 18) => {
   // First validate the date format
   const formatValidation = validateDateFormat(birthDate);
   if (!formatValidation.isValid) {
@@ -229,7 +229,7 @@ export const getAgeVerificationError = (birthDate, minAge = 13) => {
  * @param {number} minAge - Minimum age requirement
  * @returns {object} - Complete validation result
  */
-export const validateAge = (dateString, minAge = 13) => {
+export const validateAge = (dateString, minAge = 18) => {
   const formatValidation = validateDateFormat(dateString);
 
   if (!formatValidation.isValid) {
@@ -254,13 +254,13 @@ export const validateAge = (dateString, minAge = 13) => {
 };
 
 /**
- * Utility function to get the maximum allowed date (13 years ago from today)
+ * Utility function to get the maximum allowed date (18 years ago from today)
  * @returns {string} - Date string in YYYY-MM-DD format
  */
 export const getMaxAllowedDate = () => {
   const today = new Date();
   const maxDate = new Date();
-  maxDate.setFullYear(today.getFullYear() - 13);
+  maxDate.setFullYear(today.getFullYear() - 18);
   return maxDate.toISOString().split('T')[0];
 };
 

@@ -339,7 +339,7 @@ const useAuthStore = create(
           return { success: true, data };
         } catch (error) {
           // Handle age verification errors specifically
-          if (error.code === 'COPPA_AGE_RESTRICTION' || error.code === 'AGE_VERIFICATION_FAILED') {
+          if (error.code === 'AGE_VERIFICATION_FAILED') {
             set({ error: error.message });
             return { success: false, error: error.message, code: error.code };
           }

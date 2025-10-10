@@ -193,22 +193,22 @@ const PrivacyPolicy = () => {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">10. Children's Privacy and COPPA Compliance</h2>
+            <h2 className="text-2xl font-semibold mb-4">10. Age Requirements</h2>
 
             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg mb-4">
               <h3 className="text-lg font-semibold mb-3 text-blue-800 dark:text-blue-200">Age Verification Requirements</h3>
               <p className="mb-3">
-                TRVL Social requires all users to be at least 13 years of age. We comply with the Children's Online Privacy Protection Act (COPPA) and implement strict age verification measures.
+                TRVL Social requires all users to be at least 18 years of age. We implement strict age verification measures to ensure platform safety and security.
               </p>
             </div>
 
             <h3 className="text-xl font-medium mb-3">10.1 Age Verification Data Collection</h3>
-            <p className="mb-4">To verify age compliance, we collect and process the following information:</p>
+            <p className="mb-4">To verify age requirements, we collect and process the following information:</p>
             <ul className="list-disc list-inside mb-4 space-y-2">
-              <li><strong>Date of Birth:</strong> Required during registration to verify minimum age requirement</li>
+              <li><strong>Date of Birth:</strong> Required during registration to verify minimum age requirement (18 years)</li>
               <li><strong>Age Calculation Data:</strong> Automatically calculated from provided birth date</li>
               <li><strong>Verification Timestamps:</strong> When age verification was completed</li>
-              <li><strong>IP Address:</strong> For location-based age verification requirements</li>
+              <li><strong>IP Address:</strong> For location-based verification and security purposes</li>
             </ul>
 
             <h3 className="text-xl font-medium mb-3">10.2 How Age Verification Data is Protected</h3>
@@ -219,44 +219,10 @@ const PrivacyPolicy = () => {
               <li>Regular audits ensure proper handling of age-related information</li>
             </ul>
 
-            <h3 className="text-xl font-medium mb-3">10.3 COPPA Compliance Measures</h3>
+            <h3 className="text-xl font-medium mb-3">10.3 Account Suspension for Underage Users</h3>
             <p className="mb-4">
-              We do not knowingly collect personal information from children under 13. Our compliance measures include:
+              If we discover that a user is under 18 years of age, we will immediately suspend their account and delete all associated personal information in accordance with applicable laws.
             </p>
-            <ul className="list-disc list-inside mb-4 space-y-2">
-              <li>Mandatory age verification during account registration</li>
-              <li>Immediate account suspension for users found to be under 13</li>
-              <li>Automatic deletion of data for verified underage accounts</li>
-              <li>Regular monitoring and auditing of age verification systems</li>
-            </ul>
-
-            <h3 className="text-xl font-medium mb-3">10.4 Parental Rights and Contact</h3>
-            <p className="mb-4">
-              If you are a parent or guardian and believe your child under 13 has created an account or provided personal information to us:
-            </p>
-            <ul className="list-disc list-inside mb-4 space-y-2">
-              <li>Contact us immediately at <a
-                href="mailto:privacy@trvlsocial.com"
-                className="text-blue-600 hover:underline underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
-              >
-                privacy@trvlsocial.com
-              </a></li>
-              <li>We will investigate and take appropriate action within 24 hours</li>
-              <li>We will permanently delete all associated data if the account is confirmed to belong to a child under 13</li>
-              <li>No fees will be charged for reasonable requests related to children's privacy</li>
-            </ul>
-
-            <h3 className="text-xl font-medium mb-3">10.5 Data Deletion for Underage Users</h3>
-            <p className="mb-4">
-              When we become aware that we have collected information from a child under 13, we will:
-            </p>
-            <ul className="list-disc list-inside mb-4 space-y-2">
-              <li>Immediately suspend the account to prevent further data collection</li>
-              <li>Delete all personal information associated with the account within 30 days</li>
-              <li>Remove all user-generated content, including posts, messages, and profile information</li>
-              <li>Notify the parent or guardian (if contact information is available) of the deletion</li>
-              <li>Maintain deletion logs for compliance audit purposes only</li>
-            </ul>
           </section>
 
           <section className="mb-8">

@@ -8,7 +8,7 @@ import 'jspdf-autotable';
 class ComplianceReportGenerator {
   constructor() {
     this.templateConfig = {
-      title: 'COPPA Age Verification Compliance Report',
+      title: 'Age Verification Compliance Report',
       subtitle: 'TRVL Social Platform - Regulatory Compliance Documentation',
       footer: 'This report contains confidential compliance data.',
       colors: {
@@ -97,7 +97,7 @@ class ComplianceReportGenerator {
     doc.setFontSize(10);
     doc.text(`Generated: ${new Date().toLocaleString()}`, 20, currentY);
     doc.text(`Period: ${this.formatDateRange(dateRange)}`, 20, currentY + 5);
-    doc.text(`Report ID: COPPA-${Date.now()}`, 20, currentY + 10);
+    doc.text(`Report ID: AGE-VERIFY-${Date.now()}`, 20, currentY + 10);
     currentY += 25;
 
     return currentY;
@@ -137,7 +137,7 @@ class ComplianceReportGenerator {
 
     doc.setFontSize(12);
     doc.setTextColor(statusColor);
-    doc.text(`COPPA Compliance Status: ${status}`, 20, currentY);
+    doc.text(`Age Verification Compliance Status: ${status}`, 20, currentY);
     currentY += 15;
 
     return currentY;
@@ -215,7 +215,7 @@ class ComplianceReportGenerator {
   addComplianceStatus(doc, currentY, metrics) {
     doc.setFontSize(14);
     doc.setTextColor(this.templateConfig.colors.primary);
-    doc.text('COPPA Compliance Status', 20, currentY);
+    doc.text('Age Verification Compliance Status', 20, currentY);
     currentY += 10;
 
     const complianceChecks = [
@@ -598,7 +598,7 @@ class ComplianceReportGenerator {
         platform: 'TRVL Social',
         reportingPeriod: this.formatDateRange(dateRange),
         generatedDate: new Date().toISOString(),
-        coppaCompliance: metrics.complianceScore >= 95 ? 'COMPLIANT' : 'UNDER_REVIEW'
+        ageVerificationCompliance: metrics.complianceScore >= 95 ? 'COMPLIANT' : 'UNDER_REVIEW'
       },
       verificationMetrics: {
         totalAttempts: metrics.totalAttempts || 0,

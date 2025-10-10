@@ -231,9 +231,9 @@ const Footer = () => {
             <div className="text-center text-xs text-gray-500 dark:text-gray-400">
               <p className="mb-2">
                 <span className="inline-flex items-center px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded text-xs font-medium mr-2">
-                  13+
+                  18+
                 </span>
-                TRVL Social is for users 13 years and older. We comply with COPPA.
+                TRVL Social is for users 18 years and older.
               </p>
               <p>
                 Questions about age verification? Contact{' '}

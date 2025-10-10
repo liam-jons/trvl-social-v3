@@ -33,8 +33,14 @@ const MainLayout = () => {
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-400/10 rounded-full filter blur-3xl animate-pulse" />
         </div>
 
-        {/* Content Container */}
-        <div className="relative z-0 container mx-auto px-4 pb-8" style={{ paddingTop: '88px' }}>
+        {/* Content Container with Dynamic Header Height */}
+        <div
+          className="relative z-0 container mx-auto px-4 pb-8"
+          style={{
+            paddingTop: 'var(--header-height, 88px)',
+            paddingBottom: 'max(env(safe-area-inset-bottom, 0), 2rem)',
+          }}
+        >
           <Outlet />
         </div>
       </main>

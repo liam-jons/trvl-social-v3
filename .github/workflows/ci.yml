@@ -1,0 +1,575 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20.x'
+
+jobs:
+  setup:
+    name: Setup and Install Dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Cache node modules
+        id: cache-npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            .npm
+          key: ${{ runner.os }}-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            .npm
+          key: ${{ runner.os }}-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            .npm
+          key: ${{ runner.os }}-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test:run
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 30
+
+  build-check:
+    name: Build Check
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            .npm
+          key: ${{ runner.os }}-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Load environment variables from .env.example
+        run: |
+          # Copy .env.example to .env for build
+          cp .env.example .env
+          # Set required build-time variables for CI
+          echo "VITE_SUPABASE_URL=https://placeholder.supabase.co" >> .env
+          echo "VITE_SUPABASE_ANON_KEY=placeholder-anon-key" >> .env
+          echo "VITE_SUPABASE_PUBLISHABLE_KEY=placeholder-publishable-key" >> .env
+          echo "VITE_STRIPE_PUBLISHABLE_KEY=pk_test_placeholder" >> .env
+          echo "VITE_MAPBOX_ACCESS_TOKEN=pk.placeholder" >> .env
+          echo "VITE_APP_URL=http://localhost:5173" >> .env
+
+      - name: Build application
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: dist/
+          retention-days: 7
+
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            .npm
+          key: ${{ runner.os }}-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Load environment variables for preview
+        run: |
+          cp .env.example .env
+          echo "VITE_SUPABASE_URL=https://placeholder.supabase.co" >> .env
+          echo "VITE_SUPABASE_ANON_KEY=placeholder-anon-key" >> .env
+          echo "VITE_SUPABASE_PUBLISHABLE_KEY=placeholder-publishable-key" >> .env
+          echo "VITE_STRIPE_PUBLISHABLE_KEY=pk_test_placeholder" >> .env
+          echo "VITE_MAPBOX_ACCESS_TOKEN=pk.placeholder" >> .env
+          echo "VITE_APP_URL=http://localhost:4173" >> .env
+
+      - name: Build application for E2E
+        run: npm run build
+
+      - name: Run E2E tests with Playwright
+        run: |
+          # Start preview server in background
+          npm run preview &
+          PREVIEW_PID=$!
+
+          # Wait for server to be ready
+          echo "Waiting for preview server to start..."
+          npx wait-on http://localhost:4173 -t 60000
+
+          # Run Playwright tests
+          npx playwright test || TEST_EXIT_CODE=$?
+
+          # Kill preview server
+          kill $PREVIEW_PID || true
+
+          # Exit with test result
+          exit ${TEST_EXIT_CODE:-0}
+
+      - name: Upload E2E test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Upload E2E test videos
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-videos
+          path: test-results/
+          retention-days: 7
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: setup
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        id: npm-audit
+        continue-on-error: true
+        run: |
+          echo "Running npm audit..."
+          npm audit --audit-level=high --json > audit-results.json || true
+
+          # Parse results
+          CRITICAL=$(cat audit-results.json | jq '.metadata.vulnerabilities.critical // 0')
+          HIGH=$(cat audit-results.json | jq '.metadata.vulnerabilities.high // 0')
+          MODERATE=$(cat audit-results.json | jq '.metadata.vulnerabilities.moderate // 0')
+          LOW=$(cat audit-results.json | jq '.metadata.vulnerabilities.low // 0')
+
+          echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
+          echo "high=$HIGH" >> $GITHUB_OUTPUT
+          echo "moderate=$MODERATE" >> $GITHUB_OUTPUT
+          echo "low=$LOW" >> $GITHUB_OUTPUT
+
+          # Create summary
+          echo "## Security Audit Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Critical | $CRITICAL |" >> $GITHUB_STEP_SUMMARY
+          echo "| High     | $HIGH |" >> $GITHUB_STEP_SUMMARY
+          echo "| Moderate | $MODERATE |" >> $GITHUB_STEP_SUMMARY
+          echo "| Low      | $LOW |" >> $GITHUB_STEP_SUMMARY
+
+          # Fail if critical or high vulnerabilities found
+          if [ $CRITICAL -gt 0 ] || [ $HIGH -gt 0 ]; then
+            echo "::error::Found $CRITICAL critical and $HIGH high severity vulnerabilities"
+            exit 1
+          fi
+
+      - name: Run dependency review (PRs only)
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: always
+
+      - name: Check for known malicious packages
+        run: |
+          echo "Checking for known malicious packages..."
+
+          # Check if any dependencies are in the npm advisory database
+          npm audit signatures || true
+
+      - name: Upload security scan results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-scan-results
+          path: audit-results.json
+          retention-days: 30
+
+      - name: Comment security results on PR
+        if: github.event_name == 'pull_request' && failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let auditData = {};
+
+            try {
+              auditData = JSON.parse(fs.readFileSync('audit-results.json', 'utf8'));
+            } catch (error) {
+              console.log('Could not read audit results');
+            }
+
+            const critical = auditData?.metadata?.vulnerabilities?.critical || 0;
+            const high = auditData?.metadata?.vulnerabilities?.high || 0;
+            const moderate = auditData?.metadata?.vulnerabilities?.moderate || 0;
+
+            const comment = `## 🔒 Security Scan Failed
+
+            **Vulnerabilities Detected:**
+
+            | Severity | Count |
+            |----------|-------|
+            | 🔴 Critical | ${critical} |
+            | 🟠 High | ${high} |
+            | 🟡 Moderate | ${moderate} |
+
+            **Action Required:** This PR cannot be merged until high and critical vulnerabilities are resolved.
+
+            **How to fix:**
+            1. Run \`npm audit\` locally to see details
+            2. Run \`npm audit fix\` to automatically fix issues
+            3. For breaking changes, use \`npm audit fix --force\` with caution
+            4. Update the PR with the fixes
+
+            **View full report:** See the \`security-scan-results\` artifact in the workflow run.`;
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+
+  lighthouse-check:
+    name: Lighthouse Performance Check
+    runs-on: ubuntu-latest
+    needs: [setup, build-check]
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            .npm
+          key: ${{ runner.os }}-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: dist/
+
+      - name: Setup Lighthouse CI
+        run: |
+          npm install -g @lhci/cli@0.13.x
+          npm install -g wait-on
+
+      - name: Start preview server
+        run: |
+          npm run preview &
+          PREVIEW_PID=$!
+          echo "PREVIEW_PID=$PREVIEW_PID" >> $GITHUB_ENV
+
+          # Wait for server to be ready
+          npx wait-on http://localhost:4173 -t 60000
+
+      - name: Run Lighthouse CI
+        id: lighthouse
+        continue-on-error: true
+        run: |
+          # Create Lighthouse CI config
+          cat > lighthouserc.json << 'EOF'
+          {
+            "ci": {
+              "collect": {
+                "url": ["http://localhost:4173"],
+                "numberOfRuns": 3,
+                "settings": {
+                  "preset": "desktop",
+                  "throttling": {
+                    "rttMs": 40,
+                    "throughputKbps": 10240,
+                    "cpuSlowdownMultiplier": 1
+                  }
+                }
+              },
+              "assert": {
+                "assertions": {
+                  "categories:performance": ["error", {"minScore": 0.85}],
+                  "categories:accessibility": ["error", {"minScore": 0.90}],
+                  "categories:best-practices": ["error", {"minScore": 0.85}],
+                  "categories:seo": ["error", {"minScore": 0.90}],
+                  "first-contentful-paint": ["warn", {"maxNumericValue": 2000}],
+                  "largest-contentful-paint": ["error", {"maxNumericValue": 2500}],
+                  "cumulative-layout-shift": ["error", {"maxNumericValue": 0.1}],
+                  "total-blocking-time": ["warn", {"maxNumericValue": 300}]
+                }
+              },
+              "upload": {
+                "target": "temporary-public-storage"
+              }
+            }
+          }
+          EOF
+
+          # Run Lighthouse CI
+          lhci autorun || LHCI_EXIT=$?
+
+          # Save results
+          echo "exit_code=${LHCI_EXIT:-0}" >> $GITHUB_OUTPUT
+
+          exit ${LHCI_EXIT:-0}
+
+      - name: Stop preview server
+        if: always()
+        run: |
+          kill $PREVIEW_PID || true
+
+      - name: Parse Lighthouse results
+        if: always()
+        id: lighthouse-results
+        run: |
+          # Extract scores from the latest manifest
+          MANIFEST=$(ls -t .lighthouseci/manifest*.json 2>/dev/null | head -n1)
+
+          if [ -f "$MANIFEST" ]; then
+            REPORT=$(jq -r '.[0].jsonPath' "$MANIFEST")
+
+            if [ -f "$REPORT" ]; then
+              PERFORMANCE=$(jq -r '.categories.performance.score * 100 | round' "$REPORT")
+              ACCESSIBILITY=$(jq -r '.categories.accessibility.score * 100 | round' "$REPORT")
+              BEST_PRACTICES=$(jq -r '.categories["best-practices"].score * 100 | round' "$REPORT")
+              SEO=$(jq -r '.categories.seo.score * 100 | round' "$REPORT")
+
+              echo "performance=$PERFORMANCE" >> $GITHUB_OUTPUT
+              echo "accessibility=$ACCESSIBILITY" >> $GITHUB_OUTPUT
+              echo "best_practices=$BEST_PRACTICES" >> $GITHUB_OUTPUT
+              echo "seo=$SEO" >> $GITHUB_OUTPUT
+
+              # Create summary
+              echo "## 🔍 Lighthouse Performance Report" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "| Category | Score |" >> $GITHUB_STEP_SUMMARY
+              echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+              echo "| Performance | $PERFORMANCE/100 |" >> $GITHUB_STEP_SUMMARY
+              echo "| Accessibility | $ACCESSIBILITY/100 |" >> $GITHUB_STEP_SUMMARY
+              echo "| Best Practices | $BEST_PRACTICES/100 |" >> $GITHUB_STEP_SUMMARY
+              echo "| SEO | $SEO/100 |" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci/
+          retention-days: 30
+
+      - name: Comment Lighthouse results on PR
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const performance = '${{ steps.lighthouse-results.outputs.performance }}';
+            const accessibility = '${{ steps.lighthouse-results.outputs.accessibility }}';
+            const bestPractices = '${{ steps.lighthouse-results.outputs.best_practices }}';
+            const seo = '${{ steps.lighthouse-results.outputs.seo }}';
+
+            const getEmoji = (score) => {
+              if (score >= 90) return '🟢';
+              if (score >= 50) return '🟡';
+              return '🔴';
+            };
+
+            const comment = `## 🔍 Lighthouse Performance Report
+
+            | Category | Score |
+            |----------|-------|
+            | ${getEmoji(performance)} Performance | **${performance || 'N/A'}/100** |
+            | ${getEmoji(accessibility)} Accessibility | **${accessibility || 'N/A'}/100** |
+            | ${getEmoji(bestPractices)} Best Practices | **${bestPractices || 'N/A'}/100** |
+            | ${getEmoji(seo)} SEO | **${seo || 'N/A'}/100** |
+
+            ### Performance Budgets
+            - ✅ **Performance:** ≥ 85
+            - ✅ **Accessibility:** ≥ 90
+            - ✅ **Best Practices:** ≥ 85
+            - ✅ **SEO:** ≥ 90
+
+            **Full report:** See the \`lighthouse-reports\` artifact in the workflow run.
+
+            ---
+            *Powered by [Lighthouse CI](https://github.com/GoogleChrome/lighthouse-ci)*`;
+
+            // Find existing Lighthouse comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+
+            const existingComment = comments.find(comment =>
+              comment.body.includes('🔍 Lighthouse Performance Report')
+            );
+
+            if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: comment
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }

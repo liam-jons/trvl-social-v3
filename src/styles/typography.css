@@ -1,0 +1,476 @@
+/* ========================================
+   RESPONSIVE TYPOGRAPHY SYSTEM
+   Using clamp() for fluid typography
+   Task 41.6: Create Responsive Typography System
+   ======================================== */
+
+@layer base {
+  :root {
+    /* ========== FLUID TYPOGRAPHY TOKENS ========== */
+    /*
+     * Formula: clamp(min, preferred, max)
+     * Scales smoothly between mobile (375px) and desktop (1440px)
+     * Using viewport width (vw) for fluid scaling
+     */
+
+    /* Display Typography - Hero/Marketing */
+    --font-size-display-2xl: clamp(2.5rem, 4vw + 1rem, 5rem);      /* 40px → 80px */
+    --font-size-display-xl: clamp(2rem, 3.5vw + 0.875rem, 4rem);   /* 32px → 64px */
+    --font-size-display-lg: clamp(1.75rem, 3vw + 0.75rem, 3.5rem); /* 28px → 56px */
+    --font-size-display-md: clamp(1.5rem, 2.5vw + 0.625rem, 3rem); /* 24px → 48px */
+    --font-size-display-sm: clamp(1.25rem, 2vw + 0.5rem, 2.5rem);  /* 20px → 40px */
+
+    /* Heading Typography - Content Headers */
+    --font-size-heading-xl: clamp(2rem, 2.5vw + 0.75rem, 3rem);    /* 32px → 48px */
+    --font-size-heading-lg: clamp(1.5rem, 2vw + 0.625rem, 2.25rem);/* 24px → 36px */
+    --font-size-heading-md: clamp(1.25rem, 1.5vw + 0.5rem, 1.875rem); /* 20px → 30px */
+    --font-size-heading-sm: clamp(1.125rem, 1vw + 0.5rem, 1.5rem); /* 18px → 24px */
+    --font-size-heading-xs: clamp(1rem, 0.5vw + 0.5rem, 1.25rem);  /* 16px → 20px */
+
+    /* Body Typography - Main Content */
+    --font-size-body-xl: clamp(1.125rem, 0.5vw + 0.875rem, 1.25rem); /* 18px → 20px */
+    --font-size-body-lg: clamp(1rem, 0.25vw + 0.875rem, 1.125rem);   /* 16px → 18px */
+    --font-size-body-md: clamp(0.875rem, 0.25vw + 0.75rem, 1rem);    /* 14px → 16px */
+    --font-size-body-sm: clamp(0.8125rem, 0.125vw + 0.75rem, 0.875rem); /* 13px → 14px */
+    --font-size-body-xs: clamp(0.75rem, 0.125vw + 0.6875rem, 0.8125rem); /* 12px → 13px */
+
+    /* Caption/Label Typography - Small Text */
+    --font-size-caption-lg: clamp(0.8125rem, 0.125vw + 0.75rem, 0.875rem); /* 13px → 14px */
+    --font-size-caption-md: clamp(0.75rem, 0.125vw + 0.6875rem, 0.8125rem); /* 12px → 13px */
+    --font-size-caption-sm: clamp(0.6875rem, 0.0625vw + 0.625rem, 0.75rem); /* 11px → 12px */
+
+    /* Line Height Ratios - Responsive */
+    --line-height-display: clamp(1.1, 0.1vw + 1.05, 1.2);
+    --line-height-heading: clamp(1.2, 0.1vw + 1.15, 1.3);
+    --line-height-body: clamp(1.5, 0.15vw + 1.4, 1.65);
+    --line-height-caption: clamp(1.3, 0.1vw + 1.25, 1.4);
+
+    /* Letter Spacing - Responsive */
+    --letter-spacing-tighter: clamp(-0.02em, -0.005vw - 0.015em, -0.01em);
+    --letter-spacing-tight: clamp(-0.01em, -0.0025vw - 0.0075em, -0.005em);
+    --letter-spacing-normal: 0;
+    --letter-spacing-wide: clamp(0.01em, 0.0025vw + 0.0075em, 0.02em);
+    --letter-spacing-wider: clamp(0.025em, 0.005vw + 0.02em, 0.04em);
+    --letter-spacing-widest: clamp(0.05em, 0.01vw + 0.04em, 0.08em);
+
+    /* Font Weight Scale */
+    --font-weight-thin: 100;
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
+    --font-weight-black: 900;
+  }
+}
+
+@layer components {
+  /* ========== TYPOGRAPHY COMPONENT CLASSES ========== */
+
+  /* Display Headings */
+  .text-display-2xl {
+    font-size: var(--font-size-display-2xl);
+    line-height: var(--line-height-display);
+    letter-spacing: var(--letter-spacing-tighter);
+    font-weight: var(--font-weight-bold);
+  }
+
+  .text-display-xl {
+    font-size: var(--font-size-display-xl);
+    line-height: var(--line-height-display);
+    letter-spacing: var(--letter-spacing-tighter);
+    font-weight: var(--font-weight-bold);
+  }
+
+  .text-display-lg {
+    font-size: var(--font-size-display-lg);
+    line-height: var(--line-height-display);
+    letter-spacing: var(--letter-spacing-tight);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .text-display-md {
+    font-size: var(--font-size-display-md);
+    line-height: var(--line-height-display);
+    letter-spacing: var(--letter-spacing-tight);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .text-display-sm {
+    font-size: var(--font-size-display-sm);
+    line-height: var(--line-height-display);
+    letter-spacing: var(--letter-spacing-tight);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  /* Content Headings */
+  .text-heading-xl {
+    font-size: var(--font-size-heading-xl);
+    line-height: var(--line-height-heading);
+    letter-spacing: var(--letter-spacing-tight);
+    font-weight: var(--font-weight-bold);
+  }
+
+  .text-heading-lg {
+    font-size: var(--font-size-heading-lg);
+    line-height: var(--line-height-heading);
+    letter-spacing: var(--letter-spacing-normal);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .text-heading-md {
+    font-size: var(--font-size-heading-md);
+    line-height: var(--line-height-heading);
+    letter-spacing: var(--letter-spacing-normal);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .text-heading-sm {
+    font-size: var(--font-size-heading-sm);
+    line-height: var(--line-height-heading);
+    letter-spacing: var(--letter-spacing-normal);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .text-heading-xs {
+    font-size: var(--font-size-heading-xs);
+    line-height: var(--line-height-heading);
+    letter-spacing: var(--letter-spacing-normal);
+    font-weight: var(--font-weight-medium);
+  }
+
+  /* Body Text */
+  .text-body-xl {
+    font-size: var(--font-size-body-xl);
+    line-height: var(--line-height-body);
+    letter-spacing: var(--letter-spacing-normal);
+    font-weight: var(--font-weight-normal);
+  }
+
+  .text-body-lg {
+    font-size: var(--font-size-body-lg);
+    line-height: var(--line-height-body);
+    letter-spacing: var(--letter-spacing-normal);
+    font-weight: var(--font-weight-normal);
+  }
+
+  .text-body-md {
+    font-size: var(--font-size-body-md);
+    line-height: var(--line-height-body);
+    letter-spacing: var(--letter-spacing-normal);
+    font-weight: var(--font-weight-normal);
+  }
+
+  .text-body-sm {
+    font-size: var(--font-size-body-sm);
+    line-height: var(--line-height-body);
+    letter-spacing: var(--letter-spacing-normal);
+    font-weight: var(--font-weight-normal);
+  }
+
+  .text-body-xs {
+    font-size: var(--font-size-body-xs);
+    line-height: var(--line-height-body);
+    letter-spacing: var(--letter-spacing-normal);
+    font-weight: var(--font-weight-normal);
+  }
+
+  /* Caption/Label Text */
+  .text-caption-lg {
+    font-size: var(--font-size-caption-lg);
+    line-height: var(--line-height-caption);
+    letter-spacing: var(--letter-spacing-wide);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .text-caption-md {
+    font-size: var(--font-size-caption-md);
+    line-height: var(--line-height-caption);
+    letter-spacing: var(--letter-spacing-wide);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .text-caption-sm {
+    font-size: var(--font-size-caption-sm);
+    line-height: var(--line-height-caption);
+    letter-spacing: var(--letter-spacing-wider);
+    font-weight: var(--font-weight-medium);
+  }
+
+  /* Special Typography Styles */
+  .text-lead {
+    font-size: var(--font-size-body-xl);
+    line-height: var(--line-height-body);
+    letter-spacing: var(--letter-spacing-normal);
+    font-weight: var(--font-weight-light);
+    color: rgb(var(--color-text-secondary));
+  }
+
+  .text-overline {
+    font-size: var(--font-size-caption-sm);
+    line-height: var(--line-height-caption);
+    letter-spacing: var(--letter-spacing-widest);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+  }
+
+  .text-quote {
+    font-size: var(--font-size-heading-sm);
+    line-height: var(--line-height-body);
+    letter-spacing: var(--letter-spacing-normal);
+    font-weight: var(--font-weight-light);
+    font-style: italic;
+  }
+
+  /* Responsive Font Weight Utilities */
+  .font-responsive-heading {
+    font-weight: clamp(500, 2vw + 400, 700);
+  }
+
+  .font-responsive-body {
+    font-weight: clamp(300, 1vw + 300, 400);
+  }
+
+  /* Optimized for Readability */
+  .text-readable {
+    font-size: var(--font-size-body-lg);
+    line-height: var(--line-height-body);
+    letter-spacing: var(--letter-spacing-normal);
+    max-width: 65ch; /* Optimal reading width */
+  }
+
+  .text-readable-sm {
+    font-size: var(--font-size-body-md);
+    line-height: var(--line-height-body);
+    letter-spacing: var(--letter-spacing-normal);
+    max-width: 65ch;
+  }
+
+  /* Prose Styling for Long-form Content */
+  .prose {
+    font-size: var(--font-size-body-lg);
+    line-height: var(--line-height-body);
+    max-width: 65ch;
+  }
+
+  .prose h1 {
+    font-size: var(--font-size-heading-xl);
+    line-height: var(--line-height-heading);
+    font-weight: var(--font-weight-bold);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .prose h2 {
+    font-size: var(--font-size-heading-lg);
+    line-height: var(--line-height-heading);
+    font-weight: var(--font-weight-semibold);
+    margin-top: 1.75rem;
+    margin-bottom: 0.875rem;
+  }
+
+  .prose h3 {
+    font-size: var(--font-size-heading-md);
+    line-height: var(--line-height-heading);
+    font-weight: var(--font-weight-semibold);
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .prose p {
+    margin-bottom: 1.25rem;
+  }
+
+  .prose ul, .prose ol {
+    margin: 1.25rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .prose li {
+    margin-bottom: 0.5rem;
+  }
+
+  /* Mobile Optimizations */
+  @media (max-width: 640px) {
+    /* Increase tap targets for links in body text */
+    .prose a,
+    .text-body-md a,
+    .text-body-lg a {
+      padding: 0.125rem 0.25rem;
+      margin: -0.125rem -0.25rem;
+      border-radius: var(--radius-sm);
+    }
+
+    /* Adjust heading margins for mobile */
+    .text-heading-xl,
+    .text-heading-lg {
+      margin-top: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+  }
+
+  /* Tablet Optimizations */
+  @media (min-width: 641px) and (max-width: 1024px) {
+    /* Fine-tune for tablet reading */
+    .prose,
+    .text-readable {
+      max-width: 55ch;
+    }
+  }
+
+  /* Desktop Optimizations */
+  @media (min-width: 1025px) {
+    /* Optimize for larger screens */
+    .prose,
+    .text-readable {
+      max-width: 70ch;
+    }
+  }
+
+  /* Print Optimizations */
+  @media print {
+    body {
+      font-size: 12pt;
+      line-height: 1.5;
+    }
+
+    h1 { font-size: 20pt; }
+    h2 { font-size: 18pt; }
+    h3 { font-size: 16pt; }
+    h4, h5, h6 { font-size: 14pt; }
+  }
+}
+
+@layer utilities {
+  /* ========== TYPOGRAPHY UTILITIES ========== */
+
+  /* Text Truncation */
+  .text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Multi-line Clamping */
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-4 {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-5 {
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Text Balance for Better Line Breaks */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /* Hyphenation Control */
+  .hyphens-auto {
+    hyphens: auto;
+  }
+
+  .hyphens-manual {
+    hyphens: manual;
+  }
+
+  .hyphens-none {
+    hyphens: none;
+  }
+
+  /* Font Smoothing */
+  .font-smooth {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .font-smooth-auto {
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
+  }
+
+  /* Tabular Numbers for Data */
+  .numbers-tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .numbers-normal {
+    font-variant-numeric: normal;
+  }
+
+  /* Text Rendering Optimization */
+  .text-optimize-legibility {
+    text-rendering: optimizeLegibility;
+  }
+
+  .text-optimize-speed {
+    text-rendering: optimizeSpeed;
+  }
+
+  /* Word Breaking */
+  .break-normal {
+    word-break: normal;
+    overflow-wrap: normal;
+  }
+
+  .break-words {
+    overflow-wrap: break-word;
+  }
+
+  .break-all {
+    word-break: break-all;
+  }
+
+  /* Whitespace Control */
+  .whitespace-normal {
+    white-space: normal;
+  }
+
+  .whitespace-nowrap {
+    white-space: nowrap;
+  }
+
+  .whitespace-pre {
+    white-space: pre;
+  }
+
+  .whitespace-pre-line {
+    white-space: pre-line;
+  }
+
+  .whitespace-pre-wrap {
+    white-space: pre-wrap;
+  }
+}

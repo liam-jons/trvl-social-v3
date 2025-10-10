@@ -458,10 +458,16 @@ COMMENT ON TABLE dispute_threads IS 'Communication threads for dispute resolutio
 COMMENT ON TABLE refund_requests IS 'Customer-initiated refund requests with approval workflow';
 COMMENT ON TABLE payment_disputes IS 'Payment disputes from Stripe or other payment processors';
 
--- Create storage bucket for dispute evidence if it doesn't exist
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('dispute-documents', 'dispute-documents', false)
-ON CONFLICT (id) DO NOTHING;
+-- Create storage bucket for dispute documents
+-- Note: Due to storage schema variations across Supabase versions,
+-- bucket creation should be done via the Supabase Dashboard or API
+-- Navigate to Storage > Create a new bucket with these settings:
+-- - Name: dispute-documents
+-- - Public: false (private bucket for admin/vendor access)
+-- - File size limit: 10MB recommended
+--
+-- Alternatively, use the Supabase JavaScript client:
+-- supabase.storage.createBucket('dispute-documents', { public: false });
 
 -- Create storage policy for dispute documents
 CREATE POLICY "Users can upload dispute evidence" ON storage.objects

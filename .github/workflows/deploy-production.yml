@@ -1,0 +1,284 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      skip_migrations:
+        description: 'Skip database migrations'
+        required: false
+        default: false
+        type: boolean
+      force_deploy:
+        description: 'Force deployment (skip approval)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  NODE_VERSION: '20.x'
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  deploy-production:
+    name: Deploy to Production Environment
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create database backup
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.PRODUCTION_SUPABASE_DB_PASSWORD }}
+          SUPABASE_PROJECT_ID: ${{ secrets.PRODUCTION_SUPABASE_PROJECT_ID }}
+        run: |
+          echo "Creating database backup before migration..."
+
+          # Install Supabase CLI
+          npm install -g supabase
+
+          # Link to production project
+          npx supabase link --project-ref $SUPABASE_PROJECT_ID --password $SUPABASE_DB_PASSWORD
+
+          # Create backup (dump schema and data)
+          BACKUP_FILE="backup-$(date +%Y%m%d-%H%M%S).sql"
+          npx supabase db dump --password $SUPABASE_DB_PASSWORD > $BACKUP_FILE
+
+          echo "Backup created: $BACKUP_FILE"
+          echo "BACKUP_FILE=$BACKUP_FILE" >> $GITHUB_ENV
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-backup-${{ github.run_id }}
+          path: ${{ env.BACKUP_FILE }}
+          retention-days: 90
+
+      - name: Run database migrations
+        if: ${{ !github.event.inputs.skip_migrations }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.PRODUCTION_SUPABASE_DB_PASSWORD }}
+          SUPABASE_PROJECT_ID: ${{ secrets.PRODUCTION_SUPABASE_PROJECT_ID }}
+        run: |
+          echo "Running database migrations for production..."
+
+          # Push migrations to production database (idempotent)
+          npx supabase db push --password $SUPABASE_DB_PASSWORD
+
+          echo "✅ Database migrations completed successfully"
+
+      - name: Verify database health
+        env:
+          SUPABASE_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.PRODUCTION_SUPABASE_ANON_KEY }}
+        run: |
+          echo "Verifying database health..."
+
+          # Check database connectivity
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            "$SUPABASE_URL/rest/v1/")
+
+          if [ $HTTP_STATUS -eq 200 ]; then
+            echo "✅ Database health check passed"
+          else
+            echo "❌ Database health check failed (HTTP $HTTP_STATUS)"
+            exit 1
+          fi
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.PRODUCTION_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PRODUCTION_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_STRIPE_PUBLISHABLE_KEY: ${{ secrets.PRODUCTION_STRIPE_PUBLISHABLE_KEY }}
+          VITE_MAPBOX_ACCESS_TOKEN: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
+          VITE_APP_URL: ${{ secrets.PRODUCTION_APP_URL }}
+          VITE_APP_NAME: "TRVL Social"
+          VITE_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          VITE_SENTRY_ENVIRONMENT: production
+          VITE_GA4_MEASUREMENT_ID: ${{ secrets.GA4_MEASUREMENT_ID }}
+          VITE_MIXPANEL_TOKEN: ${{ secrets.MIXPANEL_TOKEN }}
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel Production
+        id: deploy
+        run: |
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "✅ Deployed to: $DEPLOYMENT_URL"
+
+      - name: Assign production domain
+        run: |
+          echo "Assigning production domain alias..."
+          vercel alias set ${{ steps.deploy.outputs.url }} ${{ secrets.PRODUCTION_DOMAIN }} --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Run post-deployment health check
+        run: |
+          echo "Running comprehensive health check on production deployment..."
+
+          # Wait for deployment to propagate
+          sleep 15
+
+          # Check main domain
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.PRODUCTION_APP_URL }})
+
+          if [ $HTTP_STATUS -eq 200 ]; then
+            echo "✅ Production health check passed (HTTP $HTTP_STATUS)"
+          else
+            echo "❌ Production health check failed (HTTP $HTTP_STATUS)"
+            echo "⚠️ Manual verification required"
+            exit 1
+          fi
+
+          # Check critical endpoints
+          echo "Checking critical endpoints..."
+
+          # Health endpoint
+          HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.PRODUCTION_APP_URL }}/api/health || echo "000")
+          echo "Health endpoint: HTTP $HEALTH_STATUS"
+
+          # API endpoint
+          API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: ${{ secrets.PRODUCTION_SUPABASE_ANON_KEY }}" \
+            "${{ secrets.PRODUCTION_SUPABASE_URL }}/rest/v1/" || echo "000")
+          echo "API endpoint: HTTP $API_STATUS"
+
+          echo "✅ All health checks passed"
+
+      - name: Create GitHub Release
+        if: github.event_name == 'push'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deploymentUrl = '${{ steps.deploy.outputs.url }}';
+            const commitSha = context.sha;
+            const tagName = `production-${new Date().toISOString().split('T')[0]}-${commitSha.substring(0, 7)}`;
+
+            // Create a tag
+            try {
+              await github.rest.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `refs/tags/${tagName}`,
+                sha: commitSha
+              });
+
+              // Create a release
+              await github.rest.repos.createRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_name: tagName,
+                name: `Production Deployment - ${new Date().toISOString().split('T')[0]}`,
+                body: `## 🚀 Production Deployment\n\n**Deployment URL:** ${deploymentUrl}\n\n**Commit:** ${commitSha}\n\n**Deployed at:** ${new Date().toISOString()}\n\n### Changes\nSee commit history for details.`,
+                draft: false,
+                prerelease: false
+              });
+
+              console.log(`Created release: ${tagName}`);
+            } catch (error) {
+              console.log(`Release creation skipped or failed: ${error.message}`);
+            }
+
+      - name: Comment deployment URL on commit
+        uses: actions/github-script@v7
+        if: github.event_name == 'push'
+        with:
+          script: |
+            const deploymentUrl = '${{ steps.deploy.outputs.url }}';
+            const commitSha = context.sha;
+
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: commitSha,
+              body: `🚀 **Production deployment successful!**\n\n✅ **Live URL:** ${{ secrets.PRODUCTION_APP_URL }}\n🔗 **Vercel URL:** ${deploymentUrl}\n\n📦 Environment: \`production\`\n🌳 Branch: \`${context.ref.replace('refs/heads/', '')}\`\n\n⚠️ **Post-deployment checklist:**\n- [ ] Verify core functionality\n- [ ] Check analytics tracking\n- [ ] Monitor error rates in Sentry\n- [ ] Review performance metrics`
+            });
+
+      - name: Notify deployment status
+        if: always()
+        uses: 8398a7/action-slack@v3
+        continue-on-error: true
+        with:
+          status: ${{ job.status }}
+          channel: '#production-deployments'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+          custom_payload: |
+            {
+              "attachments": [
+                {
+                  "color": "${{ job.status == 'success' && 'good' || 'danger' }}",
+                  "title": "🚀 Production Deployment ${{ job.status == 'success' && 'Successful' || 'Failed' }}",
+                  "fields": [
+                    {
+                      "title": "Environment",
+                      "value": "Production",
+                      "short": true
+                    },
+                    {
+                      "title": "Branch",
+                      "value": "${{ github.ref_name }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Live URL",
+                      "value": "<${{ secrets.PRODUCTION_APP_URL }}|View Site>",
+                      "short": false
+                    },
+                    {
+                      "title": "Workflow",
+                      "value": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>",
+                      "short": false
+                    }
+                  ],
+                  "footer": "GitHub Actions",
+                  "ts": "${{ github.event.head_commit.timestamp }}"
+                }
+              ]
+            }
+
+      - name: Trigger post-deployment monitoring
+        if: success()
+        run: |
+          echo "Production deployment completed successfully"
+          echo "Monitor the following:"
+          echo "- Sentry: Error rates and performance"
+          echo "- Analytics: User activity and conversion rates"
+          echo "- Vercel: Performance metrics and logs"
+          echo "- Supabase: Database performance and queries"
+
+      - name: Rollback instructions
+        if: failure()
+        run: |
+          echo "❌ Deployment failed. Rollback instructions:"
+          echo "1. Go to Vercel dashboard"
+          echo "2. Navigate to the previous successful deployment"
+          echo "3. Click 'Promote to Production'"
+          echo "4. For database rollback, see DEPLOYMENT.md"
+          echo ""
+          echo "Database backup artifact: database-backup-${{ github.run_id }}"

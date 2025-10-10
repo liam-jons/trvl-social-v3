@@ -9,15 +9,17 @@ import {
   CurrencyDollarIcon,
   ChatBubbleLeftRightIcon,
   DevicePhoneMobileIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import GlassCard from '../components/ui/GlassCard';
 import GlassButton from '../components/ui/GlassButton';
 import GlassInput from '../components/ui/GlassInput';
 import NotificationPreferences from '../components/settings/NotificationPreferences';
 import PrivacyPreferenceCenter from '../components/settings/PrivacyPreferenceCenter';
+import DataPrivacyPanel from '../components/settings/DataPrivacyPanel';
 const SettingsPage = () => {
-  const [activeTab, setActiveTab] = useState('account'); // account, notifications, privacy, preferences
+  const [activeTab, setActiveTab] = useState('account'); // account, notifications, privacy, data-privacy, preferences
   const [userProfile, setUserProfile] = useState({
     name: 'John Doe',
     email: 'john.doe@example.com',
@@ -88,6 +90,7 @@ const SettingsPage = () => {
     { id: 'account', label: 'Account', icon: UserCircleIcon },
     { id: 'notifications', label: 'Notifications', icon: BellIcon },
     { id: 'privacy', label: 'Privacy', icon: ShieldCheckIcon },
+    { id: 'data-privacy', label: 'Data & Privacy', icon: DocumentTextIcon },
     { id: 'preferences', label: 'Preferences', icon: CogIcon }
   ];
   return (
@@ -386,6 +389,8 @@ const SettingsPage = () => {
                 <PrivacyPreferenceCenter />
               </div>
             )}
+            {/* Data & Privacy Tab */}
+            {activeTab === 'data-privacy' && <DataPrivacyPanel />}
             {/* Preferences Tab */}
             {activeTab === 'preferences' && (
               <GlassCard>
@@ -458,7 +463,7 @@ const SettingsPage = () => {
               </GlassCard>
             )}
             {/* Save Changes Button */}
-            {hasChanges && ['account', 'privacy', 'preferences'].includes(activeTab) && (
+            {hasChanges && ['account', 'privacy', 'preferences'].includes(activeTab) && activeTab !== 'data-privacy' && (
               <div className="flex items-center space-x-4 pt-6 border-t border-white/20">
                 <GlassButton
                   variant="primary"
