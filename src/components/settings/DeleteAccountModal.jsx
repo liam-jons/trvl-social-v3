@@ -6,7 +6,7 @@ import {
 import GlassModal from '../ui/GlassModal';
 import GlassButton from '../ui/GlassButton';
 import GlassInput from '../ui/GlassInput';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
 
 const DeleteAccountModal = ({ isOpen, onClose }) => {

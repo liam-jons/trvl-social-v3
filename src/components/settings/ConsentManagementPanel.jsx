@@ -5,7 +5,7 @@ import {
   InformationCircleIcon
 } from '@heroicons/react/24/outline';
 import GlassCard from '../ui/GlassCard';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
 
 const ConsentManagementPanel = () => {

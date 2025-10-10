@@ -10,7 +10,7 @@ import GlassCard from '../ui/GlassCard';
 import GlassButton from '../ui/GlassButton';
 import DeleteAccountModal from './DeleteAccountModal';
 import ConsentManagementPanel from './ConsentManagementPanel';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 const DataPrivacyPanel = () => {
   const { user } = useAuth();
