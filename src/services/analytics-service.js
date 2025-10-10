@@ -33,12 +33,20 @@ class AnalyticsService {
                         this.gdprConsentService.hasConsent('essential');
 
       if (hasConsent) {
-        // Initialize all services in parallel
-        await Promise.all([
+        // Build list of services to initialize
+        const initPromises = [
           this.services.mixpanel.init(),
-          this.services.sentry.init(),
-          this.services.datadog.init()
-        ]);
+          this.services.sentry.init()
+        ];
+
+        // Only initialize Datadog if properly configured (not placeholder values)
+        const datadogAppId = import.meta.env.VITE_DATADOG_APPLICATION_ID;
+        if (datadogAppId && datadogAppId !== 'your_datadog_app_id') {
+          initPromises.push(this.services.datadog.init());
+        }
+
+        // Initialize all configured services in parallel
+        await Promise.all(initPromises);
 
         this.isInitialized = true;
 
