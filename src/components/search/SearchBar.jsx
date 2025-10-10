@@ -110,8 +110,19 @@ const SearchBar = ({
   };
 
   // Handle click outside to close dropdown and keyboard shortcuts
+  // FIXED: Only listen for events when dropdown is actually open
   useEffect(() => {
+    // Only add event listeners when dropdown is open
+    if (!showDropdown) return;
+
     const handleClickOutside = (event) => {
+      // Skip if clicking on navigation elements - don't interfere with React Router
+      const target = event.target;
+      if (target.closest('nav') || target.closest('a[href]')) {
+        return;
+      }
+
+      // Only close dropdown if clicking outside both input and dropdown
       if (dropdownRef.current && !dropdownRef.current.contains(event.target) &&
           inputRef.current && !inputRef.current.contains(event.target)) {
         setShowDropdown(false);
@@ -133,13 +144,15 @@ const SearchBar = ({
       }
     };
 
+    // Use passive listeners for better performance
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleKeyDown);
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [showDropdown]); // Only re-attach when showDropdown changes
 
   const showSuggestionsDropdown = showSuggestions && showDropdown && isFocused;
 
@@ -191,7 +204,7 @@ const SearchBar = ({
               className="text-gray-400 hover:text-gray-600 transition-colors p-1"
               aria-label="Clear search"
             >
-              <XMarkIcon className="h-5 w-5" />
+              <XMarkIcon className="h-5 h-5" />
             </button>
           </div>
         )}

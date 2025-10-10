@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useEffect } from 'react';
+import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import AdventureGrid from './AdventureGrid';
 import ViewToggle from './ViewToggle';
@@ -37,6 +37,24 @@ const AdventureList = ({
   // Internal state for infinite scroll
   const [displayedAdventures, setDisplayedAdventures] = useState([]);
   const [infiniteLoading, setInfiniteLoading] = useState(false);
+
+  // Track if initial load has happened to prevent reset loops
+  const initialLoadDoneRef = useRef(false);
+  const prevFilteredLengthRef = useRef(0);
+
+  // Mock function to get coordinates for adventures (in real app, this would come from API)
+  // Moved up before useMemo to avoid hoisting issues
+  const getAdventureCoordinates = useCallback((location) => {
+    const locationCoords = {
+      'Reykjavik, Iceland': { latitude: 64.1466, longitude: -21.9426 },
+      'Manaus, Brazil': { latitude: -3.1190, longitude: -60.0217 },
+      'Kathmandu, Nepal': { latitude: 27.7172, longitude: 85.3240 },
+      'Santorini, Greece': { latitude: 36.3932, longitude: 25.4615 },
+      'El Calafate, Argentina': { latitude: -50.3374, longitude: -72.2647 },
+      'Kyoto, Japan': { latitude: 35.0116, longitude: 135.7681 }
+    };
+    return locationCoords[location];
+  }, []);
 
   // Filter and sort adventures
   const filteredAdventures = useMemo(() => {
@@ -192,7 +210,7 @@ const AdventureList = ({
     });
 
     return filtered;
-  }, [adventures, searchQuery, filters, sortBy, userLocation, calculateDistance]);
+  }, [adventures, searchQuery, filters, sortBy, userLocation, calculateDistance, getAdventureCoordinates]);
 
   // Pagination hook (for traditional pagination)
   const pagination = usePagination(filteredAdventures, {
@@ -244,36 +262,37 @@ const AdventureList = ({
     threshold: 0.8
   });
 
-  // Initialize displayed adventures for infinite scroll
+  // Initialize displayed adventures for infinite scroll - FIXED to prevent infinite loop
   useEffect(() => {
     if (paginationMode === 'infinite' || paginationMode === 'both') {
       if (!onLoadMore) {
-        // Client-side: show first page
-        setDisplayedAdventures(filteredAdventures.slice(0, pageSize));
-        infiniteScroll.reset();
+        // Only reset when filters actually change the results, not on every render
+        const currentLength = filteredAdventures.length;
+        const hasFilterChanged = prevFilteredLengthRef.current !== currentLength;
+
+        if (!initialLoadDoneRef.current || hasFilterChanged) {
+          // Client-side: show first page
+          setDisplayedAdventures(filteredAdventures.slice(0, pageSize));
+          initialLoadDoneRef.current = true;
+          prevFilteredLengthRef.current = currentLength;
+
+          // Only reset if filters changed, not on initial load
+          if (hasFilterChanged && initialLoadDoneRef.current) {
+            infiniteScroll.reset();
+          }
+        }
       }
     }
-  }, [filteredAdventures, paginationMode, pageSize, onLoadMore]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filteredAdventures.length, paginationMode, pageSize, onLoadMore]);
 
   // Handle URL-based pagination changes
   useEffect(() => {
-    if (urlPageChange && pagination.currentPage !== urlPage) {
+    if (urlPageChange && urlPage && pagination.currentPage !== urlPage) {
       pagination.goToPage(urlPage);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlPage, urlPageChange]);
-
-  // Mock function to get coordinates for adventures (in real app, this would come from API)
-  const getAdventureCoordinates = (location) => {
-    const locationCoords = {
-      'Reykjavik, Iceland': { latitude: 64.1466, longitude: -21.9426 },
-      'Manaus, Brazil': { latitude: -3.1190, longitude: -60.0217 },
-      'Kathmandu, Nepal': { latitude: 27.7172, longitude: 85.3240 },
-      'Santorini, Greece': { latitude: 36.3932, longitude: 25.4615 },
-      'El Calafate, Argentina': { latitude: -50.3374, longitude: -72.2647 },
-      'Kyoto, Japan': { latitude: 35.0116, longitude: 135.7681 }
-    };
-    return locationCoords[location];
-  };
 
   // Determine which adventures to display based on pagination mode
   const adventuresToDisplay = useMemo(() => {
