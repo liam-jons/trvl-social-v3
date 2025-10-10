@@ -160,7 +160,7 @@ const SavedOffers = ({ userId, onAction }) => {
                   </h5>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-gray-600 dark:text-gray-400">
                     <div>📍 {offer?.trip_requests?.destination}</div>
-                    <div>👥 {offer?.trip_requests?.group_size} people</div>
+                    <div>👥 {offer?.trip_requests?.participants_count} people</div>
                     <div>📅 {formatDate(offer?.trip_requests?.start_date)}</div>
                     <div className={`font-medium ${
                       isExpired

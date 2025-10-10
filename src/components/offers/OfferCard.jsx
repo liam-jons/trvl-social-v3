@@ -105,7 +105,7 @@ const OfferCard = ({
             </div>
             <div className="flex items-center gap-1">
               <Users className="w-4 h-4" />
-              {offer.trip_request?.group_size} people
+              {offer.trip_request?.participants_count} people
             </div>
             <div className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />

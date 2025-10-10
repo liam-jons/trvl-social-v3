@@ -420,7 +420,7 @@ const OfferActionModal = ({ type, offer, onClose, userId }) => {
           <div>
             <span className="text-gray-600 dark:text-gray-400">Group Size:</span>
             <div className="font-semibold text-gray-900 dark:text-white">
-              {offer.trip_request?.group_size} people
+              {offer.trip_request?.participants_count} people
             </div>
           </div>
           <div>

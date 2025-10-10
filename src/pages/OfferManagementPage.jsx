@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import useOfferManagementStore from '../stores/offerManagementStore';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -30,12 +30,16 @@ const OfferManagementPage = () => {
   const [selectedOffer, setSelectedOffer] = useState(null);
   const [actionModal, setActionModal] = useState({ show: false, type: null, offer: null });
 
-  // Load data on component mount
-  useEffect(() => {
+  // Load data on component mount - use useCallback to prevent infinite loop
+  const loadData = useCallback(() => {
     if (user?.id) {
       loadUserTripRequests(user.id);
     }
-  }, [user?.id, loadUserTripRequests]);
+  }, [user?.id]); // Only depend on user.id, not the function
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const filteredOffers = getFilteredOffers();
 
@@ -196,7 +200,7 @@ const OfferManagementPage = () => {
         ) : error ? (
           <ErrorMessage
             message={error}
-            onRetry={() => loadUserTripRequests(user.id)}
+            onRetry={loadData}
           />
         ) : (
           <>

@@ -89,7 +89,7 @@ const TripRequestCard = ({ request, vendor, onBidRequest }) => {
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-gray-400" />
           <span className="text-sm text-gray-600 dark:text-gray-400">
-            {request.group_size} {request.group_size === 1 ? 'person' : 'people'}
+            {request.participants_count} {request.participants_count === 1 ? 'person' : 'people'}
           </span>
         </div>
         <div className="flex items-center gap-2">

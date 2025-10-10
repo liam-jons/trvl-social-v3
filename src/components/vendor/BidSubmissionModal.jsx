@@ -254,7 +254,7 @@ const BidSubmissionModal = ({ request, vendor, onClose, onBidSubmitted }) => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-gray-400" />
-                  <span className="text-sm">{request.group_size} people</span>
+                  <span className="text-sm">{request.participants_count} people</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-gray-400" />

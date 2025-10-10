@@ -54,7 +54,7 @@ const Header = () => {
     mobileMenu.close();
     profileDropdown.close();
     notificationDropdown.close();
-  }, [location]);
+  }, [location.pathname, mobileMenu.close, profileDropdown.close, notificationDropdown.close]);
 
   // Initialize notifications when user is authenticated
   useEffect(() => {
@@ -230,7 +230,7 @@ const Header = () => {
                   {profileDropdown.isOpen && (
                     <div
                       {...profileDropdown.dropdownProps}
-                      className="absolute right-0 mt-2 w-48 transition-fast"
+                      className="absolute right-0 mt-2 w-48 z-dropdown transition-fast"
                       style={{
                         animation: 'fadeIn 150ms ease-out',
                       }}

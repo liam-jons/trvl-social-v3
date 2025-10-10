@@ -238,7 +238,7 @@ const OfferComparison = ({ onAction, onBackToOffers }) => {
                 {offers.slice(0, 4).map((offer) => (
                   <div key={offer.id} className="text-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                     <div className="font-semibold text-gray-900 dark:text-white">
-                      {formatCurrency(offer.proposed_price / (offer.trip_request?.group_size || 1))}
+                      {formatCurrency(offer.proposed_price / (offer.trip_request?.participants_count || 1))}
                     </div>
                   </div>
                 ))}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 /**
  * Custom hook for managing dropdown behavior with keyboard navigation
@@ -127,7 +127,8 @@ export const useDropdown = (options = {}) => {
     return () => document.removeEventListener('keydown', handleTab);
   }, [isOpen]);
 
-  return {
+  // Memoize the return object to prevent unnecessary re-renders
+  return useMemo(() => ({
     isOpen,
     toggle,
     open,
@@ -147,7 +148,7 @@ export const useDropdown = (options = {}) => {
       role: 'menu',
       'aria-hidden': !isOpen,
     },
-  };
+  }), [isOpen, toggle, open, close]);
 };
 
 export default useDropdown;
